@@ -1,84 +1,150 @@
 import { sql } from "drizzle-orm";
+import { z } from "zod";
+import { builder } from "~/src/graphql/builder";
 import type { GraphQLContext } from "~/src/graphql/context";
-import { pluginMapRequestsTable } from "../database/tables";
+import { TalawaGraphQLError } from "~/src/utilities/TalawaGraphQLError";
+import { pollsTable } from "../database/tables";
+import { PluginMapPollRef, ClearPollsResultRef } from "./types";
+import { pluginMapPollInputSchema } from "./inputs";
 
-// Log a new request from any of the 4 contexts
-export async function logPluginMapRequest(
+// Log a new poll from any of the 4 contexts
+export async function logPluginMapPollResolver(
   _parent: unknown,
-  {
-    requestType,
-    requestSource,
-    metadata
-  }: {
-    requestType: string; // 'admin_global', 'admin_org', 'user_global', 'user_org'
-    requestSource: string; // Which extension sent the request
-    metadata?: string;
+  args: {
+    input: {
+      userId: string;
+      userRole: string;
+      organizationId?: string | null;
+      extensionPoint: string;
+    };
   },
-  context: GraphQLContext
+  ctx: GraphQLContext
 ) {
+  if (!ctx.currentClient.isAuthenticated) {
+    throw new TalawaGraphQLError({
+      extensions: { code: "unauthenticated" },
+    });
+  }
+
+  const {
+    success,
+    data: parsedArgs,
+    error,
+  } = pluginMapPollInputSchema.safeParse(args.input);
+
+  if (!success) {
+    ctx.log?.error("Invalid arguments for logPluginMapPoll:", error);
+    throw new TalawaGraphQLError({
+      extensions: { code: "unexpected" },
+    });
+  }
+
   try {
-    // Validate request type
-    const validTypes = ['admin_global', 'admin_org', 'user_global', 'user_org'];
-    if (!validTypes.includes(requestType)) {
-      throw new Error(`Invalid request type. Must be one of: ${validTypes.join(', ')}`);
-    }
-
-    // Get the next request number
-    const [{ maxRequestNumber }] = await context.db
-      .select({ 
-        maxRequestNumber: sql<number>`COALESCE(MAX(${pluginMapRequestsTable.requestNumber}), 0)` 
+    // Get the next poll number
+    const maxPollResult = await ctx.drizzleClient
+      .select({
+        maxPollNumber: sql<number>`COALESCE(MAX(${pollsTable.pollNumber}), 0)`,
       })
-      .from(pluginMapRequestsTable);
+      .from(pollsTable);
 
-    const nextRequestNumber = (maxRequestNumber || 0) + 1;
-    const message = `Request ${nextRequestNumber}`;
+    const maxPollNumber = maxPollResult[0]?.maxPollNumber || 0;
+    const nextPollNumber = maxPollNumber + 1;
 
-    // Insert the new request
-    const [newRequest] = await context.db
-      .insert(pluginMapRequestsTable)
+    // Insert the new poll
+    const [newPoll] = await ctx.drizzleClient
+      .insert(pollsTable)
       .values({
-        requestNumber: nextRequestNumber,
-        requestType,
-        requestSource,
-        message,
-        metadata,
+        pollNumber: nextPollNumber,
+        userId: parsedArgs.userId,
+        userRole: parsedArgs.userRole,
+        organizationId: parsedArgs.organizationId,
+        extensionPoint: parsedArgs.extensionPoint,
       })
       .returning();
 
-    context.logger?.info(`Plugin Map: Logged ${message} from ${requestSource} (${requestType})`);
+    ctx.log?.info(
+      `Plugin Map: Logged poll ${nextPollNumber} from ${parsedArgs.extensionPoint} by ${parsedArgs.userRole} ${parsedArgs.userId}`
+    );
 
-    return newRequest;
+    return newPoll;
   } catch (error) {
-    context.logger?.error("Error logging plugin map request:", error);
-    throw new Error(`Failed to log request: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    ctx.log?.error("Error logging plugin map poll:", error);
+    throw new TalawaGraphQLError({
+      extensions: { code: "unexpected" },
+    });
   }
 }
 
-// Clear all logged requests
-export async function clearPluginMapRequests(
+// Clear all logged polls
+export async function clearPluginMapPollsResolver(
   _parent: unknown,
-  _args: {},
-  context: GraphQLContext
+  _args: Record<string, unknown>,
+  ctx: GraphQLContext
 ) {
+  if (!ctx.currentClient.isAuthenticated) {
+    throw new TalawaGraphQLError({
+      extensions: { code: "unauthenticated" },
+    });
+  }
+
   try {
     // Get count before deletion
-    const [{ count }] = await context.db
+    const countResult = await ctx.drizzleClient
       .select({ count: sql<number>`count(*)` })
-      .from(pluginMapRequestsTable);
+      .from(pollsTable);
 
-    // Delete all requests
-    await context.db
-      .delete(pluginMapRequestsTable);
+    const count = countResult[0]?.count || 0;
 
-    context.logger?.info(`Plugin Map: Cleared ${count} logged requests`);
+    // Delete all polls
+    await ctx.drizzleClient.delete(pollsTable);
+
+    ctx.log?.info(`Plugin Map: Cleared ${count} logged polls`);
 
     return {
       success: true,
       clearedCount: count,
-      message: `Cleared ${count} requests`
+      message: `Cleared ${count} polls`,
     };
   } catch (error) {
-    context.logger?.error("Error clearing plugin map requests:", error);
-    throw new Error("Failed to clear requests");
+    ctx.log?.error("Error clearing plugin map polls:", error);
+    throw new TalawaGraphQLError({
+      extensions: { code: "unexpected" },
+    });
   }
-} 
+}
+
+// Register all Plugin Map mutations with the builder
+export function registerPluginMapMutations(
+  builderInstance: typeof builder
+): void {
+  // Log plugin map poll
+  builderInstance.mutationField("logPluginMapPoll", (t) =>
+    t.field({
+      type: PluginMapPollRef,
+      args: {
+        input: t.arg({
+          type: builder.inputType("PluginMapPollInput", {
+            fields: (t) => ({
+              userId: t.string({ required: true }),
+              userRole: t.string({ required: true }),
+              organizationId: t.string({ required: false }),
+              extensionPoint: t.string({ required: true }),
+            }),
+          }),
+          required: true,
+        }),
+      },
+      description: "Log a new plugin map poll",
+      resolve: logPluginMapPollResolver,
+    })
+  );
+
+  // Clear plugin map polls
+  builderInstance.mutationField("clearPluginMapPolls", (t) =>
+    t.field({
+      type: ClearPollsResultRef,
+      description: "Clear all logged plugin map polls",
+      resolve: clearPluginMapPollsResolver,
+    })
+  );
+}

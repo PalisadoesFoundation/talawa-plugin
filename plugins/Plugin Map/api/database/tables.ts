@@ -1,19 +1,19 @@
 import { pgTable, text, timestamp, uuid, integer } from "drizzle-orm/pg-core";
 
-// Plugin Map Requests table - logs requests from different contexts
-export const pluginMapRequestsTable = pgTable("plugin_map_requests", {
+// Plugin Map Polls table - simple polling system to test requests from frontend
+export const pollsTable = pgTable("plugin_map_polls", {
   id: uuid("id").primaryKey().defaultRandom(),
-  requestNumber: integer("request_number").notNull(), // Auto-incrementing request number
-  requestType: text("request_type").notNull(), // 'admin_global', 'admin_org', 'user_global', 'user_org'
-  requestSource: text("request_source").notNull(), // Which extension sent the request
-  message: text("message").notNull(), // Simple message like "Request 1", "Request 2", etc.
-  metadata: text("metadata"), // Optional additional data
+  pollNumber: integer("poll_number").notNull(), // Auto-incrementing poll number
+  userId: text("user_id").notNull(), // The user that is polling from the frontend
+  userRole: text("user_role").notNull(), // Role of user that is polling
+  organizationId: text("organization_id"), // Only if is a org specific route, null for global route
+  extensionPoint: text("extension_point").notNull(), // Frontend sends the extension point ID (RA1, RA2, etc.)
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Debug exports to help with module loading
 export const __debug = {
   tables: {
-    pluginMapRequestsTable,
+    pollsTable,
   },
 };
