@@ -73,14 +73,14 @@ export class RazorpayService {
         .from(configTable)
         .limit(1);
 
-      if (config.length === 0 || !config[0].keyId || !config[0].keySecret) {
+      if (config.length === 0 || !config[0]?.keyId || !config[0]?.keySecret) {
         throw new Error("Razorpay configuration not found or incomplete");
       }
 
       const configItem = config[0];
       this.razorpay = new Razorpay({
-        key_id: configItem.keyId,
-        key_secret: configItem.keySecret,
+        key_id: configItem?.keyId,
+        key_secret: configItem?.keySecret,
       });
 
       this.context.log?.info("Razorpay service initialized successfully");
@@ -145,12 +145,12 @@ export class RazorpayService {
         .from(configTable)
         .limit(1);
 
-      if (config.length === 0 || !config[0].webhookSecret) {
+      if (config.length === 0 || !config[0]?.webhookSecret) {
         throw new Error("Webhook secret not configured");
       }
 
       const expectedSignature = crypto
-        .createHmac("sha256", config[0].webhookSecret)
+        .createHmac("sha256", config[0]?.webhookSecret)
         .update(paymentData)
         .digest("hex");
 

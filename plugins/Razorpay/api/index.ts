@@ -12,7 +12,7 @@ export * from "./routes/webhook";
 
 // Lifecycle hooks
 export async function onLoad(context: IPluginContext): Promise<void> {
-  if (context.logger) {
+  if (context.logger?.info) {
     context.logger.info("Razorpay Plugin loaded successfully");
   }
 
@@ -34,18 +34,18 @@ export async function onLoad(context: IPluginContext): Promise<void> {
       await db.select().from(ordersTable).limit(1);
     }
 
-    if (context.logger) {
+    if (context.logger?.info) {
       context.logger.info("Razorpay plugin tables verified");
     }
   } catch (error) {
-    if (context.logger) {
+    if (context.logger?.warn) {
       context.logger.warn("Failed to verify Razorpay plugin tables:", error);
     }
   }
 }
 
 export async function onActivate(context: IPluginContext): Promise<void> {
-  if (context.logger) {
+  if (context.logger?.info) {
     context.logger.info("Razorpay Plugin activated");
   }
 
@@ -74,17 +74,17 @@ export async function onActivate(context: IPluginContext): Promise<void> {
           description: "Donation to organization",
         });
 
-        if (context.logger) {
+        if (context.logger?.info) {
           context.logger.info("Default Razorpay configuration created");
         }
       }
     }
 
-    if (context.logger) {
+    if (context.logger?.info) {
       context.logger.info("Razorpay configuration initialized");
     }
   } catch (error) {
-    if (context.logger) {
+    if (context.logger?.error) {
       context.logger.error(
         "Failed to initialize Razorpay configuration:",
         error
@@ -95,13 +95,13 @@ export async function onActivate(context: IPluginContext): Promise<void> {
   // Register GraphQL schema extensions
   if (context.graphql) {
     try {
-      if (context.logger) {
+      if (context.logger?.info) {
         context.logger.info(
           "GraphQL schema extensions registered for Razorpay Plugin"
         );
       }
     } catch (error) {
-      if (context.logger) {
+      if (context.logger?.error) {
         context.logger.error("Failed to register GraphQL extensions:", error);
       }
     }
@@ -109,25 +109,25 @@ export async function onActivate(context: IPluginContext): Promise<void> {
 }
 
 export async function onDeactivate(context: IPluginContext): Promise<void> {
-  if (context.logger) {
+  if (context.logger?.info) {
     context.logger.info("Razorpay Plugin deactivated");
   }
 
   // Cleanup plugin-specific resources
   try {
     // Clean up any active payment sessions
-    if (context.logger) {
+    if (context.logger?.info) {
       context.logger.info("Razorpay plugin cleanup completed");
     }
   } catch (error) {
-    if (context.logger) {
+    if (context.logger?.error) {
       context.logger.error("Failed to cleanup Razorpay plugin:", error);
     }
   }
 }
 
 export async function onUnload(context: IPluginContext): Promise<void> {
-  if (context.logger) {
+  if (context.logger?.info) {
     context.logger.info("Razorpay Plugin unloaded");
   }
 }
@@ -138,7 +138,7 @@ export async function onPaymentCreated(
   context: IPluginContext
 ): Promise<void> {
   try {
-    if (context.logger) {
+    if (context.logger?.info) {
       context.logger.info(`Payment created: ${data.paymentId}`);
     }
 
@@ -154,7 +154,7 @@ export async function onPaymentCreated(
       });
     }
   } catch (error) {
-    if (context.logger) {
+    if (context.logger?.error) {
       context.logger.error("Error in onPaymentCreated:", error);
     }
   }
@@ -165,7 +165,7 @@ export async function onPaymentCompleted(
   context: IPluginContext
 ): Promise<void> {
   try {
-    if (context.logger) {
+    if (context.logger?.info) {
       context.logger.info(`Payment completed: ${data.paymentId}`);
     }
 
@@ -199,7 +199,7 @@ export async function onPaymentCompleted(
       });
     }
   } catch (error) {
-    if (context.logger) {
+    if (context.logger?.error) {
       context.logger.error("Error in onPaymentCompleted:", error);
     }
   }
@@ -210,7 +210,7 @@ export async function onPaymentFailed(
   context: IPluginContext
 ): Promise<void> {
   try {
-    if (context.logger) {
+    if (context.logger?.info) {
       context.logger.info(`Payment failed: ${data.paymentId}`);
     }
 
@@ -244,7 +244,7 @@ export async function onPaymentFailed(
       });
     }
   } catch (error) {
-    if (context.logger) {
+    if (context.logger?.error) {
       context.logger.error("Error in onPaymentFailed:", error);
     }
   }
