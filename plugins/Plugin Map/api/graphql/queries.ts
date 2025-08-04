@@ -88,9 +88,12 @@ export async function getExtensionPointsOverviewResolver(
 export async function getPluginMapRequestsResolver(
   _parent: unknown,
   args: {
-    requestType?: string | null;
-    limit?: number | null;
-    offset?: number | null;
+    input?: {
+      userId?: string | null;
+      userRole?: string | null;
+      organizationId?: string | null;
+      extensionPoint?: string | null;
+    } | null;
   },
   ctx: GraphQLContext
 ) {
@@ -100,22 +103,57 @@ export async function getPluginMapRequestsResolver(
     });
   }
 
-  try {
-    const { requestType, limit = 50, offset = 0 } = args;
+  const input = args.input || {};
+  const {
+    success,
+    data: parsedArgs,
+    error,
+  } = getPluginMapPollsInputSchema.safeParse(input);
 
+  if (!success) {
+    ctx.log?.error("Invalid arguments for getPluginMapRequests:", error);
+    throw new TalawaGraphQLError({
+      extensions: { code: "unexpected" },
+    });
+  }
+
+  try {
     const whereConditions = [];
 
-    if (requestType) {
-      whereConditions.push(eq(pollsTable.extensionPoint, requestType));
+    if (parsedArgs.userId) {
+      whereConditions.push(eq(pollsTable.userId, parsedArgs.userId));
     }
+
+    if (parsedArgs.userRole) {
+      whereConditions.push(eq(pollsTable.userRole, parsedArgs.userRole));
+    }
+
+    if (parsedArgs.organizationId !== undefined) {
+      if (parsedArgs.organizationId === null) {
+        whereConditions.push(isNull(pollsTable.organizationId));
+      } else {
+        whereConditions.push(
+          eq(pollsTable.organizationId, parsedArgs.organizationId)
+        );
+      }
+    }
+
+    if (parsedArgs.extensionPoint) {
+      whereConditions.push(
+        eq(pollsTable.extensionPoint, parsedArgs.extensionPoint)
+      );
+    }
+
+    const limit = 50; // Fixed limit
+    const offset = 0; // Fixed offset
 
     const polls = await ctx.drizzleClient
       .select()
       .from(pollsTable)
       .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
       .orderBy(desc(pollsTable.createdAt))
-      .limit(limit || 50)
-      .offset(offset || 0);
+      .limit(limit)
+      .offset(offset);
 
     // Get total count
     const countResult = await ctx.drizzleClient
@@ -128,7 +166,7 @@ export async function getPluginMapRequestsResolver(
     return {
       requests: polls,
       totalCount: count,
-      hasMore: (offset || 0) + (limit || 50) < count,
+      hasMore: false, // Since we're not using pagination
     };
   } catch (error) {
     ctx.log?.error("Error getting plugin map requests:", error);
@@ -146,8 +184,6 @@ export async function getPluginMapPollsResolver(
       userRole?: string | null;
       organizationId?: string | null;
       extensionPoint?: string | null;
-      limit?: number | null;
-      offset?: number | null;
     } | null;
   },
   ctx: GraphQLContext
@@ -195,8 +231,8 @@ export async function getPluginMapPollsResolver(
       );
     }
 
-    const limit = parsedArgs.limit || 50;
-    const offset = parsedArgs.offset || 0;
+    const limit = 50; // Fixed limit
+    const offset = 0; // Fixed offset
 
     const polls = await ctx.drizzleClient
       .select()
@@ -217,7 +253,7 @@ export async function getPluginMapPollsResolver(
     return {
       polls,
       totalCount: count,
-      hasMore: offset + limit < count,
+      hasMore: false, // Since we're not using pagination
     };
   } catch (error) {
     ctx.log?.error("Error getting plugin map polls:", error);
@@ -246,9 +282,17 @@ export function registerPluginMapQueries(
     t.field({
       type: PluginMapRequestsResultRef,
       args: {
-        requestType: t.arg.string({ required: false }),
-        limit: t.arg.int({ required: false }),
-        offset: t.arg.int({ required: false }),
+        input: t.arg({
+          type: builder.inputType("GetPluginMapRequestsInput", {
+            fields: (t) => ({
+              userId: t.string({ required: false }),
+              userRole: t.string({ required: false }),
+              organizationId: t.string({ required: false }),
+              extensionPoint: t.string({ required: false }),
+            }),
+          }),
+          required: false,
+        }),
       },
       description: "Get logged requests from different contexts",
       resolve: getPluginMapRequestsResolver,
@@ -266,8 +310,6 @@ export function registerPluginMapQueries(
               userRole: t.string({ required: false }),
               organizationId: t.string({ required: false }),
               extensionPoint: t.string({ required: false }),
-              limit: t.int({ required: false }),
-              offset: t.int({ required: false }),
             }),
           }),
           required: false,

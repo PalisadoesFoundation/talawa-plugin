@@ -23,11 +23,10 @@ export const PluginMapPollInput = builder
 
 // GetPluginMapPolls Input
 export const getPluginMapPollsInputSchema = z.object({
+  userId: z.string().nullable().optional(),
   userRole: z.string().nullable().optional(),
   organizationId: z.string().nullable().optional(),
   extensionPoint: z.string().nullable().optional(),
-  limit: z.number().nullable().optional(),
-  offset: z.number().nullable().optional(),
 });
 
 export const GetPluginMapPollsInput = builder
@@ -37,10 +36,9 @@ export const GetPluginMapPollsInput = builder
   .implement({
     description: "Input for getting plugin map polls",
     fields: (t) => ({
+      userId: t.string({ required: false }),
       userRole: t.string({ required: false }),
       organizationId: t.string({ required: false }),
       extensionPoint: t.string({ required: false }),
-      limit: t.int({ required: false }),
-      offset: t.int({ required: false }),
     }),
   });
