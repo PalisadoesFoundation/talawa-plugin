@@ -227,61 +227,115 @@ const ExtensionPointsOrganization: React.FC = () => {
         </Col>
 
         <Col span={24}>
-          <Card title="RA1 Extension Point Details" style={{ height: '400px' }}>
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <Paragraph>
-                <strong>Extension Point ID:</strong> RA1
-              </Paragraph>
-              <Paragraph>
-                <strong>Name:</strong> Admin Organization Route
-              </Paragraph>
-              <Paragraph>
-                <strong>Description:</strong> Admin's organization-specific view
-                and management features
-              </Paragraph>
-              <Paragraph>
-                <strong>Context:</strong> Organization ({orgId})
-              </Paragraph>
-              <Paragraph>
-                <strong>User Role:</strong> Admin
-              </Paragraph>
-              <Paragraph>
-                <strong>Features:</strong>
-              </Paragraph>
-              <ul>
-                <li>Organization admin dashboard</li>
-                <li>Organization management</li>
-                <li>Organization settings</li>
-                <li>Organization admin preferences</li>
-                <li>Organization-specific features</li>
-              </ul>
-            </Space>
-          </Card>
-        </Col>
-
-        <Col span={24}>
           <Card title="Extension Point Information">
-            <Row gutter={[16, 16]}>
-              <Col span={8}>
-                <Paragraph>
-                  <strong>Type:</strong> Organization Route
-                </Paragraph>
+            <Row gutter={[24, 16]}>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '16px',
+                    background: '#f8f9fa',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Extension ID
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    RA1
+                  </div>
+                </div>
               </Col>
-              <Col span={8}>
-                <Paragraph>
-                  <strong>Access Level:</strong> Admin Only
-                </Paragraph>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '16px',
+                    background: '#f8f9fa',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Type
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    Organization Route
+                  </div>
+                </div>
               </Col>
-              <Col span={8}>
-                <Paragraph>
-                  <strong>Organization:</strong> {orgId}
-                </Paragraph>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '16px',
+                    background: '#f8f9fa',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Access Level
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    Admin Only
+                  </div>
+                </div>
+              </Col>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '16px',
+                    background: '#f8f9fa',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Organization
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    {orgId}
+                  </div>
+                </div>
               </Col>
             </Row>
-            <Paragraph>
-              <strong>Note:</strong> This extension point is accessible from any
-              admin organization context.
-            </Paragraph>
+            <div
+              style={{
+                marginTop: '16px',
+                padding: '16px',
+                background: '#f0f8ff',
+                borderRadius: '6px',
+                border: '1px solid #d6e4ff',
+              }}
+            >
+              <strong>Note:</strong> This extension point provides
+              organization-specific administrative capabilities. Plugins can access
+              organization data and manage features within the current organization
+              context.
+            </div>
           </Card>
         </Col>
       </Row>

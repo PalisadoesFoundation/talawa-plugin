@@ -223,61 +223,115 @@ const ExtensionPointsGlobal: React.FC = () => {
         </Col>
 
         <Col span={24}>
-          <Card title="RU2 Extension Point Details" style={{ height: '400px' }}>
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <Paragraph>
-                <strong>Extension Point ID:</strong> RU2
-              </Paragraph>
-              <Paragraph>
-                <strong>Name:</strong> User Global Route
-              </Paragraph>
-              <Paragraph>
-                <strong>Description:</strong> User's global view and
-                cross-organization features
-              </Paragraph>
-              <Paragraph>
-                <strong>Context:</strong> Global (no organization)
-              </Paragraph>
-              <Paragraph>
-                <strong>User Role:</strong> User
-              </Paragraph>
-              <Paragraph>
-                <strong>Features:</strong>
-              </Paragraph>
-              <ul>
-                <li>Global profile</li>
-                <li>Cross-org settings</li>
-                <li>Global preferences</li>
-                <li>Global user dashboard</li>
-                <li>Cross-organization features</li>
-              </ul>
-            </Space>
-          </Card>
-        </Col>
-
-        <Col span={24}>
           <Card title="Extension Point Information">
-            <Row gutter={[16, 16]}>
-              <Col span={8}>
-                <Paragraph>
-                  <strong>Type:</strong> Global Route
-                </Paragraph>
+            <Row gutter={[24, 16]}>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '16px',
+                    background: '#f8f9fa',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Extension ID
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    RU2
+                  </div>
+                </div>
               </Col>
-              <Col span={8}>
-                <Paragraph>
-                  <strong>Access Level:</strong> User Only
-                </Paragraph>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '16px',
+                    background: '#f8f9fa',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Type
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    Global Route
+                  </div>
+                </div>
               </Col>
-              <Col span={8}>
-                <Paragraph>
-                  <strong>Organization:</strong> None (Global)
-                </Paragraph>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '16px',
+                    background: '#f8f9fa',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Access Level
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    User Only
+                  </div>
+                </div>
+              </Col>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '16px',
+                    background: '#f8f9fa',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Organization
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    None (Global)
+                  </div>
+                </div>
               </Col>
             </Row>
-            <Paragraph>
-              <strong>Note:</strong> This extension point is accessible from any
-              global user context.
-            </Paragraph>
+            <div
+              style={{
+                marginTop: '16px',
+                padding: '16px',
+                background: '#f0f8ff',
+                borderRadius: '6px',
+                border: '1px solid #d6e4ff',
+              }}
+            >
+              <strong>Note:</strong> This extension point provides system-wide
+              user capabilities. Plugins can access global data and provide
+              features that work across all organizations. No organization
+              context is required.
+            </div>
           </Card>
         </Col>
       </Row>
