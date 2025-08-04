@@ -6,16 +6,17 @@
  */
 
 import React from 'react';
-import { Card, Typography, Row, Col, Button, message, Space, Tabs } from 'antd';
+import { Card, Typography, Row, Col, Button, message, Space } from 'antd';
 import { useMutation } from '@apollo/client';
 import { gql } from 'graphql-tag';
+import useLocalStorage from 'utils/useLocalstorage';
 
 const { Title, Paragraph } = Typography;
 
-// GraphQL mutation for logging polls
-const LOG_PLUGIN_MAP_POLL = gql`
-  mutation LogPluginMapPoll($input: PluginMapPollInput!) {
-    logPluginMapPoll(input: $input) {
+// GraphQL mutation for logging requests
+const LOG_PLUGIN_MAP_REQUEST = gql`
+  mutation LogPluginMapRequest($input: PluginMapRequestInput!) {
+    plugin_map_logPluginMapRequest(input: $input) {
       id
       pollNumber
       userId
@@ -28,150 +29,118 @@ const LOG_PLUGIN_MAP_POLL = gql`
 `;
 
 const ExtensionPointsGlobal: React.FC = () => {
-  const [logPoll] = useMutation(LOG_PLUGIN_MAP_POLL);
+  const [logRequest] = useMutation(LOG_PLUGIN_MAP_REQUEST);
+  const { getItem } = useLocalStorage();
+  const userId = getItem('id') as string | null;
 
-  const handlePollClick = async (extensionPoint: string, userRole: string) => {
+  const handlePollClick = async () => {
     try {
-      const result = await logPoll({
+      const result = await logRequest({
         variables: {
           input: {
-            userId: 'current-user', // This should come from auth context
-            userRole,
+            userId: userId || 'unknown-user', // Use actual user ID from localStorage
+            userRole: 'user',
             organizationId: null, // Global routes have no organization
-            extensionPoint,
+            extensionPoint: 'RU2',
           },
         },
       });
 
-      if (result.data?.logPluginMapPoll) {
+      if (result.data?.plugin_map_logPluginMapRequest) {
         message.success(
-          `Poll ${result.data.logPluginMapPoll.pollNumber} logged successfully from ${extensionPoint}`,
+          `Request ${result.data.plugin_map_logPluginMapRequest.pollNumber} logged successfully from RU2`,
         );
       }
     } catch (error) {
-      console.error('Error logging poll:', error);
-      message.error('Failed to log poll');
+      console.error('Error logging request:', error);
+      message.error('Failed to log request');
     }
   };
 
-  const adminGlobalExtensions = [
-    {
-      id: 'RA1',
-      name: 'Admin Global Route',
-      description: 'Global admin dashboard and system management',
-      features: ['System monitoring', 'Global analytics', 'User management'],
-    },
-  ];
-
-  const userGlobalExtensions = [
-    {
-      id: 'RU2',
-      name: 'User Global Route',
-      description: "User's global view and cross-organization features",
-      features: ['Global profile', 'Cross-org settings', 'Global preferences'],
-    },
-  ];
-
-  const items = [
-    {
-      key: 'admin',
-      label: 'Admin Global Extensions',
-      children: (
-        <Row gutter={[16, 16]}>
-          <Col span={24}>
-            <Card
-              title="Test Admin Global Polls"
-              style={{ marginBottom: '16px' }}
-            >
-              <Space wrap>
-                {adminGlobalExtensions.map((ext) => (
-                  <Button
-                    key={ext.id}
-                    type="primary"
-                    onClick={() => handlePollClick(ext.id, 'admin')}
-                  >
-                    {ext.name} ({ext.id})
-                  </Button>
-                ))}
-              </Space>
-            </Card>
-          </Col>
-          {adminGlobalExtensions.map((ext) => (
-            <Col span={24} key={ext.id}>
-              <Card title={ext.name} style={{ height: '200px' }}>
-                <Paragraph>
-                  <strong>ID:</strong> {ext.id}
-                </Paragraph>
-                <Paragraph>{ext.description}</Paragraph>
-                <Paragraph>
-                  <strong>Features:</strong>
-                </Paragraph>
-                <ul>
-                  {ext.features.map((feature, index) => (
-                    <li key={index}>{feature}</li>
-                  ))}
-                </ul>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      ),
-    },
-    {
-      key: 'user',
-      label: 'User Global Extensions',
-      children: (
-        <Row gutter={[16, 16]}>
-          <Col span={24}>
-            <Card
-              title="Test User Global Polls"
-              style={{ marginBottom: '16px' }}
-            >
-              <Space wrap>
-                {userGlobalExtensions.map((ext) => (
-                  <Button
-                    key={ext.id}
-                    type="primary"
-                    onClick={() => handlePollClick(ext.id, 'user')}
-                  >
-                    {ext.name} ({ext.id})
-                  </Button>
-                ))}
-              </Space>
-            </Card>
-          </Col>
-          {userGlobalExtensions.map((ext) => (
-            <Col span={24} key={ext.id}>
-              <Card title={ext.name} style={{ height: '200px' }}>
-                <Paragraph>
-                  <strong>ID:</strong> {ext.id}
-                </Paragraph>
-                <Paragraph>{ext.description}</Paragraph>
-                <Paragraph>
-                  <strong>Features:</strong>
-                </Paragraph>
-                <ul>
-                  {ext.features.map((feature, index) => (
-                    <li key={index}>{feature}</li>
-                  ))}
-                </ul>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      ),
-    },
-  ];
-
   return (
     <div style={{ padding: '24px' }}>
-      <Title level={2}>Global Extension Points</Title>
+      <Title level={2}>RU2 - User Global Extension Point</Title>
       <Paragraph>
-        Global extension points that work across all organizations. These are
-        accessible from any context.
+        This page represents the RU2 extension point - User Global Route. This
+        is a global user route that provides user functionality across all
+        organizations.
       </Paragraph>
 
-      <Tabs items={items} />
+      <Row gutter={[16, 16]}>
+        <Col span={24}>
+          <Card title="Test Request System" style={{ marginBottom: '16px' }}>
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Paragraph>
+                Click the button below to test the request system for RU2
+                extension point.
+              </Paragraph>
+
+              <Button type="primary" onClick={handlePollClick}>
+                Request RU2 (User Global)
+              </Button>
+            </Space>
+          </Card>
+        </Col>
+
+        <Col span={24}>
+          <Card title="RU2 Extension Point Details" style={{ height: '400px' }}>
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Paragraph>
+                <strong>Extension Point ID:</strong> RU2
+              </Paragraph>
+              <Paragraph>
+                <strong>Name:</strong> User Global Route
+              </Paragraph>
+              <Paragraph>
+                <strong>Description:</strong> User's global view and
+                cross-organization features
+              </Paragraph>
+              <Paragraph>
+                <strong>Context:</strong> Global (no organization)
+              </Paragraph>
+              <Paragraph>
+                <strong>User Role:</strong> User
+              </Paragraph>
+              <Paragraph>
+                <strong>Features:</strong>
+              </Paragraph>
+              <ul>
+                <li>Global profile</li>
+                <li>Cross-org settings</li>
+                <li>Global preferences</li>
+                <li>Global user dashboard</li>
+                <li>Cross-organization features</li>
+              </ul>
+            </Space>
+          </Card>
+        </Col>
+
+        <Col span={24}>
+          <Card title="Extension Point Information">
+            <Row gutter={[16, 16]}>
+              <Col span={8}>
+                <Paragraph>
+                  <strong>Type:</strong> Global Route
+                </Paragraph>
+              </Col>
+              <Col span={8}>
+                <Paragraph>
+                  <strong>Access Level:</strong> User Only
+                </Paragraph>
+              </Col>
+              <Col span={8}>
+                <Paragraph>
+                  <strong>Organization:</strong> None (Global)
+                </Paragraph>
+              </Col>
+            </Row>
+            <Paragraph>
+              <strong>Note:</strong> This extension point is accessible from any
+              global user context.
+            </Paragraph>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 };

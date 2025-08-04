@@ -1,22 +1,23 @@
 /**
  * Extension Points User Component for Plugin Map
  *
- * This component displays user-specific extension points in the Talawa
- * Admin Panel. These extension points are designed for user-facing
- * functionality and can be used to enhance the user experience.
+ * This component displays all available extension points in the Talawa Admin Panel
+ * from a user organization perspective, helping developers understand the full ecosystem.
  */
 
 import React from 'react';
 import { Card, Typography, Row, Col, Button, message, Space } from 'antd';
 import { useMutation } from '@apollo/client';
 import { gql } from 'graphql-tag';
+import { useParams, Navigate } from 'react-router-dom';
+import useLocalStorage from 'utils/useLocalstorage';
 
 const { Title, Paragraph } = Typography;
 
-// GraphQL mutation for logging polls
-const LOG_PLUGIN_MAP_POLL = gql`
-  mutation LogPluginMapPoll($input: PluginMapPollInput!) {
-    logPluginMapPoll(input: $input) {
+// GraphQL mutation for logging requests
+const LOG_PLUGIN_MAP_REQUEST = gql`
+  mutation LogPluginMapRequest($input: PluginMapRequestInput!) {
+    plugin_map_logPluginMapRequest(input: $input) {
       id
       pollNumber
       userId
@@ -29,189 +30,124 @@ const LOG_PLUGIN_MAP_POLL = gql`
 `;
 
 const ExtensionPointsUser: React.FC = () => {
-  const [logPoll] = useMutation(LOG_PLUGIN_MAP_POLL);
+  const [logRequest] = useMutation(LOG_PLUGIN_MAP_REQUEST);
+  const { orgId } = useParams();
+  const { getItem } = useLocalStorage();
+  const userId = getItem('id') as string | null;
 
-  const handlePollClick = async (
-    extensionPoint: string,
-    userRole: string,
-    organizationId?: string,
-  ) => {
+  // Redirect if no organization ID is found
+  if (!orgId) {
+    return <Navigate to={'/'} replace />;
+  }
+
+  const handlePollClick = async () => {
     try {
-      const result = await logPoll({
+      const result = await logRequest({
         variables: {
           input: {
-            userId: 'current-user', // This should come from auth context
-            userRole,
-            organizationId: organizationId || null,
-            extensionPoint,
+            userId: userId || 'unknown-user', // Use actual user ID from localStorage
+            userRole: 'user',
+            organizationId: orgId, // Use actual organization ID from URL
+            extensionPoint: 'RU1',
           },
         },
       });
 
-      if (result.data?.logPluginMapPoll) {
+      if (result.data?.plugin_map_logPluginMapRequest) {
         message.success(
-          `Poll ${result.data.logPluginMapPoll.pollNumber} logged successfully from ${extensionPoint}`,
+          `Request ${result.data.plugin_map_logPluginMapRequest.pollNumber} logged successfully from RU1`,
         );
       }
     } catch (error) {
-      console.error('Error logging poll:', error);
-      message.error('Failed to log poll');
+      console.error('Error logging request:', error);
+      message.error('Failed to log request');
     }
   };
 
-  const userGlobalExtensions = [
-    {
-      id: 'RU2',
-      name: 'User Global Route',
-      description: "User's global view and cross-organization features",
-      features: ['Global profile', 'Cross-org settings', 'Global preferences'],
-    },
-  ];
-
-  const userOrgExtensions = [
-    {
-      id: 'RU1',
-      name: 'User Organization Route',
-      description: "User's organization-specific dashboard and features",
-      features: ['Org dashboard', 'Member view', 'Org activities'],
-    },
-  ];
-
   return (
     <div style={{ padding: '24px' }}>
-      <Title level={2}>User Extension Points</Title>
+      <Title level={2}>RU1 - User Organization Extension Point</Title>
       <Paragraph>
-        User-specific extension points that provide user-focused functionality
-        across different contexts.
+        This page represents the RU1 extension point - User Organization Route.
+        This is an organization-specific user route that provides user
+        functionality within a specific organization. Current Organization ID:{' '}
+        <strong>{orgId}</strong>
       </Paragraph>
 
       <Row gutter={[16, 16]}>
         <Col span={24}>
-          <Card title="Test Poll System" style={{ marginBottom: '16px' }}>
+          <Card title="Test Request System" style={{ marginBottom: '16px' }}>
             <Space direction="vertical" style={{ width: '100%' }}>
               <Paragraph>
-                Click the buttons below to test the polling system for
-                user-specific extension points.
+                Click the button below to test the request system for RU1
+                extension point.
               </Paragraph>
 
-              <Row gutter={[8, 8]}>
-                <Col>
-                  <Button
-                    type="primary"
-                    onClick={() => handlePollClick('RU1', 'user', 'org-123')}
-                  >
-                    User Org Poll (RU1)
-                  </Button>
-                </Col>
-                <Col>
-                  <Button
-                    type="primary"
-                    onClick={() => handlePollClick('RU2', 'user')}
-                  >
-                    User Global Poll (RU2)
-                  </Button>
-                </Col>
-              </Row>
-            </Space>
-          </Card>
-        </Col>
-
-        <Col span={12}>
-          <Card title="User Global Extensions" style={{ height: '400px' }}>
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <Paragraph>
-                <strong>Context:</strong> Global (no organization)
-              </Paragraph>
-
-              {userGlobalExtensions.map((ext) => (
-                <Card key={ext.id} size="small" style={{ marginBottom: '8px' }}>
-                  <Paragraph>
-                    <strong>{ext.id}:</strong> {ext.name}
-                  </Paragraph>
-                  <Paragraph>{ext.description}</Paragraph>
-                  <Paragraph>
-                    <strong>Features:</strong>
-                  </Paragraph>
-                  <ul>
-                    {ext.features.map((feature, index) => (
-                      <li key={index}>{feature}</li>
-                    ))}
-                  </ul>
-                  <Button
-                    type="primary"
-                    size="small"
-                    onClick={() => handlePollClick(ext.id, 'user')}
-                  >
-                    Test {ext.id}
-                  </Button>
-                </Card>
-              ))}
-            </Space>
-          </Card>
-        </Col>
-
-        <Col span={12}>
-          <Card
-            title="User Organization Extensions"
-            style={{ height: '400px' }}
-          >
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <Paragraph>
-                <strong>Context:</strong> Organization-specific (org-123)
-              </Paragraph>
-
-              {userOrgExtensions.map((ext) => (
-                <Card key={ext.id} size="small" style={{ marginBottom: '8px' }}>
-                  <Paragraph>
-                    <strong>{ext.id}:</strong> {ext.name}
-                  </Paragraph>
-                  <Paragraph>{ext.description}</Paragraph>
-                  <Paragraph>
-                    <strong>Features:</strong>
-                  </Paragraph>
-                  <ul>
-                    {ext.features.map((feature, index) => (
-                      <li key={index}>{feature}</li>
-                    ))}
-                  </ul>
-                  <Button
-                    type="primary"
-                    size="small"
-                    onClick={() => handlePollClick(ext.id, 'user', 'org-123')}
-                  >
-                    Test {ext.id}
-                  </Button>
-                </Card>
-              ))}
+              <Button type="primary" onClick={handlePollClick}>
+                Request RU1 (User Organization)
+              </Button>
             </Space>
           </Card>
         </Col>
 
         <Col span={24}>
-          <Card title="User Context Information">
+          <Card title="RU1 Extension Point Details" style={{ height: '400px' }}>
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Paragraph>
+                <strong>Extension Point ID:</strong> RU1
+              </Paragraph>
+              <Paragraph>
+                <strong>Name:</strong> User Organization Route
+              </Paragraph>
+              <Paragraph>
+                <strong>Description:</strong> User's organization-specific
+                dashboard and features
+              </Paragraph>
+              <Paragraph>
+                <strong>Context:</strong> Organization-specific
+              </Paragraph>
+              <Paragraph>
+                <strong>User Role:</strong> User
+              </Paragraph>
+              <Paragraph>
+                <strong>Organization ID:</strong> {orgId}
+              </Paragraph>
+              <Paragraph>
+                <strong>Features:</strong>
+              </Paragraph>
+              <ul>
+                <li>Org dashboard</li>
+                <li>Member view</li>
+                <li>Event participation</li>
+                <li>Organization-specific settings</li>
+                <li>Member features</li>
+              </ul>
+            </Space>
+          </Card>
+        </Col>
+
+        <Col span={24}>
+          <Card title="Extension Point Information">
             <Row gutter={[16, 16]}>
               <Col span={8}>
                 <Paragraph>
-                  <strong>Global Extensions:</strong>{' '}
-                  {userGlobalExtensions.length}
+                  <strong>Type:</strong> Organization Route
                 </Paragraph>
               </Col>
               <Col span={8}>
                 <Paragraph>
-                  <strong>Organization Extensions:</strong>{' '}
-                  {userOrgExtensions.length}
+                  <strong>Access Level:</strong> User Only
                 </Paragraph>
               </Col>
               <Col span={8}>
                 <Paragraph>
-                  <strong>Total User Extensions:</strong>{' '}
-                  {userGlobalExtensions.length + userOrgExtensions.length}
+                  <strong>Organization:</strong> Specific
                 </Paragraph>
               </Col>
             </Row>
             <Paragraph>
-              <strong>Note:</strong> Global polls have no organization ID, while
-              organization polls include the org ID.
+              <strong>Note:</strong> This extension point is accessible from
+              organization-specific user contexts.
             </Paragraph>
           </Card>
         </Col>
