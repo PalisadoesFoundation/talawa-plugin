@@ -39,7 +39,7 @@
     "database": [
       {
         "type": "table",
-        "name": "pluginMapRequestsTable",
+        "name": "pollsTable",
         "file": "database/tables.ts"
       }
     ],
