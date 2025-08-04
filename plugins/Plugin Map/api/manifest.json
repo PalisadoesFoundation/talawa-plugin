@@ -9,51 +9,40 @@
     "graphql": [
       {
         "type": "query",
-        "name": "getExtensionPointsOverview",
+        "name": "pluginMapQueries",
         "file": "graphql/queries.ts",
-        "resolver": "getExtensionPointsOverview",
-        "description": "Get an overview of all available extension points in the system"
-      },
-      {
-        "type": "query",
-        "name": "getPluginMapRequests",
-        "file": "graphql/queries.ts",
-        "resolver": "getPluginMapRequests",
-        "description": "Get logged requests from different contexts"
+        "builderDefinition": "registerPluginMapQueries",
+        "description": "Register all Plugin Map query fields"
       },
       {
         "type": "mutation",
-        "name": "logPluginMapRequest",
+        "name": "pluginMapMutations",
         "file": "graphql/mutations.ts",
-        "resolver": "logPluginMapRequest",
-        "description": "Log a new request from admin or user context"
-      },
-      {
-        "type": "mutation",
-        "name": "clearPluginMapRequests",
-        "file": "graphql/mutations.ts",
-        "resolver": "clearPluginMapRequests",
-        "description": "Clear all logged requests"
+        "builderDefinition": "registerPluginMapMutations",
+        "description": "Register all Plugin Map mutation fields"
       }
     ],
     "database": [
       {
         "type": "table",
         "name": "pollsTable",
-        "file": "database/tables.ts"
+        "file": "database/tables.ts",
+        "description": "Plugin map polls and requests"
       }
     ],
     "hooks": [
       {
         "type": "post",
         "event": "plugin:activated",
-        "handler": "onPluginActivated"
+        "handler": "onPluginActivated",
+        "description": "Handle plugin activation events"
       },
       {
         "type": "post",
         "event": "plugin:deactivated",
-        "handler": "onPluginDeactivated"
+        "handler": "onPluginDeactivated",
+        "description": "Handle plugin deactivation events"
       }
     ]
   }
-} 
+}

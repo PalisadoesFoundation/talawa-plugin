@@ -8,25 +8,38 @@ export * from "./graphql/inputs";
 
 // Lifecycle hooks
 export async function onLoad(context: IPluginContext): Promise<void> {
-  context.logger?.info("Plugin Map Plugin loaded successfully");
+  if (context.logger?.info) {
+    context.logger.info("Plugin Map Plugin loaded successfully");
+  }
 
   // Initialize plugin table if it doesn't exist
   try {
     const { pollsTable } = await import("./database/tables");
 
     // Check if table exists by trying to query it
-    if (context.db) {
-      await context.db.select().from(pollsTable).limit(1);
+    if (
+      context.db &&
+      typeof context.db === "object" &&
+      "select" in context.db
+    ) {
+      const db = context.db as any;
+      await db.select().from(pollsTable).limit(1);
     }
 
-    context.logger?.info("Plugin Map polls table verified");
+    if (context.logger?.info) {
+      context.logger.info("Plugin Map polls table verified");
+    }
   } catch (error) {
-    context.logger?.warn("Failed to verify plugin table:", error);
+    if (context.logger?.warn) {
+      context.logger.warn("Failed to verify plugin table:", error);
+    }
   }
 }
 
 export async function onActivate(context: IPluginContext): Promise<void> {
-  context.logger?.info("Plugin Map Plugin activated");
+  if (context.logger?.info) {
+    context.logger.info("Plugin Map Plugin activated");
+  }
 
   // Register GraphQL schema extensions
   if (context.graphql) {
@@ -37,24 +50,49 @@ export async function onActivate(context: IPluginContext): Promise<void> {
       );
 
       // Register queries and mutations with the GraphQL builder
-      registerPluginMapQueries(context.graphql);
-      registerPluginMapMutations(context.graphql);
+      registerPluginMapQueries(context.graphql as any);
+      registerPluginMapMutations(context.graphql as any);
 
-      context.logger?.info(
-        "GraphQL schema extensions registered for Plugin Map Plugin"
-      );
+      if (context.logger?.info) {
+        context.logger.info(
+          "GraphQL schema extensions registered for Plugin Map Plugin"
+        );
+      }
     } catch (error) {
-      context.logger?.error("Failed to register GraphQL extensions:", error);
+      if (context.logger?.error) {
+        context.logger.error("Failed to register GraphQL extensions:", error);
+      }
     }
   }
 }
 
 export async function onDeactivate(context: IPluginContext): Promise<void> {
-  context.logger?.info("Plugin Map Plugin deactivated");
+  if (context.logger?.info) {
+    context.logger.info("Plugin Map Plugin deactivated");
+  }
 }
 
 export async function onUnload(context: IPluginContext): Promise<void> {
-  context.logger?.info("Plugin Map Plugin unloaded");
+  if (context.logger?.info) {
+    context.logger.info("Plugin Map Plugin unloaded");
+  }
+}
+
+// Hook handlers
+export async function onPluginActivated(
+  context: IPluginContext
+): Promise<void> {
+  if (context.logger?.info) {
+    context.logger.info("Plugin Map Plugin activated via hook");
+  }
+}
+
+export async function onPluginDeactivated(
+  context: IPluginContext
+): Promise<void> {
+  if (context.logger?.info) {
+    context.logger.info("Plugin Map Plugin deactivated via hook");
+  }
 }
 
 // Plugin information
@@ -66,8 +104,12 @@ export function getPluginInfo() {
     author: "Plugin Map Team",
     dependencies: [],
     graphqlOperations: [
+      "getExtensionPointsOverview",
+      "getPluginMapRequests",
       "getPluginMapPolls",
+      "logPluginMapRequest",
       "logPluginMapPoll",
+      "clearPluginMapRequests",
       "clearPluginMapPolls",
     ],
   };
