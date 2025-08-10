@@ -2,317 +2,339 @@
  * Extension Points Dashboard Component for Plugin Map
  *
  * This component displays all available extension points in the Talawa Admin Panel
- * for developers to understand where they can inject their own components.
+ * from a global admin perspective, helping developers understand the full ecosystem.
  */
 
-import React from 'react';
-import { Card, Row, Col, Badge, Typography, Space, Divider } from 'antd';
+import React, { useEffect, useState } from 'react';
 import {
-  SettingOutlined,
-  UserOutlined,
-  DashboardOutlined,
-  TeamOutlined,
-  CodeOutlined,
-  AppstoreOutlined,
-  GlobalOutlined,
-  FolderOutlined,
-} from '@ant-design/icons';
+  Card,
+  Typography,
+  Row,
+  Col,
+  Button,
+  message,
+  Space,
+  Table,
+  Tag,
+} from 'antd';
+import { useMutation, useQuery } from '@apollo/client';
+import { gql } from 'graphql-tag';
+import useLocalStorage from 'utils/useLocalstorage';
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Paragraph } = Typography;
 
-interface ExtensionPoint {
-  id: string;
-  name: string;
-  description: string;
-  type: 'route' | 'drawer' | 'injector';
-  context: 'admin' | 'user' | 'global';
-  icon: React.ReactNode;
-  examples?: string[];
-}
+// GraphQL mutation for logging requests
+const LOG_PLUGIN_MAP_REQUEST = gql`
+  mutation LogPluginMapRequest($input: PluginMapRequestInput!) {
+    plugin_map_logPluginMapRequest(input: $input) {
+      id
+      pollNumber
+      userId
+      userRole
+      organizationId
+      extensionPoint
+      createdAt
+    }
+  }
+`;
+
+// GraphQL query for fetching requests
+const GET_PLUGIN_MAP_REQUESTS = gql`
+  query GetPluginMapRequests($input: GetPluginMapRequestsInput) {
+    plugin_map_getPluginMapRequests(input: $input) {
+      requests {
+        id
+        pollNumber
+        userId
+        userRole
+        organizationId
+        extensionPoint
+        createdAt
+      }
+      totalCount
+      hasMore
+    }
+  }
+`;
 
 const ExtensionPointsDashboard: React.FC = () => {
-  const extensionPoints: ExtensionPoint[] = [
+  const [logRequest] = useMutation(LOG_PLUGIN_MAP_REQUEST);
+  const { getItem } = useLocalStorage();
+  const userId = getItem('id') as string | null;
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
+
+  // Query to fetch requests for this extension point
+  const {
+    data: requestsData,
+    loading: loadingRequests,
+    refetch,
+  } = useQuery(GET_PLUGIN_MAP_REQUESTS, {
+    variables: {
+      input: {
+        extensionPoint: 'RA2',
+        userRole: 'admin',
+        organizationId: null, // Global routes have no organization
+        userId: userId || 'unknown-user', // Filter by current user ID
+      },
+    },
+    fetchPolicy: 'network-only',
+  });
+
+  // Refetch when a new request is logged
+  useEffect(() => {
+    if (refetchTrigger > 0) {
+      refetch();
+    }
+  }, [refetchTrigger, refetch]);
+
+  const handlePollClick = async () => {
+    try {
+      const result = await logRequest({
+        variables: {
+          input: {
+            userId: userId || 'unknown-user', // Use actual user ID from localStorage
+            userRole: 'admin',
+            organizationId: null, // Global routes have no organization
+            extensionPoint: 'RA2',
+          },
+        },
+      });
+
+      if (result.data?.plugin_map_logPluginMapRequest) {
+        message.success(
+          `Request ${result.data.plugin_map_logPluginMapRequest.pollNumber} logged successfully from RA2`,
+        );
+        // Trigger refetch to update the history
+        setRefetchTrigger((prev) => prev + 1);
+      }
+    } catch (error) {
+      console.error('Error logging request:', error);
+      message.error('Failed to log request');
+    }
+  };
+
+  // Table columns for request history
+  const columns = [
     {
-      id: 'RA1',
-      name: 'Admin Route Extension 1',
-      description:
-        'Global admin route extension point for dashboard-level functionality',
-      type: 'route',
-      context: 'admin',
-      icon: <DashboardOutlined />,
-      examples: ['Dashboard widgets', 'Global analytics', 'System monitoring'],
+      title: 'Request #',
+      dataIndex: 'pollNumber',
+      key: 'pollNumber',
+      width: 100,
     },
     {
-      id: 'RA2',
-      name: 'Admin Route Extension 2',
-      description: 'Organization-specific admin route extension point',
-      type: 'route',
-      context: 'admin',
-      icon: <TeamOutlined />,
-      examples: [
-        'Organization settings',
-        'Member management',
-        'Event management',
-      ],
+      title: 'User ID',
+      dataIndex: 'userId',
+      key: 'userId',
+      width: 150,
+      ellipsis: true,
     },
     {
-      id: 'RU1',
-      name: 'User Route Extension 1',
-      description: 'Organization-specific user route extension point',
-      type: 'route',
-      context: 'user',
-      icon: <UserOutlined />,
-      examples: [
-        'User dashboard',
-        'Profile management',
-        'Organization activities',
-      ],
+      title: 'User Role',
+      dataIndex: 'userRole',
+      key: 'userRole',
+      width: 100,
+      render: (userRole: string) => (
+        <Tag color={userRole === 'admin' ? 'red' : 'blue'}>{userRole}</Tag>
+      ),
     },
     {
-      id: 'RU2',
-      name: 'User Route Extension 2',
-      description: 'Global user route extension point',
-      type: 'route',
-      context: 'user',
-      icon: <GlobalOutlined />,
-      examples: [
-        'Global user settings',
-        'Cross-organization features',
-        'User preferences',
-      ],
+      title: 'Extension Point',
+      dataIndex: 'extensionPoint',
+      key: 'extensionPoint',
+      width: 120,
+      render: (extensionPoint: string) => (
+        <Tag color="green">{extensionPoint}</Tag>
+      ),
     },
     {
-      id: 'DA1',
-      name: 'Admin Drawer Extension 1',
-      description: 'Global admin drawer menu extension point',
-      type: 'drawer',
-      context: 'admin',
-      icon: <FolderOutlined />,
-      examples: [
-        'Navigation menu items',
-        'Global admin tools',
-        'System utilities',
-      ],
+      title: 'Organization',
+      dataIndex: 'organizationId',
+      key: 'organizationId',
+      width: 150,
+      render: (orgId: string | null) => <span>{orgId || 'Global'}</span>,
     },
     {
-      id: 'DA2',
-      name: 'Admin Drawer Extension 2',
-      description: 'Organization-specific admin drawer menu extension point',
-      type: 'drawer',
-      context: 'admin',
-      icon: <FolderOutlined />,
-      examples: ['Organization tools', 'Member management', 'Event tools'],
-    },
-    {
-      id: 'DU1',
-      name: 'User Drawer Extension 1',
-      description: 'Organization-specific user drawer menu extension point',
-      type: 'drawer',
-      context: 'user',
-      icon: <FolderOutlined />,
-      examples: ['User navigation', 'Organization features', 'User tools'],
-    },
-    {
-      id: 'DU2',
-      name: 'User Drawer Extension 2',
-      description: 'Global user drawer menu extension point',
-      type: 'drawer',
-      context: 'user',
-      icon: <FolderOutlined />,
-      examples: [
-        'Global user navigation',
-        'Cross-organization tools',
-        'User preferences',
-      ],
-    },
-    {
-      id: 'G1',
-      name: 'General Injector Extension 1',
-      description: 'Component injection point for general UI elements',
-      type: 'injector',
-      context: 'global',
-      icon: <CodeOutlined />,
-      examples: ['Button injections', 'Card enhancements', 'Form extensions'],
-    },
-    {
-      id: 'G2',
-      name: 'General Injector Extension 2',
-      description: 'Component injection point for secondary UI elements',
-      type: 'injector',
-      context: 'global',
-      icon: <CodeOutlined />,
-      examples: ['Widget injections', 'Modal enhancements', 'List extensions'],
-    },
-    {
-      id: 'G3',
-      name: 'General Injector Extension 3',
-      description: 'Component injection point for tertiary UI elements',
-      type: 'injector',
-      context: 'global',
-      icon: <CodeOutlined />,
-      examples: [
-        'Toolbar injections',
-        'Sidebar enhancements',
-        'Footer extensions',
-      ],
-    },
-    {
-      id: 'G4',
-      name: 'General Injector Extension 4',
-      description: 'Component injection point for quaternary UI elements',
-      type: 'injector',
-      context: 'global',
-      icon: <CodeOutlined />,
-      examples: ['Header injections', 'Menu enhancements', 'Status extensions'],
-    },
-    {
-      id: 'G5',
-      name: 'General Injector Extension 5',
-      description: 'Component injection point for quinary UI elements',
-      type: 'injector',
-      context: 'global',
-      icon: <CodeOutlined />,
-      examples: [
-        'Notification injections',
-        'Badge enhancements',
-        'Icon extensions',
-      ],
+      title: 'Created At',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      width: 180,
+      render: (createdAt: string) => (
+        <span>{new Date(createdAt).toLocaleString()}</span>
+      ),
     },
   ];
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'route':
-        return 'blue';
-      case 'drawer':
-        return 'green';
-      case 'injector':
-        return 'orange';
-      default:
-        return 'default';
-    }
-  };
-
-  const getContextColor = (context: string) => {
-    switch (context) {
-      case 'admin':
-        return 'red';
-      case 'user':
-        return 'purple';
-      case 'global':
-        return 'cyan';
-      default:
-        return 'default';
-    }
-  };
+  const requests =
+    requestsData?.plugin_map_getPluginMapRequests?.requests || [];
 
   return (
     <div style={{ padding: '24px' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <Title level={1}>
-          <AppstoreOutlined style={{ marginRight: '12px' }} />
-          Extension Points Map
-        </Title>
-        <Paragraph>
-          This dashboard shows all available extension points in the Talawa
-          Admin Panel. Developers can use these extension points to inject their
-          own components and functionality.
-        </Paragraph>
-      </div>
+      <Title level={2}>RA2 - Admin Global Extension Point</Title>
+      <Paragraph>
+        This page represents the RA2 extension point - Admin Global Route. This
+        is a global admin route that provides admin functionality across all
+        organizations.
+      </Paragraph>
 
       <Row gutter={[16, 16]}>
-        {extensionPoints.map((point) => (
-          <Col xs={24} sm={12} lg={8} key={point.id}>
-            <Card
-              hoverable
-              style={{ height: '100%' }}
-              title={
-                <Space>
-                  {point.icon}
-                  <Text strong>{point.id}</Text>
-                </Space>
-              }
-              extra={
-                <Space>
-                  <Badge color={getTypeColor(point.type)} text={point.type} />
-                  <Badge
-                    color={getContextColor(point.context)}
-                    text={point.context}
-                  />
-                </Space>
-              }
-            >
-              <Space
-                direction="vertical"
+        <Col span={24}>
+          <Card title="Test Request System" style={{ marginBottom: '16px' }}>
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Paragraph>
+                Click the button below to test the request system for RA2
+                extension point.
+              </Paragraph>
+
+              <Button type="primary" onClick={handlePollClick}>
+                Request RA2 (Admin Global)
+              </Button>
+            </Space>
+          </Card>
+        </Col>
+
+        <Col span={24}>
+          <Card
+            title="Request History (RA2 - Admin Global)"
+            style={{ marginBottom: '16px' }}
+          >
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Paragraph>
+                Recent requests logged for this extension point. Total requests:{' '}
+                {requestsData?.plugin_map_getPluginMapRequests?.totalCount || 0}
+              </Paragraph>
+
+              <Table
+                columns={columns}
+                dataSource={requests}
+                loading={loadingRequests}
+                rowKey="id"
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showQuickJumper: true,
+                  showTotal: (total, range) =>
+                    `${range[0]}-${range[1]} of ${total} requests`,
+                }}
+                scroll={{ x: 800 }}
                 size="small"
-                style={{ width: '100%' }}
-              >
-                <Text strong>{point.name}</Text>
-                <Paragraph style={{ fontSize: '14px', marginBottom: '12px' }}>
-                  {point.description}
-                </Paragraph>
+              />
+            </Space>
+          </Card>
+        </Col>
 
-                {point.examples && point.examples.length > 0 && (
-                  <>
-                    <Divider style={{ margin: '12px 0' }} />
-                    <Text strong style={{ fontSize: '12px' }}>
-                      Examples:
-                    </Text>
-                    <ul style={{ margin: '4px 0', paddingLeft: '20px' }}>
-                      {point.examples.map((example, index) => (
-                        <li
-                          key={index}
-                          style={{ fontSize: '12px', marginBottom: '2px' }}
-                        >
-                          {example}
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
-              </Space>
-            </Card>
-          </Col>
-        ))}
+        <Col span={24}>
+          <Card title="Extension Point Information">
+            <Row gutter={[24, 16]}>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '16px',
+                    background: '#f8f9fa',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Extension ID
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    RA2
+                  </div>
+                </div>
+              </Col>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '16px',
+                    background: '#f8f9fa',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Type
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    Global Route
+                  </div>
+                </div>
+              </Col>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '16px',
+                    background: '#f8f9fa',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Access Level
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    Admin Only
+                  </div>
+                </div>
+              </Col>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '16px',
+                    background: '#f8f9fa',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Organization
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    None (Global)
+                  </div>
+                </div>
+              </Col>
+            </Row>
+            <div
+              style={{
+                marginTop: '16px',
+                padding: '16px',
+                background: '#f0f8ff',
+                borderRadius: '6px',
+                border: '1px solid #d6e4ff',
+              }}
+            >
+              <strong>Note:</strong> This extension point provides system-wide
+              administrative capabilities. Plugins can access global data and
+              manage cross-organization features. No organization context is
+              required.
+            </div>
+          </Card>
+        </Col>
       </Row>
-
-      <Divider />
-
-      <Card style={{ marginTop: '24px' }}>
-        <Title level={3}>How to Use Extension Points</Title>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '16px',
-          }}
-        >
-          <div>
-            <Title level={4}>Routes (R*)</Title>
-            <Paragraph>
-              Route extension points allow you to add entirely new pages to the
-              admin or user interface. Define your component and path in the
-              plugin manifest.
-            </Paragraph>
-          </div>
-          <div>
-            <Title level={4}>Drawers (D*)</Title>
-            <Paragraph>
-              Drawer extension points let you add menu items to the navigation
-              sidebar. Perfect for adding new sections or tools to the
-              interface.
-            </Paragraph>
-          </div>
-          <div>
-            <Title level={4}>Injectors (G*)</Title>
-            <Paragraph>
-              Injector extension points allow you to inject components into
-              existing UI elements. Great for adding buttons, widgets, or
-              enhancing existing features.
-            </Paragraph>
-          </div>
-        </div>
-      </Card>
     </div>
   );
 };
