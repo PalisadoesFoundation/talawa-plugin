@@ -94,6 +94,22 @@ async function main() {
       return;
     }
 
+    // For production builds, ask about type checking
+    let skipTypeCheck = false;
+    if (!isDevelopment) {
+      const typeCheckResponse = await confirm({
+        message: 'Skip type checking for production build? (Yes = skip, No = run type check)',
+        initialValue: false,
+      });
+
+      if (isCancel(typeCheckResponse)) {
+        outro('Operation cancelled');
+        return;
+      }
+      
+      skipTypeCheck = typeCheckResponse;
+    }
+
     // Create zip
     const zipSpinner = spinner();
     zipSpinner.start(`Creating ${isDevelopment ? 'development' : 'production'} zip for ${selectedPluginName}...`);
@@ -104,7 +120,7 @@ async function main() {
         await createZip(selectedPlugin, true);
       } else {
         // For production: compile TypeScript to JavaScript first, then zip
-        await compileForProduction(selectedPlugin);
+        await compileForProduction(selectedPlugin, skipTypeCheck);
         await createZip(selectedPlugin, false);
         
         // Restore original TypeScript files

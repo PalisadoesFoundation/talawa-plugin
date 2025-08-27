@@ -121,11 +121,7 @@ export async function createZip(plugin: PluginInfo, isDevelopment: boolean): Pro
       }
     }
 
-    // If neither admin nor api were flagged, you can still include root contents if desired:
-    // (Uncomment if your plugin structure expects root files/dirs too)
-    // if (!plugin.hasAdmin && !plugin.hasApi) {
-    //   files.push(...listFilesRecursive(plugin.path, ''));
-    // }
+   
 
     const output = createWriteStream(zipPath);
 
@@ -162,8 +158,7 @@ export async function createZip(plugin: PluginInfo, isDevelopment: boolean): Pro
           ...f.stats,
           mtime,
         } as any,
-        // Do NOT set `store:true`—keep compression on to avoid "uncompressed" edge cases.
-        // mode: 0o644, // optional: force file mode for portability
+    
       });
     }
 
