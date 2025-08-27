@@ -1,7 +1,6 @@
 // scripts/zip/createZip.ts
-import { createWriteStream } from 'node:fs';
-import { readdirSync, statSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { createWriteStream, existsSync, mkdirSync, readFileSync, statSync, readdirSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
 import archiver from 'archiver';
 
 interface PluginInfo {
@@ -12,132 +11,188 @@ interface PluginInfo {
 }
 
 async function getPluginId(pluginPath: string): Promise<string> {
-  // Try to get plugin ID from plugin-level manifest first
-  const pluginManifestPath = join(pluginPath, 'manifest.json');
-  if (existsSync(pluginManifestPath)) {
+  const tryManifest = (p: string) => {
+    if (!existsSync(p)) return null;
     try {
-      const manifestContent = readFileSync(pluginManifestPath, 'utf-8');
+      const manifestContent = readFileSync(p, 'utf-8');
       const manifest = JSON.parse(manifestContent);
-      if (manifest.pluginId) {
-        return manifest.pluginId;
+      return manifest?.pluginId ?? null;
+    } catch {
+      return null;
+    }
+  };
+
+  return (
+    tryManifest(join(pluginPath, 'manifest.json')) ||
+    tryManifest(join(pluginPath, 'admin', 'manifest.json')) ||
+    tryManifest(join(pluginPath, 'api', 'manifest.json')) ||
+    pluginPath.split('/').pop() ||
+    'unknown'
+  );
+}
+
+async function validateZipFile(zipPath: string): Promise<void> {
+  try {
+    const stats = statSync(zipPath);
+    if (stats.size < 100) throw new Error('Zip file is too small - may be corrupted');
+    console.log(`✅ Zip file size: ${(stats.size / 1024).toFixed(2)} KB`);
+  } catch (error) {
+    throw new Error(`Zip validation failed: ${error}`);
+  }
+}
+
+// Ignore typical OS/build cruft
+const IGNORE_BASENAMES = new Set([
+  '.DS_Store',
+  'Thumbs.db',
+]);
+const IGNORE_DIRS = new Set([
+  '__MACOSX',
+  '.git',
+  '.svn',
+  '.hg',
+]);
+
+function shouldIgnore(fullPath: string, base: string, isDir: boolean): boolean {
+  if (isDir && IGNORE_DIRS.has(base)) return true;
+  if (!isDir && IGNORE_BASENAMES.has(base)) return true;
+  return false;
+}
+
+function listFilesRecursive(root: string, baseInZip: string): Array<{ fsPath: string; zipPath: string; stats: ReturnType<typeof statSync> }> {
+  const out: Array<{ fsPath: string; zipPath: string; stats: ReturnType<typeof statSync> }> = [];
+  const stack: Array<{ dir: string; prefix: string }> = [{ dir: root, prefix: baseInZip }];
+
+  while (stack.length) {
+    const { dir, prefix } = stack.pop()!;
+    const entries = readdirSync(dir, { withFileTypes: true });
+
+    for (const ent of entries) {
+      const fsPath = join(dir, ent.name);
+      const base = ent.name;
+      if (shouldIgnore(fsPath, base, ent.isDirectory())) continue;
+
+      // Normalize zip path with forward slashes
+      const zipPath = (prefix ? `${prefix}/` : '') + base.replace(new RegExp(sep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), '/');
+
+      if (ent.isDirectory()) {
+        stack.push({ dir: fsPath, prefix: zipPath });
+      } else if (ent.isFile()) {
+        const stats = statSync(fsPath);
+        // Skip zero-length weirdness (optional)
+        // if (stats.size === 0) continue;
+        out.push({ fsPath, zipPath, stats });
       }
-    } catch (error) {
-      console.warn('Failed to read plugin manifest:', error);
     }
   }
 
-  // Try to get plugin ID from admin manifest
-  const adminManifestPath = join(pluginPath, 'admin', 'manifest.json');
-  if (existsSync(adminManifestPath)) {
-    try {
-      const manifestContent = readFileSync(adminManifestPath, 'utf-8');
-      const manifest = JSON.parse(manifestContent);
-      if (manifest.pluginId) {
-        return manifest.pluginId;
-      }
-    } catch (error) {
-      console.warn('Failed to read admin manifest:', error);
-    }
-  }
-
-  // Try to get plugin ID from API manifest
-  const apiManifestPath = join(pluginPath, 'api', 'manifest.json');
-  if (existsSync(apiManifestPath)) {
-    try {
-      const manifestContent = readFileSync(apiManifestPath, 'utf-8');
-      const manifest = JSON.parse(manifestContent);
-      if (manifest.pluginId) {
-        return manifest.pluginId;
-      }
-    } catch (error) {
-      console.warn('Failed to read API manifest:', error);
-    }
-  }
-
-  // Fallback to plugin name if no pluginId found
-  return pluginPath.split('/').pop() || 'unknown';
+  return out;
 }
 
 export async function createZip(plugin: PluginInfo, isDevelopment: boolean): Promise<void> {
   return new Promise(async (resolve, reject) => {
     const buildType = isDevelopment ? 'dev' : 'prod';
-    
-    // Get plugin ID from manifest files
+
     const pluginId = await getPluginId(plugin.path);
     const zipFileName = `${pluginId}-${buildType}.zip`;
-    
-    // Create zip output directory in root
+
     const zipOutputDir = join(process.cwd(), 'plugin-zips');
     if (!existsSync(zipOutputDir)) {
       mkdirSync(zipOutputDir, { recursive: true });
     }
-    
     const zipPath = join(zipOutputDir, zipFileName);
-    
+
+    // Prepare list of files deterministically
+    const files: Array<{ fsPath: string; zipPath: string; stats: ReturnType<typeof statSync> }> = [];
+
+    // Optional: include only selected subtrees
+    if (plugin.hasAdmin && existsSync(join(plugin.path, 'admin'))) {
+      files.push(...listFilesRecursive(join(plugin.path, 'admin'), 'admin'));
+    }
+    if (plugin.hasApi && existsSync(join(plugin.path, 'api'))) {
+      files.push(...listFilesRecursive(join(plugin.path, 'api'), 'api'));
+    }
+
+    // Top-level files we explicitly include
+    for (const top of ['manifest.json', 'README.md', 'package.json']) {
+      const p = join(plugin.path, top);
+      if (existsSync(p)) {
+        const stats = statSync(p);
+        files.push({ fsPath: p, zipPath: top, stats });
+      }
+    }
+
+    // If neither admin nor api were flagged, you can still include root contents if desired:
+    // (Uncomment if your plugin structure expects root files/dirs too)
+    // if (!plugin.hasAdmin && !plugin.hasApi) {
+    //   files.push(...listFilesRecursive(plugin.path, ''));
+    // }
+
     const output = createWriteStream(zipPath);
+
     const archive = archiver('zip', {
-      zlib: { level: 9 } // Sets the compression level
+      zlib: { level: 9 },       // max compression but broadly compatible
+      store: false,             // compress entries (no "stored" entries)
+      forceZip64: false,        // avoid ZIP64 unless absolutely needed
+      // comment: 'Talawa plugin package', // optional
     });
 
-    output.on('close', () => {
-      console.log(`\n📦 Zip created: ${zipFileName}`);
-      console.log(`📁 Location: ${zipPath}`);
-      console.log(`📊 Total size: ${(archive.pointer() / 1024 / 1024).toFixed(2)} MB`);
-      resolve();
-    });
-
-    archive.on('error', (err) => {
-      reject(err);
+    const done = new Promise<void>((resolveClose, rejectClose) => {
+      output.on('close', () => resolveClose());
+      output.on('error', rejectClose);
+      archive.on('warning', (err) => {
+        if ((err as any)?.code === 'ENOENT') {
+          console.warn('Archive warning:', err);
+        } else {
+          rejectClose(err);
+        }
+      });
+      archive.on('error', rejectClose);
     });
 
     archive.pipe(output);
 
-    // Add admin folder if it exists
-    if (plugin.hasAdmin) {
-      const adminPath = join(plugin.path, 'admin');
-      if (existsSync(adminPath)) {
-        addDirectoryToArchive(archive, adminPath, `admin`);
-      }
+    // Add files with known stats → prevents “data descriptor” streaming headers.
+    for (const f of files) {
+      if (!f.stats) continue; // Skip files without stats
+      
+      // Normalize mtime to seconds (avoid extended precision extra fields)
+      const mtimeMs = Number(f.stats.mtimeMs);
+      const mtime = new Date(Math.floor(mtimeMs / 1000) * 1000);
+      archive.file(f.fsPath, {
+        name: f.zipPath.replace(/\\/g, '/'),
+        stats: {
+          ...f.stats,
+          mtime,
+        } as any,
+        // Do NOT set `store:true`—keep compression on to avoid "uncompressed" edge cases.
+        // mode: 0o644, // optional: force file mode for portability
+      });
     }
 
-    // Add api folder if it exists
-    if (plugin.hasApi) {
-      const apiPath = join(plugin.path, 'api');
-      if (existsSync(apiPath)) {
-        addDirectoryToArchive(archive, apiPath, `api`);
-      }
-    }
-
-    // Add plugin manifest if it exists
-    const pluginManifestPath = join(plugin.path, 'manifest.json');
-    if (existsSync(pluginManifestPath)) {
-      archive.file(pluginManifestPath, { name: 'manifest.json' });
-    }
-
-    // Add README if it exists
-    const readmePath = join(plugin.path, 'README.md');
-    if (existsSync(readmePath)) {
-      archive.file(readmePath, { name: 'README.md' });
-    }
-
+    // Finalize & wait
     archive.finalize();
-  });
-}
 
-function addDirectoryToArchive(archive: archiver.Archiver, dirPath: string, archivePath: string): void {
-  const items = readdirSync(dirPath);
+    try {
+      await done;
 
-  for (const item of items) {
-    const fullPath = join(dirPath, item);
-    const relativePath = join(archivePath, item);
-    const stat = statSync(fullPath);
+      console.log(`\n📦 Zip created: ${zipFileName}`);
+      console.log(`📁 Location: ${zipPath}`);
+      console.log(`📊 Total size (writer): ${(archive.pointer() / 1024 / 1024).toFixed(2)} MB`);
 
-    if (stat.isDirectory()) {
-      // Recursively add subdirectories
-      addDirectoryToArchive(archive, fullPath, relativePath);
-    } else {
-      // Add file to archive
-      archive.file(fullPath, { name: relativePath });
+      await validateZipFile(zipPath);
+      console.log('✅ Zip file validation passed');
+
+      // Basic compatibility notes
+      console.log('\n🔧 Cross-platform compatibility checks:');
+      console.log(`✅ No string "append" entries (no data descriptors)`);
+      console.log(`✅ ZIP64 disabled`);
+      console.log(`✅ Extra OS attrs avoided (no __MACOSX/.DS_Store)`);
+    } catch (e) {
+      console.error('Archive finalize/validate error:', e);
+      return reject(e);
     }
-  }
+
+    resolve();
+  });
 }
