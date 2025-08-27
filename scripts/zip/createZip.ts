@@ -35,7 +35,6 @@ async function validateZipFile(zipPath: string): Promise<void> {
   try {
     const stats = statSync(zipPath);
     if (stats.size < 100) throw new Error('Zip file is too small - may be corrupted');
-    console.log(`✅ Zip file size: ${(stats.size / 1024).toFixed(2)} KB`);
   } catch (error) {
     throw new Error(`Zip validation failed: ${error}`);
   }
@@ -141,9 +140,7 @@ export async function createZip(plugin: PluginInfo, isDevelopment: boolean): Pro
       output.on('close', () => resolveClose());
       output.on('error', rejectClose);
       archive.on('warning', (err) => {
-        if ((err as any)?.code === 'ENOENT') {
-          console.warn('Archive warning:', err);
-        } else {
+        if ((err as any)?.code !== 'ENOENT') {
           rejectClose(err);
         }
       });
@@ -176,18 +173,10 @@ export async function createZip(plugin: PluginInfo, isDevelopment: boolean): Pro
     try {
       await done;
 
-      console.log(`\n📦 Zip created: ${zipFileName}`);
-      console.log(`📁 Location: ${zipPath}`);
-      console.log(`📊 Total size (writer): ${(archive.pointer() / 1024 / 1024).toFixed(2)} MB`);
+      console.log(`📦 Zip created: ${zipFileName}`);
+      console.log(`📊 Size: ${(archive.pointer() / 1024 / 1024).toFixed(2)} MB`);
 
       await validateZipFile(zipPath);
-      console.log('✅ Zip file validation passed');
-
-      // Basic compatibility notes
-      console.log('\n🔧 Cross-platform compatibility checks:');
-      console.log(`✅ No string "append" entries (no data descriptors)`);
-      console.log(`✅ ZIP64 disabled`);
-      console.log(`✅ Extra OS attrs avoided (no __MACOSX/.DS_Store)`);
     } catch (e) {
       console.error('Archive finalize/validate error:', e);
       return reject(e);
