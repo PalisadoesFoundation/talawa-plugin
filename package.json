@@ -7,10 +7,14 @@
   "description": "Microkernel-based plugin system for extending Talawa with modular features across API, Admin, and Mobile.",
   "devDependencies": {
     "@clack/prompts": "^0.11.0",
+    "@types/archiver": "^6.0.3",
     "@types/node": "^22.15.21",
     "chalk": "^5.4.1",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "archiver": "^6.0.1"
   },
   "homepage": "https://github.com/PalisadoesFoundation/talawa-plugin#readme",
   "license": "GNU General Public License v3.0",
@@ -19,6 +23,7 @@
   "version": "1.0.0",
   "scripts": {
     "init-plugin": "tsx ./scripts/init/index.ts",
+    "zip-plugin": "tsx ./scripts/zip/index.ts",
     "typecheck": "tsc --noEmit"
   },
   "keywords": []
