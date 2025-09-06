@@ -286,6 +286,42 @@ export async function getPluginInfo(context: IPluginContext) {
   };
 }
 
+// Webhook handler for Razorpay
+export async function handleRazorpayWebhook(
+  request: any,
+  reply: any
+): Promise<void> {
+  try {
+    const webhookData = request.body;
+    
+    // Create context with available resources
+    const context = {
+      log: console,
+      drizzleClient: null, // This would need to be injected from the plugin system
+      pluginManager: null,
+    };
+
+    // Import and use the Razorpay service
+    const { createRazorpayService } = await import("./services/razorpayService");
+    const razorpayService = createRazorpayService(context as any);
+
+    // Process the webhook
+    await razorpayService.processWebhook(webhookData);
+
+    // Return success response
+    reply.status(200).send({ 
+      status: "success",
+      message: "Webhook processed successfully"
+    });
+  } catch (error) {
+    console.error("Razorpay webhook processing failed:", error);
+    reply.status(500).send({ 
+      error: "Webhook processing failed",
+      message: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+}
+
 // Export the plugin lifecycle interface
 const RazorpayPlugin: IPluginLifecycle = {
   onLoad,
