@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { Badge, Tooltip } from 'antd';
-import { EnvironmentOutlined, AppstoreOutlined } from '@ant-design/icons';
+import { Badge, Tooltip, Card, Typography, Space } from 'antd';
+import { EnvironmentOutlined, AppstoreOutlined, CreditCardOutlined, TransactionOutlined } from '@ant-design/icons';
+
+const { Text, Title } = Typography;
 
 interface MapIconInjectorProps {
   extensionPointId?: string;
@@ -22,6 +24,57 @@ const MapIconInjector: React.FC<MapIconInjectorProps> = ({
   size = 'default',
   showBadge = true,
 }) => {
+  // For G1 extension point, render a full-width transaction block
+  if (extensionPointId === 'G1') {
+    return (
+      <Card
+        style={{
+          width: '100%',
+          margin: '16px 0',
+          border: '2px dashed #1890ff',
+          backgroundColor: '#f6ffed',
+          borderRadius: '8px',
+        }}
+        bodyStyle={{
+          padding: '20px',
+          textAlign: 'center',
+        }}
+      >
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+          <Space align="center" size="large">
+            <TransactionOutlined 
+              style={{ 
+                fontSize: '32px', 
+                color: '#1890ff' 
+              }} 
+            />
+            <div>
+              <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
+                Payment Provider Transactions
+              </Title>
+              <Text type="secondary">
+                Browse transactions made using the following payment provider
+              </Text>
+            </div>
+          </Space>
+          
+          <div style={{ 
+            padding: '12px 16px', 
+            backgroundColor: '#e6f7ff', 
+            borderRadius: '6px',
+            border: '1px solid #91d5ff'
+          }}>
+            <Text style={{ fontSize: '14px', color: '#1890ff' }}>
+              <AppstoreOutlined style={{ marginRight: '8px' }} />
+              Extension Point: {extensionPointId} - Transaction Display Area
+            </Text>
+          </div>
+        </Space>
+      </Card>
+    );
+  }
+
+  // For other extension points, render the original small icon
   const getIconSize = () => {
     switch (size) {
       case 'small':
