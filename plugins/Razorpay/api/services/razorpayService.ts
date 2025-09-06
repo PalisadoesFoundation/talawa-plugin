@@ -247,6 +247,61 @@ export class RazorpayService {
       throw error;
     }
   }
+
+  async testConnection(): Promise<{ success: boolean; message: string }> {
+    try {
+      // Get current configuration
+      const config = await this.context.drizzleClient.select().from(configTable).limit(1);
+      
+      if (config.length === 0 || !config[0]) {
+        return {
+          success: false,
+          message: "No Razorpay configuration found",
+        };
+      }
+
+      const configItem = config[0];
+      
+      if (!configItem.keyId || !configItem.keySecret) {
+        return {
+          success: false,
+          message: "API keys are not configured",
+        };
+      }
+
+      // Test connection by making a simple API call to Razorpay
+      const response = await fetch("https://api.razorpay.com/v1/payments", {
+        method: "GET",
+        headers: {
+          "Authorization": `Basic ${Buffer.from(`${configItem.keyId}:${configItem.keySecret}`).toString("base64")}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        return {
+          success: true,
+          message: "Connection successful! Your Razorpay credentials are valid.",
+        };
+      } else if (response.status === 401) {
+        return {
+          success: false,
+          message: "Invalid API credentials. Please check your Key ID and Key Secret.",
+        };
+      } else {
+        return {
+          success: false,
+          message: `Connection failed with status: ${response.status}`,
+        };
+      }
+    } catch (error) {
+      this.context.log?.error("Error testing Razorpay connection:", error);
+      return {
+        success: false,
+        message: "Connection test failed. Please check your internet connection and try again.",
+      };
+    }
+  }
 }
 
 export function createRazorpayService(
