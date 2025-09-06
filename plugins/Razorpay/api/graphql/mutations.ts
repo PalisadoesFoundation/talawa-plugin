@@ -13,6 +13,7 @@ import {
   RazorpayConfigRef,
   RazorpayOrderRef,
   RazorpayPaymentResultRef,
+  RazorpayTestResultRef,
 } from "./types";
 import {
   RazorpayConfigInput,
@@ -658,7 +659,7 @@ export function registerRazorpayMutations(
   // Test Razorpay connection
   builderInstance.mutationField("testRazorpayConnection", (t) =>
     t.field({
-      type: builderInstance.objectRef<{ success: boolean; message: string }>("RazorpayTestResult"),
+      type: RazorpayTestResultRef,
       description: "Test Razorpay API connection with current credentials",
       resolve: testRazorpayConnectionResolver,
     })

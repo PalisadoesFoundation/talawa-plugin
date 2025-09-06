@@ -180,3 +180,16 @@ RazorpayPaymentResultRef.implement({
     }),
   }),
 });
+
+// RazorpayTestResult type
+export const RazorpayTestResultRef = builder.objectRef<{
+  success: boolean;
+  message: string;
+}>("RazorpayTestResult");
+
+RazorpayTestResultRef.implement({
+  fields: (t) => ({
+    success: t.exposeBoolean("success"),
+    message: t.exposeString("message"),
+  }),
+});

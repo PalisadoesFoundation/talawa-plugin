@@ -219,6 +219,12 @@ const RazorpayConfiguration: React.FC = () => {
       return;
     }
 
+    // Validate key format
+    if (!config.keyId.startsWith('rzp_')) {
+      toast.error('Invalid Key ID format. Razorpay Key ID should start with "rzp_"');
+      return;
+    }
+
     setIsLoading(true);
     try {
       toast.info('Testing Razorpay connection...');
@@ -230,7 +236,15 @@ const RazorpayConfiguration: React.FC = () => {
           setCurrentStep(3);
         }
       } else {
-        toast.error(result?.razorpay_testRazorpayConnection?.message || 'Connection test failed');
+        const errorMessage = result?.razorpay_testRazorpayConnection?.message || 'Connection test failed';
+        toast.error(errorMessage);
+        
+        // Log the error for debugging
+        console.error('Razorpay connection test failed:', {
+          error: errorMessage,
+          keyId: config.keyId?.substring(0, 8) + '...',
+          testMode: config.testMode
+        });
       }
     } catch (error) {
       console.error('Connection test error:', error);
@@ -352,12 +366,21 @@ const RazorpayConfiguration: React.FC = () => {
             <Alert variant="info" className="mb-4">
               <Alert.Heading>Get Your Razorpay API Keys</Alert.Heading>
               <p className="mb-2">To get started, you need to obtain your Razorpay API keys:</p>
-              <ol className="mb-0">
+              <ol className="mb-3">
                 <li>Visit <a href="https://dashboard.razorpay.com" target="_blank" rel="noopener noreferrer">Razorpay Dashboard</a></li>
                 <li>Go to <strong>Settings → API Keys</strong></li>
                 <li>Generate your <strong>Key ID</strong> and <strong>Key Secret</strong></li>
                 <li>Copy and paste them below</li>
               </ol>
+              <div className="alert alert-warning mb-0">
+                <strong>Important:</strong>
+                <ul className="mb-0 mt-2">
+                  <li>Use <strong>Test Keys</strong> for development (start with <code>rzp_test_</code>)</li>
+                  <li>Use <strong>Live Keys</strong> for production (start with <code>rzp_live_</code>)</li>
+                  <li>Make sure your Razorpay account is activated</li>
+                  <li>Keep your Key Secret secure and never share it publicly</li>
+                </ul>
+              </div>
             </Alert>
 
             <Form onSubmit={handleStep1Submit}>

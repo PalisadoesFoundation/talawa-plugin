@@ -271,6 +271,7 @@ export async function getPluginInfo(context: IPluginContext) {
     graphqlOperations: [
       "getRazorpayConfig",
       "updateRazorpayConfig",
+      "testRazorpayConnection",
       "getOrganizationTransactions",
       "getUserTransactions",
       "getOrganizationTransactionStats",
