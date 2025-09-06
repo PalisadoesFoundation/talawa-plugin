@@ -35,7 +35,7 @@ const UPDATE_RAZORPAY_CONFIG = gql`
 
 const TEST_RAZORPAY_CONNECTION = gql`
   mutation TestRazorpayConnection {
-    razorpay_testConnection {
+    razorpay_testRazorpayConnection {
       success
       message
     }
@@ -139,6 +139,80 @@ const RazorpayConfiguration: React.FC = () => {
     }
   };
 
+  const handleStep1Submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // Save API keys first
+      const cleanConfig = {
+        keyId: config.keyId,
+        keySecret: config.keySecret,
+        webhookSecret: config.webhookSecret || '',
+        isEnabled: config.isEnabled,
+        testMode: config.testMode,
+        currency: config.currency,
+        description: config.description,
+      };
+
+      const { data: result } = await updateConfig({
+        variables: {
+          input: cleanConfig,
+        },
+      });
+
+      if (result?.razorpay_updateRazorpayConfig) {
+        toast.success('API keys saved successfully');
+        await refetch();
+        nextStep(); // Move to test connection step
+      } else {
+        toast.error('Failed to save API keys');
+      }
+    } catch (error) {
+      console.error('Error saving API keys:', error);
+      toast.error('Failed to save API keys');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStep3Submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // Save additional settings
+      const cleanConfig = {
+        keyId: config.keyId,
+        keySecret: config.keySecret,
+        webhookSecret: config.webhookSecret || '',
+        isEnabled: config.isEnabled,
+        testMode: config.testMode,
+        currency: config.currency,
+        description: config.description,
+      };
+
+      const { data: result } = await updateConfig({
+        variables: {
+          input: cleanConfig,
+        },
+      });
+
+      if (result?.razorpay_updateRazorpayConfig) {
+        toast.success('Settings saved successfully');
+        await refetch();
+        nextStep(); // Move to final step
+      } else {
+        toast.error('Failed to save settings');
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast.error('Failed to save settings');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleTestConnection = async () => {
     if (!config.keyId || !config.keySecret) {
       toast.error('Please enter both Key ID and Key Secret before testing connection');
@@ -150,13 +224,13 @@ const RazorpayConfiguration: React.FC = () => {
       toast.info('Testing Razorpay connection...');
       const { data: result } = await testConnection();
       
-      if (result?.razorpay_testConnection?.success) {
+      if (result?.razorpay_testRazorpayConnection?.success) {
         toast.success('Connection test successful! Razorpay credentials are valid.');
         if (isFirstTimeSetup) {
           setCurrentStep(3);
         }
       } else {
-        toast.error(result?.razorpay_testConnection?.message || 'Connection test failed');
+        toast.error(result?.razorpay_testRazorpayConnection?.message || 'Connection test failed');
       }
     } catch (error) {
       console.error('Connection test error:', error);
@@ -286,7 +360,7 @@ const RazorpayConfiguration: React.FC = () => {
               </ol>
             </Alert>
 
-            <Form onSubmit={(e) => { e.preventDefault(); nextStep(); }}>
+            <Form onSubmit={handleStep1Submit}>
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3">
@@ -336,8 +410,8 @@ const RazorpayConfiguration: React.FC = () => {
               </Form.Group>
 
               <div className="d-flex justify-content-end">
-                <Button type="submit" variant="primary" disabled={!config.keyId || !config.keySecret}>
-                  Next: Test Connection
+                <Button type="submit" variant="primary" disabled={!config.keyId || !config.keySecret || isLoading}>
+                  {isLoading ? 'Saving...' : 'Next: Test Connection'}
                 </Button>
               </div>
             </Form>
@@ -403,7 +477,7 @@ const RazorpayConfiguration: React.FC = () => {
             </Card.Title>
           </Card.Header>
           <Card.Body>
-            <Form onSubmit={(e) => { e.preventDefault(); nextStep(); }}>
+            <Form onSubmit={handleStep3Submit}>
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3">
@@ -460,11 +534,11 @@ const RazorpayConfiguration: React.FC = () => {
               </Row>
 
               <div className="d-flex justify-content-between">
-                <Button variant="outline-secondary" onClick={prevStep}>
+                <Button variant="outline-secondary" onClick={prevStep} disabled={isLoading}>
                   Back to Test Connection
                 </Button>
-                <Button type="submit" variant="primary">
-                  Next: Complete Setup
+                <Button type="submit" variant="primary" disabled={isLoading}>
+                  {isLoading ? 'Saving...' : 'Next: Complete Setup'}
                 </Button>
               </div>
             </Form>
