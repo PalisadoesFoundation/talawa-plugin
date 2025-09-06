@@ -7,6 +7,7 @@
  * - G2: Organization transaction management injector (injected into admin transactions page)
  * - RA1: Global admin configuration for Razorpay keys and settings
  * - RU1: User donation form for making payments to organizations
+ * - RU2: Global user transactions page showing all transactions across organizations
  */
 
 import { IPluginLifecycle } from '../../types';
@@ -14,7 +15,9 @@ import { IPluginLifecycle } from '../../types';
 // Import all components
 import RazorpayConfiguration from './pages/RazorpayConfiguration';
 import DonationForm from './pages/DonationForm';
-import RazorpayInjector from './injector/RazorpayInjector';
+import UserTransactions from './pages/UserTransactions';
+import RazorpayUserTransactionsInjector from './injector/RazorpayUserTransactionsInjector';
+import RazorpayOrganizationTransactionsInjector from './injector/RazorpayOrganizationTransactionsInjector';
 
 // Plugin lifecycle implementation
 const RazorpayLifecycle: IPluginLifecycle = {
@@ -117,5 +120,7 @@ export default RazorpayLifecycle;
 export {
   RazorpayConfiguration,
   DonationForm,
-  RazorpayInjector,
+  UserTransactions,
+  RazorpayUserTransactionsInjector,
+  RazorpayOrganizationTransactionsInjector,
 }; 

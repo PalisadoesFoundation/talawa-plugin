@@ -9,13 +9,13 @@
   "extensionPoints": {
     "G1": [
       {
-        "injector": "RazorpayInjector",
+        "injector": "RazorpayUserTransactionsInjector",
         "description": "Razorpay payment provider transactions for users"
       }
     ],
     "G2": [
       {
-        "injector": "RazorpayInjector",
+        "injector": "RazorpayOrganizationTransactionsInjector",
         "description": "Razorpay payment provider transactions for organization admins"
       }
     ],
@@ -31,6 +31,12 @@
         "component": "DonationForm"
       }
     ],
+    "RU2": [
+      {
+        "path": "/user/razorpay/my-transactions",
+        "component": "UserTransactions"
+      }
+    ],
     "DA1": [
       {
         "label": "Razorpay Configuration",
@@ -44,6 +50,14 @@
         "label": "Make Donation",
         "icon": "/src/plugin/available/razorpay/assets/razorpay.png",
         "path": "/user/razorpay/:orgId/donate",
+        "order": 1
+      }
+    ],
+    "DU2": [
+      {
+        "label": "My Transactions",
+        "icon": "/src/plugin/available/razorpay/assets/razorpay.png",
+        "path": "/user/razorpay/my-transactions",
         "order": 1
       }
     ]
