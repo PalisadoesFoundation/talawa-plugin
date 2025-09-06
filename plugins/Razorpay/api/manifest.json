@@ -61,6 +61,14 @@
         "handler": "onPaymentFailed",
         "description": "Handle payment failure events"
       }
+    ],
+    "webhooks": [
+      {
+        "path": "/",
+        "handler": "handleRazorpayWebhook",
+        "method": "POST",
+        "description": "Handle Razorpay webhook events for payment notifications"
+      }
     ]
   }
 }
