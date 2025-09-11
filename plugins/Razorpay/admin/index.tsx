@@ -3,19 +3,21 @@
  *
  * This plugin integrates Razorpay payment gateway for donations and payments within organizations.
  * It provides:
+ * - G1: User transaction history injector (injected into user transactions page)
+ * - G2: Organization transaction management injector (injected into admin transactions page)
  * - RA1: Global admin configuration for Razorpay keys and settings
- * - RA2: Organization admin view of transaction summaries
  * - RU1: User donation form for making payments to organizations
- * - RU2: User view of their transaction history across organizations
+ * - RU2: Global user transactions page showing all transactions across organizations
  */
 
 import { IPluginLifecycle } from '../../types';
 
 // Import all components
 import RazorpayConfiguration from './pages/RazorpayConfiguration';
-import OrganizationTransactions from './pages/OrganizationTransactions';
 import DonationForm from './pages/DonationForm';
 import UserTransactions from './pages/UserTransactions';
+import RazorpayUserTransactionsInjector from './injector/RazorpayUserTransactionsInjector';
+import RazorpayOrganizationTransactionsInjector from './injector/RazorpayOrganizationTransactionsInjector';
 
 // Plugin lifecycle implementation
 const RazorpayLifecycle: IPluginLifecycle = {
@@ -117,7 +119,8 @@ export default RazorpayLifecycle;
 // Export all components
 export {
   RazorpayConfiguration,
-  OrganizationTransactions,
   DonationForm,
   UserTransactions,
+  RazorpayUserTransactionsInjector,
+  RazorpayOrganizationTransactionsInjector,
 }; 

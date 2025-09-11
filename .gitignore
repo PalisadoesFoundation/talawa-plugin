@@ -840,5 +840,8 @@ package-lock.json
 yarn.lock
 /test/graphql/types/gql.tada.d.ts
 
+# Plugin zip outputs
+plugin-zips/
+
 # FNM
 .node-version

@@ -13,6 +13,7 @@ import {
   RazorpayConfigRef,
   RazorpayOrderRef,
   RazorpayPaymentResultRef,
+  RazorpayTestResultRef,
 } from "./types";
 import {
   RazorpayConfigInput,
@@ -535,6 +536,58 @@ export async function verifyPaymentResolver(
   }
 }
 
+// Test Razorpay connection resolver
+export async function testRazorpayConnectionResolver(
+  _parent: unknown,
+  _args: Record<string, unknown>,
+  ctx: GraphQLContext
+) {
+  if (!ctx.currentClient.isAuthenticated) {
+    throw new TalawaGraphQLError({
+      extensions: { code: "unauthenticated" },
+    });
+  }
+
+  try {
+    // Get current configuration
+    const config = await ctx.drizzleClient.select().from(configTable).limit(1);
+
+    if (config.length === 0 || !config[0]) {
+      return {
+        success: false,
+        message: "No Razorpay configuration found. Please configure your API keys first.",
+      };
+    }
+
+    const configItem = config[0];
+    
+    if (!configItem.keyId || !configItem.keySecret) {
+      return {
+        success: false,
+        message: "API keys are not configured. Please enter your Key ID and Key Secret.",
+      };
+    }
+
+    // Import Razorpay service to test connection
+    const { createRazorpayService } = await import("../services/razorpayService");
+    const razorpayService = createRazorpayService(ctx);
+
+    // Test the connection by making a simple API call
+    const testResult = await razorpayService.testConnection();
+
+    return {
+      success: testResult.success,
+      message: testResult.message,
+    };
+  } catch (error) {
+    ctx.log?.error("Error testing Razorpay connection:", error);
+    return {
+      success: false,
+      message: "Connection test failed. Please check your API keys and try again.",
+    };
+  }
+}
+
 // Register all Razorpay mutations with the builder
 export function registerRazorpayMutations(
   builderInstance: typeof builder
@@ -600,6 +653,15 @@ export function registerRazorpayMutations(
       },
       description: "Verify payment signature and update transaction status",
       resolve: verifyPaymentResolver,
+    })
+  );
+
+  // Test Razorpay connection
+  builderInstance.mutationField("testRazorpayConnection", (t) =>
+    t.field({
+      type: RazorpayTestResultRef,
+      description: "Test Razorpay API connection with current credentials",
+      resolve: testRazorpayConnectionResolver,
     })
   );
 }

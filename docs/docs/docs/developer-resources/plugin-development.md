@@ -704,5 +704,6 @@ Navigate to your plugin in the admin panel:
 3. **Add Documentation**: Document your plugin's features and usage
 4. **Optimize Performance**: Implement caching and optimization strategies
 5. **Add Configuration**: Make your plugin configurable through settings
+6. **Package Your Plugin**: Use the [Plugin Scripts](./scripts.md) to create distributable zip files
 
 This guide provides a solid foundation for plugin development. Refer to the Plugin Map plugin for a complete working example of all these concepts in action. 

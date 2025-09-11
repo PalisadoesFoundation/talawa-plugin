@@ -41,29 +41,6 @@ export async function onActivate(context: IPluginContext): Promise<void> {
     context.logger.info("Plugin Map Plugin activated");
   }
 
-  // Register GraphQL schema extensions
-  if (context.graphql) {
-    try {
-      const { registerPluginMapQueries } = await import("./graphql/queries");
-      const { registerPluginMapMutations } = await import(
-        "./graphql/mutations"
-      );
-
-      // Register queries and mutations with the GraphQL builder
-      registerPluginMapQueries(context.graphql as any);
-      registerPluginMapMutations(context.graphql as any);
-
-      if (context.logger?.info) {
-        context.logger.info(
-          "GraphQL schema extensions registered for Plugin Map Plugin"
-        );
-      }
-    } catch (error) {
-      if (context.logger?.error) {
-        context.logger.error("Failed to register GraphQL extensions:", error);
-      }
-    }
-  }
 }
 
 export async function onDeactivate(context: IPluginContext): Promise<void> {

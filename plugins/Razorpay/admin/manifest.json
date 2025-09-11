@@ -7,16 +7,22 @@
   "main": "index.tsx",
   "icon": "/src/plugin/available/razorpay/assets/razorpay.png",
   "extensionPoints": {
+    "G1": [
+      {
+        "injector": "RazorpayUserTransactionsInjector",
+        "description": "Razorpay payment provider transactions for users"
+      }
+    ],
+    "G2": [
+      {
+        "injector": "RazorpayOrganizationTransactionsInjector",
+        "description": "Razorpay payment provider transactions for organization admins"
+      }
+    ],
     "RA1": [
       {
         "path": "/admin/razorpay/configuration",
         "component": "RazorpayConfiguration"
-      }
-    ],
-    "RA2": [
-      {
-        "path": "/admin/razorpay/:orgId/transactions",
-        "component": "OrganizationTransactions"
       }
     ],
     "RU1": [
@@ -36,14 +42,6 @@
         "label": "Razorpay Configuration",
         "icon": "/src/plugin/available/razorpay/assets/razorpay.png",
         "path": "/admin/razorpay/configuration",
-        "order": 1
-      }
-    ],
-    "DA2": [
-      {
-        "label": "Payment Transactions",
-        "icon": "/src/plugin/available/razorpay/assets/razorpay.png",
-        "path": "/admin/razorpay/:orgId/transactions",
         "order": 1
       }
     ],

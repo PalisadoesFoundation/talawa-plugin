@@ -247,6 +247,106 @@ export class RazorpayService {
       throw error;
     }
   }
+
+  async testConnection(): Promise<{ success: boolean; message: string }> {
+    try {
+      // Get current configuration
+      const config = await this.context.drizzleClient.select().from(configTable).limit(1);
+      
+      if (config.length === 0 || !config[0]) {
+        return {
+          success: false,
+          message: "No Razorpay configuration found. Please configure your API keys first.",
+        };
+      }
+
+      const configItem = config[0];
+      
+      if (!configItem.keyId || !configItem.keySecret) {
+        return {
+          success: false,
+          message: "API keys are not configured. Please enter your Key ID and Key Secret.",
+        };
+      }
+
+      // Validate key format
+      if (!configItem.keyId.startsWith('rzp_')) {
+        return {
+          success: false,
+          message: "Invalid Key ID format. Razorpay Key ID should start with 'rzp_'.",
+        };
+      }
+
+      this.context.log?.info(`Testing Razorpay connection with Key ID: ${configItem.keyId.substring(0, 8)}...`);
+
+      // Test connection by making a simple API call to Razorpay
+      const response = await fetch("https://api.razorpay.com/v1/payments?count=1", {
+        method: "GET",
+        headers: {
+          "Authorization": `Basic ${Buffer.from(`${configItem.keyId}:${configItem.keySecret}`).toString("base64")}`,
+          "Content-Type": "application/json",
+          "User-Agent": "Talawa-Razorpay-Plugin/1.0.0",
+        },
+      });
+
+      this.context.log?.info(`Razorpay API response status: ${response.status}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        this.context.log?.info("Razorpay API test successful");
+        return {
+          success: true,
+          message: "Connection successful! Your Razorpay credentials are valid.",
+        };
+      } else if (response.status === 401) {
+        return {
+          success: false,
+          message: "Invalid API credentials. Please check your Key ID and Key Secret. Make sure you're using the correct test/live keys.",
+        };
+      } else if (response.status === 403) {
+        return {
+          success: false,
+          message: "Access forbidden. Please check if your Razorpay account is active and has the necessary permissions.",
+        };
+      } else if (response.status === 429) {
+        return {
+          success: false,
+          message: "Rate limit exceeded. Please try again in a few minutes.",
+        };
+      } else if (response.status >= 500) {
+        return {
+          success: false,
+          message: "Razorpay server error. Please try again later.",
+        };
+      } else {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        this.context.log?.error(`Razorpay API error: ${response.status} - ${errorText}`);
+        return {
+          success: false,
+          message: `Connection failed with status ${response.status}. ${errorText}`,
+        };
+      }
+    } catch (error) {
+      this.context.log?.error("Error testing Razorpay connection:", error);
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        return {
+          success: false,
+          message: "Network error. Please check your internet connection and try again.",
+        };
+      } else if (error instanceof Error) {
+        return {
+          success: false,
+          message: `Connection test failed: ${error.message}`,
+        };
+      } else {
+        return {
+          success: false,
+          message: "Connection test failed. Please check your internet connection and try again.",
+        };
+      }
+    }
+  }
 }
 
 export function createRazorpayService(
