@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import Loader from '../../../../components/Loader/Loader';
+import useLocalStorage from 'utils/useLocalstorage';
 
 // GraphQL operations
 const GET_ORGANIZATION_INFO = gql`
@@ -111,6 +112,8 @@ interface PaymentResult {
 const DonationForm: React.FC = () => {
   const { orgId } = useParams<{ orgId: string }>();
   const navigate = useNavigate();
+  const { getItem } = useLocalStorage();
+  const userId = getItem('id') as string | null;
 
   // Load Razorpay script on component mount
   useEffect(() => {
@@ -216,6 +219,7 @@ const DonationForm: React.FC = () => {
         variables: {
           input: {
             organizationId: orgId,
+            userId: userId,
             amount: parseFloat(formData.amount) * 100, // Convert to paise
             currency: formData.currency,
             description:

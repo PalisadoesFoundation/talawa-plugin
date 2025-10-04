@@ -183,33 +183,117 @@ export class RazorpayService {
     }
   }
 
+  async verifyWebhookSignature(
+    webhookBody: string,
+    signature: string
+  ): Promise<boolean> {
+    try {
+      const config = await this.context.drizzleClient
+        .select()
+        .from(configTable)
+        .limit(1);
+
+      if (config.length === 0 || !config[0]?.webhookSecret) {
+        throw new Error("Webhook secret not configured");
+      }
+
+      const expectedSignature = crypto
+        .createHmac("sha256", config[0]?.webhookSecret)
+        .update(webhookBody)
+        .digest("hex");
+
+      const isValid = crypto.timingSafeEqual(
+        Buffer.from(expectedSignature, "hex"),
+        Buffer.from(signature, "hex")
+      );
+
+      this.context.log?.info(`Webhook signature verification result: ${isValid}`);
+      return isValid;
+    } catch (error) {
+      this.context.log?.error("Failed to verify webhook signature:", error);
+      throw error;
+    }
+  }
+
   async processWebhook(webhookData: RazorpayWebhookData): Promise<void> {
     try {
       const { payment } = webhookData.payload;
       const paymentEntity = payment.entity;
 
-      // Update transaction in database
-      await this.context.drizzleClient
-        .update(transactionsTable)
-        .set({
-          status: paymentEntity.status,
-          method: paymentEntity.method,
-          bank: paymentEntity.bank || undefined,
-          wallet: paymentEntity.wallet || undefined,
-          vpa: paymentEntity.vpa || undefined,
-          email: paymentEntity.email,
-          contact: paymentEntity.contact,
-          fee: paymentEntity.fee,
-          tax: paymentEntity.tax,
-          errorCode: paymentEntity.error_code || undefined,
-          errorDescription: paymentEntity.error_description || undefined,
-          refundStatus: paymentEntity.refund_status || undefined,
-          capturedAt: paymentEntity.captured
-            ? new Date(paymentEntity.created_at * 1000)
-            : undefined,
-          updatedAt: new Date(),
-        })
-        .where(eq(transactionsTable.paymentId, paymentEntity.id));
+      // Get order details to get userId and other info
+      const orderDetails = await this.context.drizzleClient
+        .select()
+        .from(ordersTable)
+        .where(eq(ordersTable.razorpayOrderId, paymentEntity.order_id))
+        .limit(1);
+
+      if (orderDetails.length === 0) {
+        this.context.log?.error(`Order not found for payment: ${paymentEntity.id}`);
+        throw new Error(`Order not found for payment: ${paymentEntity.id}`);
+      }
+
+      const order = orderDetails[0];
+
+      // Check if transaction already exists
+      const existingTransaction = await this.context.drizzleClient
+        .select()
+        .from(transactionsTable)
+        .where(eq(transactionsTable.paymentId, paymentEntity.id))
+        .limit(1);
+
+      if (existingTransaction.length === 0) {
+        // Create new transaction with userId from order
+        await this.context.drizzleClient
+          .insert(transactionsTable)
+          .values({
+            paymentId: paymentEntity.id,
+            orderId: order.id,
+            organizationId: order.organizationId,
+            userId: order.userId, // Use userId from order
+            amount: order.amount,
+            currency: order.currency,
+            status: paymentEntity.status,
+            method: paymentEntity.method,
+            bank: paymentEntity.bank || undefined,
+            wallet: paymentEntity.wallet || undefined,
+            vpa: paymentEntity.vpa || undefined,
+            email: paymentEntity.email,
+            contact: paymentEntity.contact,
+            fee: paymentEntity.fee,
+            tax: paymentEntity.tax,
+            errorCode: paymentEntity.error_code || undefined,
+            errorDescription: paymentEntity.error_description || undefined,
+            refundStatus: paymentEntity.refund_status || undefined,
+            capturedAt: paymentEntity.captured
+              ? new Date(paymentEntity.created_at * 1000)
+              : undefined,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+      } else {
+        // Update existing transaction
+        await this.context.drizzleClient
+          .update(transactionsTable)
+          .set({
+            status: paymentEntity.status,
+            method: paymentEntity.method,
+            bank: paymentEntity.bank || undefined,
+            wallet: paymentEntity.wallet || undefined,
+            vpa: paymentEntity.vpa || undefined,
+            email: paymentEntity.email,
+            contact: paymentEntity.contact,
+            fee: paymentEntity.fee,
+            tax: paymentEntity.tax,
+            errorCode: paymentEntity.error_code || undefined,
+            errorDescription: paymentEntity.error_description || undefined,
+            refundStatus: paymentEntity.refund_status || undefined,
+            capturedAt: paymentEntity.captured
+              ? new Date(paymentEntity.created_at * 1000)
+              : undefined,
+            updatedAt: new Date(),
+          })
+          .where(eq(transactionsTable.paymentId, paymentEntity.id));
+      }
 
       // Update order status if payment is captured
       if (paymentEntity.captured) {
