@@ -18,8 +18,8 @@ const { Title, Text } = Typography;
 
 // GraphQL query for fetching user transactions
 const GET_USER_TRANSACTIONS = gql`
-  query GetUserTransactions($userId: String!, $limit: Int) {
-    razorpay_getUserTransactions(userId: $userId, limit: $limit) {
+  query GetUserTransactions($userId: String!, $orgId: String!, $limit: Int) {
+    razorpay_getUserTransactions(userId: $userId, orgId: $orgId, limit: $limit) {
       id
       paymentId
       amount
@@ -82,6 +82,7 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
   } = useQuery(GET_USER_TRANSACTIONS, {
     variables: {
       userId: userId || '',
+      orgId: orgId || '',
       limit: 10, // Show recent 10 transactions in injector
     },
     skip: !userId || !orgId,
