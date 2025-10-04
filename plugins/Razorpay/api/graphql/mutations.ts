@@ -418,6 +418,11 @@ export async function verifyPaymentResolver(
   }
 
   try {
+    ctx.log?.info("Verifying payment:", {
+      razorpayPaymentId: parsedArgs.input.razorpayPaymentId,
+      razorpayOrderId: parsedArgs.input.razorpayOrderId,
+    });
+
     // Get Razorpay configuration
     const config = await ctx.drizzleClient.select().from(configTable).limit(1);
 
@@ -437,15 +442,26 @@ export async function verifyPaymentResolver(
       });
     }
 
-    // Verify signature
+    // Verify signature using keySecret (not webhookSecret)
     const expectedSignature = crypto
-      .createHmac("sha256", configItem.webhookSecret || "")
+      .createHmac("sha256", configItem.keySecret || "")
       .update(
         `${parsedArgs.input.razorpayOrderId}|${parsedArgs.input.razorpayPaymentId}`
       )
       .digest("hex");
 
+    ctx.log?.info("Signature verification:", {
+      expected: expectedSignature,
+      received: parsedArgs.input.razorpaySignature,
+      match: expectedSignature === parsedArgs.input.razorpaySignature,
+      keySecretLength: configItem.keySecret?.length || 0,
+      webhookSecretLength: configItem.webhookSecret?.length || 0,
+      orderId: parsedArgs.input.razorpayOrderId,
+      paymentId: parsedArgs.input.razorpayPaymentId,
+    });
+
     if (expectedSignature !== parsedArgs.input.razorpaySignature) {
+      ctx.log?.error("Signature verification failed");
       throw new TalawaGraphQLError({
         extensions: {
           code: "unauthorized_action_on_arguments_associated_resources",
@@ -470,10 +486,7 @@ export async function verifyPaymentResolver(
       });
     }
 
-    // Parse payment data
-    const paymentData = JSON.parse(parsedArgs.input.paymentData);
-
-    // Create or update transaction
+    // Check if transaction already exists (created by webhook)
     const existingTransaction = await ctx.drizzleClient
       .select()
       .from(transactionsTable)
@@ -489,40 +502,21 @@ export async function verifyPaymentResolver(
       });
     }
 
-    const transactionData = {
-      paymentId: parsedArgs.input.razorpayPaymentId,
-      orderId: orderItem.id,
-      organizationId: orderItem.organizationId,
-      userId: orderItem.userId,
-      amount: orderItem.amount,
-      currency: orderItem.currency,
-      status: "captured",
-      method: paymentData.method,
-      bank: paymentData.bank,
-      wallet: paymentData.wallet,
-      cardId: paymentData.card_id,
-      vpa: paymentData.vpa,
-      email: paymentData.email,
-      contact: paymentData.contact,
-      fee: paymentData.fee,
-      tax: paymentData.tax,
-      capturedAt: new Date(),
-    };
-
+    // If transaction doesn't exist, create a basic one
+    // (The webhook should have created it, but just in case)
     if (existingTransaction.length === 0) {
-      // Create new transaction
+      const transactionData = {
+        paymentId: parsedArgs.input.razorpayPaymentId,
+        orderId: orderItem.id,
+        organizationId: orderItem.organizationId,
+        userId: orderItem.userId,
+        amount: orderItem.amount,
+        currency: orderItem.currency,
+        status: "captured",
+        capturedAt: new Date(),
+      };
+
       await ctx.drizzleClient.insert(transactionsTable).values(transactionData);
-    } else {
-      // Update existing transaction
-      await ctx.drizzleClient
-        .update(transactionsTable)
-        .set({
-          ...transactionData,
-          updatedAt: new Date(),
-        })
-        .where(
-          eq(transactionsTable.paymentId, parsedArgs.input.razorpayPaymentId)
-        );
     }
 
     // Update order status
