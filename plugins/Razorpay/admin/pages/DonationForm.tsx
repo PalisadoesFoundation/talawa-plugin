@@ -7,19 +7,31 @@ import Loader from '../../../../components/Loader/Loader';
 
 // GraphQL operations
 const GET_ORGANIZATION_INFO = gql`
-  query GetOrganizationInfo($orgId: ID!) {
-    getOrganizationById(id: $orgId) {
+  query GetOrganizationInfo($orgId: String!) {
+    organization(input: { id: $orgId }) {
       id
       name
       description
-      image
+      avatarURL
+    }
+  }
+`;
+
+const GET_RAZORPAY_CONFIG = gql`
+  query GetRazorpayConfig {
+    razorpay_getRazorpayConfig {
+      keyId
+      isEnabled
+      testMode
+      currency
+      description
     }
   }
 `;
 
 const CREATE_PAYMENT_ORDER = gql`
   mutation CreatePaymentOrder($input: RazorpayOrderInput!) {
-    razorpay_createPaymentOrder(input: $input) {
+    createPaymentOrder(input: $input) {
       id
       razorpayOrderId
       organizationId
@@ -38,15 +50,11 @@ const CREATE_PAYMENT_ORDER = gql`
   }
 `;
 
-const INITIATE_PAYMENT = gql`
-  mutation InitiatePayment($input: RazorpayPaymentInput!) {
-    razorpay_initiatePayment(input: $input) {
+const VERIFY_PAYMENT = gql`
+  mutation VerifyPayment($input: RazorpayVerificationInput!) {
+    verifyPayment(input: $input) {
       success
       message
-      orderId
-      paymentId
-      amount
-      currency
       transaction {
         paymentId
         status
@@ -61,7 +69,7 @@ interface OrganizationInfo {
   id: string;
   name: string;
   description: string;
-  image: string;
+  avatarURL: string;
 }
 
 interface PaymentOrder {
@@ -81,13 +89,17 @@ interface PaymentOrder {
   updatedAt: Date;
 }
 
+interface RazorpayConfig {
+  keyId: string;
+  isEnabled: boolean;
+  testMode: boolean;
+  currency: string;
+  description: string;
+}
+
 interface PaymentResult {
   success: boolean;
   message: string;
-  orderId?: string;
-  paymentId?: string;
-  amount?: number;
-  currency?: string;
   transaction?: {
     paymentId?: string;
     status: string;
@@ -125,8 +137,14 @@ const DonationForm: React.FC = () => {
     skip: !orgId,
   });
 
+  const {
+    data: razorpayConfig,
+    loading: configLoading,
+    error: configError,
+  } = useQuery(GET_RAZORPAY_CONFIG);
+
   const [createOrder] = useMutation(CREATE_PAYMENT_ORDER);
-  const [initiatePayment] = useMutation(INITIATE_PAYMENT);
+  const [verifyPayment] = useMutation(VERIFY_PAYMENT);
 
   useEffect(() => {
     // Load user data if available
@@ -168,6 +186,12 @@ const DonationForm: React.FC = () => {
 
     if (!validateForm()) return;
 
+    // Check if Razorpay is configured
+    if (!razorpayConfig?.getRazorpayConfig?.keyId || !razorpayConfig?.getRazorpayConfig?.isEnabled) {
+      toast.error('Razorpay is not configured or enabled. Please contact the administrator.');
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
@@ -180,7 +204,7 @@ const DonationForm: React.FC = () => {
             currency: formData.currency,
             description:
               formData.description ||
-              `Donation to ${orgData?.getOrganizationById?.name}`,
+              `Donation to ${orgData?.organization?.name}`,
             donorName: formData.donorName,
             donorEmail: formData.donorEmail,
             donorPhone: formData.donorPhone,
@@ -189,47 +213,62 @@ const DonationForm: React.FC = () => {
         },
       });
 
-      if (!orderData?.createPaymentOrder?.success) {
-        throw new Error(
-          orderData?.createPaymentOrder?.message ||
-            'Failed to create payment order',
-        );
+      if (!orderData?.createPaymentOrder) {
+        throw new Error('Failed to create payment order');
       }
 
-      // Step 2: Initiate payment
-      const { data: paymentData } = await initiatePayment({
-        variables: {
-          input: {
-            orderId: orderData.createPaymentOrder.order.id,
-            organizationId: orgId,
-          },
-        },
-      });
+      const order = orderData.createPaymentOrder;
 
-      if (!paymentData?.initiatePayment?.success) {
-        throw new Error(
-          paymentData?.initiatePayment?.message || 'Failed to initiate payment',
-        );
-      }
-
-      // Step 3: Open Razorpay payment modal
-      const paymentInfo = paymentData.initiatePayment.paymentData;
-
+      // Step 2: Open Razorpay payment modal
       const options = {
-        key: paymentInfo.key,
-        amount: paymentInfo.amount,
-        currency: paymentInfo.currency,
-        name: paymentInfo.name,
-        description: paymentInfo.description,
-        order_id: paymentInfo.orderId,
-        prefill: paymentInfo.prefill,
-        notes: paymentInfo.notes,
-        theme: paymentInfo.theme,
-        handler: function (response: any) {
-          // Payment successful
-          console.log('Payment successful:', response);
-          setCurrentStep('success');
-          toast.success('Payment successful! Thank you for your donation.');
+        key: razorpayConfig.getRazorpayConfig.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        name: orgData?.organization?.name || 'Organization',
+        description: order.description || `Donation to ${orgData?.organization?.name}`,
+        order_id: order.razorpayOrderId,
+        prefill: {
+          name: formData.donorName,
+          email: formData.donorEmail,
+          contact: formData.donorPhone,
+        },
+        notes: {
+          organizationId: orgId,
+          donorName: formData.donorName,
+          anonymous: formData.anonymous.toString(),
+        },
+        theme: {
+          color: '#28a745',
+        },
+        handler: async function (response: any) {
+          // Payment successful - verify payment
+          try {
+            const { data: verificationData } = await verifyPayment({
+              variables: {
+                input: {
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpaySignature: response.razorpay_signature,
+                  paymentData: JSON.stringify({
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                  }),
+                },
+              },
+            });
+
+            if (verificationData?.verifyPayment?.success) {
+              setCurrentStep('success');
+              toast.success('Payment successful! Thank you for your donation.');
+            } else {
+              throw new Error(verificationData?.verifyPayment?.message || 'Payment verification failed');
+            }
+          } catch (error) {
+            console.error('Payment verification error:', error);
+            toast.error('Payment verification failed. Please contact support.');
+            setIsProcessing(false);
+          }
         },
         modal: {
           ondismiss: function () {
@@ -267,7 +306,7 @@ const DonationForm: React.FC = () => {
     }).format(amount);
   };
 
-  if (orgLoading) {
+  if (orgLoading || configLoading) {
     return <Loader />;
   }
 
@@ -279,7 +318,25 @@ const DonationForm: React.FC = () => {
     );
   }
 
-  const organization = orgData?.getOrganizationById;
+  if (configError) {
+    return (
+      <Alert variant="danger">
+        Failed to load Razorpay configuration: {configError.message}
+      </Alert>
+    );
+  }
+
+  // Check if Razorpay is configured
+  if (!razorpayConfig?.getRazorpayConfig?.keyId || !razorpayConfig?.getRazorpayConfig?.isEnabled) {
+    return (
+      <Alert variant="warning">
+        <h4>Payment System Not Available</h4>
+        <p>Razorpay payment gateway is not configured or enabled. Please contact the administrator to set up payments.</p>
+      </Alert>
+    );
+  }
+
+  const organization = orgData?.organization;
 
   if (currentStep === 'success') {
     return (
@@ -328,9 +385,9 @@ const DonationForm: React.FC = () => {
           <Card className="mb-6">
             <Card.Body className="p-6">
               <div className="d-flex align-items-center">
-                {organization.image && (
+                {organization.avatarURL && (
                   <img
-                    src={organization.image}
+                    src={organization.avatarURL}
                     alt={organization.name}
                     className="w-16 h-16 rounded-circle me-3"
                     style={{ objectFit: 'cover' }}

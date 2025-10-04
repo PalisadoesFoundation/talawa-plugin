@@ -6,78 +6,89 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useQuery } from '@apollo/client';
+import { gql } from 'graphql-tag';
 import { Card, Table, Tag, Button, Space, Typography, message, Spin } from 'antd';
 import { CreditCardOutlined, EyeOutlined, DownloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import { useParams } from 'react-router-dom';
+import useLocalStorage from 'utils/useLocalstorage';
 
 const { Title, Text } = Typography;
 
+// GraphQL query for fetching user transactions
+const GET_USER_TRANSACTIONS = gql`
+  query GetUserTransactions($userId: String!, $limit: Int) {
+    razorpay_getUserTransactions(userId: $userId, limit: $limit) {
+      id
+      paymentId
+      amount
+      currency
+      status
+      donorName
+      donorEmail
+      method
+      bank
+      wallet
+      vpa
+      email
+      contact
+      fee
+      tax
+      errorCode
+      errorDescription
+      refundStatus
+      capturedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 interface RazorpayUserTransaction {
   id: string;
-  amount: number;
+  paymentId?: string;
+  amount?: number;
   currency: string;
-  status: 'captured' | 'authorized' | 'failed' | 'refunded';
-  description: string;
+  status: string;
+  donorName?: string;
+  donorEmail?: string;
+  method?: string;
+  bank?: string;
+  wallet?: string;
+  vpa?: string;
+  email?: string;
+  contact?: string;
+  fee?: number;
+  tax?: number;
+  errorCode?: string;
+  errorDescription?: string;
+  refundStatus?: string;
+  capturedAt?: string;
   createdAt: string;
-  organizationName: string;
-  paymentMethod: string;
+  updatedAt: string;
 }
 
 const RazorpayUserTransactionsInjector: React.FC = () => {
-  const [transactions, setTransactions] = useState<RazorpayUserTransaction[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { orgId } = useParams();
+  const { getItem } = useLocalStorage();
+  const userId = getItem('id') as string | null;
 
-  useEffect(() => {
-    // Simulate loading Razorpay user transactions
-    // In a real implementation, this would fetch from the API
-    const mockTransactions: RazorpayUserTransaction[] = [
-      {
-        id: 'txn_123456789',
-        amount: 1000,
-        currency: 'INR',
-        status: 'captured',
-        description: 'Donation to Organization A',
-        createdAt: '2024-01-15T10:30:00Z',
-        organizationName: 'Organization A',
-        paymentMethod: 'Card'
-      },
-      {
-        id: 'txn_987654321',
-        amount: 500,
-        currency: 'INR',
-        status: 'captured',
-        description: 'Event Registration Fee',
-        createdAt: '2024-01-14T15:45:00Z',
-        organizationName: 'Organization B',
-        paymentMethod: 'UPI'
-      },
-      {
-        id: 'txn_456789123',
-        amount: 2000,
-        currency: 'INR',
-        status: 'refunded',
-        description: 'Donation to Organization C',
-        createdAt: '2024-01-13T09:20:00Z',
-        organizationName: 'Organization C',
-        paymentMethod: 'Net Banking'
-      },
-      {
-        id: 'txn_789123456',
-        amount: 750,
-        currency: 'INR',
-        status: 'captured',
-        description: 'Membership Fee',
-        createdAt: '2024-01-12T14:15:00Z',
-        organizationName: 'Organization A',
-        paymentMethod: 'Card'
-      }
-    ];
+  // GraphQL query
+  const {
+    data: transactionsData,
+    loading: transactionsLoading,
+    error: transactionsError,
+  } = useQuery(GET_USER_TRANSACTIONS, {
+    variables: {
+      userId: userId || '',
+      limit: 10, // Show recent 10 transactions in injector
+    },
+    skip: !userId || !orgId,
+    fetchPolicy: 'network-only',
+  });
 
-    setTimeout(() => {
-      setTransactions(mockTransactions);
-      setLoading(false);
-    }, 1000);
-  }, []);
+  const transactions = transactionsData?.razorpay_getUserTransactions || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -121,11 +132,11 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
   const columns: ColumnsType<RazorpayUserTransaction> = [
     {
       title: 'Transaction ID',
-      dataIndex: 'id',
-      key: 'id',
-      render: (id: string) => (
+      dataIndex: 'paymentId',
+      key: 'paymentId',
+      render: (paymentId: string) => (
         <Text code style={{ fontSize: '12px' }}>
-          {id}
+          {paymentId || 'N/A'}
         </Text>
       ),
     },
@@ -135,7 +146,7 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
       key: 'amount',
       render: (amount: number, record: RazorpayUserTransaction) => (
         <Text strong>
-          {formatAmount(amount, record.currency)}
+          {amount ? formatAmount(amount, record.currency) : 'N/A'}
         </Text>
       ),
     },
@@ -150,20 +161,10 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
       ),
     },
     {
-      title: 'Organization',
-      dataIndex: 'organizationName',
-      key: 'organizationName',
-    },
-    {
-      title: 'Description',
-      dataIndex: 'description',
-      key: 'description',
-      ellipsis: true,
-    },
-    {
       title: 'Payment Method',
-      dataIndex: 'paymentMethod',
-      key: 'paymentMethod',
+      dataIndex: 'method',
+      key: 'method',
+      render: (method: string) => method || 'N/A',
     },
     {
       title: 'Date',
@@ -197,7 +198,7 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
     },
   ];
 
-  if (loading) {
+  if (transactionsLoading) {
     return (
       <Card>
         <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -205,6 +206,18 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
           <div style={{ marginTop: '16px' }}>
             <Text>Loading Razorpay transactions...</Text>
           </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (transactionsError) {
+    return (
+      <Card>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <Text type="danger">
+            Error loading transactions: {transactionsError.message}
+          </Text>
         </div>
       </Card>
     );

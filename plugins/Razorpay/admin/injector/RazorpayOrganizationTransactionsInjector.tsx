@@ -6,127 +6,123 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useQuery } from '@apollo/client';
+import { gql } from 'graphql-tag';
 import { Card, Table, Tag, Button, Space, Typography, message, Spin, Statistic, Row, Col } from 'antd';
 import { CreditCardOutlined, EyeOutlined, DownloadOutlined, DollarOutlined, UserOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import { useParams } from 'react-router-dom';
+import useLocalStorage from 'utils/useLocalstorage';
 
 const { Title, Text } = Typography;
 
+// GraphQL queries for fetching organization transactions and stats
+const GET_ORG_TRANSACTIONS = gql`
+  query GetOrganizationTransactions($orgId: String!, $limit: Int) {
+    razorpay_getOrganizationTransactions(orgId: $orgId, limit: $limit) {
+      id
+      paymentId
+      amount
+      currency
+      status
+      donorName
+      donorEmail
+      method
+      bank
+      wallet
+      vpa
+      email
+      contact
+      fee
+      tax
+      errorCode
+      errorDescription
+      refundStatus
+      capturedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+const GET_ORG_TRANSACTION_STATS = gql`
+  query GetOrganizationTransactionStats($orgId: String!) {
+    razorpay_getOrganizationTransactionStats(orgId: $orgId) {
+      totalTransactions
+      totalAmount
+      currency
+      successCount
+      failedCount
+      pendingCount
+    }
+  }
+`;
+
 interface RazorpayOrganizationTransaction {
   id: string;
-  amount: number;
+  paymentId?: string;
+  amount?: number;
   currency: string;
-  status: 'captured' | 'authorized' | 'failed' | 'refunded';
-  description: string;
+  status: string;
+  donorName?: string;
+  donorEmail?: string;
+  method?: string;
+  bank?: string;
+  wallet?: string;
+  vpa?: string;
+  email?: string;
+  contact?: string;
+  fee?: number;
+  tax?: number;
+  errorCode?: string;
+  errorDescription?: string;
+  refundStatus?: string;
+  capturedAt?: string;
   createdAt: string;
-  userEmail: string;
-  userName: string;
-  paymentMethod: string;
-  fees: number;
+  updatedAt: string;
+}
+
+interface TransactionStats {
+  totalTransactions: number;
+  totalAmount: number;
+  currency: string;
+  successCount: number;
+  failedCount: number;
+  pendingCount: number;
 }
 
 const RazorpayOrganizationTransactionsInjector: React.FC = () => {
-  const [transactions, setTransactions] = useState<RazorpayOrganizationTransaction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalAmount: 0,
-    totalTransactions: 0,
-    successRate: 0,
-    totalFees: 0
+  const { orgId } = useParams();
+  const { getItem } = useLocalStorage();
+
+  // GraphQL queries
+  const {
+    data: transactionsData,
+    loading: transactionsLoading,
+    error: transactionsError,
+  } = useQuery(GET_ORG_TRANSACTIONS, {
+    variables: {
+      orgId: orgId || '',
+      limit: 10, // Show recent 10 transactions in injector
+    },
+    skip: !orgId,
+    fetchPolicy: 'network-only',
   });
 
-  useEffect(() => {
-    // Simulate loading Razorpay organization transactions
-    // In a real implementation, this would fetch from the API
-    const mockTransactions: RazorpayOrganizationTransaction[] = [
-      {
-        id: 'txn_123456789',
-        amount: 1000,
-        currency: 'INR',
-        status: 'captured',
-        description: 'Donation from John Doe',
-        createdAt: '2024-01-15T10:30:00Z',
-        userEmail: 'john.doe@example.com',
-        userName: 'John Doe',
-        paymentMethod: 'Card',
-        fees: 20
-      },
-      {
-        id: 'txn_987654321',
-        amount: 500,
-        currency: 'INR',
-        status: 'captured',
-        description: 'Event Registration Fee',
-        createdAt: '2024-01-14T15:45:00Z',
-        userEmail: 'jane.smith@example.com',
-        userName: 'Jane Smith',
-        paymentMethod: 'UPI',
-        fees: 10
-      },
-      {
-        id: 'txn_456789123',
-        amount: 2000,
-        currency: 'INR',
-        status: 'refunded',
-        description: 'Donation from Bob Wilson',
-        createdAt: '2024-01-13T09:20:00Z',
-        userEmail: 'bob.wilson@example.com',
-        userName: 'Bob Wilson',
-        paymentMethod: 'Net Banking',
-        fees: 40
-      },
-      {
-        id: 'txn_789123456',
-        amount: 750,
-        currency: 'INR',
-        status: 'captured',
-        description: 'Membership Fee',
-        createdAt: '2024-01-12T14:15:00Z',
-        userEmail: 'alice.brown@example.com',
-        userName: 'Alice Brown',
-        paymentMethod: 'Card',
-        fees: 15
-      },
-      {
-        id: 'txn_321654987',
-        amount: 1500,
-        currency: 'INR',
-        status: 'captured',
-        description: 'Workshop Registration',
-        createdAt: '2024-01-11T11:20:00Z',
-        userEmail: 'charlie.davis@example.com',
-        userName: 'Charlie Davis',
-        paymentMethod: 'UPI',
-        fees: 30
-      }
-    ];
+  const {
+    data: statsData,
+    loading: statsLoading,
+    error: statsError,
+  } = useQuery(GET_ORG_TRANSACTION_STATS, {
+    variables: {
+      orgId: orgId || '',
+    },
+    skip: !orgId,
+    fetchPolicy: 'network-only',
+  });
 
-    setTimeout(() => {
-      setTransactions(mockTransactions);
-      
-      // Calculate stats for admin view
-      const totalAmount = mockTransactions
-        .filter(t => t.status === 'captured')
-        .reduce((sum, t) => sum + t.amount, 0);
-      
-      const totalTransactions = mockTransactions.length;
-      const successfulTransactions = mockTransactions.filter(t => t.status === 'captured').length;
-      const successRate = totalTransactions > 0 ? (successfulTransactions / totalTransactions) * 100 : 0;
-      
-      const totalFees = mockTransactions
-        .filter(t => t.status === 'captured')
-        .reduce((sum, t) => sum + t.fees, 0);
-
-      setStats({
-        totalAmount,
-        totalTransactions,
-        successRate,
-        totalFees
-      });
-      
-      setLoading(false);
-    }, 1000);
-  }, []);
+  const transactions = transactionsData?.razorpay_getOrganizationTransactions || [];
+  const stats = statsData?.razorpay_getOrganizationTransactionStats;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -170,11 +166,11 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
   const columns: ColumnsType<RazorpayOrganizationTransaction> = [
     {
       title: 'Transaction ID',
-      dataIndex: 'id',
-      key: 'id',
-      render: (id: string) => (
+      dataIndex: 'paymentId',
+      key: 'paymentId',
+      render: (paymentId: string) => (
         <Text code style={{ fontSize: '12px' }}>
-          {id}
+          {paymentId || 'N/A'}
         </Text>
       ),
     },
@@ -184,7 +180,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
       key: 'amount',
       render: (amount: number, record: RazorpayOrganizationTransaction) => (
         <Text strong>
-          {formatAmount(amount, record.currency)}
+          {amount ? formatAmount(amount, record.currency) : 'N/A'}
         </Text>
       ),
     },
@@ -199,35 +195,30 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
       ),
     },
     {
-      title: 'User',
-      key: 'user',
+      title: 'Donor',
+      key: 'donor',
       render: (_, record: RazorpayOrganizationTransaction) => (
         <div>
-          <div style={{ fontWeight: 500 }}>{record.userName}</div>
+          <div style={{ fontWeight: 500 }}>{record.donorName || 'Anonymous'}</div>
           <Text type="secondary" style={{ fontSize: '12px' }}>
-            {record.userEmail}
+            {record.donorEmail || 'N/A'}
           </Text>
         </div>
       ),
     },
     {
-      title: 'Description',
-      dataIndex: 'description',
-      key: 'description',
-      ellipsis: true,
-    },
-    {
       title: 'Payment Method',
-      dataIndex: 'paymentMethod',
-      key: 'paymentMethod',
+      dataIndex: 'method',
+      key: 'method',
+      render: (method: string) => method || 'N/A',
     },
     {
       title: 'Fees',
-      dataIndex: 'fees',
-      key: 'fees',
-      render: (fees: number, record: RazorpayOrganizationTransaction) => (
+      dataIndex: 'fee',
+      key: 'fee',
+      render: (fee: number, record: RazorpayOrganizationTransaction) => (
         <Text type="secondary">
-          {formatAmount(fees, record.currency)}
+          {fee ? formatAmount(fee, record.currency) : 'N/A'}
         </Text>
       ),
     },
@@ -263,7 +254,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
     },
   ];
 
-  if (loading) {
+  if (transactionsLoading || statsLoading) {
     return (
       <Card>
         <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -271,6 +262,18 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
           <div style={{ marginTop: '16px' }}>
             <Text>Loading Razorpay organization transactions...</Text>
           </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (transactionsError || statsError) {
+    return (
+      <Card>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <Text type="danger">
+            Error loading transactions: {transactionsError?.message || statsError?.message}
+          </Text>
         </div>
       </Card>
     );
@@ -291,53 +294,52 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
       </div>
 
       {/* Statistics Row */}
-      <Row gutter={16} style={{ marginBottom: '24px' }}>
-        <Col span={6}>
-          <Card size="small">
-            <Statistic
-              title="Total Amount"
-              value={stats.totalAmount / 100}
-              precision={2}
-              prefix={<DollarOutlined />}
-              suffix="INR"
-              valueStyle={{ color: '#3f8600' }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card size="small">
-            <Statistic
-              title="Total Transactions"
-              value={stats.totalTransactions}
-              prefix={<UserOutlined />}
-              valueStyle={{ color: '#1890ff' }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card size="small">
-            <Statistic
-              title="Success Rate"
-              value={stats.successRate}
-              precision={1}
-              suffix="%"
-              valueStyle={{ color: '#3f8600' }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card size="small">
-            <Statistic
-              title="Total Fees"
-              value={stats.totalFees / 100}
-              precision={2}
-              prefix={<DollarOutlined />}
-              suffix="INR"
-              valueStyle={{ color: '#cf1322' }}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {stats && (
+        <Row gutter={16} style={{ marginBottom: '24px' }}>
+          <Col span={6}>
+            <Card size="small">
+              <Statistic
+                title="Total Amount"
+                value={stats.totalAmount ? stats.totalAmount / 100 : 0}
+                precision={2}
+                prefix={<DollarOutlined />}
+                suffix={stats.currency || 'INR'}
+                valueStyle={{ color: '#3f8600' }}
+              />
+            </Card>
+          </Col>
+          <Col span={6}>
+            <Card size="small">
+              <Statistic
+                title="Total Transactions"
+                value={stats.totalTransactions || 0}
+                prefix={<UserOutlined />}
+                valueStyle={{ color: '#1890ff' }}
+              />
+            </Card>
+          </Col>
+          <Col span={6}>
+            <Card size="small">
+              <Statistic
+                title="Success Rate"
+                value={stats.totalTransactions ? ((stats.successCount || 0) / stats.totalTransactions) * 100 : 0}
+                precision={1}
+                suffix="%"
+                valueStyle={{ color: '#3f8600' }}
+              />
+            </Card>
+          </Col>
+          <Col span={6}>
+            <Card size="small">
+              <Statistic
+                title="Failed Transactions"
+                value={stats.failedCount || 0}
+                valueStyle={{ color: '#cf1322' }}
+              />
+            </Card>
+          </Col>
+        </Row>
+      )}
 
       <Table
         columns={columns}

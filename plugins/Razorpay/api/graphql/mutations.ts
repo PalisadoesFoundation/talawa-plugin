@@ -536,8 +536,8 @@ export async function verifyPaymentResolver(
   }
 }
 
-// Test Razorpay connection resolver
-export async function testRazorpayConnectionResolver(
+// Test Razorpay setup with dummy payment
+export async function testRazorpaySetupResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
   ctx: GraphQLContext
@@ -568,23 +568,63 @@ export async function testRazorpayConnectionResolver(
       };
     }
 
-    // Import Razorpay service to test connection
+    if (!configItem.webhookSecret) {
+      return {
+        success: false,
+        message: "Webhook secret is not configured. Please enter your webhook secret.",
+      };
+    }
+
+    // Import Razorpay service to test setup
     const { createRazorpayService } = await import("../services/razorpayService");
     const razorpayService = createRazorpayService(ctx);
 
-    // Test the connection by making a simple API call
-    const testResult = await razorpayService.testConnection();
+    ctx.log?.info(`Testing Razorpay setup with Key ID: ${configItem.keyId?.substring(0, 8)}...`);
+
+    // Test by creating a dummy payment order (₹1.00 = 100 paise)
+    const testOrder = await razorpayService.createOrder({
+      amount: 100, // 100 paise = ₹1.00
+      currency: configItem.currency || "INR",
+      receipt: `test_${Date.now()}`,
+      notes: {
+        test: "true",
+        purpose: "setup_verification"
+      }
+    });
+
+    ctx.log?.info(`Test order created successfully: ${testOrder.id}`);
 
     return {
-      success: testResult.success,
-      message: testResult.message,
+      success: true,
+      message: `Setup verified! Test order created: ${testOrder.id} (₹1.00). Your Razorpay configuration is working correctly.`,
     };
+
   } catch (error) {
-    ctx.log?.error("Error testing Razorpay connection:", error);
-    return {
-      success: false,
-      message: "Connection test failed. Please check your API keys and try again.",
-    };
+    ctx.log?.error("Error testing Razorpay setup:", error);
+    
+    if (error instanceof Error) {
+      if (error.message.includes("Invalid API credentials")) {
+        return {
+          success: false,
+          message: "Invalid API credentials. Please check your Key ID and Key Secret.",
+        };
+      } else if (error.message.includes("Webhook secret not configured")) {
+        return {
+          success: false,
+          message: "Webhook secret not configured. Please add your webhook secret.",
+        };
+      } else {
+        return {
+          success: false,
+          message: `Setup test failed: ${error.message}`,
+        };
+      }
+    } else {
+      return {
+        success: false,
+        message: "Setup test failed. Please check your configuration and try again.",
+      };
+    }
   }
 }
 
@@ -656,12 +696,12 @@ export function registerRazorpayMutations(
     })
   );
 
-  // Test Razorpay connection
-  builderInstance.mutationField("testRazorpayConnection", (t) =>
+  // Test Razorpay setup with dummy payment
+  builderInstance.mutationField("testRazorpaySetup", (t) =>
     t.field({
       type: RazorpayTestResultRef,
-      description: "Test Razorpay API connection with current credentials",
-      resolve: testRazorpayConnectionResolver,
+      description: "Test Razorpay setup by creating a dummy payment order",
+      resolve: testRazorpaySetupResolver,
     })
   );
 }

@@ -96,6 +96,8 @@ export class RazorpayService {
     }
 
     try {
+      this.context.log?.info(`Creating Razorpay order with amount: ${orderData.amount} paise (₹${(orderData.amount / 100).toFixed(2)} ${orderData.currency})`);
+      
       const order = await this.razorpay!.orders.create({
         amount: orderData.amount,
         currency: orderData.currency,
@@ -107,6 +109,20 @@ export class RazorpayService {
       return order;
     } catch (error) {
       this.context.log?.error("Failed to create Razorpay order:", error);
+      
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+          throw new Error('Invalid API credentials. Please check your Key ID and Key Secret.');
+        } else if (error.message.includes('403') || error.message.includes('Forbidden')) {
+          throw new Error('Access forbidden. Please check if your Razorpay account is active.');
+        } else if (error.message.includes('429') || error.message.includes('Rate limit')) {
+          throw new Error('Rate limit exceeded. Please try again in a few minutes.');
+        } else {
+          throw new Error(`Razorpay API error: ${error.message}`);
+        }
+      }
+      
       throw error;
     }
   }
