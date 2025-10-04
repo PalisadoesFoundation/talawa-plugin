@@ -9,6 +9,7 @@ import {
   ordersTable,
   transactionsTable,
 } from "../database/tables";
+import { createRazorpayService } from "../services/razorpayService";
 import {
   RazorpayConfigRef,
   RazorpayOrderRef,
@@ -182,26 +183,43 @@ export async function createPaymentOrderResolver(
   }
 
   try {
-    // Generate Razorpay order ID
-    const razorpayOrderId = `order_${Date.now()}_${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
+    // Step 1: Initialize the Razorpay service
+    const razorpayService = createRazorpayService(ctx);
 
+    // Step 2: Create a real order with the Razorpay API
+    const razorpayOrder = await razorpayService.createOrder({
+      amount: parsedArgs.input.amount,
+      currency: parsedArgs.input.currency,
+      receipt: `receipt_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`,
+      notes: {
+        organizationId: parsedArgs.input.organizationId,
+        userId: parsedArgs.input.userId || "guest",
+        donorName: parsedArgs.input.donorName,
+      },
+    });
+
+    if (!razorpayOrder || !razorpayOrder.id) {
+      throw new Error("Failed to create Razorpay order.");
+    }
+
+    // Step 3: Save the REAL order details to your database
     const [order] = await ctx.drizzleClient
       .insert(ordersTable)
       .values({
-        razorpayOrderId,
+        razorpayOrderId: razorpayOrder.id, // Use the REAL ID from Razorpay
         organizationId: parsedArgs.input.organizationId,
         userId: parsedArgs.input.userId,
-        amount: parsedArgs.input.amount,
-        currency: parsedArgs.input.currency,
-        receipt: `receipt_${Date.now()}_${Math.random()
-          .toString(36)
-          .substr(2, 9)}`,
-        status: "created",
+        amount: razorpayOrder.amount, // Use amount from Razorpay response as source of truth
+        currency: razorpayOrder.currency,
+        receipt: razorpayOrder.receipt,
+        status: razorpayOrder.status, // Status will be "created"
         donorName: parsedArgs.input.donorName,
         donorEmail: parsedArgs.input.donorEmail,
+        donorPhone: parsedArgs.input.donorPhone,
         description: parsedArgs.input.description,
+        anonymous: parsedArgs.input.anonymous,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -213,26 +231,28 @@ export async function createPaymentOrderResolver(
       });
     }
 
+    // Return the correct data to the frontend
     return {
       id: order.id,
-      razorpayOrderId: order.razorpayOrderId || undefined,
-      organizationId: order.organizationId || undefined,
-      userId: order.userId || undefined,
-      amount: order.amount || undefined,
-      currency: order.currency || "INR",
-      status: order.status || "created",
-      donorName: order.donorName || undefined,
-      donorEmail: order.donorEmail || undefined,
-      donorPhone: order.donorPhone || undefined,
-      description: order.description || undefined,
-      anonymous: order.anonymous || false,
-      createdAt: order.createdAt || new Date(),
-      updatedAt: order.updatedAt || new Date(),
+      razorpayOrderId: order.razorpayOrderId, // This is now the REAL order ID
+      organizationId: order.organizationId,
+      userId: order.userId,
+      amount: order.amount,
+      currency: order.currency,
+      status: order.status,
+      donorName: order.donorName,
+      donorEmail: order.donorEmail,
+      donorPhone: order.donorPhone,
+      description: order.description,
+      anonymous: order.anonymous,
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
     };
   } catch (error) {
     ctx.log?.error("Error creating payment order:", error);
     throw new TalawaGraphQLError({
       extensions: { code: "unexpected" },
+      message: error instanceof Error ? error.message : "Could not create payment order",
     });
   }
 }

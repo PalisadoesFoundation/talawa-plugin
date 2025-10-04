@@ -31,7 +31,7 @@ const GET_RAZORPAY_CONFIG = gql`
 
 const CREATE_PAYMENT_ORDER = gql`
   mutation CreatePaymentOrder($input: RazorpayOrderInput!) {
-    createPaymentOrder(input: $input) {
+    razorpay_createPaymentOrder(input: $input) {
       id
       razorpayOrderId
       organizationId
@@ -52,7 +52,7 @@ const CREATE_PAYMENT_ORDER = gql`
 
 const VERIFY_PAYMENT = gql`
   mutation VerifyPayment($input: RazorpayVerificationInput!) {
-    verifyPayment(input: $input) {
+    razorpay_verifyPayment(input: $input) {
       success
       message
       transaction {
@@ -111,6 +111,22 @@ interface PaymentResult {
 const DonationForm: React.FC = () => {
   const { orgId } = useParams<{ orgId: string }>();
   const navigate = useNavigate();
+
+  // Load Razorpay script on component mount
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+    
+    return () => {
+      // Cleanup script on unmount
+      const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+      if (existingScript) {
+        existingScript.remove();
+      }
+    };
+  }, []);
 
   const [formData, setFormData] = useState({
     amount: '',
@@ -187,7 +203,7 @@ const DonationForm: React.FC = () => {
     if (!validateForm()) return;
 
     // Check if Razorpay is configured
-    if (!razorpayConfig?.getRazorpayConfig?.keyId || !razorpayConfig?.getRazorpayConfig?.isEnabled) {
+    if (!razorpayConfig?.razorpay_getRazorpayConfig?.keyId || !razorpayConfig?.razorpay_getRazorpayConfig?.isEnabled) {
       toast.error('Razorpay is not configured or enabled. Please contact the administrator.');
       return;
     }
@@ -213,15 +229,23 @@ const DonationForm: React.FC = () => {
         },
       });
 
-      if (!orderData?.createPaymentOrder) {
+      if (!orderData?.razorpay_createPaymentOrder) {
         throw new Error('Failed to create payment order');
       }
 
-      const order = orderData.createPaymentOrder;
+      const order = orderData.razorpay_createPaymentOrder;
 
-      // Step 2: Open Razorpay payment modal
+      // Validate order data
+      if (!order.razorpayOrderId) {
+        throw new Error('Invalid order: missing Razorpay order ID');
+      }
+      if (!order.amount || order.amount <= 0) {
+        throw new Error('Invalid order: missing or invalid amount');
+      }
+
+      // Step 2: Open Razorpay payment modal - simplified as per official docs
       const options = {
-        key: razorpayConfig.getRazorpayConfig.keyId,
+        key: razorpayConfig.razorpay_getRazorpayConfig.keyId,
         amount: order.amount,
         currency: order.currency,
         name: orgData?.organization?.name || 'Organization',
@@ -232,66 +256,49 @@ const DonationForm: React.FC = () => {
           email: formData.donorEmail,
           contact: formData.donorPhone,
         },
-        notes: {
-          organizationId: orgId,
-          donorName: formData.donorName,
-          anonymous: formData.anonymous.toString(),
-        },
         theme: {
-          color: '#28a745',
+          color: '#3399cc',
         },
-        handler: async function (response: any) {
+        handler: function (response: any) {
           // Payment successful - verify payment
-          try {
-            const { data: verificationData } = await verifyPayment({
-              variables: {
-                input: {
-                  razorpayPaymentId: response.razorpay_payment_id,
-                  razorpayOrderId: response.razorpay_order_id,
-                  razorpaySignature: response.razorpay_signature,
-                  paymentData: JSON.stringify({
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_order_id: response.razorpay_order_id,
-                    razorpay_signature: response.razorpay_signature,
-                  }),
-                },
+          verifyPayment({
+            variables: {
+              input: {
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpaySignature: response.razorpay_signature,
+                paymentData: JSON.stringify({
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_signature: response.razorpay_signature,
+                }),
               },
-            });
-
-            if (verificationData?.verifyPayment?.success) {
+            },
+          }).then(({ data: verificationData }) => {
+            if (verificationData?.razorpay_verifyPayment?.success) {
               setCurrentStep('success');
               toast.success('Payment successful! Thank you for your donation.');
+              setIsProcessing(false);
             } else {
-              throw new Error(verificationData?.verifyPayment?.message || 'Payment verification failed');
+              toast.error(verificationData?.razorpay_verifyPayment?.message || 'Payment verification failed');
+              setIsProcessing(false);
             }
-          } catch (error) {
+          }).catch((error) => {
             console.error('Payment verification error:', error);
             toast.error('Payment verification failed. Please contact support.');
             setIsProcessing(false);
-          }
+          });
         },
         modal: {
           ondismiss: function () {
-            // Payment modal closed
-            console.log('Payment modal closed');
             setIsProcessing(false);
           },
         },
       };
 
-      // Load Razorpay script if not already loaded
-      if (!(window as any).Razorpay) {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onload = () => {
-          const rzp = new (window as any).Razorpay(options);
-          rzp.open();
-        };
-        document.head.appendChild(script);
-      } else {
-        const rzp = new (window as any).Razorpay(options);
-        rzp.open();
-      }
+      // Simple Razorpay integration as per official docs
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
     } catch (error) {
       console.error('Payment error:', error);
       toast.error(error instanceof Error ? error.message : 'Payment failed');
@@ -327,7 +334,7 @@ const DonationForm: React.FC = () => {
   }
 
   // Check if Razorpay is configured
-  if (!razorpayConfig?.getRazorpayConfig?.keyId || !razorpayConfig?.getRazorpayConfig?.isEnabled) {
+  if (!razorpayConfig?.razorpay_getRazorpayConfig?.keyId || !razorpayConfig?.razorpay_getRazorpayConfig?.isEnabled) {
     return (
       <Alert variant="warning">
         <h4>Payment System Not Available</h4>
