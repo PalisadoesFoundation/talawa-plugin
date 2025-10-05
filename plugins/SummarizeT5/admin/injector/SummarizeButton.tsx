@@ -132,7 +132,7 @@ const SummarizeButton: React.FC<SummarizeButtonProps> = (props) => {
             color: '#1976d2',
             mb: 0.5 
           }}>
-            🤖 AI Summary:
+            Summary:
           </Box>
           <Box sx={{ fontSize: '0.8rem', lineHeight: 1.4 }}>
             {summary}
