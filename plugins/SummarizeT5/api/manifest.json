@@ -1,0 +1,8 @@
+{
+  "name": "SummarizeT5 API",
+  "pluginId": "summarize_t5_api",
+  "version": "1.0.0",
+  "description": "API endpoints for SummarizeT5 AI summarization service",
+  "author": "Palisadoes Foundation",
+  "main": "index.ts"
+}
