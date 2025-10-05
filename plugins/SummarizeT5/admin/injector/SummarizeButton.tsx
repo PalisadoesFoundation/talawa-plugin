@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Button, CircularProgress, Alert, Box } from '@mui/material';
 import { SmartToy } from '@mui/icons-material';
+import { gql } from 'graphql-tag';
+import { useMutation } from '@apollo/client';
 
 interface SummarizeButtonProps {
   caption?: string;
@@ -27,6 +29,20 @@ const SummarizeButton: React.FC<SummarizeButtonProps> = (props) => {
   const [summary, setSummary] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // GraphQL mutation (namespaced with pluginId)
+  const SUMMARIZE_MUTATION = gql`
+    mutation Summarize($input: SummarizeInput!) {
+      summarize_t5_summarizeText(input: $input) {
+        summary
+        originalLength
+        summaryLength
+        postId
+      }
+    }
+  `;
+
+  const [runSummarize] = useMutation(SUMMARIZE_MUTATION);
+
   // Get the text content to summarize
   const getTextToSummarize = () => {
     return props.caption || props.text || '';
@@ -42,20 +58,11 @@ const SummarizeButton: React.FC<SummarizeButtonProps> = (props) => {
     setError(null);
     setSummary(null);
     try {
-      // Call GraphQL mutation exposed by API plugin (namespaced with pluginId)
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: `mutation Summarize($input: SummarizeInput!) { summarizetext: summarize_t5_summarizeText(input: $input) { summary originalLength summaryLength postId } }`,
-          variables: { input: { text: textToSummarize, postId: props.postId } },
-        }),
+      const { data } = await runSummarize({
+        variables: { input: { text: textToSummarize, postId: props.postId } },
+        fetchPolicy: 'no-cache',
       });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      const data = await response.json();
-      const result = data?.data?.summarizetext;
+      const result = data?.summarize_t5_summarizeText;
       if (!result?.summary) throw new Error('Empty summary');
       setSummary(result.summary);
     } catch (err) {
