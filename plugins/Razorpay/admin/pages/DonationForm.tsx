@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useMutation, useQuery, gql } from '@apollo/client';
-import { useParams, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
-import Loader from '../../../../components/Loader/Loader';
+import React, { useState, useEffect } from "react";
+import { useMutation, useQuery, gql } from "@apollo/client";
+import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { Card, Form, Button, Row, Col, Alert } from "react-bootstrap";
+import Loader from "../../../../components/Loader/Loader";
 
 // GraphQL operations
 const GET_ORGANIZATION_INFO = gql`
@@ -101,19 +101,19 @@ const DonationForm: React.FC = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    amount: '',
-    currency: 'INR',
-    description: '',
-    donorName: '',
-    donorEmail: '',
-    donorPhone: '',
+    amount: "",
+    currency: "INR",
+    description: "",
+    donorName: "",
+    donorEmail: "",
+    donorPhone: "",
     anonymous: false,
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState<
-    'form' | 'payment' | 'success'
-  >('form');
+    "form" | "payment" | "success"
+  >("form");
 
   // GraphQL operations
   const {
@@ -130,12 +130,12 @@ const DonationForm: React.FC = () => {
 
   useEffect(() => {
     // Load user data if available
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
     if (user.firstName && user.lastName) {
       setFormData((prev) => ({
         ...prev,
         donorName: `${user.firstName} ${user.lastName}`,
-        donorEmail: user.email || '',
+        donorEmail: user.email || "",
       }));
     }
   }, []);
@@ -149,15 +149,15 @@ const DonationForm: React.FC = () => {
 
   const validateForm = () => {
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
-      toast.error('Please enter a valid amount');
+      toast.error("Please enter a valid amount");
       return false;
     }
     if (!formData.donorName.trim()) {
-      toast.error('Please enter your name');
+      toast.error("Please enter your name");
       return false;
     }
     if (!formData.donorEmail.trim()) {
-      toast.error('Please enter your email');
+      toast.error("Please enter your email");
       return false;
     }
     return true;
@@ -192,7 +192,7 @@ const DonationForm: React.FC = () => {
       if (!orderData?.createPaymentOrder?.success) {
         throw new Error(
           orderData?.createPaymentOrder?.message ||
-            'Failed to create payment order',
+            "Failed to create payment order",
         );
       }
 
@@ -208,7 +208,7 @@ const DonationForm: React.FC = () => {
 
       if (!paymentData?.initiatePayment?.success) {
         throw new Error(
-          paymentData?.initiatePayment?.message || 'Failed to initiate payment',
+          paymentData?.initiatePayment?.message || "Failed to initiate payment",
         );
       }
 
@@ -227,14 +227,14 @@ const DonationForm: React.FC = () => {
         theme: paymentInfo.theme,
         handler: function (response: any) {
           // Payment successful
-          console.log('Payment successful:', response);
-          setCurrentStep('success');
-          toast.success('Payment successful! Thank you for your donation.');
+          console.log("Payment successful:", response);
+          setCurrentStep("success");
+          toast.success("Payment successful! Thank you for your donation.");
         },
         modal: {
           ondismiss: function () {
             // Payment modal closed
-            console.log('Payment modal closed');
+            console.log("Payment modal closed");
             setIsProcessing(false);
           },
         },
@@ -242,8 +242,8 @@ const DonationForm: React.FC = () => {
 
       // Load Razorpay script if not already loaded
       if (!(window as any).Razorpay) {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
         script.onload = () => {
           const rzp = new (window as any).Razorpay(options);
           rzp.open();
@@ -254,16 +254,16 @@ const DonationForm: React.FC = () => {
         rzp.open();
       }
     } catch (error) {
-      console.error('Payment error:', error);
-      toast.error(error instanceof Error ? error.message : 'Payment failed');
+      console.error("Payment error:", error);
+      toast.error(error instanceof Error ? error.message : "Payment failed");
       setIsProcessing(false);
     }
   };
 
   const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: currency || 'INR',
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: currency || "INR",
     }).format(amount);
   };
 
@@ -281,7 +281,7 @@ const DonationForm: React.FC = () => {
 
   const organization = orgData?.getOrganizationById;
 
-  if (currentStep === 'success') {
+  if (currentStep === "success") {
     return (
       <div className="container mx-auto p-6">
         <Card className="max-w-md mx-auto">
@@ -301,7 +301,7 @@ const DonationForm: React.FC = () => {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => navigate('/user/razorpay/my-transactions')}
+                onClick={() => navigate("/user/razorpay/my-transactions")}
                 className="w-100"
               >
                 View My Transactions
@@ -333,7 +333,7 @@ const DonationForm: React.FC = () => {
                     src={organization.image}
                     alt={organization.name}
                     className="w-16 h-16 rounded-circle me-3"
-                    style={{ objectFit: 'cover' }}
+                    style={{ objectFit: "cover" }}
                   />
                 )}
                 <div>
@@ -370,7 +370,7 @@ const DonationForm: React.FC = () => {
                           type="number"
                           value={formData.amount}
                           onChange={(e) =>
-                            handleInputChange('amount', e.target.value)
+                            handleInputChange("amount", e.target.value)
                           }
                           placeholder="0.00"
                           min="1"
@@ -388,7 +388,7 @@ const DonationForm: React.FC = () => {
                       <Form.Select
                         value={formData.currency}
                         onChange={(e) =>
-                          handleInputChange('currency', e.target.value)
+                          handleInputChange("currency", e.target.value)
                         }
                       >
                         <option value="INR">INR (₹)</option>
@@ -411,7 +411,7 @@ const DonationForm: React.FC = () => {
                         variant="outline-secondary"
                         size="sm"
                         onClick={() =>
-                          handleInputChange('amount', amount.toString())
+                          handleInputChange("amount", amount.toString())
                         }
                       >
                         ₹{amount}
@@ -433,7 +433,7 @@ const DonationForm: React.FC = () => {
                         type="text"
                         value={formData.donorName}
                         onChange={(e) =>
-                          handleInputChange('donorName', e.target.value)
+                          handleInputChange("donorName", e.target.value)
                         }
                         placeholder="Enter your full name"
                         required
@@ -448,7 +448,7 @@ const DonationForm: React.FC = () => {
                         type="email"
                         value={formData.donorEmail}
                         onChange={(e) =>
-                          handleInputChange('donorEmail', e.target.value)
+                          handleInputChange("donorEmail", e.target.value)
                         }
                         placeholder="Enter your email"
                         required
@@ -463,7 +463,7 @@ const DonationForm: React.FC = () => {
                     type="tel"
                     value={formData.donorPhone}
                     onChange={(e) =>
-                      handleInputChange('donorPhone', e.target.value)
+                      handleInputChange("donorPhone", e.target.value)
                     }
                     placeholder="Enter your phone number"
                   />
@@ -476,7 +476,7 @@ const DonationForm: React.FC = () => {
                     rows={3}
                     value={formData.description}
                     onChange={(e) =>
-                      handleInputChange('description', e.target.value)
+                      handleInputChange("description", e.target.value)
                     }
                     placeholder="Add a personal message with your donation"
                   />
@@ -488,7 +488,7 @@ const DonationForm: React.FC = () => {
                     id="anonymous"
                     checked={formData.anonymous}
                     onChange={(e) =>
-                      handleInputChange('anonymous', e.target.checked)
+                      handleInputChange("anonymous", e.target.checked)
                     }
                     label="Make this donation anonymous"
                   />
@@ -547,7 +547,7 @@ const DonationForm: React.FC = () => {
                     <span>Processing...</span>
                   </div>
                 ) : (
-                  `Donate ${formData.amount ? formatCurrency(parseFloat(formData.amount), formData.currency) : ''}`
+                  `Donate ${formData.amount ? formatCurrency(parseFloat(formData.amount), formData.currency) : ""}`
                 )}
               </Button>
             </Form>

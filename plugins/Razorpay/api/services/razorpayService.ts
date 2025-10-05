@@ -137,7 +137,7 @@ export class RazorpayService {
     paymentId: string,
     orderId: string,
     signature: string,
-    paymentData: string
+    paymentData: string,
   ): Promise<boolean> {
     try {
       const config = await this.context.drizzleClient
@@ -156,7 +156,7 @@ export class RazorpayService {
 
       const isValid = crypto.timingSafeEqual(
         Buffer.from(expectedSignature, "hex"),
-        Buffer.from(signature, "hex")
+        Buffer.from(signature, "hex"),
       );
 
       this.context.log?.info(`Payment verification result: ${isValid}`);
@@ -207,7 +207,7 @@ export class RazorpayService {
       }
 
       this.context.log?.info(
-        `Webhook processed for payment: ${paymentEntity.id}`
+        `Webhook processed for payment: ${paymentEntity.id}`,
       );
     } catch (error) {
       this.context.log?.error("Failed to process webhook:", error);
@@ -251,62 +251,78 @@ export class RazorpayService {
   async testConnection(): Promise<{ success: boolean; message: string }> {
     try {
       // Get current configuration
-      const config = await this.context.drizzleClient.select().from(configTable).limit(1);
-      
+      const config = await this.context.drizzleClient
+        .select()
+        .from(configTable)
+        .limit(1);
+
       if (config.length === 0 || !config[0]) {
         return {
           success: false,
-          message: "No Razorpay configuration found. Please configure your API keys first.",
+          message:
+            "No Razorpay configuration found. Please configure your API keys first.",
         };
       }
 
       const configItem = config[0];
-      
+
       if (!configItem.keyId || !configItem.keySecret) {
         return {
           success: false,
-          message: "API keys are not configured. Please enter your Key ID and Key Secret.",
+          message:
+            "API keys are not configured. Please enter your Key ID and Key Secret.",
         };
       }
 
       // Validate key format
-      if (!configItem.keyId.startsWith('rzp_')) {
+      if (!configItem.keyId.startsWith("rzp_")) {
         return {
           success: false,
-          message: "Invalid Key ID format. Razorpay Key ID should start with 'rzp_'.",
+          message:
+            "Invalid Key ID format. Razorpay Key ID should start with 'rzp_'.",
         };
       }
 
-      this.context.log?.info(`Testing Razorpay connection with Key ID: ${configItem.keyId.substring(0, 8)}...`);
+      this.context.log?.info(
+        `Testing Razorpay connection with Key ID: ${configItem.keyId.substring(0, 8)}...`,
+      );
 
       // Test connection by making a simple API call to Razorpay
-      const response = await fetch("https://api.razorpay.com/v1/payments?count=1", {
-        method: "GET",
-        headers: {
-          "Authorization": `Basic ${Buffer.from(`${configItem.keyId}:${configItem.keySecret}`).toString("base64")}`,
-          "Content-Type": "application/json",
-          "User-Agent": "Talawa-Razorpay-Plugin/1.0.0",
+      const response = await fetch(
+        "https://api.razorpay.com/v1/payments?count=1",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Basic ${Buffer.from(`${configItem.keyId}:${configItem.keySecret}`).toString("base64")}`,
+            "Content-Type": "application/json",
+            "User-Agent": "Talawa-Razorpay-Plugin/1.0.0",
+          },
         },
-      });
+      );
 
-      this.context.log?.info(`Razorpay API response status: ${response.status}`);
+      this.context.log?.info(
+        `Razorpay API response status: ${response.status}`,
+      );
 
       if (response.ok) {
         const data = await response.json();
         this.context.log?.info("Razorpay API test successful");
         return {
           success: true,
-          message: "Connection successful! Your Razorpay credentials are valid.",
+          message:
+            "Connection successful! Your Razorpay credentials are valid.",
         };
       } else if (response.status === 401) {
         return {
           success: false,
-          message: "Invalid API credentials. Please check your Key ID and Key Secret. Make sure you're using the correct test/live keys.",
+          message:
+            "Invalid API credentials. Please check your Key ID and Key Secret. Make sure you're using the correct test/live keys.",
         };
       } else if (response.status === 403) {
         return {
           success: false,
-          message: "Access forbidden. Please check if your Razorpay account is active and has the necessary permissions.",
+          message:
+            "Access forbidden. Please check if your Razorpay account is active and has the necessary permissions.",
         };
       } else if (response.status === 429) {
         return {
@@ -319,8 +335,10 @@ export class RazorpayService {
           message: "Razorpay server error. Please try again later.",
         };
       } else {
-        const errorText = await response.text().catch(() => 'Unknown error');
-        this.context.log?.error(`Razorpay API error: ${response.status} - ${errorText}`);
+        const errorText = await response.text().catch(() => "Unknown error");
+        this.context.log?.error(
+          `Razorpay API error: ${response.status} - ${errorText}`,
+        );
         return {
           success: false,
           message: `Connection failed with status ${response.status}. ${errorText}`,
@@ -328,11 +346,12 @@ export class RazorpayService {
       }
     } catch (error) {
       this.context.log?.error("Error testing Razorpay connection:", error);
-      
-      if (error instanceof TypeError && error.message.includes('fetch')) {
+
+      if (error instanceof TypeError && error.message.includes("fetch")) {
         return {
           success: false,
-          message: "Network error. Please check your internet connection and try again.",
+          message:
+            "Network error. Please check your internet connection and try again.",
         };
       } else if (error instanceof Error) {
         return {
@@ -342,7 +361,8 @@ export class RazorpayService {
       } else {
         return {
           success: false,
-          message: "Connection test failed. Please check your internet connection and try again.",
+          message:
+            "Connection test failed. Please check your internet connection and try again.",
         };
       }
     }
@@ -350,7 +370,7 @@ export class RazorpayService {
 }
 
 export function createRazorpayService(
-  context: GraphQLContext
+  context: GraphQLContext,
 ): RazorpayService {
   return new RazorpayService(context);
 }
