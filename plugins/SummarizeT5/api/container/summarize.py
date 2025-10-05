@@ -12,7 +12,7 @@ from transformers import T5ForConditionalGeneration, T5Tokenizer
 import os
 
 class T5Summarizer:
-    def __init__(self, model_name: str = "t5-base", max_length: int = 512, min_length: int = 50):
+    def __init__(self, model_name: str = "t5-base", max_length: int = 512, min_length: int = 10):
         """
         Initialize T5 summarizer
         
