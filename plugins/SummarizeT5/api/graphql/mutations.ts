@@ -20,8 +20,27 @@ export async function summarizeTextResolver(
     );
   }
 
-  const words = data.input.text.trim().split(/\s+/);
-  const summary = words.length <= 10 ? data.input.text.trim() : words.slice(0, 10).join(" ") + "...";
+  // Inside a container, localhost points to the container itself, not the host.
+  // Prefer host.docker.internal which resolves to the host on Docker Desktop/Linux.
+  const endpoint =
+    process.env.T5_SERVICE_URL ||
+    "http://host.docker.internal:8000/summarize";
+  const payload = {
+    text: data.input.text,
+    max_summary_length: 150,
+  } as const;
+
+  const resp = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!resp.ok) {
+    throw new Error(`summarize service error: HTTP ${resp.status}`);
+  }
+  const json = (await resp.json()) as { summary?: string };
+  const summary = (json.summary || "").toString();
 
   return {
     summary,
