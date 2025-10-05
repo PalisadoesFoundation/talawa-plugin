@@ -108,7 +108,6 @@ export const RazorpayOrderRef = builder.objectRef<{
   donorEmail?: string;
   donorPhone?: string;
   description?: string;
-  anonymous: boolean;
   createdAt: Date;
   updatedAt: Date;
 }>("RazorpayOrder");
@@ -126,7 +125,6 @@ RazorpayOrderRef.implement({
     donorEmail: t.exposeString("donorEmail", { nullable: true }),
     donorPhone: t.exposeString("donorPhone", { nullable: true }),
     description: t.exposeString("description", { nullable: true }),
-    anonymous: t.exposeBoolean("anonymous"),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
   }),

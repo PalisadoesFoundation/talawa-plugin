@@ -219,7 +219,6 @@ export async function createPaymentOrderResolver(
         donorEmail: parsedArgs.input.donorEmail,
         donorPhone: parsedArgs.input.donorPhone,
         description: parsedArgs.input.description,
-        anonymous: parsedArgs.input.anonymous,
         createdAt: new Date(),
         updatedAt: new Date(),
       })

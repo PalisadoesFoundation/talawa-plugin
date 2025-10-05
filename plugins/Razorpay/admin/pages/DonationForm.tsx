@@ -44,7 +44,6 @@ const CREATE_PAYMENT_ORDER = gql`
       donorEmail
       donorPhone
       description
-      anonymous
       createdAt
       updatedAt
     }
@@ -85,7 +84,6 @@ interface PaymentOrder {
   donorEmail?: string;
   donorPhone?: string;
   description?: string;
-  anonymous: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -138,7 +136,6 @@ const DonationForm: React.FC = () => {
     donorName: '',
     donorEmail: '',
     donorPhone: '',
-    anonymous: false,
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -228,7 +225,6 @@ const DonationForm: React.FC = () => {
             donorName: formData.donorName,
             donorEmail: formData.donorEmail,
             donorPhone: formData.donorPhone,
-            anonymous: formData.anonymous,
           },
         },
       });
@@ -550,17 +546,6 @@ const DonationForm: React.FC = () => {
                   />
                 </Form.Group>
 
-                <Form.Group className="mb-3">
-                  <Form.Check
-                    type="checkbox"
-                    id="anonymous"
-                    checked={formData.anonymous}
-                    onChange={(e) =>
-                      handleInputChange('anonymous', e.target.checked)
-                    }
-                    label="Make this donation anonymous"
-                  />
-                </Form.Group>
               </div>
 
               {/* Payment Summary */}
