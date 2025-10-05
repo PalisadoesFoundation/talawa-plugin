@@ -313,6 +313,16 @@ const DonationForm: React.FC = () => {
     }).format(amount);
   };
 
+  const getCurrencySymbol = (currency: string) => {
+    const symbols: { [key: string]: string } = {
+      INR: '₹',
+      USD: '$',
+      EUR: '€',
+      GBP: '£',
+    };
+    return symbols[currency] || currency;
+  };
+
   if (orgLoading || configLoading) {
     return <Loader />;
   }
@@ -358,7 +368,17 @@ const DonationForm: React.FC = () => {
             </p>
             <div className="d-grid gap-2">
               <Button
-                onClick={() => navigate(`/user/razorpay/${orgId}/donate`)}
+                onClick={() => {
+                  setCurrentStep('form');
+                  setFormData({
+                    amount: '',
+                    currency: 'INR',
+                    description: '',
+                    donorName: formData.donorName, // Keep donor info for convenience
+                    donorEmail: formData.donorEmail,
+                    donorPhone: formData.donorPhone,
+                  });
+                }}
                 className="w-100"
               >
                 Make Another Donation
@@ -428,7 +448,7 @@ const DonationForm: React.FC = () => {
                       <Form.Label>Amount</Form.Label>
                       <div className="position-relative">
                         <span className="position-absolute top-50 start-0 translate-middle-y ms-2 text-muted">
-                          ₹
+                          {getCurrencySymbol(formData.currency)}
                         </span>
                         <Form.Control
                           type="number"
@@ -478,7 +498,7 @@ const DonationForm: React.FC = () => {
                           handleInputChange('amount', amount.toString())
                         }
                       >
-                        ₹{amount}
+                        {formatCurrency(amount, formData.currency)}
                       </Button>
                     ))}
                   </div>

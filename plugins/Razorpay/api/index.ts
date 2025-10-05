@@ -308,10 +308,20 @@ export async function handleRazorpayWebhook(
     // Log the webhook for debugging
     console.log(`🔗 Razorpay webhook received: ${paymentEntity.id} - ${paymentEntity.status}`);
 
+    // Format currency display
+    const currencySymbols: { [key: string]: string } = {
+      INR: '₹',
+      USD: '$',
+      EUR: '€',
+      GBP: '£',
+    };
+    const symbol = currencySymbols[paymentEntity.currency] || paymentEntity.currency;
+    const displayAmount = (paymentEntity.amount / 100).toFixed(2);
+
     console.log(`Payment Details:
       - ID: ${paymentEntity.id}
       - Status: ${paymentEntity.status}
-      - Amount: ${paymentEntity.amount} ${paymentEntity.currency}
+      - Amount: ${symbol}${displayAmount} ${paymentEntity.currency}
       - Method: ${paymentEntity.method}
       - Order ID: ${paymentEntity.order_id}
       - Email: ${paymentEntity.email}

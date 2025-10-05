@@ -96,7 +96,17 @@ export class RazorpayService {
     }
 
     try {
-      this.context.log?.info(`Creating Razorpay order with amount: ${orderData.amount} paise (₹${(orderData.amount / 100).toFixed(2)} ${orderData.currency})`);
+      // Format currency display based on currency type
+      const currencySymbols: { [key: string]: string } = {
+        INR: '₹',
+        USD: '$',
+        EUR: '€',
+        GBP: '£',
+      };
+      const symbol = currencySymbols[orderData.currency] || orderData.currency;
+      const displayAmount = (orderData.amount / 100).toFixed(2);
+      
+      this.context.log?.info(`Creating Razorpay order with amount: ${symbol}${displayAmount} ${orderData.currency}`);
       
       const order = await this.razorpay!.orders.create({
         amount: orderData.amount,
@@ -105,7 +115,7 @@ export class RazorpayService {
         notes: orderData.notes,
       });
 
-      this.context.log?.info(`Razorpay order created: ${order.id}`);
+      this.context.log?.info(`Razorpay order created: ${order.id} for ${symbol}${displayAmount} ${orderData.currency}`);
       return order;
     } catch (error) {
       this.context.log?.error("Failed to create Razorpay order:", error);
