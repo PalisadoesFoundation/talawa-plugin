@@ -18,7 +18,7 @@ export async function logPluginMapRequestResolver(
       extensionPoint: string;
     };
   },
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -63,7 +63,7 @@ export async function logPluginMapRequestResolver(
       .returning();
 
     ctx.log?.info(
-      `Plugin Map: Logged request ${nextPollNumber} from ${parsedArgs.extensionPoint} by ${parsedArgs.userRole} ${parsedArgs.userId}`
+      `Plugin Map: Logged request ${nextPollNumber} from ${parsedArgs.extensionPoint} by ${parsedArgs.userRole} ${parsedArgs.userId}`,
     );
 
     return newPoll;
@@ -79,7 +79,7 @@ export async function logPluginMapRequestResolver(
 export async function clearPluginMapRequestsResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -124,7 +124,7 @@ export async function logPluginMapPollResolver(
       extensionPoint: string;
     };
   },
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -169,7 +169,7 @@ export async function logPluginMapPollResolver(
       .returning();
 
     ctx.log?.info(
-      `Plugin Map: Logged poll ${nextPollNumber} from ${parsedArgs.extensionPoint} by ${parsedArgs.userRole} ${parsedArgs.userId}`
+      `Plugin Map: Logged poll ${nextPollNumber} from ${parsedArgs.extensionPoint} by ${parsedArgs.userRole} ${parsedArgs.userId}`,
     );
 
     return newPoll;
@@ -185,7 +185,7 @@ export async function logPluginMapPollResolver(
 export async function clearPluginMapPollsResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -221,7 +221,7 @@ export async function clearPluginMapPollsResolver(
 
 // Register all Plugin Map mutations with the builder
 export function registerPluginMapMutations(
-  builderInstance: typeof builder
+  builderInstance: typeof builder,
 ): void {
   // Log plugin map request
   builderInstance.mutationField("logPluginMapRequest", (t) =>
@@ -242,7 +242,7 @@ export function registerPluginMapMutations(
       },
       description: "Log a new request from admin or user context",
       resolve: logPluginMapRequestResolver,
-    })
+    }),
   );
 
   // Clear plugin map requests
@@ -251,7 +251,7 @@ export function registerPluginMapMutations(
       type: ClearPollsResultRef,
       description: "Clear all logged requests",
       resolve: clearPluginMapRequestsResolver,
-    })
+    }),
   );
 
   // Log plugin map poll
@@ -273,7 +273,7 @@ export function registerPluginMapMutations(
       },
       description: "Log a new plugin map poll",
       resolve: logPluginMapPollResolver,
-    })
+    }),
   );
 
   // Clear plugin map polls
@@ -282,6 +282,6 @@ export function registerPluginMapMutations(
       type: ClearPollsResultRef,
       description: "Clear all logged plugin map polls",
       resolve: clearPluginMapPollsResolver,
-    })
+    }),
   );
 }

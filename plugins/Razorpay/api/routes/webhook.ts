@@ -66,7 +66,7 @@ export async function registerRazorpayWebhookRoutes(fastify: FastifyInstance) {
         context?.log?.error("Webhook processing failed:", error);
         reply.status(500).send({ error: "Webhook processing failed" });
       }
-    }
+    },
   );
 
   // Health check endpoint for the webhook
@@ -78,6 +78,6 @@ export async function registerRazorpayWebhookRoutes(fastify: FastifyInstance) {
         timestamp: new Date().toISOString(),
         plugin: "razorpay",
       });
-    }
+    },
   );
 }

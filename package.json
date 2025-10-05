@@ -28,7 +28,8 @@
     "**/*.{ts, tsx, json}": "eslint --fix"
   },
   "dependencies": {
-    "archiver": "^6.0.1"
+    "archiver": "^6.0.1",
+    "prettier": "^3.6.2"
   },
   "homepage": "https://github.com/PalisadoesFoundation/talawa-plugin#readme",
   "license": "GNU General Public License v3.0",
