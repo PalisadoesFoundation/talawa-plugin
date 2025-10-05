@@ -42,12 +42,12 @@ const SummarizeButton: React.FC<SummarizeButtonProps> = (props) => {
     setError(null);
     setSummary(null);
     try {
-      // Call GraphQL mutation exposed by API plugin
+      // Call GraphQL mutation exposed by API plugin (namespaced with pluginId)
       const response = await fetch('/graphql', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          query: `mutation Summarize($input: SummarizeInput!) { summarizetext: summarizeText(input: $input) { summary originalLength summaryLength postId } }`,
+          query: `mutation Summarize($input: SummarizeInput!) { summarizetext: summarize_t5_summarizeText(input: $input) { summary originalLength summaryLength postId } }`,
           variables: { input: { text: textToSummarize, postId: props.postId } },
         }),
       });
@@ -92,7 +92,7 @@ const SummarizeButton: React.FC<SummarizeButtonProps> = (props) => {
             }
           }}
         >
-          🤖 AI Summarize
+          Summarize
         </Button>
       )}
 

@@ -5,6 +5,7 @@
   "description": "AI-powered text summarization plugin using T5 model. Provides summarize buttons for posts in both organization and user portal contexts.",
   "author": "Palisadoes Foundation",
   "main": "index.tsx",
+  "icon": "/src/plugin/available/summarize_t5/assets/summarize-icon.svg",
   "extensionPoints": {
     "G3": [
       {
