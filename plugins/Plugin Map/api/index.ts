@@ -40,7 +40,6 @@ export async function onActivate(context: IPluginContext): Promise<void> {
   if (context.logger?.info) {
     context.logger.info("Plugin Map Plugin activated");
   }
-
 }
 
 export async function onDeactivate(context: IPluginContext): Promise<void> {
@@ -57,7 +56,7 @@ export async function onUnload(context: IPluginContext): Promise<void> {
 
 // Hook handlers
 export async function onPluginActivated(
-  context: IPluginContext
+  context: IPluginContext,
 ): Promise<void> {
   if (context.logger?.info) {
     context.logger.info("Plugin Map Plugin activated via hook");
@@ -65,7 +64,7 @@ export async function onPluginActivated(
 }
 
 export async function onPluginDeactivated(
-  context: IPluginContext
+  context: IPluginContext,
 ): Promise<void> {
   if (context.logger?.info) {
     context.logger.info("Plugin Map Plugin deactivated via hook");

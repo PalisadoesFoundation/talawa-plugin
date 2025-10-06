@@ -32,18 +32,21 @@ The plugin manager is responsible for:
 The system provides specific extension points for different contexts:
 
 #### Route Extensions
+
 - **RA1**: Admin Global Routes - System-wide admin functionality
 - **RA2**: Admin Organization Routes - Organization-specific admin features
 - **RU1**: User Organization Routes - Organization-specific user features
 - **RU2**: User Global Routes - System-wide user functionality
 
 #### Drawer Extensions
+
 - **DA1**: Admin Global Drawer - Menu items for global admins
 - **DA2**: Admin Organization Drawer - Menu items for organization admins
 - **DU1**: User Organization Drawer - Menu items for organization users
 - **DU2**: User Global Drawer - Menu items for global users
 
 #### Injector Extensions
+
 - **G1-G5**: General Injectors - Code injection points for UI components
 
 ## API Plugin System
@@ -213,10 +216,10 @@ Plugins receive a context object that provides access to system resources:
 
 ```typescript
 interface IPluginContext {
-  db: unknown;           // Drizzle database instance
-  graphql: unknown;      // GraphQL schema builder
-  pubsub: unknown;       // PubSub instance
-  logger: ILogger;       // Logger instance
+  db: unknown; // Drizzle database instance
+  graphql: unknown; // GraphQL schema builder
+  pubsub: unknown; // PubSub instance
+  logger: ILogger; // Logger instance
   pluginManager?: unknown; // Plugin manager instance
 }
 ```
@@ -381,4 +384,3 @@ The plugin system includes comprehensive error handling:
 - Performance monitoring and optimization
 
 This architecture provides a robust, extensible, and maintainable plugin system that allows organizations to customize Talawa to their specific needs while maintaining system stability and security.
-

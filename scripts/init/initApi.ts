@@ -1,7 +1,7 @@
 // scripts/initAPI.ts
-import { spinner } from '@clack/prompts';
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { spinner } from "@clack/prompts";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 /**
  * Scaffolds the Server/API side of a plugin.
@@ -21,20 +21,20 @@ import { join } from 'node:path';
  */
 export function createAPISkeleton(
   pluginName: string,
-  pluginsRoot = 'plugins',
+  pluginsRoot = "plugins",
 ): void {
   const s = spinner();
-  s.start('Creating API skeleton…');
+  s.start("Creating API skeleton…");
 
-  const apiRoot = join(pluginsRoot, pluginName, 'api');
-  const dbDir = join(apiRoot, 'database');
-  const gqlDir = join(apiRoot, 'graphql');
+  const apiRoot = join(pluginsRoot, pluginName, "api");
+  const dbDir = join(apiRoot, "database");
+  const gqlDir = join(apiRoot, "graphql");
 
   [dbDir, gqlDir].forEach((d) => mkdirSync(d, { recursive: true }));
 
   // Database tables
   writeFileSync(
-    join(dbDir, 'tables.ts'),
+    join(dbDir, "tables.ts"),
     `import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 export const ${camelCase(pluginName)}Table = pgTable('${pluginName.toLowerCase()}', {
@@ -52,7 +52,7 @@ export type New${pascal(pluginName)} = typeof ${camelCase(pluginName)}Table.$inf
 
   // GraphQL types
   writeFileSync(
-    join(gqlDir, 'types.ts'),
+    join(gqlDir, "types.ts"),
     `import { z } from 'zod';
 
 export const ${pascal(pluginName)}Schema = z.object({
@@ -72,7 +72,7 @@ export type ${pascal(pluginName)}ListType = z.infer<typeof ${pascal(pluginName)}
 
   // GraphQL inputs
   writeFileSync(
-    join(gqlDir, 'inputs.ts'),
+    join(gqlDir, "inputs.ts"),
     `import { z } from 'zod';
 
 export const Create${pascal(pluginName)}InputSchema = z.object({
@@ -94,7 +94,7 @@ export type Update${pascal(pluginName)}Input = z.infer<typeof Update${pascal(plu
 
   // GraphQL queries
   writeFileSync(
-    join(gqlDir, 'queries.ts'),
+    join(gqlDir, "queries.ts"),
     `import type { IPluginContext } from '~/src/plugin/types';
 import { ${pascal(pluginName)}ListSchema } from './types';
 
@@ -118,7 +118,7 @@ export function register${pascal(pluginName)}Queries(graphql: any): void {
 
   // GraphQL mutations
   writeFileSync(
-    join(gqlDir, 'mutations.ts'),
+    join(gqlDir, "mutations.ts"),
     `import type { IPluginContext } from '~/src/plugin/types';
 import { ${pascal(pluginName)}Schema, Create${pascal(pluginName)}InputSchema, Update${pascal(pluginName)}InputSchema } from './types';
 
@@ -172,7 +172,7 @@ export function register${pascal(pluginName)}Mutations(graphql: any): void {
 
   // Main index.ts
   writeFileSync(
-    join(apiRoot, 'index.ts'),
+    join(apiRoot, "index.ts"),
     `import type { IPluginContext } from '~/src/plugin/types';
 
 // Export all GraphQL components
@@ -265,37 +265,37 @@ export function getPluginInfo() {
 
   // Manifest.json
   writeFileSync(
-    join(apiRoot, 'manifest.json'),
+    join(apiRoot, "manifest.json"),
     JSON.stringify(
       {
         name: pascal(pluginName),
         pluginId: camelCase(pluginName),
-        version: '1.0.0',
+        version: "1.0.0",
         description: `A ${pluginName} plugin that provides ${pluginName} functionality.`,
-        author: 'Palisadoes Foundation',
-        main: 'index.ts',
+        author: "Palisadoes Foundation",
+        main: "index.ts",
         extensionPoints: {
           graphql: [
             {
-              type: 'query',
+              type: "query",
               name: `${camelCase(pluginName)}Queries`,
-              file: 'graphql/queries.ts',
+              file: "graphql/queries.ts",
               builderDefinition: `register${pascal(pluginName)}Queries`,
               description: `Register all ${pascal(pluginName)} query fields`,
             },
             {
-              type: 'mutation',
+              type: "mutation",
               name: `${camelCase(pluginName)}Mutations`,
-              file: 'graphql/mutations.ts',
+              file: "graphql/mutations.ts",
               builderDefinition: `register${pascal(pluginName)}Mutations`,
               description: `Register all ${pascal(pluginName)} mutation fields`,
             },
           ],
           database: [
             {
-              type: 'table',
+              type: "table",
               name: `${camelCase(pluginName)}Table`,
-              file: 'database/tables.ts',
+              file: "database/tables.ts",
               description: `${pascal(pluginName)} data table`,
             },
           ],
@@ -308,7 +308,7 @@ export function getPluginInfo() {
 
   // README.md
   writeFileSync(
-    join(apiRoot, 'README.md'),
+    join(apiRoot, "README.md"),
     `# ${pascal(pluginName)} – API module
 
 This folder contains the server-side code that extends **Talawa-API**.
@@ -337,7 +337,7 @@ The plugin creates a \`${pluginName.toLowerCase()}\` table with the following fi
 `,
   );
 
-  s.stop('API skeleton created.');
+  s.stop("API skeleton created.");
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -345,12 +345,16 @@ function pascal(str: string): string {
   return str
     .split(/[-_]/)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join('');
+    .join("");
 }
 
 function camelCase(str: string): string {
   return str
     .split(/[-_]/)
-    .map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join('');
+    .map((w, i) =>
+      i === 0
+        ? w.toLowerCase()
+        : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(),
+    )
+    .join("");
 }

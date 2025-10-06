@@ -70,16 +70,19 @@ The Plugin Store displays:
 ## Plugin Status Types
 
 ### Active
+
 - Plugin is fully functional
 - All components are registered and available
 - Plugin appears in navigation and is accessible
 
 ### Inactive
+
 - Plugin is installed but not enabled
 - Components are not registered
 - Plugin does not appear in navigation
 
 ### Error
+
 - Plugin failed to load or activate
 - Error details are displayed
 - Plugin is automatically deactivated for safety
@@ -110,18 +113,21 @@ Some plugins may require configuration:
 ### Common Issues
 
 #### Plugin Won't Install
+
 - **Check Compatibility**: Ensure the plugin is compatible with your Talawa version
 - **Verify Dependencies**: Some plugins require specific dependencies
 - **Check Permissions**: Ensure you have admin permissions
 - **Review Logs**: Check system logs for error details
 
 #### Plugin Won't Activate
+
 - **Check Requirements**: Verify all plugin requirements are met
 - **Review Configuration**: Ensure plugin is properly configured
 - **Check Database**: Verify database tables are created correctly
 - **Test GraphQL**: Check if GraphQL schema is registered properly
 
 #### Plugin Shows Error Status
+
 - **Read Error Message**: Check the specific error details
 - **Review Logs**: Look for detailed error information
 - **Check Dependencies**: Ensure all required services are running
@@ -241,4 +247,3 @@ For plugins without automatic updates:
 - **Professional Support**: Contact Talawa support for system issues
 
 This guide provides comprehensive information for managing plugins effectively and safely in your Talawa installation.
-

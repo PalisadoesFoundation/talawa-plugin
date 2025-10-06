@@ -23,12 +23,14 @@ Route extensions allow plugins to add new pages and navigation to the admin pane
 **Context**: Global (no organization-specific)
 
 **Use Cases**:
+
 - System-wide settings and configuration
 - Global user management
 - Cross-organization analytics
 - System administration tools
 
 **Example**:
+
 ```json
 {
   "extensionPoints": {
@@ -49,12 +51,14 @@ Route extensions allow plugins to add new pages and navigation to the admin pane
 **Context**: Organization-specific (requires `orgId` parameter)
 
 **Use Cases**:
+
 - Organization settings and configuration
 - Member management
 - Organization-specific analytics
 - Event management tools
 
 **Example**:
+
 ```json
 {
   "extensionPoints": {
@@ -75,12 +79,14 @@ Route extensions allow plugins to add new pages and navigation to the admin pane
 **Context**: Organization-specific (requires `orgId` parameter)
 
 **Use Cases**:
+
 - Organization participation features
 - Member-specific tools
 - Organization event participation
 - User organization settings
 
 **Example**:
+
 ```json
 {
   "extensionPoints": {
@@ -101,12 +107,14 @@ Route extensions allow plugins to add new pages and navigation to the admin pane
 **Context**: Global (no organization-specific)
 
 **Use Cases**:
+
 - Global user profile management
 - Cross-organization features
 - Global user preferences
 - System-wide user tools
 
 **Example**:
+
 ```json
 {
   "extensionPoints": {
@@ -131,12 +139,14 @@ Drawer extensions allow plugins to add menu items to the navigation drawer.
 **Context**: Global admin navigation
 
 **Properties**:
+
 - `label`: Display text for the menu item
 - `icon`: Icon path or component
 - `path`: Navigation path
 - `order`: Display order (optional)
 
 **Example**:
+
 ```json
 {
   "extensionPoints": {
@@ -159,6 +169,7 @@ Drawer extensions allow plugins to add menu items to the navigation drawer.
 **Context**: Organization admin navigation
 
 **Example**:
+
 ```json
 {
   "extensionPoints": {
@@ -181,6 +192,7 @@ Drawer extensions allow plugins to add menu items to the navigation drawer.
 **Context**: Organization user navigation
 
 **Example**:
+
 ```json
 {
   "extensionPoints": {
@@ -203,6 +215,7 @@ Drawer extensions allow plugins to add menu items to the navigation drawer.
 **Context**: Global user navigation
 
 **Example**:
+
 ```json
 {
   "extensionPoints": {
@@ -229,18 +242,21 @@ Injector extensions allow plugins to inject code into existing components.
 **Context**: Various UI locations throughout the application
 
 **Use Cases**:
+
 - Adding buttons to existing pages
 - Injecting content into forms
 - Adding widgets to dashboards
 - Customizing existing components
 
 **Properties**:
+
 - `injector`: Component name to inject
 - `description`: Description of what the injector does
 - `target`: Optional target identifier for specific injection points
 - `order`: Optional display order
 
 **Example**:
+
 ```json
 {
   "extensionPoints": {
@@ -273,11 +289,13 @@ API extensions allow plugins to extend the backend functionality.
 **Purpose**: Add GraphQL queries, mutations, and subscriptions.
 
 **Types**:
+
 - `query`: Read operations
 - `mutation`: Write operations
 - `subscription`: Real-time operations
 
 **Builder-First Approach**:
+
 ```json
 {
   "extensionPoints": {
@@ -306,11 +324,13 @@ API extensions allow plugins to extend the backend functionality.
 **Purpose**: Add database tables, enums, and relations.
 
 **Types**:
+
 - `table`: Database tables
 - `enum`: Database enums
 - `relation`: Database relations
 
 **Example**:
+
 ```json
 {
   "extensionPoints": {
@@ -331,16 +351,19 @@ API extensions allow plugins to extend the backend functionality.
 **Purpose**: Register event handlers for system events.
 
 **Types**:
+
 - `pre`: Execute before an event
 - `post`: Execute after an event
 
 **Events**:
+
 - `plugin:activated`: Plugin activation events
 - `plugin:deactivated`: Plugin deactivation events
 - `user:created`: User creation events
 - `organization:created`: Organization creation events
 
 **Example**:
+
 ```json
 {
   "extensionPoints": {
@@ -484,4 +507,4 @@ API extensions allow plugins to extend the backend functionality.
 3. **Server Logs**: Check backend extension logs
 4. **Plugin Manager**: Review plugin status and errors
 
-This reference provides comprehensive information about all available extension points and how to use them effectively in your plugins. 
+This reference provides comprehensive information about all available extension points and how to use them effectively in your plugins.
