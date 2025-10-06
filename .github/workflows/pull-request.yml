@@ -345,14 +345,14 @@ jobs:
       - name: Run Flake8 Linter
         run: |
           source venv/bin/activate
-          flake8 --docstring-convention google --ignore E402,E722,E203,F401,W503 .github
+          flake8 --docstring-convention google --ignore E402,E722,E203,F401,W503 .github plugin scripts
 
       - name: Run pydocstyle
         run: |
           source venv/bin/activate
-          pydocstyle --convention=google --add-ignore=D415,D205 .github
+          pydocstyle --convention=google --add-ignore=D415,D205 .github plugin scripts
 
       - name: Run docstring compliance check
         run: |
           source venv/bin/activate
-          python .github/workflows/scripts/check_docstrings.py --directories .github
+          python .github/workflows/scripts/check_docstrings.py --directories .github plugin scripts
