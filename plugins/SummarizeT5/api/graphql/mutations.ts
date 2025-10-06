@@ -11,20 +11,19 @@ const summarizeArgsSchema = z.object({
 export async function summarizeTextResolver(
   _parent: unknown,
   args: z.infer<typeof summarizeArgsSchema>,
-  _ctx: GraphQLContext
+  _ctx: GraphQLContext,
 ) {
   const { success, data, error } = summarizeArgsSchema.safeParse(args);
   if (!success) {
     throw new Error(
-      `invalid_arguments: ${error.issues.map((i) => i.message).join(", ")}`
+      `invalid_arguments: ${error.issues.map((i) => i.message).join(", ")}`,
     );
   }
 
   // Inside a container, localhost points to the container itself, not the host.
   // Prefer host.docker.internal which resolves to the host on Docker Desktop/Linux.
   const endpoint =
-    process.env.T5_SERVICE_URL ||
-    "http://host.docker.internal:8000/summarize";
+    process.env.T5_SERVICE_URL || "http://host.docker.internal:8000/summarize";
   const payload = {
     text: data.input.text,
     max_summary_length: 150,
@@ -59,8 +58,6 @@ export function registerSummarizeMutations(b: typeof builder) {
       },
       description: "Summarize text to ~10 words (demo)",
       resolve: summarizeTextResolver,
-    })
+    }),
   );
 }
-
-

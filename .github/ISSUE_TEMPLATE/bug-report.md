@@ -3,7 +3,8 @@ name: Bug Report
 about: Create a report to help us improve.
 title: Bug Report
 labels: bug
-assignees: ""
+assignees: ''
+
 ---
 
 **Describe the bug**
@@ -31,6 +32,5 @@ Add any other context or screenshots about the feature request here.
 
 **Potential internship candidates**
 
-Please read this if you are planning to apply for a Palisadoes Foundation internship
-
+Please read this if you are planning to apply for a Palisadoes Foundation internship 
 - https://github.com/PalisadoesFoundation/talawa/issues/359

@@ -7,15 +7,13 @@ export async function summarizeT5HealthResolver() {
 
 // Register all SummarizeT5 queries with the builder
 export function registerSummarizeQueries(
-  builderInstance: typeof builder
+  builderInstance: typeof builder,
 ): void {
   builderInstance.queryField("summarizeT5Health", (t) =>
     t.field({
       type: "String",
       description: "Health status for SummarizeT5 plugin",
       resolve: summarizeT5HealthResolver,
-    })
+    }),
   );
 }
-
-
