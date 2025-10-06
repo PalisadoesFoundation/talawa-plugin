@@ -35,7 +35,7 @@ jobs:
           node-version: '24.x'
 
       - name: Install Dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Count number of lines
         run: |
@@ -68,15 +68,15 @@ jobs:
 
       - name: Check formatting
         if: steps.changed-files.outputs.only_changed != 'true'
-        run: npm run format:check
+        run: pnpm run format:check
         
       - name: Run formatting if check fails
         if: failure()
-        run: npm run format:fix
+        run: pnpm run format:fix
 
       # - name: Check for type errors
       #   if: steps.changed-files.outputs.only_changed != 'true'
-      #   run: npm run typecheck
+      #   run: pnpm run typecheck
 
       # - name: Check for linting errors in modified files
       #   if: steps.changed-files.outputs.only_changed != 'true'
@@ -85,7 +85,7 @@ jobs:
       #   run: npx eslint ${CHANGED_FILES}
         
       - name: Check for TSDoc comments
-        run: npm run check-tsdoc # Run the TSDoc check script
+        run: pnpm run check-tsdoc # Run the TSDoc check script
 
       # - name: Check for localStorage Usage
       #   run: npx tsx scripts/githooks/check-localstorage-usage.ts --scan-entire-repo
@@ -290,10 +290,10 @@ jobs:
           node-version: '24.x' 
       - name: Install dependencies
         working-directory: ./docs
-        run: npm install
+        run: pnpm install
       - name: Test building the website
         working-directory: ./docs
-        run: npm run build
+        run: pnpm run build
 
   Check-Target-Branch:
     if: ${{ github.actor != 'dependabot[bot]' }}
