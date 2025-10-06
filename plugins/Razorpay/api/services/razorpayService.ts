@@ -96,6 +96,20 @@ export class RazorpayService {
     }
 
     try {
+      // Format currency display based on currency type
+      const currencySymbols: { [key: string]: string } = {
+        INR: "₹",
+        USD: "$",
+        EUR: "€",
+        GBP: "£",
+      };
+      const symbol = currencySymbols[orderData.currency] || orderData.currency;
+      const displayAmount = (orderData.amount / 100).toFixed(2);
+
+      this.context.log?.info(
+        `Creating Razorpay order with amount: ${symbol}${displayAmount} ${orderData.currency}`,
+      );
+
       const order = await this.razorpay!.orders.create({
         amount: orderData.amount,
         currency: orderData.currency,
@@ -103,10 +117,41 @@ export class RazorpayService {
         notes: orderData.notes,
       });
 
-      this.context.log?.info(`Razorpay order created: ${order.id}`);
+      this.context.log?.info(
+        `Razorpay order created: ${order.id} for ${symbol}${displayAmount} ${orderData.currency}`,
+      );
       return order;
     } catch (error) {
       this.context.log?.error("Failed to create Razorpay order:", error);
+
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (
+          error.message.includes("401") ||
+          error.message.includes("Unauthorized")
+        ) {
+          throw new Error(
+            "Invalid API credentials. Please check your Key ID and Key Secret.",
+          );
+        } else if (
+          error.message.includes("403") ||
+          error.message.includes("Forbidden")
+        ) {
+          throw new Error(
+            "Access forbidden. Please check if your Razorpay account is active.",
+          );
+        } else if (
+          error.message.includes("429") ||
+          error.message.includes("Rate limit")
+        ) {
+          throw new Error(
+            "Rate limit exceeded. Please try again in a few minutes.",
+          );
+        } else {
+          throw new Error(`Razorpay API error: ${error.message}`);
+        }
+      }
+
       throw error;
     }
   }
@@ -167,15 +212,77 @@ export class RazorpayService {
     }
   }
 
+  async verifyWebhookSignature(
+    webhookBody: string,
+    signature: string,
+  ): Promise<boolean> {
+    try {
+      const config = await this.context.drizzleClient
+        .select()
+        .from(configTable)
+        .limit(1);
+
+      if (config.length === 0 || !config[0]?.webhookSecret) {
+        throw new Error("Webhook secret not configured");
+      }
+
+      const expectedSignature = crypto
+        .createHmac("sha256", config[0]?.webhookSecret)
+        .update(webhookBody)
+        .digest("hex");
+
+      const isValid = crypto.timingSafeEqual(
+        Buffer.from(expectedSignature, "hex"),
+        Buffer.from(signature, "hex"),
+      );
+
+      this.context.log?.info(
+        `Webhook signature verification result: ${isValid}`,
+      );
+      return isValid;
+    } catch (error) {
+      this.context.log?.error("Failed to verify webhook signature:", error);
+      throw error;
+    }
+  }
+
   async processWebhook(webhookData: RazorpayWebhookData): Promise<void> {
     try {
       const { payment } = webhookData.payload;
       const paymentEntity = payment.entity;
 
-      // Update transaction in database
-      await this.context.drizzleClient
-        .update(transactionsTable)
-        .set({
+      // Get order details to get userId and other info
+      const orderDetails = await this.context.drizzleClient
+        .select()
+        .from(ordersTable)
+        .where(eq(ordersTable.razorpayOrderId, paymentEntity.order_id))
+        .limit(1);
+
+      if (orderDetails.length === 0) {
+        this.context.log?.error(
+          `Order not found for payment: ${paymentEntity.id}`,
+        );
+        throw new Error(`Order not found for payment: ${paymentEntity.id}`);
+      }
+
+      const order = orderDetails[0];
+
+      // Check if transaction already exists
+      const existingTransaction = await this.context.drizzleClient
+        .select()
+        .from(transactionsTable)
+        .where(eq(transactionsTable.paymentId, paymentEntity.id))
+        .limit(1);
+
+      if (existingTransaction.length === 0) {
+        // Create new transaction with userId from order
+        await this.context.drizzleClient.insert(transactionsTable).values({
+          paymentId: paymentEntity.id,
+          orderId: order.id,
+          organizationId: order.organizationId,
+          userId: order.userId, // Use userId from order
+          amount: order.amount,
+          currency: order.currency,
           status: paymentEntity.status,
           method: paymentEntity.method,
           bank: paymentEntity.bank || undefined,
@@ -191,9 +298,33 @@ export class RazorpayService {
           capturedAt: paymentEntity.captured
             ? new Date(paymentEntity.created_at * 1000)
             : undefined,
+          createdAt: new Date(),
           updatedAt: new Date(),
-        })
-        .where(eq(transactionsTable.paymentId, paymentEntity.id));
+        });
+      } else {
+        // Update existing transaction
+        await this.context.drizzleClient
+          .update(transactionsTable)
+          .set({
+            status: paymentEntity.status,
+            method: paymentEntity.method,
+            bank: paymentEntity.bank || undefined,
+            wallet: paymentEntity.wallet || undefined,
+            vpa: paymentEntity.vpa || undefined,
+            email: paymentEntity.email,
+            contact: paymentEntity.contact,
+            fee: paymentEntity.fee,
+            tax: paymentEntity.tax,
+            errorCode: paymentEntity.error_code || undefined,
+            errorDescription: paymentEntity.error_description || undefined,
+            refundStatus: paymentEntity.refund_status || undefined,
+            capturedAt: paymentEntity.captured
+              ? new Date(paymentEntity.created_at * 1000)
+              : undefined,
+            updatedAt: new Date(),
+          })
+          .where(eq(transactionsTable.paymentId, paymentEntity.id));
+      }
 
       // Update order status if payment is captured
       if (paymentEntity.captured) {

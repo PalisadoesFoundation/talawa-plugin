@@ -97,11 +97,13 @@ docker-compose up -d
 ## When to Use
 
 ✅ Ideal for:
+
 - Machine Learning plugins (e.g., summarisation, image tagging)
 - Document parsers or video processors
 - Isolated backend tools
 
 ❌ Avoid if:
+
 - Plugin only renders UI or simple APIs
 - Plugin runs entirely within the browser or admin panel
 

@@ -35,13 +35,13 @@ plugins/
 ### Example (Vitest + TypeORM)
 
 ```ts
-import { describe, it, expect } from 'vitest';
-import { getGreeting } from '../plugin-service';
+import { describe, it, expect } from "vitest";
+import { getGreeting } from "../plugin-service";
 
-describe('plugin-service', () => {
-  it('should return the correct greeting', () => {
-    const result = getGreeting('Talawa');
-    expect(result).toBe('Hello, Talawa!');
+describe("plugin-service", () => {
+  it("should return the correct greeting", () => {
+    const result = getGreeting("Talawa");
+    expect(result).toBe("Hello, Talawa!");
   });
 });
 ```
@@ -54,12 +54,12 @@ describe('plugin-service', () => {
 ### Example
 
 ```tsx
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import PluginCard from '../PluginCard';
+import { describe, it, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
+import PluginCard from "../PluginCard";
 
-describe('PluginCard', () => {
-  it('renders plugin name', () => {
+describe("PluginCard", () => {
+  it("renders plugin name", () => {
     render(<PluginCard name="Survey Plugin" />);
     expect(screen.getByText(/Survey Plugin/)).toBeInTheDocument();
   });
