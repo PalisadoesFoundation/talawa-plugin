@@ -62,7 +62,7 @@
         "description": "Handle payment failure events"
       }
     ],
-    "webhooks":[
+    "webhooks": [
       {
         "path": "/",
         "handler": "handleRazorpayWebhook",

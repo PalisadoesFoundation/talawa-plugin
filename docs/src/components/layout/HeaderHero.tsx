@@ -1,5 +1,5 @@
-import React from 'react';
-import HomeCallToAction from '../../utils/HomeCallToAction';
+import React from "react";
+import HomeCallToAction from "../../utils/HomeCallToAction";
 
 function HeaderHero() {
   return (
@@ -10,9 +10,7 @@ function HeaderHero() {
       <h2 className="tagline" aria-describedby="main-title">
         Plugin Docs
       </h2>
-      <p className="description">
-        Plugins for the Talawa Admin portal
-      </p>
+      <p className="description">Plugins for the Talawa Admin portal</p>
       <div className="buttons" role="navigation" aria-label="Quick links">
         <HomeCallToAction />
       </div>
