@@ -15,7 +15,7 @@ import { getPluginMapPollsInputSchema } from "./inputs";
 export async function getExtensionPointsOverviewResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
-  ctx: GraphQLContext,
+  ctx: GraphQLContext
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -95,7 +95,7 @@ export async function getPluginMapRequestsResolver(
       extensionPoint?: string | null;
     } | null;
   },
-  ctx: GraphQLContext,
+  ctx: GraphQLContext
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -133,14 +133,14 @@ export async function getPluginMapRequestsResolver(
         whereConditions.push(isNull(pollsTable.organizationId));
       } else {
         whereConditions.push(
-          eq(pollsTable.organizationId, parsedArgs.organizationId),
+          eq(pollsTable.organizationId, parsedArgs.organizationId)
         );
       }
     }
 
     if (parsedArgs.extensionPoint) {
       whereConditions.push(
-        eq(pollsTable.extensionPoint, parsedArgs.extensionPoint),
+        eq(pollsTable.extensionPoint, parsedArgs.extensionPoint)
       );
     }
 
@@ -186,7 +186,7 @@ export async function getPluginMapPollsResolver(
       extensionPoint?: string | null;
     } | null;
   },
-  ctx: GraphQLContext,
+  ctx: GraphQLContext
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -220,14 +220,14 @@ export async function getPluginMapPollsResolver(
         whereConditions.push(isNull(pollsTable.organizationId));
       } else {
         whereConditions.push(
-          eq(pollsTable.organizationId, parsedArgs.organizationId),
+          eq(pollsTable.organizationId, parsedArgs.organizationId)
         );
       }
     }
 
     if (parsedArgs.extensionPoint) {
       whereConditions.push(
-        eq(pollsTable.extensionPoint, parsedArgs.extensionPoint),
+        eq(pollsTable.extensionPoint, parsedArgs.extensionPoint)
       );
     }
 
@@ -265,7 +265,7 @@ export async function getPluginMapPollsResolver(
 
 // Register all Plugin Map queries with the builder
 export function registerPluginMapQueries(
-  builderInstance: typeof builder,
+  builderInstance: typeof builder
 ): void {
   // Get extension points overview
   builderInstance.queryField("getExtensionPointsOverview", (t) =>
@@ -274,7 +274,7 @@ export function registerPluginMapQueries(
       description:
         "Get an overview of all available extension points in the system",
       resolve: getExtensionPointsOverviewResolver,
-    }),
+    })
   );
 
   // Get plugin map requests
@@ -296,7 +296,7 @@ export function registerPluginMapQueries(
       },
       description: "Get logged requests from different contexts",
       resolve: getPluginMapRequestsResolver,
-    }),
+    })
   );
 
   // Get plugin map polls
@@ -317,6 +317,6 @@ export function registerPluginMapQueries(
       },
       description: "Get plugin map polls with optional filtering",
       resolve: getPluginMapPollsResolver,
-    }),
+    })
   );
 }

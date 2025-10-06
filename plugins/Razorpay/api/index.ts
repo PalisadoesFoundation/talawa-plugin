@@ -87,7 +87,7 @@ export async function onActivate(context: IPluginContext): Promise<void> {
     if (context.logger?.error) {
       context.logger.error(
         "Failed to initialize Razorpay configuration:",
-        error,
+        error
       );
     }
   }
@@ -97,7 +97,7 @@ export async function onActivate(context: IPluginContext): Promise<void> {
     try {
       if (context.logger?.info) {
         context.logger.info(
-          "GraphQL schema extensions registered for Razorpay Plugin",
+          "GraphQL schema extensions registered for Razorpay Plugin"
         );
       }
     } catch (error) {
@@ -135,7 +135,7 @@ export async function onUnload(context: IPluginContext): Promise<void> {
 // Event handlers
 export async function onPaymentCreated(
   data: any,
-  context: IPluginContext,
+  context: IPluginContext
 ): Promise<void> {
   try {
     if (context.logger?.info) {
@@ -162,7 +162,7 @@ export async function onPaymentCreated(
 
 export async function onPaymentCompleted(
   data: any,
-  context: IPluginContext,
+  context: IPluginContext
 ): Promise<void> {
   try {
     if (context.logger?.info) {
@@ -207,7 +207,7 @@ export async function onPaymentCompleted(
 
 export async function onPaymentFailed(
   data: any,
-  context: IPluginContext,
+  context: IPluginContext
 ): Promise<void> {
   try {
     if (context.logger?.info) {
@@ -290,11 +290,11 @@ export async function getPluginInfo(context: IPluginContext) {
 // Webhook handler for Razorpay
 export async function handleRazorpayWebhook(
   request: any,
-  reply: any,
+  reply: any
 ): Promise<void> {
   try {
     const webhookData = request.body;
-
+    
     // Create context with available resources
     const context = {
       log: console,
@@ -303,24 +303,22 @@ export async function handleRazorpayWebhook(
     };
 
     // Import and use the Razorpay service
-    const { createRazorpayService } = await import(
-      "./services/razorpayService"
-    );
+    const { createRazorpayService } = await import("./services/razorpayService");
     const razorpayService = createRazorpayService(context as any);
 
     // Process the webhook
     await razorpayService.processWebhook(webhookData);
 
     // Return success response
-    reply.status(200).send({
+    reply.status(200).send({ 
       status: "success",
-      message: "Webhook processed successfully",
+      message: "Webhook processed successfully"
     });
   } catch (error) {
     console.error("Razorpay webhook processing failed:", error);
-    reply.status(500).send({
+    reply.status(500).send({ 
       error: "Webhook processing failed",
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: error instanceof Error ? error.message : "Unknown error"
     });
   }
 }

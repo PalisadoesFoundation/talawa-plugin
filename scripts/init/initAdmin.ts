@@ -1,7 +1,7 @@
 // scripts/initAdmin.ts
-import { spinner } from "@clack/prompts";
-import { mkdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { spinner } from '@clack/prompts';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 /**
  * Scaffolds the Admin (web) part of a plugin.
@@ -21,24 +21,24 @@ import { join } from "node:path";
  */
 export function createAdminSkeleton(
   pluginName: string,
-  pluginsRoot = "plugins",
+  pluginsRoot = 'plugins'
 ): void {
   const s = spinner();
-  s.start("Creating Admin skeleton…");
+  s.start('Creating Admin skeleton…');
 
-  const adminRoot = join(pluginsRoot, pluginName, "admin");
-  const pagesDir = join(adminRoot, "pages");
-  const assetsDir = join(adminRoot, "assets");
-  const injectorDir = join(adminRoot, "injector");
+  const adminRoot = join(pluginsRoot, pluginName, 'admin');
+  const pagesDir = join(adminRoot, 'pages');
+  const assetsDir = join(adminRoot, 'assets');
+  const injectorDir = join(adminRoot, 'injector');
 
   // Create all dirs
   [pagesDir, assetsDir, injectorDir].forEach((d) =>
-    mkdirSync(d, { recursive: true }),
+    mkdirSync(d, { recursive: true })
   );
 
   /* ─────────── pages/index.tsx ─────────── */
   writeFileSync(
-    join(pagesDir, "index.tsx"),
+    join(pagesDir, 'index.tsx'),
     `import React from 'react';
 
 /**
@@ -66,12 +66,12 @@ const ${pascal(pluginName)}Page: React.FC = () => {
 };
 
 export default ${pascal(pluginName)}Page;
-`,
+`
   );
 
   /* ─────────── injector/IconInjector.tsx ─────────── */
   writeFileSync(
-    join(injectorDir, "IconInjector.tsx"),
+    join(injectorDir, 'IconInjector.tsx'),
     `import React from 'react';
 
 /**
@@ -98,12 +98,12 @@ const ${pascal(pluginName)}IconInjector: React.FC = () => {
 };
 
 export default ${pascal(pluginName)}IconInjector;
-`,
+`
   );
 
   /* ─────────── main index.tsx ─────────── */
   writeFileSync(
-    join(adminRoot, "index.tsx"),
+    join(adminRoot, 'index.tsx'),
     `/**
  * ${pascal(pluginName)} Plugin for Talawa Admin
  *
@@ -210,21 +210,21 @@ export {
   ${pascal(pluginName)}Page,
   ${pascal(pluginName)}IconInjector,
 };
-`,
+`
   );
 
   /* ─────────── manifest.json ─────────── */
   writeFileSync(
-    join(adminRoot, "manifest.json"),
+    join(adminRoot, 'manifest.json'),
     JSON.stringify(
       {
         name: pascal(pluginName),
         pluginId: camelCase(pluginName),
-        version: "1.0.0",
+        version: '1.0.0',
         description: `A ${pluginName} plugin that provides ${pluginName} functionality for the Talawa Admin Panel.`,
-        author: "Palisadoes Foundation",
-        main: "index.tsx",
-        icon: "/src/assets/svgs/plugins.svg",
+        author: 'Palisadoes Foundation',
+        main: 'index.tsx',
+        icon: '/src/assets/svgs/plugins.svg',
         extensionPoints: {
           RA1: [
             {
@@ -235,7 +235,7 @@ export {
           DA1: [
             {
               label: pascal(pluginName),
-              icon: "/src/assets/svgs/plugins.svg",
+              icon: '/src/assets/svgs/plugins.svg',
               path: `/admin/${camelCase(pluginName)}`,
               order: 1,
             },
@@ -255,31 +255,31 @@ export {
 
   /* ─────────── info.json ─────────── */
   writeFileSync(
-    join(adminRoot, "info.json"),
+    join(adminRoot, 'info.json'),
     JSON.stringify(
       {
         name: pascal(pluginName),
-        version: "1.0.0",
+        version: '1.0.0',
         description: `${pascal(pluginName)} plugin for Talawa Admin`,
-        author: "Palisadoes Foundation",
-        homepage: "https://github.com/PalisadoesFoundation/talawa",
+        author: 'Palisadoes Foundation',
+        homepage: 'https://github.com/PalisadoesFoundation/talawa',
         repository: {
-          type: "git",
-          url: "https://github.com/PalisadoesFoundation/talawa.git",
+          type: 'git',
+          url: 'https://github.com/PalisadoesFoundation/talawa.git',
         },
         bugs: {
-          url: "https://github.com/PalisadoesFoundation/talawa/issues",
+          url: 'https://github.com/PalisadoesFoundation/talawa/issues',
         },
-        license: "MIT",
+        license: 'MIT',
         dependencies: {},
         devDependencies: {},
         peerDependencies: {
-          react: "^18.0.0",
-          "react-dom": "^18.0.0",
+          react: '^18.0.0',
+          'react-dom': '^18.0.0',
         },
-        keywords: ["talawa", "plugin", "admin", camelCase(pluginName)],
+        keywords: ['talawa', 'plugin', 'admin', camelCase(pluginName)],
         engines: {
-          node: ">=16.0.0",
+          node: '>=16.0.0',
         },
       },
       null,
@@ -289,7 +289,7 @@ export {
 
   /* ─────────── README.md ─────────── */
   writeFileSync(
-    join(adminRoot, "README.md"),
+    join(adminRoot, 'README.md'),
     `# ${pascal(pluginName)} – Admin module
 
 This folder contains the React code that extends **Talawa-Admin**.
@@ -329,7 +329,7 @@ and its components will be mounted at the registered extension points.
 
   /* ─────────── assets/placeholder.txt ─────────── */
   writeFileSync(
-    join(assetsDir, "placeholder.txt"),
+    join(assetsDir, 'placeholder.txt'),
     `This directory is for static assets like images, icons, and other media files.
 
 Replace this file with your actual assets:
@@ -342,7 +342,7 @@ The assets can be referenced in your components using relative paths.
 `,
   );
 
-  s.stop("Admin skeleton created.");
+  s.stop('Admin skeleton created.');
 }
 
 /* ─────────────────────────────────────── */
@@ -350,16 +350,12 @@ function pascal(str: string): string {
   return str
     .split(/[-_]/)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join("");
+    .join('');
 }
 
 function camelCase(str: string): string {
   return str
     .split(/[-_]/)
-    .map((w, i) =>
-      i === 0
-        ? w.toLowerCase()
-        : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(),
-    )
-    .join("");
+    .map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join('');
 }

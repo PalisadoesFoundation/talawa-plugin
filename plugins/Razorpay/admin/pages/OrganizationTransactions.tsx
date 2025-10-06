@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { useQuery, gql } from "@apollo/client";
-import { useParams } from "react-router-dom";
-import { Card, Form, Button, Row, Col, Alert } from "react-bootstrap";
-import Loader from "../../../../components/Loader/Loader";
+import React, { useState, useEffect } from 'react';
+import { useQuery, gql } from '@apollo/client';
+import { useParams } from 'react-router-dom';
+import { Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
+import Loader from '../../../../components/Loader/Loader';
 
 // GraphQL operations
 const GET_ORG_TRANSACTIONS = gql`
@@ -48,16 +48,8 @@ const GET_ORG_TRANSACTIONS = gql`
 `;
 
 const GET_ORG_TRANSACTION_STATS = gql`
-  query GetOrganizationTransactionStats(
-    $orgId: String!
-    $dateFrom: String
-    $dateTo: String
-  ) {
-    razorpay_getOrganizationTransactionStats(
-      orgId: $orgId
-      dateFrom: $dateFrom
-      dateTo: $dateTo
-    ) {
+  query GetOrganizationTransactionStats($orgId: String!, $dateFrom: String, $dateTo: String) {
+    razorpay_getOrganizationTransactionStats(orgId: $orgId, dateFrom: $dateFrom, dateTo: $dateTo) {
       totalTransactions
       totalAmount
       currency
@@ -111,14 +103,14 @@ interface Pagination {
 const OrganizationTransactions: React.FC = () => {
   const { orgId } = useParams<{ orgId: string }>();
   const [filters, setFilters] = useState({
-    status: "",
-    dateFrom: "",
-    dateTo: "",
+    status: '',
+    dateFrom: '',
+    dateTo: '',
     limit: 20,
     offset: 0,
   });
 
-  const [statsPeriod, setStatsPeriod] = useState("30d");
+  const [statsPeriod, setStatsPeriod] = useState('30d');
 
   // GraphQL queries
   const {
@@ -162,24 +154,24 @@ const OrganizationTransactions: React.FC = () => {
   };
 
   const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: currency || "INR",
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: currency || 'INR',
     }).format(amount / 100); // Razorpay amounts are in paise
   };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "captured":
-      case "success":
-        return "bg-success text-white";
-      case "failed":
-      case "cancelled":
-        return "bg-danger text-white";
-      case "pending":
-        return "bg-warning text-dark";
+      case 'captured':
+      case 'success':
+        return 'bg-success text-white';
+      case 'failed':
+      case 'cancelled':
+        return 'bg-danger text-white';
+      case 'pending':
+        return 'bg-warning text-dark';
       default:
-        return "bg-secondary text-white";
+        return 'bg-secondary text-white';
     }
   };
 
@@ -190,7 +182,7 @@ const OrganizationTransactions: React.FC = () => {
   if (transactionsError || statsError) {
     return (
       <Alert variant="danger">
-        Failed to load transaction data:{" "}
+        Failed to load transaction data:{' '}
         {transactionsError?.message || statsError?.message}
       </Alert>
     );
@@ -273,7 +265,7 @@ const OrganizationTransactions: React.FC = () => {
                 <Form.Label>Status</Form.Label>
                 <Form.Select
                   value={filters.status}
-                  onChange={(e) => handleFilterChange("status", e.target.value)}
+                  onChange={(e) => handleFilterChange('status', e.target.value)}
                 >
                   <option value="">All Status</option>
                   <option value="captured">Successful</option>
@@ -291,7 +283,7 @@ const OrganizationTransactions: React.FC = () => {
                   type="date"
                   value={filters.dateFrom}
                   onChange={(e) =>
-                    handleFilterChange("dateFrom", e.target.value)
+                    handleFilterChange('dateFrom', e.target.value)
                   }
                 />
               </Form.Group>
@@ -303,7 +295,7 @@ const OrganizationTransactions: React.FC = () => {
                 <Form.Control
                   type="date"
                   value={filters.dateTo}
-                  onChange={(e) => handleFilterChange("dateTo", e.target.value)}
+                  onChange={(e) => handleFilterChange('dateTo', e.target.value)}
                 />
               </Form.Group>
             </Col>
@@ -313,7 +305,7 @@ const OrganizationTransactions: React.FC = () => {
                 <Form.Label>Per Page</Form.Label>
                 <Form.Select
                   value={filters.limit}
-                  onChange={(e) => handleFilterChange("limit", e.target.value)}
+                  onChange={(e) => handleFilterChange('limit', e.target.value)}
                 >
                   <option value={10}>10</option>
                   <option value={20}>20</option>
@@ -366,12 +358,10 @@ const OrganizationTransactions: React.FC = () => {
                         </div>
                       </td>
                       <td className="fw-medium">
-                        {transaction.amount
-                          ? formatCurrency(
-                              transaction.amount,
-                              transaction.currency,
-                            )
-                          : "N/A"}
+                        {transaction.amount ? formatCurrency(
+                          transaction.amount,
+                          transaction.currency,
+                        ) : 'N/A'}
                       </td>
                       <td>
                         <span
@@ -380,9 +370,7 @@ const OrganizationTransactions: React.FC = () => {
                           {transaction.status}
                         </span>
                       </td>
-                      <td className="small">
-                        {transaction.donorName || "Anonymous"}
-                      </td>
+                      <td className="small">{transaction.donorName || 'Anonymous'}</td>
                       <td className="small text-muted">
                         {new Date(transaction.createdAt).toLocaleDateString()}
                       </td>
@@ -397,11 +385,11 @@ const OrganizationTransactions: React.FC = () => {
           {pagination && pagination.totalPages > 1 && (
             <div className="d-flex justify-content-between align-items-center mt-4">
               <div className="small text-muted">
-                Showing {filters.offset + 1} to{" "}
+                Showing {filters.offset + 1} to{' '}
                 {Math.min(
                   filters.offset + filters.limit,
                   pagination.totalCount,
-                )}{" "}
+                )}{' '}
                 of {pagination.totalCount} transactions
               </div>
               <div className="d-flex gap-2">
