@@ -53,6 +53,7 @@ class SummarizeRequest(BaseModel):
         None
 
     """
+
     text: str
     max_summary_length: Optional[int] = 150
 
@@ -67,6 +68,7 @@ class SummarizeResponse(BaseModel):
         None
 
     """
+
     summary: str
     original_length: int
     summary_length: int
