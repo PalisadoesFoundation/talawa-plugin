@@ -1,16 +1,16 @@
 # Talawa API Documentation Website
 
-[![N|Solid](static/img/markdown/misc/logo.png)](https://github.com/PalisadoesFoundation/talawa-api)
+[![N|Solid](static/img/markdown/misc/logo.png)](https://github.com/PalisadoesFoundation/talawa-plugin)
 
 ## Installation
 
-This document provides instructions on how to set up and start a running instance of the [talawa-api documentation website](https://docs-admin.talawa.io/) on your local system. The instructions are written to be followed in sequence so make sure to go through each of them step by step without skipping any sections.
+This document provides instructions on how to set up and start a running instance of the [talawa-plugin documentation website](https://docs-plugin.talawa.io/) on your local system. The instructions are written to be followed in sequence so make sure to go through each of them step by step without skipping any sections.
 
 ## Table of Contents
 
 <!-- TOC -->
 
-- [Talawa API Documentation Website](#talawa-api-documentation-website)
+- [Talawa API Documentation Website](#talawa-plugin-documentation-website)
   - [Installation](#installation)
   - [Table of Contents](#table-of-contents)
   - [Prerequisites for Developers](#prerequisites-for-developers)
@@ -23,7 +23,7 @@ This document provides instructions on how to set up and start a running instanc
 
 ## Prerequisites for Developers
 
-The contents of the `talawa-api` repo is used to automatically create [the talawa-api Documentation website](https://docs-admin.talawa.io/). The automation uses [Docusaurus](https://docusaurus.io/docs/), a modern static website generator.
+The contents of the `talawa-plugin` repo is used to automatically create [the talawa-plugin Documentation website](https://docs-plugin.talawa.io/). The automation uses [Docusaurus](https://docusaurus.io/docs/), a modern static website generator.
 
 We recommend that you follow these steps before beginning development work in this repository.
 
@@ -41,7 +41,7 @@ $ pnpm -version
 
 ### Install the Required Packages
 
-From the `talawa-api/docs` directory, run the following command.
+From the `talawa-plugin/docs` directory, run the following command.
 
 ```console
 $ pnpm install
