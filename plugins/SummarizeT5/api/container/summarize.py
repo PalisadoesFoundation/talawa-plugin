@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""
-T5 Small Text Summarization Script
-This script provides both command-line and API interfaces for text summarization using T5-small model.
+"""T5 Small Text Summarization Script.
+
+This script provides both command-line and API interfaces for text
+summarization using T5-small model.
+
 """
 
 import argparse
@@ -13,19 +15,23 @@ import os
 
 
 class T5Summarizer:
+    """T5Summarizer Class."""
+
     def __init__(
         self,
         model_name: str = "t5-base",
         max_length: int = 512,
         min_length: int = 10,
     ):
-        """
-        Initialize T5 summarizer
+        """Initialize T5 summarizer.
 
         Args:
             model_name: Name of the T5 model to use
             max_length: Maximum length of input text
             min_length: Minimum length of summary
+
+        Returns:
+            None
         """
         self.model_name = model_name
         self.max_length = max_length
@@ -47,15 +53,14 @@ class T5Summarizer:
         print("Model loaded successfully!")
 
     def summarize(self, text: str, max_summary_length: int = 150) -> str:
-        """
-        Summarize the input text
+        """Summarize the input text.
 
         Args:
             text: Input text to summarize
             max_summary_length: Maximum length of the summary
 
         Returns:
-            Summarized text
+            summary: Summarized text
         """
         # Preprocess the text
         text = text.strip()
@@ -94,6 +99,15 @@ class T5Summarizer:
 
 
 def main():
+    """Main function.
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    """
     parser = argparse.ArgumentParser(description="T5 Small Text Summarization")
     parser.add_argument("--text", type=str, help="Text to summarize")
     parser.add_argument(

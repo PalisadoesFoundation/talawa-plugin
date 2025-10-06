@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""
-FastAPI server for T5 Text Summarization
+"""FastAPI server for T5 Text Summarization.
+
 Provides REST API endpoints for text summarization using T5-base model
 """
 
@@ -17,7 +17,15 @@ summarizer = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize the T5 model when server starts"""
+    """Initialize the T5 model when server starts.
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    """
     global summarizer
     print("Loading T5 model...")
     summarizer = T5Summarizer()
@@ -36,11 +44,29 @@ app = FastAPI(
 
 
 class SummarizeRequest(BaseModel):
+    """Summarize request model.
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    """
     text: str
     max_summary_length: Optional[int] = 150
 
 
 class SummarizeResponse(BaseModel):
+    """Summarize response model.
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    """
     summary: str
     original_length: int
     summary_length: int
@@ -48,13 +74,29 @@ class SummarizeResponse(BaseModel):
 
 @app.get("/")
 async def root():
-    """Health check endpoint"""
+    """Root endpoint.
+
+    Args:
+        None
+
+    Returns:
+        string: Message string.
+
+    """
     return {"message": "T5 Text Summarization API is running"}
 
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
+    """Health check endpoint.
+
+    Args:
+        None
+
+    Returns:
+        dict: Status dict.
+
+    """
     return {
         "status": "healthy",
         "model": summarizer.model_name if summarizer else "not loaded",
@@ -63,14 +105,15 @@ async def health_check():
 
 @app.post("/summarize", response_model=SummarizeResponse)
 async def summarize_text(request: SummarizeRequest):
-    """
-    Summarize the provided text
+    """Summarize the provided text.
 
     Args:
-        request: SummarizeRequest containing text and optional max_summary_length
+        request: SummarizeRequest containing text and optional
+            max_summary_length
 
     Returns:
-        SummarizeResponse with summary and metadata
+        code: SummarizeResponse with summary and metadata
+
     """
     if not summarizer:
         raise HTTPException(status_code=503, detail="Model not loaded yet")
@@ -98,15 +141,15 @@ async def summarize_text(request: SummarizeRequest):
 
 @app.post("/summarize/batch")
 async def summarize_batch(texts: list[str], max_summary_length: int = 150):
-    """
-    Summarize multiple texts in batch
+    """Summarize multiple texts in batch.
 
     Args:
         texts: List of texts to summarize
         max_summary_length: Maximum length of summaries
 
     Returns:
-        List of summaries
+        list: List of summaries
+
     """
     if not summarizer:
         raise HTTPException(status_code=503, detail="Model not loaded yet")
