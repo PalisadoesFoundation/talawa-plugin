@@ -37,7 +37,6 @@ export const razorpayOrderInputSchema = z.object({
   donorEmail: z.string().nullable().optional(),
   donorPhone: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
-  anonymous: z.boolean().optional().nullable(),
 });
 
 export const RazorpayOrderInput = builder
@@ -53,7 +52,6 @@ export const RazorpayOrderInput = builder
       donorEmail: t.string({ required: false }),
       donorPhone: t.string({ required: false }),
       description: t.string({ required: false }),
-      anonymous: t.boolean({ required: false, nullable: true }),
     }),
   });
 
@@ -100,9 +98,9 @@ export const razorpayVerificationInputSchema = z.object({
 });
 
 export const RazorpayVerificationInput = builder
-  .inputRef<z.infer<typeof razorpayVerificationInputSchema>>(
-    "RazorpayVerificationInput"
-  )
+  .inputRef<
+    z.infer<typeof razorpayVerificationInputSchema>
+  >("RazorpayVerificationInput")
   .implement({
     description: "Input for verifying a Razorpay payment",
     fields: (t) => ({

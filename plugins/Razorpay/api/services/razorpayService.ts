@@ -96,6 +96,20 @@ export class RazorpayService {
     }
 
     try {
+      // Format currency display based on currency type
+      const currencySymbols: { [key: string]: string } = {
+        INR: "₹",
+        USD: "$",
+        EUR: "€",
+        GBP: "£",
+      };
+      const symbol = currencySymbols[orderData.currency] || orderData.currency;
+      const displayAmount = (orderData.amount / 100).toFixed(2);
+
+      this.context.log?.info(
+        `Creating Razorpay order with amount: ${symbol}${displayAmount} ${orderData.currency}`,
+      );
+
       const order = await this.razorpay!.orders.create({
         amount: orderData.amount,
         currency: orderData.currency,
@@ -103,10 +117,41 @@ export class RazorpayService {
         notes: orderData.notes,
       });
 
-      this.context.log?.info(`Razorpay order created: ${order.id}`);
+      this.context.log?.info(
+        `Razorpay order created: ${order.id} for ${symbol}${displayAmount} ${orderData.currency}`,
+      );
       return order;
     } catch (error) {
       this.context.log?.error("Failed to create Razorpay order:", error);
+
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (
+          error.message.includes("401") ||
+          error.message.includes("Unauthorized")
+        ) {
+          throw new Error(
+            "Invalid API credentials. Please check your Key ID and Key Secret.",
+          );
+        } else if (
+          error.message.includes("403") ||
+          error.message.includes("Forbidden")
+        ) {
+          throw new Error(
+            "Access forbidden. Please check if your Razorpay account is active.",
+          );
+        } else if (
+          error.message.includes("429") ||
+          error.message.includes("Rate limit")
+        ) {
+          throw new Error(
+            "Rate limit exceeded. Please try again in a few minutes.",
+          );
+        } else {
+          throw new Error(`Razorpay API error: ${error.message}`);
+        }
+      }
+
       throw error;
     }
   }
@@ -137,7 +182,7 @@ export class RazorpayService {
     paymentId: string,
     orderId: string,
     signature: string,
-    paymentData: string
+    paymentData: string,
   ): Promise<boolean> {
     try {
       const config = await this.context.drizzleClient
@@ -156,7 +201,7 @@ export class RazorpayService {
 
       const isValid = crypto.timingSafeEqual(
         Buffer.from(expectedSignature, "hex"),
-        Buffer.from(signature, "hex")
+        Buffer.from(signature, "hex"),
       );
 
       this.context.log?.info(`Payment verification result: ${isValid}`);
@@ -167,15 +212,77 @@ export class RazorpayService {
     }
   }
 
+  async verifyWebhookSignature(
+    webhookBody: string,
+    signature: string,
+  ): Promise<boolean> {
+    try {
+      const config = await this.context.drizzleClient
+        .select()
+        .from(configTable)
+        .limit(1);
+
+      if (config.length === 0 || !config[0]?.webhookSecret) {
+        throw new Error("Webhook secret not configured");
+      }
+
+      const expectedSignature = crypto
+        .createHmac("sha256", config[0]?.webhookSecret)
+        .update(webhookBody)
+        .digest("hex");
+
+      const isValid = crypto.timingSafeEqual(
+        Buffer.from(expectedSignature, "hex"),
+        Buffer.from(signature, "hex"),
+      );
+
+      this.context.log?.info(
+        `Webhook signature verification result: ${isValid}`,
+      );
+      return isValid;
+    } catch (error) {
+      this.context.log?.error("Failed to verify webhook signature:", error);
+      throw error;
+    }
+  }
+
   async processWebhook(webhookData: RazorpayWebhookData): Promise<void> {
     try {
       const { payment } = webhookData.payload;
       const paymentEntity = payment.entity;
 
-      // Update transaction in database
-      await this.context.drizzleClient
-        .update(transactionsTable)
-        .set({
+      // Get order details to get userId and other info
+      const orderDetails = await this.context.drizzleClient
+        .select()
+        .from(ordersTable)
+        .where(eq(ordersTable.razorpayOrderId, paymentEntity.order_id))
+        .limit(1);
+
+      if (orderDetails.length === 0) {
+        this.context.log?.error(
+          `Order not found for payment: ${paymentEntity.id}`,
+        );
+        throw new Error(`Order not found for payment: ${paymentEntity.id}`);
+      }
+
+      const order = orderDetails[0];
+
+      // Check if transaction already exists
+      const existingTransaction = await this.context.drizzleClient
+        .select()
+        .from(transactionsTable)
+        .where(eq(transactionsTable.paymentId, paymentEntity.id))
+        .limit(1);
+
+      if (existingTransaction.length === 0) {
+        // Create new transaction with userId from order
+        await this.context.drizzleClient.insert(transactionsTable).values({
+          paymentId: paymentEntity.id,
+          orderId: order.id,
+          organizationId: order.organizationId,
+          userId: order.userId, // Use userId from order
+          amount: order.amount,
+          currency: order.currency,
           status: paymentEntity.status,
           method: paymentEntity.method,
           bank: paymentEntity.bank || undefined,
@@ -191,9 +298,33 @@ export class RazorpayService {
           capturedAt: paymentEntity.captured
             ? new Date(paymentEntity.created_at * 1000)
             : undefined,
+          createdAt: new Date(),
           updatedAt: new Date(),
-        })
-        .where(eq(transactionsTable.paymentId, paymentEntity.id));
+        });
+      } else {
+        // Update existing transaction
+        await this.context.drizzleClient
+          .update(transactionsTable)
+          .set({
+            status: paymentEntity.status,
+            method: paymentEntity.method,
+            bank: paymentEntity.bank || undefined,
+            wallet: paymentEntity.wallet || undefined,
+            vpa: paymentEntity.vpa || undefined,
+            email: paymentEntity.email,
+            contact: paymentEntity.contact,
+            fee: paymentEntity.fee,
+            tax: paymentEntity.tax,
+            errorCode: paymentEntity.error_code || undefined,
+            errorDescription: paymentEntity.error_description || undefined,
+            refundStatus: paymentEntity.refund_status || undefined,
+            capturedAt: paymentEntity.captured
+              ? new Date(paymentEntity.created_at * 1000)
+              : undefined,
+            updatedAt: new Date(),
+          })
+          .where(eq(transactionsTable.paymentId, paymentEntity.id));
+      }
 
       // Update order status if payment is captured
       if (paymentEntity.captured) {
@@ -207,7 +338,7 @@ export class RazorpayService {
       }
 
       this.context.log?.info(
-        `Webhook processed for payment: ${paymentEntity.id}`
+        `Webhook processed for payment: ${paymentEntity.id}`,
       );
     } catch (error) {
       this.context.log?.error("Failed to process webhook:", error);
@@ -251,62 +382,78 @@ export class RazorpayService {
   async testConnection(): Promise<{ success: boolean; message: string }> {
     try {
       // Get current configuration
-      const config = await this.context.drizzleClient.select().from(configTable).limit(1);
-      
+      const config = await this.context.drizzleClient
+        .select()
+        .from(configTable)
+        .limit(1);
+
       if (config.length === 0 || !config[0]) {
         return {
           success: false,
-          message: "No Razorpay configuration found. Please configure your API keys first.",
+          message:
+            "No Razorpay configuration found. Please configure your API keys first.",
         };
       }
 
       const configItem = config[0];
-      
+
       if (!configItem.keyId || !configItem.keySecret) {
         return {
           success: false,
-          message: "API keys are not configured. Please enter your Key ID and Key Secret.",
+          message:
+            "API keys are not configured. Please enter your Key ID and Key Secret.",
         };
       }
 
       // Validate key format
-      if (!configItem.keyId.startsWith('rzp_')) {
+      if (!configItem.keyId.startsWith("rzp_")) {
         return {
           success: false,
-          message: "Invalid Key ID format. Razorpay Key ID should start with 'rzp_'.",
+          message:
+            "Invalid Key ID format. Razorpay Key ID should start with 'rzp_'.",
         };
       }
 
-      this.context.log?.info(`Testing Razorpay connection with Key ID: ${configItem.keyId.substring(0, 8)}...`);
+      this.context.log?.info(
+        `Testing Razorpay connection with Key ID: ${configItem.keyId.substring(0, 8)}...`,
+      );
 
       // Test connection by making a simple API call to Razorpay
-      const response = await fetch("https://api.razorpay.com/v1/payments?count=1", {
-        method: "GET",
-        headers: {
-          "Authorization": `Basic ${Buffer.from(`${configItem.keyId}:${configItem.keySecret}`).toString("base64")}`,
-          "Content-Type": "application/json",
-          "User-Agent": "Talawa-Razorpay-Plugin/1.0.0",
+      const response = await fetch(
+        "https://api.razorpay.com/v1/payments?count=1",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Basic ${Buffer.from(`${configItem.keyId}:${configItem.keySecret}`).toString("base64")}`,
+            "Content-Type": "application/json",
+            "User-Agent": "Talawa-Razorpay-Plugin/1.0.0",
+          },
         },
-      });
+      );
 
-      this.context.log?.info(`Razorpay API response status: ${response.status}`);
+      this.context.log?.info(
+        `Razorpay API response status: ${response.status}`,
+      );
 
       if (response.ok) {
         const data = await response.json();
         this.context.log?.info("Razorpay API test successful");
         return {
           success: true,
-          message: "Connection successful! Your Razorpay credentials are valid.",
+          message:
+            "Connection successful! Your Razorpay credentials are valid.",
         };
       } else if (response.status === 401) {
         return {
           success: false,
-          message: "Invalid API credentials. Please check your Key ID and Key Secret. Make sure you're using the correct test/live keys.",
+          message:
+            "Invalid API credentials. Please check your Key ID and Key Secret. Make sure you're using the correct test/live keys.",
         };
       } else if (response.status === 403) {
         return {
           success: false,
-          message: "Access forbidden. Please check if your Razorpay account is active and has the necessary permissions.",
+          message:
+            "Access forbidden. Please check if your Razorpay account is active and has the necessary permissions.",
         };
       } else if (response.status === 429) {
         return {
@@ -319,8 +466,10 @@ export class RazorpayService {
           message: "Razorpay server error. Please try again later.",
         };
       } else {
-        const errorText = await response.text().catch(() => 'Unknown error');
-        this.context.log?.error(`Razorpay API error: ${response.status} - ${errorText}`);
+        const errorText = await response.text().catch(() => "Unknown error");
+        this.context.log?.error(
+          `Razorpay API error: ${response.status} - ${errorText}`,
+        );
         return {
           success: false,
           message: `Connection failed with status ${response.status}. ${errorText}`,
@@ -328,11 +477,12 @@ export class RazorpayService {
       }
     } catch (error) {
       this.context.log?.error("Error testing Razorpay connection:", error);
-      
-      if (error instanceof TypeError && error.message.includes('fetch')) {
+
+      if (error instanceof TypeError && error.message.includes("fetch")) {
         return {
           success: false,
-          message: "Network error. Please check your internet connection and try again.",
+          message:
+            "Network error. Please check your internet connection and try again.",
         };
       } else if (error instanceof Error) {
         return {
@@ -342,7 +492,8 @@ export class RazorpayService {
       } else {
         return {
           success: false,
-          message: "Connection test failed. Please check your internet connection and try again.",
+          message:
+            "Connection test failed. Please check your internet connection and try again.",
         };
       }
     }
@@ -350,7 +501,7 @@ export class RazorpayService {
 }
 
 export function createRazorpayService(
-  context: GraphQLContext
+  context: GraphQLContext,
 ): RazorpayService {
   return new RazorpayService(context);
 }

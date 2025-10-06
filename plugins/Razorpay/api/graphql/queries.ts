@@ -18,7 +18,7 @@ import {
 export async function getRazorpayConfigResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -84,7 +84,7 @@ const getOrganizationTransactionsArgumentsSchema = z.object({
 export async function getOrganizationTransactionsResolver(
   _parent: unknown,
   args: z.infer<typeof getOrganizationTransactionsArgumentsSchema>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -128,7 +128,7 @@ export async function getOrganizationTransactionsResolver(
 
     if (dateFrom) {
       whereConditions.push(
-        gte(transactionsTable.createdAt, new Date(dateFrom))
+        gte(transactionsTable.createdAt, new Date(dateFrom)),
       );
     }
 
@@ -189,6 +189,7 @@ export async function getOrganizationTransactionsResolver(
 // Get user transactions resolver
 const getUserTransactionsArgumentsSchema = z.object({
   userId: z.string(),
+  orgId: z.string().nullable().optional(),
   limit: z.number().nullable().optional(),
   offset: z.number().nullable().optional(),
   status: z.string().nullable().optional(),
@@ -199,7 +200,7 @@ const getUserTransactionsArgumentsSchema = z.object({
 export async function getUserTransactionsResolver(
   _parent: unknown,
   args: z.infer<typeof getUserTransactionsArgumentsSchema>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -228,6 +229,7 @@ export async function getUserTransactionsResolver(
   try {
     const {
       userId,
+      orgId,
       limit = 20,
       offset = 0,
       status,
@@ -237,13 +239,18 @@ export async function getUserTransactionsResolver(
 
     const whereConditions = [eq(transactionsTable.userId, userId)];
 
+    // Filter by organization if provided
+    if (orgId) {
+      whereConditions.push(eq(transactionsTable.organizationId, orgId));
+    }
+
     if (status) {
       whereConditions.push(eq(transactionsTable.status, status));
     }
 
     if (dateFrom) {
       whereConditions.push(
-        gte(transactionsTable.createdAt, new Date(dateFrom))
+        gte(transactionsTable.createdAt, new Date(dateFrom)),
       );
     }
 
@@ -311,7 +318,7 @@ const getOrganizationTransactionStatsArgumentsSchema = z.object({
 export async function getOrganizationTransactionStatsResolver(
   _parent: unknown,
   args: z.infer<typeof getOrganizationTransactionStatsArgumentsSchema>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -344,7 +351,7 @@ export async function getOrganizationTransactionStatsResolver(
 
     if (dateFrom) {
       whereConditions.push(
-        gte(transactionsTable.createdAt, new Date(dateFrom))
+        gte(transactionsTable.createdAt, new Date(dateFrom)),
       );
     }
 
@@ -402,7 +409,7 @@ const getUserTransactionStatsArgumentsSchema = z.object({
 export async function getUserTransactionStatsResolver(
   _parent: unknown,
   args: z.infer<typeof getUserTransactionStatsArgumentsSchema>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -435,7 +442,7 @@ export async function getUserTransactionStatsResolver(
 
     if (dateFrom) {
       whereConditions.push(
-        gte(transactionsTable.createdAt, new Date(dateFrom))
+        gte(transactionsTable.createdAt, new Date(dateFrom)),
       );
     }
 
@@ -491,7 +498,7 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
       type: RazorpayConfigRef,
       description: "Get Razorpay configuration settings",
       resolve: getRazorpayConfigResolver,
-    })
+    }),
   );
 
   // Get organization transactions
@@ -508,7 +515,7 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
       },
       description: "Get transaction summary for an organization",
       resolve: getOrganizationTransactionsResolver,
-    })
+    }),
   );
 
   // Get user transactions
@@ -517,6 +524,7 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
       type: t.listRef(RazorpayTransactionRef),
       args: {
         userId: t.arg.string({ required: true }),
+        orgId: t.arg.string({ required: false }),
         limit: t.arg.int({ required: false }),
         offset: t.arg.int({ required: false }),
         status: t.arg.string({ required: false }),
@@ -525,7 +533,7 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
       },
       description: "Get transaction summary for a user",
       resolve: getUserTransactionsResolver,
-    })
+    }),
   );
 
   // Get organization transaction stats
@@ -539,7 +547,7 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
       },
       description: "Get transaction statistics for an organization",
       resolve: getOrganizationTransactionStatsResolver,
-    })
+    }),
   );
 
   // Get user transaction stats
@@ -553,6 +561,6 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
       },
       description: "Get transaction statistics for a user",
       resolve: getUserTransactionStatsResolver,
-    })
+    }),
   );
 }

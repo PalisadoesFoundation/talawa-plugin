@@ -9,35 +9,37 @@
  * - Detailed examples and usage instructions for each extension point
  */
 
-import { IPluginLifecycle } from '../../types';
+import { IPluginLifecycle } from "../../types";
 
 // Import all components
-import ExtensionPointsDashboard from './pages/ExtensionPointsDashboard';
-import ExtensionPointsOrganization from './pages/ExtensionPointsOrganization';
-import ExtensionPointsUser from './pages/ExtensionPointsUser';
-import ExtensionPointsGlobal from './pages/ExtensionPointsGlobal';
-import MapIconInjector from './injector/MapIconInjector';
+import ExtensionPointsDashboard from "./pages/ExtensionPointsDashboard";
+import ExtensionPointsOrganization from "./pages/ExtensionPointsOrganization";
+import ExtensionPointsUser from "./pages/ExtensionPointsUser";
+import ExtensionPointsGlobal from "./pages/ExtensionPointsGlobal";
+import MapIconInjector from "./injector/MapIconInjector";
 
 // Plugin lifecycle implementation
 const PluginMapLifecycle: IPluginLifecycle = {
   onActivate: async () => {
-    console.log('[onActivateHook] Plugin Map plugin activated');
+    console.log("[onActivateHook] Plugin Map plugin activated");
   },
 
   onDeactivate: async () => {
-    console.log('[onDeactivateHook] Plugin Map plugin deactivated');
+    console.log("[onDeactivateHook] Plugin Map plugin deactivated");
   },
 
   onInstall: async () => {
-    console.log('[onInstallHook] Plugin Map plugin installed');
+    console.log("[onInstallHook] Plugin Map plugin installed");
   },
 
   onUninstall: async () => {
-    console.log('[onUninstallHook] Plugin Map plugin uninstalled');
+    console.log("[onUninstallHook] Plugin Map plugin uninstalled");
   },
 
   onUpdate: async (fromVersion: string, toVersion: string) => {
-    console.log(`[onUpdateHook] Plugin Map plugin updated from ${fromVersion} to ${toVersion}`);
+    console.log(
+      `[onUpdateHook] Plugin Map plugin updated from ${fromVersion} to ${toVersion}`,
+    );
   },
 };
 
