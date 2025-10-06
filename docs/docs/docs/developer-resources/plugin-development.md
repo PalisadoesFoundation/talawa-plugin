@@ -11,6 +11,7 @@ This guide walks you through creating a complete plugin for the Talawa platform,
 ## Overview
 
 A Talawa plugin consists of two main parts:
+
 - **API Plugin**: Backend functionality (GraphQL, database, hooks)
 - **Admin Plugin**: Frontend components (pages, navigation, UI)
 
@@ -178,7 +179,9 @@ export const createMyPluginDataInputSchema = z.object({
 });
 
 export const CreateMyPluginDataInput = builder
-  .inputRef<z.infer<typeof createMyPluginDataInputSchema>>("CreateMyPluginDataInput")
+  .inputRef<
+    z.infer<typeof createMyPluginDataInputSchema>
+  >("CreateMyPluginDataInput")
   .implement({
     description: "Input for creating a new my plugin data entry",
     fields: (t) => ({
@@ -204,7 +207,7 @@ import { MyPluginDataListRef } from "./types";
 export async function getMyPluginDataResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -231,15 +234,13 @@ export async function getMyPluginDataResolver(
 }
 
 // Register queries with the builder
-export function registerMyPluginQueries(
-  builderInstance: typeof builder
-): void {
+export function registerMyPluginQueries(builderInstance: typeof builder): void {
   builderInstance.queryField("getMyPluginData", (t) =>
     t.field({
       type: MyPluginDataListRef,
       description: "Get all my plugin data entries",
       resolve: getMyPluginDataResolver,
-    })
+    }),
   );
 }
 ```
@@ -265,7 +266,7 @@ export async function createMyPluginDataResolver(
       description?: string;
     };
   },
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -273,7 +274,11 @@ export async function createMyPluginDataResolver(
     });
   }
 
-  const { success, data: parsedInput, error } = createMyPluginDataInputSchema.safeParse(args.input);
+  const {
+    success,
+    data: parsedInput,
+    error,
+  } = createMyPluginDataInputSchema.safeParse(args.input);
 
   if (!success) {
     ctx.log?.error("Invalid arguments for createMyPluginData:", error);
@@ -302,7 +307,7 @@ export async function createMyPluginDataResolver(
 
 // Register mutations with the builder
 export function registerMyPluginMutations(
-  builderInstance: typeof builder
+  builderInstance: typeof builder,
 ): void {
   builderInstance.mutationField("createMyPluginData", (t) =>
     t.field({
@@ -315,7 +320,7 @@ export function registerMyPluginMutations(
       },
       description: "Create a new my plugin data entry",
       resolve: createMyPluginDataResolver,
-    })
+    }),
   );
 }
 ```
@@ -377,7 +382,9 @@ export async function onActivate(context: IPluginContext): Promise<void> {
       registerMyPluginMutations(context.graphql as any);
 
       if (context.logger?.info) {
-        context.logger.info("GraphQL schema extensions registered for My Plugin");
+        context.logger.info(
+          "GraphQL schema extensions registered for My Plugin",
+        );
       }
     } catch (error) {
       if (context.logger?.error) {
@@ -400,7 +407,9 @@ export async function onUnload(context: IPluginContext): Promise<void> {
 }
 
 // Hook handlers
-export async function onPluginActivated(context: IPluginContext): Promise<void> {
+export async function onPluginActivated(
+  context: IPluginContext,
+): Promise<void> {
   if (context.logger?.info) {
     context.logger.info("My Plugin activated via hook");
   }
@@ -414,10 +423,7 @@ export function getPluginInfo() {
     description: "A sample plugin demonstrating plugin development",
     author: "Your Name",
     dependencies: [],
-    graphqlOperations: [
-      "getMyPluginData",
-      "createMyPluginData",
-    ],
+    graphqlOperations: ["getMyPluginData", "createMyPluginData"],
   };
 }
 ```
@@ -499,7 +505,7 @@ const CREATE_MY_PLUGIN_DATA = gql`
 const MyPluginDashboard: React.FC = () => {
   const [form] = Form.useForm();
   const [createData] = useMutation(CREATE_MY_PLUGIN_DATA);
-  
+
   const { data, loading, refetch } = useQuery(GET_MY_PLUGIN_DATA, {
     fetchPolicy: 'network-only',
   });
@@ -511,7 +517,7 @@ const MyPluginDashboard: React.FC = () => {
           input: values,
         },
       });
-      
+
       message.success('Data created successfully');
       form.resetFields();
       refetch();
@@ -558,11 +564,11 @@ const MyPluginDashboard: React.FC = () => {
               >
                 <Input placeholder="Enter name" />
               </Form.Item>
-              
+
               <Form.Item name="description" label="Description">
                 <Input.TextArea placeholder="Enter description" />
               </Form.Item>
-              
+
               <Form.Item>
                 <Button type="primary" htmlType="submit">
                   Create Data
@@ -662,37 +668,44 @@ mutation CreateMyPluginData($input: CreateMyPluginDataInput!) {
 ### 4.3 Access Your Plugin
 
 Navigate to your plugin in the admin panel:
+
 - **Global Admin**: `/admin/my-plugin/dashboard`
 - Check the drawer menu for "My Plugin" entry
 
 ## Best Practices
 
 ### 1. Plugin ID Naming
+
 - Use snake_case for plugin IDs
 - Make them descriptive and unique
 - Avoid special characters except underscores
 
 ### 2. GraphQL Operations
+
 - Prefix all operations with your plugin ID
 - Use descriptive names for queries and mutations
 - Implement proper error handling
 
 ### 3. Database Design
+
 - Use descriptive table names
 - Include proper indexes for performance
 - Follow the existing schema patterns
 
 ### 4. UI Components
+
 - Follow the existing design patterns
 - Use Ant Design components consistently
 - Implement proper loading and error states
 
 ### 5. Error Handling
+
 - Always handle GraphQL errors gracefully
 - Log errors appropriately
 - Provide user-friendly error messages
 
 ### 6. Type Safety
+
 - Use TypeScript for all components
 - Define proper interfaces for all data structures
 - Leverage GraphQL types for type safety
@@ -706,4 +719,4 @@ Navigate to your plugin in the admin panel:
 5. **Add Configuration**: Make your plugin configurable through settings
 6. **Package Your Plugin**: Use the [Plugin Scripts](./scripts.md) to create distributable zip files
 
-This guide provides a solid foundation for plugin development. Refer to the Plugin Map plugin for a complete working example of all these concepts in action. 
+This guide provides a solid foundation for plugin development. Refer to the Plugin Map plugin for a complete working example of all these concepts in action.

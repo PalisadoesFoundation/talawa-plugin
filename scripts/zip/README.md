@@ -5,7 +5,7 @@ This script allows you to create zip files of Talawa plugins for distribution.
 ## Features
 
 - **Plugin Selection**: Choose from available plugins in the `plugins/` directory
-- **Build Types**: 
+- **Build Types**:
   - **Development**: Zips TypeScript files directly (for development/testing)
   - **Production**: Compiles TypeScript to JavaScript before zipping (for deployment)
 - **Automatic Detection**: Detects which modules (Admin/API) are present in each plugin
@@ -20,18 +20,21 @@ npm run zip-plugin
 ## How it Works
 
 ### Development Build
+
 - Scans the selected plugin directory
 - Zips all TypeScript (`.ts`, `.tsx`) and non-TypeScript files
 - Preserves the original directory structure
 - Output: `plugin-zips/{plugin-id}-dev.zip`
 
 ### Production Build
+
 1. **Compilation**: Compiles TypeScript files to JavaScript
    - Admin: Uses React JSX compilation settings
    - API: Uses CommonJS module compilation settings
 2. **File Processing**: Copies all non-TypeScript files (JSON, MD, assets, etc.)
 3. **Zipping**: Creates a zip with compiled JavaScript and other files
 4. **Cleanup**: Restores original TypeScript files
+
 - Output: `plugin-zips/{plugin-id}-prod.zip`
 
 ## File Structure
@@ -67,6 +70,7 @@ plugin-zips/
 ## Plugin ID Resolution
 
 The script determines the plugin ID for zip naming by checking manifest files in this order:
+
 1. Plugin-level `manifest.json` (if exists)
 2. Admin module `manifest.json` (if exists)
 3. API module `manifest.json` (if exists)

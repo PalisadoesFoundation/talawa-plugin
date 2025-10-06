@@ -5,16 +5,19 @@ Backend API plugin for Talawa that provides Razorpay payment gateway integration
 ## Features
 
 ### GraphQL Operations
+
 - **Queries**: Configuration retrieval, transaction queries, statistics
 - **Mutations**: Configuration updates, payment processing, verification
 - **Real-time**: Event publishing for payment status updates
 
 ### Database Management
+
 - **Configuration Table**: Secure storage of Razorpay settings
 - **Orders Table**: Payment order tracking
 - **Transactions Table**: Complete transaction history
 
 ### Webhook Integration
+
 - **Signature Verification**: HMAC-SHA256 validation
 - **Event Processing**: Automatic status updates
 - **Error Handling**: Comprehensive error logging
@@ -22,6 +25,7 @@ Backend API plugin for Talawa that provides Razorpay payment gateway integration
 ## Database Schema
 
 ### razorpay_config
+
 ```sql
 CREATE TABLE razorpay_config (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -38,6 +42,7 @@ CREATE TABLE razorpay_config (
 ```
 
 ### razorpay_orders
+
 ```sql
 CREATE TABLE razorpay_orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -59,6 +64,7 @@ CREATE TABLE razorpay_orders (
 ```
 
 ### razorpay_transactions
+
 ```sql
 CREATE TABLE razorpay_transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -90,6 +96,7 @@ CREATE TABLE razorpay_transactions (
 ## GraphQL Schema
 
 ### Types
+
 ```graphql
 type RazorpayConfig {
   keyId: String!
@@ -154,6 +161,7 @@ type UserTransactions {
 ```
 
 ### Queries
+
 ```graphql
 query GetRazorpayConfig {
   getRazorpayConfig {
@@ -167,8 +175,22 @@ query GetRazorpayConfig {
   }
 }
 
-query GetOrganizationTransactions($orgId: ID!, $limit: Int, $offset: Int, $status: String, $dateFrom: String, $dateTo: String) {
-  getOrganizationTransactions(orgId: $orgId, limit: $limit, offset: $offset, status: $status, dateFrom: $dateFrom, dateTo: $dateTo) {
+query GetOrganizationTransactions(
+  $orgId: ID!
+  $limit: Int
+  $offset: Int
+  $status: String
+  $dateFrom: String
+  $dateTo: String
+) {
+  getOrganizationTransactions(
+    orgId: $orgId
+    limit: $limit
+    offset: $offset
+    status: $status
+    dateFrom: $dateFrom
+    dateTo: $dateTo
+  ) {
     transactions {
       id
       paymentId
@@ -198,8 +220,20 @@ query GetOrganizationTransactions($orgId: ID!, $limit: Int, $offset: Int, $statu
   }
 }
 
-query GetUserTransactions($limit: Int, $offset: Int, $status: String, $dateFrom: String, $dateTo: String) {
-  getUserTransactions(limit: $limit, offset: $offset, status: $status, dateFrom: $dateFrom, dateTo: $dateTo) {
+query GetUserTransactions(
+  $limit: Int
+  $offset: Int
+  $status: String
+  $dateFrom: String
+  $dateTo: String
+) {
+  getUserTransactions(
+    limit: $limit
+    offset: $offset
+    status: $status
+    dateFrom: $dateFrom
+    dateTo: $dateTo
+  ) {
     transactions {
       id
       paymentId
@@ -230,6 +264,7 @@ query GetUserTransactions($limit: Int, $offset: Int, $status: String, $dateFrom:
 ```
 
 ### Mutations
+
 ```graphql
 mutation UpdateRazorpayConfig($input: RazorpayConfigInput!) {
   updateRazorpayConfig(input: $input) {
@@ -306,15 +341,18 @@ mutation VerifyPayment($input: VerifyPaymentInput!) {
 ## Webhook Endpoint
 
 ### POST /api/plugins/razorpay/webhook
+
 Handles Razorpay webhook events for payment status updates.
 
 **Headers:**
+
 ```
 Content-Type: application/json
 X-Razorpay-Signature: <signature>
 ```
 
 **Body:**
+
 ```json
 {
   "entity": "event",
@@ -357,6 +395,7 @@ X-Razorpay-Signature: <signature>
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -367,16 +406,19 @@ X-Razorpay-Signature: <signature>
 ## Security Features
 
 ### API Key Encryption
+
 - All Razorpay API secrets are encrypted using SHA-256
 - Keys are never returned in API responses
 - Secure storage in database with hashing
 
 ### Webhook Verification
+
 - HMAC-SHA256 signature validation
 - Protection against replay attacks
 - Automatic signature verification for all webhooks
 
 ### Access Control
+
 - Admin-only configuration access
 - User-specific transaction views
 - Organization-scoped permissions
@@ -385,6 +427,7 @@ X-Razorpay-Signature: <signature>
 ## Event System
 
 ### Published Events
+
 ```typescript
 // Payment created
 {
@@ -413,6 +456,7 @@ X-Razorpay-Signature: <signature>
 ```
 
 ### Event Handlers
+
 - `onPaymentCreated`: Handle new payment creation
 - `onPaymentCompleted`: Handle successful payments
 - `onPaymentFailed`: Handle failed payments
@@ -420,6 +464,7 @@ X-Razorpay-Signature: <signature>
 ## Error Handling
 
 ### Common Errors
+
 1. **Invalid API Keys**: Razorpay authentication failed
 2. **Webhook Signature Mismatch**: Invalid webhook signature
 3. **Order Not Found**: Payment order doesn't exist
@@ -427,6 +472,7 @@ X-Razorpay-Signature: <signature>
 5. **Database Errors**: Transaction/order creation failed
 
 ### Error Responses
+
 ```json
 {
   "success": false,
@@ -441,12 +487,14 @@ X-Razorpay-Signature: <signature>
 ## Performance Considerations
 
 ### Database Optimization
+
 - Indexed foreign keys for fast joins
 - Pagination for large transaction lists
 - Efficient summary calculations
 - Connection pooling
 
 ### Caching Strategy
+
 - Configuration caching
 - Transaction summary caching
 - User permission caching
@@ -455,12 +503,14 @@ X-Razorpay-Signature: <signature>
 ## Testing
 
 ### Unit Tests
+
 - GraphQL resolver tests
 - Database operation tests
 - Webhook verification tests
 - Security validation tests
 
 ### Integration Tests
+
 - End-to-end payment flow
 - Webhook processing
 - Error handling scenarios
@@ -469,6 +519,7 @@ X-Razorpay-Signature: <signature>
 ## Deployment
 
 ### Environment Variables
+
 ```bash
 RAZORPAY_KEY_ID=rzp_test_xxx
 RAZORPAY_KEY_SECRET=xxx
@@ -477,6 +528,7 @@ RAZORPAY_TEST_MODE=true
 ```
 
 ### Database Migration
+
 ```bash
 # Run database migrations
 npm run db:migrate
@@ -486,6 +538,7 @@ npm run db:verify
 ```
 
 ### Health Checks
+
 - Database connectivity
 - Razorpay API connectivity
 - Webhook endpoint availability
@@ -494,12 +547,14 @@ npm run db:verify
 ## Monitoring
 
 ### Metrics
+
 - Payment success rate
 - Average transaction amount
 - Webhook processing time
 - Error rates by type
 
 ### Logging
+
 - Payment lifecycle events
 - Webhook processing logs
 - Error details with context
@@ -508,12 +563,14 @@ npm run db:verify
 ## Support
 
 ### Documentation
+
 - Complete API reference
 - Integration examples
 - Troubleshooting guide
 - Best practices
 
 ### Development
+
 - TypeScript support
 - Comprehensive error handling
 - Unit test coverage
@@ -521,4 +578,4 @@ npm run db:verify
 
 ## License
 
-This plugin is part of the Talawa ecosystem and follows the same licensing terms as the main project. 
+This plugin is part of the Talawa ecosystem and follows the same licensing terms as the main project.

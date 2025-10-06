@@ -7,6 +7,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![GitHub stars](https://img.shields.io/github/stars/PalisadoesFoundation/talawa-plugin.svg?style=social&label=Star&maxAge=2592000)](https://github.com/PalisadoesFoundation/talawa-plugin)
 [![GitHub forks](https://img.shields.io/github/forks/PalisadoesFoundation/talawa-plugin.svg?style=social&label=Fork&maxAge=2592000)](https://github.com/PalisadoesFoundation/talawa-plugin)
+[![codecov](https://codecov.io/gh/PalisadoesFoundation/talawa-plugin/graph/badge.svg?token=TBEVUL2UBJ)](https://codecov.io/gh/PalisadoesFoundation/talawa-plugin)
 [![Formatted with Biome](https://img.shields.io/badge/Formatted_with-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev/)
 [![Linted with Biome](https://img.shields.io/badge/Linted_with-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev)
 

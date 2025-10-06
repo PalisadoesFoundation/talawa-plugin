@@ -189,6 +189,7 @@ export async function getOrganizationTransactionsResolver(
 // Get user transactions resolver
 const getUserTransactionsArgumentsSchema = z.object({
   userId: z.string(),
+  orgId: z.string().nullable().optional(),
   limit: z.number().nullable().optional(),
   offset: z.number().nullable().optional(),
   status: z.string().nullable().optional(),
@@ -228,6 +229,7 @@ export async function getUserTransactionsResolver(
   try {
     const {
       userId,
+      orgId,
       limit = 20,
       offset = 0,
       status,
@@ -236,6 +238,11 @@ export async function getUserTransactionsResolver(
     } = parsedArgs;
 
     const whereConditions = [eq(transactionsTable.userId, userId)];
+
+    // Filter by organization if provided
+    if (orgId) {
+      whereConditions.push(eq(transactionsTable.organizationId, orgId));
+    }
 
     if (status) {
       whereConditions.push(eq(transactionsTable.status, status));
@@ -517,6 +524,7 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
       type: t.listRef(RazorpayTransactionRef),
       args: {
         userId: t.arg.string({ required: true }),
+        orgId: t.arg.string({ required: false }),
         limit: t.arg.int({ required: false }),
         offset: t.arg.int({ required: false }),
         status: t.arg.string({ required: false }),

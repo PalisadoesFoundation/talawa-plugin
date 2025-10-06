@@ -32,9 +32,11 @@ Creates distributable zip files with development (TypeScript) or production (Jav
 ## Script Features
 
 ### Plugin ID Resolution
+
 Automatically detects plugin IDs from manifest files (plugin → admin → api → directory name).
 
 ### Cross-Platform Compatibility
+
 - Line endings normalized to LF
 - UTF-8 encoding for text files
 - Excludes OS artifacts (`.DS_Store`, `Thumbs.db`)
@@ -43,18 +45,21 @@ Automatically detects plugin IDs from manifest files (plugin → admin → api �
 ## Usage Examples
 
 ### Create a New Plugin
+
 ```bash
 npm run init-plugin
 # Follow prompts for plugin name and Docker config
 ```
 
 ### Package Existing Plugin
+
 ```bash
 npm run zip-plugin
 # Select plugin and build type (dev/prod)
 ```
 
 ### Generated Structure
+
 ```
 plugin-zips/
 ├── my_plugin-dev.zip
@@ -74,6 +79,7 @@ Generated zips are compatible with Talawa's upload system and plugin manager.
 ## Troubleshooting
 
 **Common Issues:**
+
 - Encoding errors: Check for non-UTF-8 characters
 - Missing files: Ensure manifest.json and entry points exist
 - Upload failures: Verify zip structure matches expected format

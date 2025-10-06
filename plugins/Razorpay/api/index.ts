@@ -6,9 +6,8 @@ export * from "./database/tables";
 export * from "./graphql/queries";
 export * from "./graphql/mutations";
 
-// Export services and routes
+// Export services
 export * from "./services/razorpayService";
-export * from "./routes/webhook";
 
 // Lifecycle hooks
 export async function onLoad(context: IPluginContext): Promise<void> {
@@ -282,12 +281,12 @@ export async function getPluginInfo(context: IPluginContext) {
     ],
     events: ["payment:created", "payment:completed", "payment:failed"],
     webhooks: [
-      "POST /api/plugins/razorpay/webhook - Razorpay webhook endpoint",
+      "POST /api/plugins/razorpay/webhook/ - Razorpay webhook endpoint",
     ],
   };
 }
 
-// Webhook handler for Razorpay
+// Webhook handler for Razorpay - Standard implementation per Razorpay docs
 export async function handleRazorpayWebhook(
   request: any,
   reply: any,
@@ -295,29 +294,189 @@ export async function handleRazorpayWebhook(
   try {
     const webhookData = request.body;
 
-    // Create context with available resources
-    const context = {
-      log: console,
-      drizzleClient: null, // This would need to be injected from the plugin system
-      pluginManager: null,
-    };
+    // Basic webhook data validation
+    if (!webhookData || !webhookData.payload || !webhookData.payload.payment) {
+      return reply.status(400).send({
+        error: "Invalid webhook data",
+        message: "Missing required webhook payload structure",
+      });
+    }
 
-    // Import and use the Razorpay service
-    const { createRazorpayService } = await import(
-      "./services/razorpayService"
+    const { payment } = webhookData.payload;
+    const paymentEntity = payment.entity;
+
+    // Log the webhook for debugging
+    console.log(
+      `🔗 Razorpay webhook received: ${paymentEntity.id} - ${paymentEntity.status}`,
     );
-    const razorpayService = createRazorpayService(context as any);
 
-    // Process the webhook
-    await razorpayService.processWebhook(webhookData);
+    // Format currency display
+    const currencySymbols: { [key: string]: string } = {
+      INR: "₹",
+      USD: "$",
+      EUR: "€",
+      GBP: "£",
+    };
+    const symbol =
+      currencySymbols[paymentEntity.currency] || paymentEntity.currency;
+    const displayAmount = (paymentEntity.amount / 100).toFixed(2);
 
-    // Return success response
+    console.log(`Payment Details:
+      - ID: ${paymentEntity.id}
+      - Status: ${paymentEntity.status}
+      - Amount: ${symbol}${displayAmount} ${paymentEntity.currency}
+      - Method: ${paymentEntity.method}
+      - Order ID: ${paymentEntity.order_id}
+      - Email: ${paymentEntity.email}
+      - Captured: ${paymentEntity.captured}
+    `);
+
+    // Get plugin context from request
+    const pluginContext = (request as any).pluginContext;
+    if (!pluginContext) {
+      console.error("Plugin context not available in webhook");
+      return reply.status(500).send({
+        error: "Plugin context not available",
+        message: "Cannot process webhook without plugin context",
+      });
+    }
+
+    // Verify webhook signature manually
+    const signature = request.headers["x-razorpay-signature"] as string;
+    const webhookBody = JSON.stringify(webhookData);
+
+    // Get webhook secret from config
+    const { configTable } = await import("./database/tables");
+    const config = await pluginContext.db.select().from(configTable).limit(1);
+
+    if (config.length === 0 || !config[0]?.webhookSecret) {
+      console.error("Webhook secret not configured");
+      return reply.status(500).send({
+        error: "Webhook secret not configured",
+        message: "Cannot verify webhook signature without webhook secret",
+      });
+    }
+
+    // Verify signature
+    const crypto = await import("node:crypto");
+    const expectedSignature = crypto
+      .createHmac("sha256", config[0].webhookSecret)
+      .update(webhookBody)
+      .digest("hex");
+
+    const isValidSignature = crypto.timingSafeEqual(
+      Buffer.from(expectedSignature, "hex"),
+      Buffer.from(signature, "hex"),
+    );
+
+    if (!isValidSignature) {
+      console.error("Invalid webhook signature");
+      return reply.status(400).send({
+        error: "Invalid signature",
+        message: "Webhook signature verification failed",
+      });
+    }
+
+    // Process webhook directly with database access
+    const { ordersTable, transactionsTable } = await import(
+      "./database/tables"
+    );
+    const { eq } = await import("drizzle-orm");
+
+    // Get order details to get userId and other info
+    const orderDetails = await pluginContext.db
+      .select()
+      .from(ordersTable)
+      .where(eq(ordersTable.razorpayOrderId, paymentEntity.order_id))
+      .limit(1);
+
+    if (orderDetails.length === 0) {
+      console.error(`Order not found for payment: ${paymentEntity.id}`);
+      return reply.status(400).send({
+        error: "Order not found",
+        message: `Order not found for payment: ${paymentEntity.id}`,
+      });
+    }
+
+    const order = orderDetails[0];
+
+    // Check if transaction already exists
+    const existingTransaction = await pluginContext.db
+      .select()
+      .from(transactionsTable)
+      .where(eq(transactionsTable.paymentId, paymentEntity.id))
+      .limit(1);
+
+    if (existingTransaction.length === 0) {
+      // Create new transaction with userId from order
+      await pluginContext.db.insert(transactionsTable).values({
+        paymentId: paymentEntity.id,
+        orderId: order.id,
+        organizationId: order.organizationId,
+        userId: order.userId, // Use userId from order
+        amount: order.amount,
+        currency: order.currency,
+        status: paymentEntity.status,
+        method: paymentEntity.method,
+        bank: paymentEntity.bank || undefined,
+        wallet: paymentEntity.wallet || undefined,
+        vpa: paymentEntity.vpa || undefined,
+        email: paymentEntity.email,
+        contact: paymentEntity.contact,
+        fee: paymentEntity.fee,
+        tax: paymentEntity.tax,
+        errorCode: paymentEntity.error_code || undefined,
+        errorDescription: paymentEntity.error_description || undefined,
+        refundStatus: paymentEntity.refund_status || undefined,
+        capturedAt: paymentEntity.captured
+          ? new Date(paymentEntity.created_at * 1000)
+          : undefined,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    } else {
+      // Update existing transaction
+      await pluginContext.db
+        .update(transactionsTable)
+        .set({
+          status: paymentEntity.status,
+          method: paymentEntity.method,
+          bank: paymentEntity.bank || undefined,
+          wallet: paymentEntity.wallet || undefined,
+          vpa: paymentEntity.vpa || undefined,
+          email: paymentEntity.email,
+          contact: paymentEntity.contact,
+          fee: paymentEntity.fee,
+          tax: paymentEntity.tax,
+          errorCode: paymentEntity.error_code || undefined,
+          errorDescription: paymentEntity.error_description || undefined,
+          refundStatus: paymentEntity.refund_status || undefined,
+          capturedAt: paymentEntity.captured
+            ? new Date(paymentEntity.created_at * 1000)
+            : undefined,
+          updatedAt: new Date(),
+        })
+        .where(eq(transactionsTable.paymentId, paymentEntity.id));
+    }
+
+    // Update order status if payment is captured
+    if (paymentEntity.captured) {
+      await pluginContext.db
+        .update(ordersTable)
+        .set({
+          status: "paid",
+          updatedAt: new Date(),
+        })
+        .where(eq(ordersTable.razorpayOrderId, paymentEntity.order_id));
+    }
+
+    // Return success response as per Razorpay docs
     reply.status(200).send({
       status: "success",
       message: "Webhook processed successfully",
     });
   } catch (error) {
-    console.error("Razorpay webhook processing failed:", error);
+    console.error("Razorpay webhook error:", error);
     reply.status(500).send({
       error: "Webhook processing failed",
       message: error instanceof Error ? error.message : "Unknown error",
