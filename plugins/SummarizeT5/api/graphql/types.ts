@@ -15,5 +15,3 @@ SummarizeResultRef.implement({
     postId: t.exposeString("postId", { nullable: true }),
   }),
 });
-
-

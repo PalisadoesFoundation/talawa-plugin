@@ -15,5 +15,3 @@ export const SummarizeInput = builder
       postId: t.string({ required: false, nullable: true }),
     }),
   });
-
-
