@@ -1,4 +1,4 @@
-# Talawa API Documentation Website
+# Talawa Plugin Documentation Website
 
 [![N|Solid](static/img/markdown/misc/logo.png)](https://github.com/PalisadoesFoundation/talawa-plugin)
 
@@ -10,7 +10,7 @@ This document provides instructions on how to set up and start a running instanc
 
 <!-- TOC -->
 
-- [Talawa API Documentation Website](#talawa-plugin-documentation-website)
+- [Talawa Plugin Documentation Website](#talawa-plugin-documentation-website)
   - [Installation](#installation)
   - [Table of Contents](#table-of-contents)
   - [Prerequisites for Developers](#prerequisites-for-developers)
