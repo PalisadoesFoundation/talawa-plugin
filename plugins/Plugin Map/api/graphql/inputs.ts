@@ -30,9 +30,9 @@ export const getPluginMapPollsInputSchema = z.object({
 });
 
 export const GetPluginMapPollsInput = builder
-  .inputRef<
-    z.infer<typeof getPluginMapPollsInputSchema>
-  >("GetPluginMapPollsInput")
+  .inputRef<z.infer<typeof getPluginMapPollsInputSchema>>(
+    "GetPluginMapPollsInput"
+  )
   .implement({
     description: "Input for getting plugin map polls",
     fields: (t) => ({

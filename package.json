@@ -9,35 +9,12 @@
     "@clack/prompts": "^0.11.0",
     "@types/archiver": "^6.0.3",
     "@types/node": "^22.15.21",
-    "@types/react": "^19.1.1",
-    "@types/react-dom": "^19.1.1",
-    "vite": "^6.3.5",
-    "vite-plugin-istanbul": "^7.1.0",
-    "vite-plugin-svgr": "^4.3.0",
-    "vitest": "^3.2.4",
     "chalk": "^5.4.1",
-    "eslint": "^9.29.0",
-    "eslint-config-prettier": "^10.0.2",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jest": "^28.10.0",
-    "eslint-plugin-prettier": "^5.2.3",
-    "eslint-plugin-react": "^7.37.4",
-    "eslint-plugin-tsdoc": "^0.4.0",
-    "eslint-plugin-vitest": "^0.5.4",
     "tsx": "^4.19.4",
-    "typedoc-plugin-markdown": "^4.5.0",
-    "typedoc": "^0.28.1",
     "typescript": "^5.8.3"
   },
-  "lint-staged": {
-    "**/*.{ts, tsx, json, scss, css}": [
-      "prettier --write"
-    ],
-    "**/*.{ts, tsx, json}": "eslint --fix"
-  },
   "dependencies": {
-    "archiver": "^6.0.1",
-    "prettier": "^3.6.2"
+    "archiver": "^6.0.1"
   },
   "homepage": "https://github.com/PalisadoesFoundation/talawa-plugin#readme",
   "license": "GNU General Public License v3.0",
@@ -47,12 +24,7 @@
   "scripts": {
     "init-plugin": "tsx ./scripts/init/index.ts",
     "zip-plugin": "tsx ./scripts/zip/index.ts",
-    "lint:check": "eslint \"**/*.{ts,tsx}\" --max-warnings=0 && python .github/workflows/scripts/eslint_disable_check.py",
-    "lint:fix": "eslint --fix \"**/*.{ts,tsx}\"",
-    "format:fix": "prettier --write \"**/*.{ts,tsx,json,scss,css}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,json,scss,css}\"",
-    "check-tsdoc": "node .github/workflows/scripts/check-tsdoc.js",
-    "typecheck": "tsc --project tsconfig.json --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "keywords": []
 }
