@@ -35,7 +35,7 @@ const updateRazorpayConfigArgumentsSchema = z.object({
 export async function updateRazorpayConfigResolver(
   _parent: unknown,
   args: z.infer<typeof updateRazorpayConfigArgumentsSchema>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -156,7 +156,7 @@ const createPaymentOrderArgumentsSchema = z.object({
 export async function createPaymentOrderResolver(
   _parent: unknown,
   args: z.infer<typeof createPaymentOrderArgumentsSchema>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -251,7 +251,10 @@ export async function createPaymentOrderResolver(
     ctx.log?.error("Error creating payment order:", error);
     throw new TalawaGraphQLError({
       extensions: { code: "unexpected" },
-      message: error instanceof Error ? error.message : "Could not create payment order",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Could not create payment order",
     });
   }
 }
@@ -264,7 +267,7 @@ const initiatePaymentArgumentsSchema = z.object({
 export async function initiatePaymentResolver(
   _parent: unknown,
   args: z.infer<typeof initiatePaymentArgumentsSchema>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -390,7 +393,7 @@ const verifyPaymentArgumentsSchema = z.object({
 export async function verifyPaymentResolver(
   _parent: unknown,
   args: z.infer<typeof verifyPaymentArgumentsSchema>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -445,7 +448,7 @@ export async function verifyPaymentResolver(
     const expectedSignature = crypto
       .createHmac("sha256", configItem.keySecret || "")
       .update(
-        `${parsedArgs.input.razorpayOrderId}|${parsedArgs.input.razorpayPaymentId}`
+        `${parsedArgs.input.razorpayOrderId}|${parsedArgs.input.razorpayPaymentId}`,
       )
       .digest("hex");
 
@@ -490,7 +493,7 @@ export async function verifyPaymentResolver(
       .select()
       .from(transactionsTable)
       .where(
-        eq(transactionsTable.paymentId, parsedArgs.input.razorpayPaymentId)
+        eq(transactionsTable.paymentId, parsedArgs.input.razorpayPaymentId),
       )
       .limit(1);
 
@@ -553,7 +556,7 @@ export async function verifyPaymentResolver(
 export async function testRazorpaySetupResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -568,31 +571,38 @@ export async function testRazorpaySetupResolver(
     if (config.length === 0 || !config[0]) {
       return {
         success: false,
-        message: "No Razorpay configuration found. Please configure your API keys first.",
+        message:
+          "No Razorpay configuration found. Please configure your API keys first.",
       };
     }
 
     const configItem = config[0];
-    
+
     if (!configItem.keyId || !configItem.keySecret) {
       return {
         success: false,
-        message: "API keys are not configured. Please enter your Key ID and Key Secret.",
+        message:
+          "API keys are not configured. Please enter your Key ID and Key Secret.",
       };
     }
 
     if (!configItem.webhookSecret) {
       return {
         success: false,
-        message: "Webhook secret is not configured. Please enter your webhook secret.",
+        message:
+          "Webhook secret is not configured. Please enter your webhook secret.",
       };
     }
 
     // Import Razorpay service to test setup
-    const { createRazorpayService } = await import("../services/razorpayService");
+    const { createRazorpayService } = await import(
+      "../services/razorpayService"
+    );
     const razorpayService = createRazorpayService(ctx);
 
-    ctx.log?.info(`Testing Razorpay setup with Key ID: ${configItem.keyId?.substring(0, 8)}...`);
+    ctx.log?.info(
+      `Testing Razorpay setup with Key ID: ${configItem.keyId?.substring(0, 8)}...`,
+    );
 
     // Test by creating a dummy payment order (₹1.00 = 100 paise)
     const testOrder = await razorpayService.createOrder({
@@ -601,8 +611,8 @@ export async function testRazorpaySetupResolver(
       receipt: `test_${Date.now()}`,
       notes: {
         test: "true",
-        purpose: "setup_verification"
-      }
+        purpose: "setup_verification",
+      },
     });
 
     ctx.log?.info(`Test order created successfully: ${testOrder.id}`);
@@ -611,20 +621,21 @@ export async function testRazorpaySetupResolver(
       success: true,
       message: `Setup verified! Test order created: ${testOrder.id} (₹1.00). Your Razorpay configuration is working correctly.`,
     };
-
   } catch (error) {
     ctx.log?.error("Error testing Razorpay setup:", error);
-    
+
     if (error instanceof Error) {
       if (error.message.includes("Invalid API credentials")) {
         return {
           success: false,
-          message: "Invalid API credentials. Please check your Key ID and Key Secret.",
+          message:
+            "Invalid API credentials. Please check your Key ID and Key Secret.",
         };
       } else if (error.message.includes("Webhook secret not configured")) {
         return {
           success: false,
-          message: "Webhook secret not configured. Please add your webhook secret.",
+          message:
+            "Webhook secret not configured. Please add your webhook secret.",
         };
       } else {
         return {
@@ -635,7 +646,8 @@ export async function testRazorpaySetupResolver(
     } else {
       return {
         success: false,
-        message: "Setup test failed. Please check your configuration and try again.",
+        message:
+          "Setup test failed. Please check your configuration and try again.",
       };
     }
   }
@@ -643,7 +655,7 @@ export async function testRazorpaySetupResolver(
 
 // Register all Razorpay mutations with the builder
 export function registerRazorpayMutations(
-  builderInstance: typeof builder
+  builderInstance: typeof builder,
 ): void {
   // Update Razorpay configuration
   builderInstance.mutationField("updateRazorpayConfig", (t) =>
@@ -658,7 +670,7 @@ export function registerRazorpayMutations(
       },
       description: "Update Razorpay configuration settings",
       resolve: updateRazorpayConfigResolver,
-    })
+    }),
   );
 
   // Create payment order
@@ -674,7 +686,7 @@ export function registerRazorpayMutations(
       },
       description: "Create a new payment order",
       resolve: createPaymentOrderResolver,
-    })
+    }),
   );
 
   // Initiate payment
@@ -690,7 +702,7 @@ export function registerRazorpayMutations(
       },
       description: "Initiate a payment transaction",
       resolve: initiatePaymentResolver,
-    })
+    }),
   );
 
   // Verify payment
@@ -706,7 +718,7 @@ export function registerRazorpayMutations(
       },
       description: "Verify payment signature and update transaction status",
       resolve: verifyPaymentResolver,
-    })
+    }),
   );
 
   // Test Razorpay setup with dummy payment
@@ -715,6 +727,6 @@ export function registerRazorpayMutations(
       type: RazorpayTestResultRef,
       description: "Test Razorpay setup by creating a dummy payment order",
       resolve: testRazorpaySetupResolver,
-    })
+    }),
   );
 }

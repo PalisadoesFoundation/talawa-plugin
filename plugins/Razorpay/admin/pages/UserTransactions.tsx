@@ -6,14 +6,34 @@
  * in one place, regardless of which organization the transactions were made to.
  */
 
-import React, { useState, useEffect } from 'react';
-import { useQuery, gql } from '@apollo/client';
-import { Card, Table, Tag, Button, Space, Typography, message, Spin, Input, Select, DatePicker, Row, Col } from 'antd';
-import { CreditCardOutlined, EyeOutlined, DownloadOutlined, SearchOutlined, FilterOutlined } from '@ant-design/icons';
-import type { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
-import { useParams, Navigate } from 'react-router-dom';
-import useLocalStorage from 'utils/useLocalstorage';
+import React, { useState, useEffect } from "react";
+import { useQuery, gql } from "@apollo/client";
+import {
+  Card,
+  Table,
+  Tag,
+  Button,
+  Space,
+  Typography,
+  message,
+  Spin,
+  Input,
+  Select,
+  DatePicker,
+  Row,
+  Col,
+} from "antd";
+import {
+  CreditCardOutlined,
+  EyeOutlined,
+  DownloadOutlined,
+  SearchOutlined,
+  FilterOutlined,
+} from "@ant-design/icons";
+import type { ColumnsType } from "antd/es/table";
+import dayjs from "dayjs";
+import { useParams, Navigate } from "react-router-dom";
+import useLocalStorage from "utils/useLocalstorage";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -63,8 +83,16 @@ const GET_USER_TRANSACTIONS = gql`
 `;
 
 const GET_USER_TRANSACTION_STATS = gql`
-  query GetUserTransactionStats($userId: String!, $dateFrom: String, $dateTo: String) {
-    razorpay_getUserTransactionStats(userId: $userId, dateFrom: $dateFrom, dateTo: $dateTo) {
+  query GetUserTransactionStats(
+    $userId: String!
+    $dateFrom: String
+    $dateTo: String
+  ) {
+    razorpay_getUserTransactionStats(
+      userId: $userId
+      dateFrom: $dateFrom
+      dateTo: $dateTo
+    ) {
       totalTransactions
       totalAmount
       currency
@@ -100,20 +128,22 @@ interface RazorpayTransaction {
 }
 
 const UserTransactions: React.FC = () => {
-  const [searchText, setSearchText] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
+  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(
+    null,
+  );
 
   // Get user data (no orgId needed for global user transactions)
   const { getItem } = useLocalStorage();
-  const userId = getItem('id') as string | null;
+  const userId = getItem("id") as string | null;
 
   // Debug logging
-  console.log('UserTransactions: userId =', userId);
+  console.log("UserTransactions: userId =", userId);
 
   // Redirect if no userId is available
   if (!userId) {
-    console.log('UserTransactions: No userId, redirecting to /');
+    console.log("UserTransactions: No userId, redirecting to /");
     return <Navigate to="/" replace />;
   }
 
@@ -125,11 +155,11 @@ const UserTransactions: React.FC = () => {
     refetch: refetchTransactions,
   } = useQuery(GET_USER_TRANSACTIONS, {
     variables: {
-      userId: userId || '',
+      userId: userId || "",
       limit: 100, // Get more transactions for user view
     },
     skip: !userId,
-    fetchPolicy: 'network-only',
+    fetchPolicy: "network-only",
   });
 
   const {
@@ -138,44 +168,47 @@ const UserTransactions: React.FC = () => {
     error: statsError,
   } = useQuery(GET_USER_TRANSACTION_STATS, {
     variables: {
-      userId: userId || '',
+      userId: userId || "",
     },
     skip: !userId,
-    fetchPolicy: 'network-only',
+    fetchPolicy: "network-only",
   });
 
   const transactions = transactionsData?.razorpay_getUserTransactions || [];
   const stats = statsData?.razorpay_getUserTransactionStats;
 
   // Debug logging
-  console.log('UserTransactions: transactionsData =', transactionsData);
-  console.log('UserTransactions: transactions =', transactions);
-  console.log('UserTransactions: transactionsLoading =', transactionsLoading);
-  console.log('UserTransactions: transactionsError =', transactionsError);
+  console.log("UserTransactions: transactionsData =", transactionsData);
+  console.log("UserTransactions: transactions =", transactions);
+  console.log("UserTransactions: transactionsLoading =", transactionsLoading);
+  console.log("UserTransactions: transactionsError =", transactionsError);
 
   // Apply filters to transactions
-  const filteredTransactions = transactions.filter(transaction => {
+  const filteredTransactions = transactions.filter((transaction) => {
     // Search filter
     if (searchText) {
       const searchLower = searchText.toLowerCase();
-      const matchesSearch = 
+      const matchesSearch =
         transaction.paymentId?.toLowerCase().includes(searchLower) ||
         transaction.donorName?.toLowerCase().includes(searchLower) ||
         transaction.donorEmail?.toLowerCase().includes(searchLower) ||
         transaction.id.toLowerCase().includes(searchLower);
-      
+
       if (!matchesSearch) return false;
     }
 
     // Status filter
-    if (statusFilter !== 'all') {
+    if (statusFilter !== "all") {
       if (transaction.status !== statusFilter) return false;
     }
 
     // Date range filter
     if (dateRange && dateRange[0] && dateRange[1]) {
       const transactionDate = dayjs(transaction.createdAt);
-      if (!transactionDate.isAfter(dateRange[0]) || !transactionDate.isBefore(dateRange[1])) {
+      if (
+        !transactionDate.isAfter(dateRange[0]) ||
+        !transactionDate.isBefore(dateRange[1])
+      ) {
         return false;
       }
     }
@@ -185,31 +218,31 @@ const UserTransactions: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'captured':
-        return 'success';
-      case 'authorized':
-        return 'processing';
-      case 'failed':
-        return 'error';
-      case 'refunded':
-        return 'warning';
+      case "captured":
+        return "success";
+      case "authorized":
+        return "processing";
+      case "failed":
+        return "error";
+      case "refunded":
+        return "warning";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getMethodColor = (method: string) => {
     switch (method?.toLowerCase()) {
-      case 'card':
-        return 'blue';
-      case 'upi':
-        return 'green';
-      case 'netbanking':
-        return 'purple';
-      case 'wallet':
-        return 'orange';
+      case "card":
+        return "blue";
+      case "upi":
+        return "green";
+      case "netbanking":
+        return "purple";
+      case "wallet":
+        return "orange";
       default:
-        return 'default';
+        return "default";
     }
   };
 
@@ -218,12 +251,12 @@ const UserTransactions: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -235,69 +268,67 @@ const UserTransactions: React.FC = () => {
     message.success(`Downloading receipt for transaction: ${transaction.id}`);
   };
 
-
   const columns: ColumnsType<RazorpayTransaction> = [
     {
-      title: 'Transaction ID',
-      dataIndex: 'paymentId',
-      key: 'paymentId',
+      title: "Transaction ID",
+      dataIndex: "paymentId",
+      key: "paymentId",
       render: (paymentId: string) => (
-        <Text code style={{ fontSize: '12px' }}>
-          {paymentId || 'N/A'}
+        <Text code style={{ fontSize: "12px" }}>
+          {paymentId || "N/A"}
         </Text>
       ),
     },
     {
-      title: 'Amount',
-      dataIndex: 'amount',
-      key: 'amount',
+      title: "Amount",
+      dataIndex: "amount",
+      key: "amount",
       render: (amount: number, record: RazorpayTransaction) => (
         <Text strong>
-          {amount ? formatAmount(amount, record.currency) : 'N/A'}
+          {amount ? formatAmount(amount, record.currency) : "N/A"}
         </Text>
       ),
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
       render: (status: string) => (
-        <Tag color={getStatusColor(status)}>
-          {status.toUpperCase()}
-        </Tag>
+        <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
       ),
     },
     {
-      title: 'Donor',
-      dataIndex: 'donorName',
-      key: 'donorName',
+      title: "Donor",
+      dataIndex: "donorName",
+      key: "donorName",
       render: (name: string, record: RazorpayTransaction) => (
         <div>
-          <div style={{ fontWeight: 500 }}>{name || 'Anonymous'}</div>
-          <div style={{ fontSize: '12px', color: '#666' }}>{record.donorEmail}</div>
+          <div style={{ fontWeight: 500 }}>{name || "Anonymous"}</div>
+          <div style={{ fontSize: "12px", color: "#666" }}>
+            {record.donorEmail}
+          </div>
         </div>
       ),
     },
     {
-      title: 'Payment Method',
-      dataIndex: 'method',
-      key: 'method',
+      title: "Payment Method",
+      dataIndex: "method",
+      key: "method",
       render: (method: string) => (
-        <Tag color={getMethodColor(method)}>
-          {method || 'N/A'}
-        </Tag>
+        <Tag color={getMethodColor(method)}>{method || "N/A"}</Tag>
       ),
     },
     {
-      title: 'Date',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      title: "Date",
+      dataIndex: "createdAt",
+      key: "createdAt",
       render: (date: string) => formatDate(date),
-      sorter: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      sorter: (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     },
     {
-      title: 'Actions',
-      key: 'actions',
+      title: "Actions",
+      key: "actions",
       render: (_, record: RazorpayTransaction) => (
         <Space size="small">
           <Button
@@ -324,9 +355,9 @@ const UserTransactions: React.FC = () => {
   if (transactionsLoading || statsLoading) {
     return (
       <Card>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div style={{ textAlign: "center", padding: "40px" }}>
           <Spin size="large" />
-          <div style={{ marginTop: '16px' }}>
+          <div style={{ marginTop: "16px" }}>
             <Text>Loading your transaction history...</Text>
           </div>
         </div>
@@ -337,9 +368,10 @@ const UserTransactions: React.FC = () => {
   if (transactionsError || statsError) {
     return (
       <Card>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div style={{ textAlign: "center", padding: "40px" }}>
           <Text type="danger">
-            Failed to load transaction data: {transactionsError?.message || statsError?.message}
+            Failed to load transaction data:{" "}
+            {transactionsError?.message || statsError?.message}
           </Text>
         </div>
       </Card>
@@ -348,15 +380,17 @@ const UserTransactions: React.FC = () => {
 
   return (
     <div>
-      <Card style={{ marginBottom: '16px' }}>
-        <div style={{ marginBottom: '16px' }}>
+      <Card style={{ marginBottom: "16px" }}>
+        <div style={{ marginBottom: "16px" }}>
           <Space align="center">
-            <CreditCardOutlined style={{ fontSize: '24px', color: '#1890ff' }} />
+            <CreditCardOutlined
+              style={{ fontSize: "24px", color: "#1890ff" }}
+            />
             <Title level={3} style={{ margin: 0 }}>
               My Razorpay Transactions
             </Title>
           </Space>
-          <Text type="secondary" style={{ display: 'block', marginTop: '4px' }}>
+          <Text type="secondary" style={{ display: "block", marginTop: "4px" }}>
             View all your payment transactions across all organizations
           </Text>
         </div>
@@ -378,7 +412,7 @@ const UserTransactions: React.FC = () => {
               placeholder="Filter by status"
               value={statusFilter}
               onChange={setStatusFilter}
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
               allowClear
             >
               <Select.Option value="all">All Statuses</Select.Option>
@@ -391,9 +425,11 @@ const UserTransactions: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={8}>
             <RangePicker
               value={dateRange}
-              onChange={(dates) => setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs] | null)}
-              style={{ width: '100%' }}
-              placeholder={['Start Date', 'End Date']}
+              onChange={(dates) =>
+                setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs] | null)
+              }
+              style={{ width: "100%" }}
+              placeholder={["Start Date", "End Date"]}
             />
           </Col>
         </Row>

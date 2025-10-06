@@ -98,9 +98,9 @@ export const razorpayVerificationInputSchema = z.object({
 });
 
 export const RazorpayVerificationInput = builder
-  .inputRef<z.infer<typeof razorpayVerificationInputSchema>>(
-    "RazorpayVerificationInput"
-  )
+  .inputRef<
+    z.infer<typeof razorpayVerificationInputSchema>
+  >("RazorpayVerificationInput")
   .implement({
     description: "Input for verifying a Razorpay payment",
     fields: (t) => ({

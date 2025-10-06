@@ -86,7 +86,7 @@ export async function onActivate(context: IPluginContext): Promise<void> {
     if (context.logger?.error) {
       context.logger.error(
         "Failed to initialize Razorpay configuration:",
-        error
+        error,
       );
     }
   }
@@ -96,7 +96,7 @@ export async function onActivate(context: IPluginContext): Promise<void> {
     try {
       if (context.logger?.info) {
         context.logger.info(
-          "GraphQL schema extensions registered for Razorpay Plugin"
+          "GraphQL schema extensions registered for Razorpay Plugin",
         );
       }
     } catch (error) {
@@ -134,7 +134,7 @@ export async function onUnload(context: IPluginContext): Promise<void> {
 // Event handlers
 export async function onPaymentCreated(
   data: any,
-  context: IPluginContext
+  context: IPluginContext,
 ): Promise<void> {
   try {
     if (context.logger?.info) {
@@ -161,7 +161,7 @@ export async function onPaymentCreated(
 
 export async function onPaymentCompleted(
   data: any,
-  context: IPluginContext
+  context: IPluginContext,
 ): Promise<void> {
   try {
     if (context.logger?.info) {
@@ -206,7 +206,7 @@ export async function onPaymentCompleted(
 
 export async function onPaymentFailed(
   data: any,
-  context: IPluginContext
+  context: IPluginContext,
 ): Promise<void> {
   try {
     if (context.logger?.info) {
@@ -289,16 +289,16 @@ export async function getPluginInfo(context: IPluginContext) {
 // Webhook handler for Razorpay - Standard implementation per Razorpay docs
 export async function handleRazorpayWebhook(
   request: any,
-  reply: any
+  reply: any,
 ): Promise<void> {
   try {
     const webhookData = request.body;
-    
+
     // Basic webhook data validation
     if (!webhookData || !webhookData.payload || !webhookData.payload.payment) {
-      return reply.status(400).send({ 
+      return reply.status(400).send({
         error: "Invalid webhook data",
-        message: "Missing required webhook payload structure"
+        message: "Missing required webhook payload structure",
       });
     }
 
@@ -306,16 +306,19 @@ export async function handleRazorpayWebhook(
     const paymentEntity = payment.entity;
 
     // Log the webhook for debugging
-    console.log(`🔗 Razorpay webhook received: ${paymentEntity.id} - ${paymentEntity.status}`);
+    console.log(
+      `🔗 Razorpay webhook received: ${paymentEntity.id} - ${paymentEntity.status}`,
+    );
 
     // Format currency display
     const currencySymbols: { [key: string]: string } = {
-      INR: '₹',
-      USD: '$',
-      EUR: '€',
-      GBP: '£',
+      INR: "₹",
+      USD: "$",
+      EUR: "€",
+      GBP: "£",
     };
-    const symbol = currencySymbols[paymentEntity.currency] || paymentEntity.currency;
+    const symbol =
+      currencySymbols[paymentEntity.currency] || paymentEntity.currency;
     const displayAmount = (paymentEntity.amount / 100).toFixed(2);
 
     console.log(`Payment Details:
@@ -332,28 +335,25 @@ export async function handleRazorpayWebhook(
     const pluginContext = (request as any).pluginContext;
     if (!pluginContext) {
       console.error("Plugin context not available in webhook");
-      return reply.status(500).send({ 
+      return reply.status(500).send({
         error: "Plugin context not available",
-        message: "Cannot process webhook without plugin context"
+        message: "Cannot process webhook without plugin context",
       });
     }
 
     // Verify webhook signature manually
-    const signature = request.headers['x-razorpay-signature'] as string;
+    const signature = request.headers["x-razorpay-signature"] as string;
     const webhookBody = JSON.stringify(webhookData);
-    
+
     // Get webhook secret from config
     const { configTable } = await import("./database/tables");
-    const config = await pluginContext.db
-      .select()
-      .from(configTable)
-      .limit(1);
+    const config = await pluginContext.db.select().from(configTable).limit(1);
 
     if (config.length === 0 || !config[0]?.webhookSecret) {
       console.error("Webhook secret not configured");
-      return reply.status(500).send({ 
+      return reply.status(500).send({
         error: "Webhook secret not configured",
-        message: "Cannot verify webhook signature without webhook secret"
+        message: "Cannot verify webhook signature without webhook secret",
       });
     }
 
@@ -366,19 +366,21 @@ export async function handleRazorpayWebhook(
 
     const isValidSignature = crypto.timingSafeEqual(
       Buffer.from(expectedSignature, "hex"),
-      Buffer.from(signature, "hex")
+      Buffer.from(signature, "hex"),
     );
 
     if (!isValidSignature) {
       console.error("Invalid webhook signature");
-      return reply.status(400).send({ 
+      return reply.status(400).send({
         error: "Invalid signature",
-        message: "Webhook signature verification failed"
+        message: "Webhook signature verification failed",
       });
     }
 
     // Process webhook directly with database access
-    const { ordersTable, transactionsTable } = await import("./database/tables");
+    const { ordersTable, transactionsTable } = await import(
+      "./database/tables"
+    );
     const { eq } = await import("drizzle-orm");
 
     // Get order details to get userId and other info
@@ -390,9 +392,9 @@ export async function handleRazorpayWebhook(
 
     if (orderDetails.length === 0) {
       console.error(`Order not found for payment: ${paymentEntity.id}`);
-      return reply.status(400).send({ 
+      return reply.status(400).send({
         error: "Order not found",
-        message: `Order not found for payment: ${paymentEntity.id}`
+        message: `Order not found for payment: ${paymentEntity.id}`,
       });
     }
 
@@ -407,33 +409,31 @@ export async function handleRazorpayWebhook(
 
     if (existingTransaction.length === 0) {
       // Create new transaction with userId from order
-      await pluginContext.db
-        .insert(transactionsTable)
-        .values({
-          paymentId: paymentEntity.id,
-          orderId: order.id,
-          organizationId: order.organizationId,
-          userId: order.userId, // Use userId from order
-          amount: order.amount,
-          currency: order.currency,
-          status: paymentEntity.status,
-          method: paymentEntity.method,
-          bank: paymentEntity.bank || undefined,
-          wallet: paymentEntity.wallet || undefined,
-          vpa: paymentEntity.vpa || undefined,
-          email: paymentEntity.email,
-          contact: paymentEntity.contact,
-          fee: paymentEntity.fee,
-          tax: paymentEntity.tax,
-          errorCode: paymentEntity.error_code || undefined,
-          errorDescription: paymentEntity.error_description || undefined,
-          refundStatus: paymentEntity.refund_status || undefined,
-          capturedAt: paymentEntity.captured
-            ? new Date(paymentEntity.created_at * 1000)
-            : undefined,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
+      await pluginContext.db.insert(transactionsTable).values({
+        paymentId: paymentEntity.id,
+        orderId: order.id,
+        organizationId: order.organizationId,
+        userId: order.userId, // Use userId from order
+        amount: order.amount,
+        currency: order.currency,
+        status: paymentEntity.status,
+        method: paymentEntity.method,
+        bank: paymentEntity.bank || undefined,
+        wallet: paymentEntity.wallet || undefined,
+        vpa: paymentEntity.vpa || undefined,
+        email: paymentEntity.email,
+        contact: paymentEntity.contact,
+        fee: paymentEntity.fee,
+        tax: paymentEntity.tax,
+        errorCode: paymentEntity.error_code || undefined,
+        errorDescription: paymentEntity.error_description || undefined,
+        refundStatus: paymentEntity.refund_status || undefined,
+        capturedAt: paymentEntity.captured
+          ? new Date(paymentEntity.created_at * 1000)
+          : undefined,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
     } else {
       // Update existing transaction
       await pluginContext.db
@@ -471,16 +471,15 @@ export async function handleRazorpayWebhook(
     }
 
     // Return success response as per Razorpay docs
-    reply.status(200).send({ 
+    reply.status(200).send({
       status: "success",
-      message: "Webhook processed successfully"
+      message: "Webhook processed successfully",
     });
-
   } catch (error) {
     console.error("Razorpay webhook error:", error);
-    reply.status(500).send({ 
+    reply.status(500).send({
       error: "Webhook processing failed",
-      message: error instanceof Error ? error.message : "Unknown error"
+      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

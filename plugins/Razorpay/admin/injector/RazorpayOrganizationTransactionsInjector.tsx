@@ -5,14 +5,32 @@
  * Razorpay payment provider transactions for organization admins in their transaction management.
  */
 
-import React, { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
-import { gql } from 'graphql-tag';
-import { Card, Table, Tag, Button, Space, Typography, message, Spin, Statistic, Row, Col } from 'antd';
-import { CreditCardOutlined, EyeOutlined, DownloadOutlined, DollarOutlined, UserOutlined } from '@ant-design/icons';
-import type { ColumnsType } from 'antd/es/table';
-import { useParams } from 'react-router-dom';
-import useLocalStorage from 'utils/useLocalstorage';
+import React, { useState, useEffect } from "react";
+import { useQuery } from "@apollo/client";
+import { gql } from "graphql-tag";
+import {
+  Card,
+  Table,
+  Tag,
+  Button,
+  Space,
+  Typography,
+  message,
+  Spin,
+  Statistic,
+  Row,
+  Col,
+} from "antd";
+import {
+  CreditCardOutlined,
+  EyeOutlined,
+  DownloadOutlined,
+  DollarOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import type { ColumnsType } from "antd/es/table";
+import { useParams } from "react-router-dom";
+import useLocalStorage from "utils/useLocalstorage";
 
 const { Title, Text } = Typography;
 
@@ -102,11 +120,11 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
     error: transactionsError,
   } = useQuery(GET_ORG_TRANSACTIONS, {
     variables: {
-      orgId: orgId || '',
+      orgId: orgId || "",
       limit: 10, // Show recent 10 transactions in injector
     },
     skip: !orgId,
-    fetchPolicy: 'network-only',
+    fetchPolicy: "network-only",
   });
 
   const {
@@ -115,27 +133,28 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
     error: statsError,
   } = useQuery(GET_ORG_TRANSACTION_STATS, {
     variables: {
-      orgId: orgId || '',
+      orgId: orgId || "",
     },
     skip: !orgId,
-    fetchPolicy: 'network-only',
+    fetchPolicy: "network-only",
   });
 
-  const transactions = transactionsData?.razorpay_getOrganizationTransactions || [];
+  const transactions =
+    transactionsData?.razorpay_getOrganizationTransactions || [];
   const stats = statsData?.razorpay_getOrganizationTransactionStats;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'captured':
-        return 'success';
-      case 'authorized':
-        return 'processing';
-      case 'failed':
-        return 'error';
-      case 'refunded':
-        return 'warning';
+      case "captured":
+        return "success";
+      case "authorized":
+        return "processing";
+      case "failed":
+        return "error";
+      case "refunded":
+        return "warning";
       default:
-        return 'default';
+        return "default";
     }
   };
 
@@ -144,12 +163,12 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -158,79 +177,81 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
     // In a real implementation, this would open a modal or navigate to details
   };
 
-  const handleDownloadReceipt = (transaction: RazorpayOrganizationTransaction) => {
+  const handleDownloadReceipt = (
+    transaction: RazorpayOrganizationTransaction,
+  ) => {
     message.success(`Downloading receipt for transaction: ${transaction.id}`);
     // In a real implementation, this would download the receipt
   };
 
   const columns: ColumnsType<RazorpayOrganizationTransaction> = [
     {
-      title: 'Transaction ID',
-      dataIndex: 'paymentId',
-      key: 'paymentId',
+      title: "Transaction ID",
+      dataIndex: "paymentId",
+      key: "paymentId",
       render: (paymentId: string) => (
-        <Text code style={{ fontSize: '12px' }}>
-          {paymentId || 'N/A'}
+        <Text code style={{ fontSize: "12px" }}>
+          {paymentId || "N/A"}
         </Text>
       ),
     },
     {
-      title: 'Amount',
-      dataIndex: 'amount',
-      key: 'amount',
+      title: "Amount",
+      dataIndex: "amount",
+      key: "amount",
       render: (amount: number, record: RazorpayOrganizationTransaction) => (
         <Text strong>
-          {amount ? formatAmount(amount, record.currency) : 'N/A'}
+          {amount ? formatAmount(amount, record.currency) : "N/A"}
         </Text>
       ),
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
       render: (status: string) => (
-        <Tag color={getStatusColor(status)}>
-          {status.toUpperCase()}
-        </Tag>
+        <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
       ),
     },
     {
-      title: 'Donor',
-      key: 'donor',
+      title: "Donor",
+      key: "donor",
       render: (_, record: RazorpayOrganizationTransaction) => (
         <div>
-          <div style={{ fontWeight: 500 }}>{record.donorName || 'Anonymous'}</div>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
-            {record.donorEmail || 'N/A'}
+          <div style={{ fontWeight: 500 }}>
+            {record.donorName || "Anonymous"}
+          </div>
+          <Text type="secondary" style={{ fontSize: "12px" }}>
+            {record.donorEmail || "N/A"}
           </Text>
         </div>
       ),
     },
     {
-      title: 'Payment Method',
-      dataIndex: 'method',
-      key: 'method',
-      render: (method: string) => method || 'N/A',
+      title: "Payment Method",
+      dataIndex: "method",
+      key: "method",
+      render: (method: string) => method || "N/A",
     },
     {
-      title: 'Fees',
-      dataIndex: 'fee',
-      key: 'fee',
+      title: "Fees",
+      dataIndex: "fee",
+      key: "fee",
       render: (fee: number, record: RazorpayOrganizationTransaction) => (
         <Text type="secondary">
-          {fee ? formatAmount(fee, record.currency) : 'N/A'}
+          {fee ? formatAmount(fee, record.currency) : "N/A"}
         </Text>
       ),
     },
     {
-      title: 'Date',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      title: "Date",
+      dataIndex: "createdAt",
+      key: "createdAt",
       render: (date: string) => formatDate(date),
     },
     {
-      title: 'Actions',
-      key: 'actions',
+      title: "Actions",
+      key: "actions",
       render: (_, record: RazorpayOrganizationTransaction) => (
         <Space size="small">
           <Button
@@ -257,9 +278,9 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
   if (transactionsLoading || statsLoading) {
     return (
       <Card>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div style={{ textAlign: "center", padding: "40px" }}>
           <Spin size="large" />
-          <div style={{ marginTop: '16px' }}>
+          <div style={{ marginTop: "16px" }}>
             <Text>Loading Razorpay organization transactions...</Text>
           </div>
         </div>
@@ -270,9 +291,10 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
   if (transactionsError || statsError) {
     return (
       <Card>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div style={{ textAlign: "center", padding: "40px" }}>
           <Text type="danger">
-            Error loading transactions: {transactionsError?.message || statsError?.message}
+            Error loading transactions:{" "}
+            {transactionsError?.message || statsError?.message}
           </Text>
         </div>
       </Card>
@@ -281,21 +303,21 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
 
   return (
     <Card>
-      <div style={{ marginBottom: '16px' }}>
+      <div style={{ marginBottom: "16px" }}>
         <Space align="center">
-          <CreditCardOutlined style={{ fontSize: '20px', color: '#1890ff' }} />
+          <CreditCardOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
           <Title level={4} style={{ margin: 0 }}>
             Razorpay Organization Transactions
           </Title>
         </Space>
-        <Text type="secondary" style={{ display: 'block', marginTop: '4px' }}>
+        <Text type="secondary" style={{ display: "block", marginTop: "4px" }}>
           Payment transactions for your organization processed through Razorpay
         </Text>
       </div>
 
       {/* Statistics Row */}
       {stats && (
-        <Row gutter={16} style={{ marginBottom: '24px' }}>
+        <Row gutter={16} style={{ marginBottom: "24px" }}>
           <Col span={6}>
             <Card size="small">
               <Statistic
@@ -303,8 +325,8 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
                 value={stats.totalAmount ? stats.totalAmount / 100 : 0}
                 precision={2}
                 prefix={<DollarOutlined />}
-                suffix={stats.currency || 'INR'}
-                valueStyle={{ color: '#3f8600' }}
+                suffix={stats.currency || "INR"}
+                valueStyle={{ color: "#3f8600" }}
               />
             </Card>
           </Col>
@@ -314,7 +336,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
                 title="Total Transactions"
                 value={stats.totalTransactions || 0}
                 prefix={<UserOutlined />}
-                valueStyle={{ color: '#1890ff' }}
+                valueStyle={{ color: "#1890ff" }}
               />
             </Card>
           </Col>
@@ -322,10 +344,15 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
             <Card size="small">
               <Statistic
                 title="Success Rate"
-                value={stats.totalTransactions ? ((stats.successCount || 0) / stats.totalTransactions) * 100 : 0}
+                value={
+                  stats.totalTransactions
+                    ? ((stats.successCount || 0) / stats.totalTransactions) *
+                      100
+                    : 0
+                }
                 precision={1}
                 suffix="%"
-                valueStyle={{ color: '#3f8600' }}
+                valueStyle={{ color: "#3f8600" }}
               />
             </Card>
           </Col>
@@ -334,7 +361,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
               <Statistic
                 title="Failed Transactions"
                 value={stats.failedCount || 0}
-                valueStyle={{ color: '#cf1322' }}
+                valueStyle={{ color: "#cf1322" }}
               />
             </Card>
           </Col>

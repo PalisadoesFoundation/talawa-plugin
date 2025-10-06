@@ -18,7 +18,7 @@ import {
 export async function getRazorpayConfigResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -84,7 +84,7 @@ const getOrganizationTransactionsArgumentsSchema = z.object({
 export async function getOrganizationTransactionsResolver(
   _parent: unknown,
   args: z.infer<typeof getOrganizationTransactionsArgumentsSchema>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -128,7 +128,7 @@ export async function getOrganizationTransactionsResolver(
 
     if (dateFrom) {
       whereConditions.push(
-        gte(transactionsTable.createdAt, new Date(dateFrom))
+        gte(transactionsTable.createdAt, new Date(dateFrom)),
       );
     }
 
@@ -200,7 +200,7 @@ const getUserTransactionsArgumentsSchema = z.object({
 export async function getUserTransactionsResolver(
   _parent: unknown,
   args: z.infer<typeof getUserTransactionsArgumentsSchema>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -250,7 +250,7 @@ export async function getUserTransactionsResolver(
 
     if (dateFrom) {
       whereConditions.push(
-        gte(transactionsTable.createdAt, new Date(dateFrom))
+        gte(transactionsTable.createdAt, new Date(dateFrom)),
       );
     }
 
@@ -318,7 +318,7 @@ const getOrganizationTransactionStatsArgumentsSchema = z.object({
 export async function getOrganizationTransactionStatsResolver(
   _parent: unknown,
   args: z.infer<typeof getOrganizationTransactionStatsArgumentsSchema>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -351,7 +351,7 @@ export async function getOrganizationTransactionStatsResolver(
 
     if (dateFrom) {
       whereConditions.push(
-        gte(transactionsTable.createdAt, new Date(dateFrom))
+        gte(transactionsTable.createdAt, new Date(dateFrom)),
       );
     }
 
@@ -409,7 +409,7 @@ const getUserTransactionStatsArgumentsSchema = z.object({
 export async function getUserTransactionStatsResolver(
   _parent: unknown,
   args: z.infer<typeof getUserTransactionStatsArgumentsSchema>,
-  ctx: GraphQLContext
+  ctx: GraphQLContext,
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
@@ -442,7 +442,7 @@ export async function getUserTransactionStatsResolver(
 
     if (dateFrom) {
       whereConditions.push(
-        gte(transactionsTable.createdAt, new Date(dateFrom))
+        gte(transactionsTable.createdAt, new Date(dateFrom)),
       );
     }
 
@@ -498,7 +498,7 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
       type: RazorpayConfigRef,
       description: "Get Razorpay configuration settings",
       resolve: getRazorpayConfigResolver,
-    })
+    }),
   );
 
   // Get organization transactions
@@ -515,7 +515,7 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
       },
       description: "Get transaction summary for an organization",
       resolve: getOrganizationTransactionsResolver,
-    })
+    }),
   );
 
   // Get user transactions
@@ -533,7 +533,7 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
       },
       description: "Get transaction summary for a user",
       resolve: getUserTransactionsResolver,
-    })
+    }),
   );
 
   // Get organization transaction stats
@@ -547,7 +547,7 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
       },
       description: "Get transaction statistics for an organization",
       resolve: getOrganizationTransactionStatsResolver,
-    })
+    }),
   );
 
   // Get user transaction stats
@@ -561,6 +561,6 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
       },
       description: "Get transaction statistics for a user",
       resolve: getUserTransactionStatsResolver,
-    })
+    }),
   );
 }
