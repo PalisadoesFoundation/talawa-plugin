@@ -1,9 +1,9 @@
-import type { IPluginContext, IPluginLifecycle } from "../../types";
+import type { IPluginContext, IPluginLifecycle } from '../../types';
 
-export * from "./graphql/types";
-export * from "./graphql/inputs";
-export * from "./graphql/mutations";
-export * from "./graphql/queries";
+export * from './graphql/types';
+export * from './graphql/inputs';
+export * from './graphql/mutations';
+export * from './graphql/queries';
 
 export async function onLoad(_context: IPluginContext): Promise<void> {}
 export async function onActivate(_context: IPluginContext): Promise<void> {}

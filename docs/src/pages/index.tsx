@@ -1,10 +1,10 @@
-import React from "react";
-import Head from "@docusaurus/Head";
-import Layout from "@theme/Layout";
-import HeaderHero from "../components/layout/HeaderHero";
+import React from 'react';
+import Head from '@docusaurus/Head';
+import Layout from '@theme/Layout';
+import HeaderHero from '../components/layout/HeaderHero';
 
 const Index = () => {
-  const pageTitle = "Talawa-Docs: Powered by The Palisadoes";
+  const pageTitle = 'Talawa-Docs: Powered by The Palisadoes';
 
   return (
     <Layout

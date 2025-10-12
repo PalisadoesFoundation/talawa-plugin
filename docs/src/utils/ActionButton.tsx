@@ -1,8 +1,8 @@
-import React from "react";
+import React from 'react';
 
 interface ActionButtonProps {
   href: string;
-  type?: "primary" | "secondary";
+  type?: 'primary' | 'secondary';
   target?: string;
   children: React.ReactNode;
   buttonClassName?: string;
@@ -11,7 +11,7 @@ interface ActionButtonProps {
 
 function ActionButton({
   href,
-  type = "primary",
+  type = 'primary',
   target,
   children,
   buttonClassName,
@@ -19,8 +19,8 @@ function ActionButton({
 }: ActionButtonProps) {
   return (
     <a
-      className={`ActionButton ${type}${buttonClassName ? ` ${buttonClassName}` : ""}`}
-      rel={target === "_blank" ? "noopener noreferrer" : undefined}
+      className={`ActionButton ${type}${buttonClassName ? ` ${buttonClassName}` : ''}`}
+      rel={target === '_blank' ? 'noopener noreferrer' : undefined}
       href={href}
       target={target}
       role="button"
