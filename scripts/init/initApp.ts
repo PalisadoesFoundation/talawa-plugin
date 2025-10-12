@@ -1,7 +1,7 @@
 // scripts/initApp.ts
-import { spinner } from "@clack/prompts";
-import { mkdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { spinner } from '@clack/prompts';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 /**
  * Scaffolds the Mobile/App portion (Flutter) of a plugin.
@@ -14,19 +14,19 @@ import { join } from "node:path";
  */
 export function createAppSkeleton(
   pluginName: string,
-  pluginsRoot = "plugins",
+  pluginsRoot = 'plugins',
 ): void {
   const s = spinner();
-  s.start("Creating Mobile/App skeleton…");
+  s.start('Creating Mobile/App skeleton…');
 
-  const appRoot = join(pluginsRoot, pluginName, "mobile");
-  const libDir = join(appRoot, "lib");
+  const appRoot = join(pluginsRoot, pluginName, 'mobile');
+  const libDir = join(appRoot, 'lib');
 
   mkdirSync(libDir, { recursive: true });
 
   // Simple Flutter entry widget
   writeFileSync(
-    join(libDir, "plugin_entry.dart"),
+    join(libDir, 'plugin_entry.dart'),
     `import 'package:flutter/material.dart';
 
 class ${pascal(pluginName)}Screen extends StatelessWidget {
@@ -44,14 +44,14 @@ class ${pascal(pluginName)}Screen extends StatelessWidget {
   );
 
   writeFileSync(
-    join(appRoot, "README.md"),
+    join(appRoot, 'README.md'),
     `# ${pluginName} – Mobile module
 
 Describe Flutter routes, widgets, and feature flags here.
 `,
   );
 
-  s.stop("Mobile/App skeleton created.");
+  s.stop('Mobile/App skeleton created.');
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -59,5 +59,5 @@ function pascal(str: string): string {
   return str
     .split(/[-_]/)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join("");
+    .join('');
 }
