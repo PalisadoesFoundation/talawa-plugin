@@ -1,18 +1,18 @@
-import { desc, eq, sql, and, gte, lte } from "drizzle-orm";
-import { z } from "zod";
-import { builder } from "~/src/graphql/builder";
-import type { GraphQLContext } from "~/src/graphql/context";
-import { TalawaGraphQLError } from "~/src/utilities/TalawaGraphQLError";
+import { desc, eq, sql, and, gte, lte } from 'drizzle-orm';
+import { z } from 'zod';
+import { builder } from '~/src/graphql/builder';
+import type { GraphQLContext } from '~/src/graphql/context';
+import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
 import {
   configTable,
   transactionsTable,
   ordersTable,
-} from "../database/tables";
+} from '../database/tables';
 import {
   RazorpayConfigRef,
   RazorpayTransactionRef,
   RazorpayTransactionStatsRef,
-} from "./types";
+} from './types';
 
 // Get Razorpay configuration resolver
 export async function getRazorpayConfigResolver(
@@ -22,7 +22,7 @@ export async function getRazorpayConfigResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -31,26 +31,26 @@ export async function getRazorpayConfigResolver(
 
     if (config.length === 0) {
       return {
-        keyId: "",
-        keySecret: "",
-        webhookSecret: "",
+        keyId: '',
+        keySecret: '',
+        webhookSecret: '',
         isEnabled: false,
         testMode: true,
-        currency: "INR",
-        description: "Donation to organization",
+        currency: 'INR',
+        description: 'Donation to organization',
       };
     }
 
     const configItem = config[0];
     if (!configItem) {
       return {
-        keyId: "",
-        keySecret: "",
-        webhookSecret: "",
+        keyId: '',
+        keySecret: '',
+        webhookSecret: '',
         isEnabled: false,
         testMode: true,
-        currency: "INR",
-        description: "Donation to organization",
+        currency: 'INR',
+        description: 'Donation to organization',
       };
     }
 
@@ -60,13 +60,13 @@ export async function getRazorpayConfigResolver(
       webhookSecret: configItem.webhookSecret || undefined,
       isEnabled: configItem.isEnabled || false,
       testMode: configItem.testMode || true,
-      currency: configItem.currency || "INR",
-      description: configItem.description || "Donation to organization",
+      currency: configItem.currency || 'INR',
+      description: configItem.description || 'Donation to organization',
     };
   } catch (error) {
-    ctx.log?.error("Error getting Razorpay config:", error);
+    ctx.log?.error('Error getting Razorpay config:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 }
@@ -88,7 +88,7 @@ export async function getOrganizationTransactionsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -101,7 +101,7 @@ export async function getOrganizationTransactionsResolver(
   if (!success) {
     throw new TalawaGraphQLError({
       extensions: {
-        code: "invalid_arguments",
+        code: 'invalid_arguments',
         issues: error.issues.map((issue) => ({
           argumentPath: issue.path,
           message: issue.message,
@@ -159,8 +159,8 @@ export async function getOrganizationTransactionsResolver(
       id: transaction.id,
       paymentId: transaction.paymentId || undefined,
       amount: transaction.amount || undefined,
-      currency: transaction.currency || "INR",
-      status: transaction.status || "pending",
+      currency: transaction.currency || 'INR',
+      status: transaction.status || 'pending',
       donorName: transaction.donorName || undefined,
       donorEmail: transaction.donorEmail || undefined,
       method: undefined,
@@ -179,9 +179,9 @@ export async function getOrganizationTransactionsResolver(
       updatedAt: transaction.updatedAt || new Date(),
     }));
   } catch (error) {
-    ctx.log?.error("Error getting organization transactions:", error);
+    ctx.log?.error('Error getting organization transactions:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 }
@@ -203,7 +203,7 @@ export async function getUserTransactionsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -216,7 +216,7 @@ export async function getUserTransactionsResolver(
   if (!success) {
     throw new TalawaGraphQLError({
       extensions: {
-        code: "invalid_arguments",
+        code: 'invalid_arguments',
         issues: error.issues.map((issue) => ({
           argumentPath: issue.path,
           message: issue.message,
@@ -274,8 +274,8 @@ export async function getUserTransactionsResolver(
       id: transaction.id,
       paymentId: transaction.paymentId || undefined,
       amount: transaction.amount || undefined,
-      currency: transaction.currency || "INR",
-      status: transaction.status || "pending",
+      currency: transaction.currency || 'INR',
+      status: transaction.status || 'pending',
       donorName: transaction.donorName || undefined,
       donorEmail: transaction.donorEmail || undefined,
       method: undefined,
@@ -294,9 +294,9 @@ export async function getUserTransactionsResolver(
       updatedAt: transaction.updatedAt || new Date(),
     }));
   } catch (error) {
-    ctx.log?.error("Error getting user transactions:", error);
+    ctx.log?.error('Error getting user transactions:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 }
@@ -315,7 +315,7 @@ export async function getOrganizationTransactionStatsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -328,7 +328,7 @@ export async function getOrganizationTransactionStatsResolver(
   if (!success) {
     throw new TalawaGraphQLError({
       extensions: {
-        code: "invalid_arguments",
+        code: 'invalid_arguments',
         issues: error.issues.map((issue) => ({
           argumentPath: issue.path,
           message: issue.message,
@@ -369,7 +369,7 @@ export async function getOrganizationTransactionStatsResolver(
       return {
         totalTransactions: 0,
         totalAmount: 0,
-        currency: "INR",
+        currency: 'INR',
         successCount: 0,
         failedCount: 0,
         pendingCount: 0,
@@ -379,15 +379,15 @@ export async function getOrganizationTransactionStatsResolver(
     return {
       totalTransactions: stats[0]?.totalTransactions || 0,
       totalAmount: stats[0]?.totalAmount || 0,
-      currency: stats[0]?.currency || "INR",
+      currency: stats[0]?.currency || 'INR',
       successCount: stats[0]?.successCount || 0,
       failedCount: stats[0]?.failedCount || 0,
       pendingCount: stats[0]?.pendingCount || 0,
     };
   } catch (error) {
-    ctx.log?.error("Error getting organization transaction stats:", error);
+    ctx.log?.error('Error getting organization transaction stats:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 }
@@ -406,7 +406,7 @@ export async function getUserTransactionStatsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -419,7 +419,7 @@ export async function getUserTransactionStatsResolver(
   if (!success) {
     throw new TalawaGraphQLError({
       extensions: {
-        code: "invalid_arguments",
+        code: 'invalid_arguments',
         issues: error.issues.map((issue) => ({
           argumentPath: issue.path,
           message: issue.message,
@@ -460,7 +460,7 @@ export async function getUserTransactionStatsResolver(
       return {
         totalTransactions: 0,
         totalAmount: 0,
-        currency: "INR",
+        currency: 'INR',
         successCount: 0,
         failedCount: 0,
         pendingCount: 0,
@@ -470,15 +470,15 @@ export async function getUserTransactionStatsResolver(
     return {
       totalTransactions: stats[0]?.totalTransactions || 0,
       totalAmount: stats[0]?.totalAmount || 0,
-      currency: stats[0]?.currency || "INR",
+      currency: stats[0]?.currency || 'INR',
       successCount: stats[0]?.successCount || 0,
       failedCount: stats[0]?.failedCount || 0,
       pendingCount: stats[0]?.pendingCount || 0,
     };
   } catch (error) {
-    ctx.log?.error("Error getting user transaction stats:", error);
+    ctx.log?.error('Error getting user transaction stats:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 }
@@ -486,16 +486,16 @@ export async function getUserTransactionStatsResolver(
 // Register all Razorpay queries with the builder
 export function registerRazorpayQueries(builderInstance: typeof builder): void {
   // Get Razorpay configuration
-  builderInstance.queryField("getRazorpayConfig", (t) =>
+  builderInstance.queryField('getRazorpayConfig', (t) =>
     t.field({
       type: RazorpayConfigRef,
-      description: "Get Razorpay configuration settings",
+      description: 'Get Razorpay configuration settings',
       resolve: getRazorpayConfigResolver,
     }),
   );
 
   // Get organization transactions
-  builderInstance.queryField("getOrganizationTransactions", (t) =>
+  builderInstance.queryField('getOrganizationTransactions', (t) =>
     t.field({
       type: t.listRef(RazorpayTransactionRef),
       args: {
@@ -506,13 +506,13 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
         dateFrom: t.arg.string({ required: false }),
         dateTo: t.arg.string({ required: false }),
       },
-      description: "Get transaction summary for an organization",
+      description: 'Get transaction summary for an organization',
       resolve: getOrganizationTransactionsResolver,
     }),
   );
 
   // Get user transactions
-  builderInstance.queryField("getUserTransactions", (t) =>
+  builderInstance.queryField('getUserTransactions', (t) =>
     t.field({
       type: t.listRef(RazorpayTransactionRef),
       args: {
@@ -523,13 +523,13 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
         dateFrom: t.arg.string({ required: false }),
         dateTo: t.arg.string({ required: false }),
       },
-      description: "Get transaction summary for a user",
+      description: 'Get transaction summary for a user',
       resolve: getUserTransactionsResolver,
     }),
   );
 
   // Get organization transaction stats
-  builderInstance.queryField("getOrganizationTransactionStats", (t) =>
+  builderInstance.queryField('getOrganizationTransactionStats', (t) =>
     t.field({
       type: RazorpayTransactionStatsRef,
       args: {
@@ -537,13 +537,13 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
         dateFrom: t.arg.string({ required: false }),
         dateTo: t.arg.string({ required: false }),
       },
-      description: "Get transaction statistics for an organization",
+      description: 'Get transaction statistics for an organization',
       resolve: getOrganizationTransactionStatsResolver,
     }),
   );
 
   // Get user transaction stats
-  builderInstance.queryField("getUserTransactionStats", (t) =>
+  builderInstance.queryField('getUserTransactionStats', (t) =>
     t.field({
       type: RazorpayTransactionStatsRef,
       args: {
@@ -551,7 +551,7 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
         dateFrom: t.arg.string({ required: false }),
         dateTo: t.arg.string({ required: false }),
       },
-      description: "Get transaction statistics for a user",
+      description: 'Get transaction statistics for a user',
       resolve: getUserTransactionStatsResolver,
     }),
   );

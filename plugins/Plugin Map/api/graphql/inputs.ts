@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { builder } from "~/src/graphql/builder";
+import { z } from 'zod';
+import { builder } from '~/src/graphql/builder';
 
 // PluginMapPoll Input
 export const pluginMapPollInputSchema = z.object({
@@ -10,9 +10,9 @@ export const pluginMapPollInputSchema = z.object({
 });
 
 export const PluginMapPollInput = builder
-  .inputRef<z.infer<typeof pluginMapPollInputSchema>>("PluginMapPollInput")
+  .inputRef<z.infer<typeof pluginMapPollInputSchema>>('PluginMapPollInput')
   .implement({
-    description: "Input for logging a plugin map poll",
+    description: 'Input for logging a plugin map poll',
     fields: (t) => ({
       userId: t.string({ required: true }),
       userRole: t.string({ required: true }),
@@ -32,9 +32,9 @@ export const getPluginMapPollsInputSchema = z.object({
 export const GetPluginMapPollsInput = builder
   .inputRef<
     z.infer<typeof getPluginMapPollsInputSchema>
-  >("GetPluginMapPollsInput")
+  >('GetPluginMapPollsInput')
   .implement({
-    description: "Input for getting plugin map polls",
+    description: 'Input for getting plugin map polls',
     fields: (t) => ({
       userId: t.string({ required: false }),
       userRole: t.string({ required: false }),

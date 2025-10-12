@@ -1,6 +1,6 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { createRazorpayService } from "../services/razorpayService";
-import type { GraphQLContext } from "~/src/graphql/context";
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { createRazorpayService } from '../services/razorpayService';
+import type { GraphQLContext } from '~/src/graphql/context';
 
 interface WebhookRequest extends FastifyRequest {
   body: {
@@ -42,7 +42,7 @@ interface WebhookRequest extends FastifyRequest {
 export async function registerRazorpayWebhookRoutes(fastify: FastifyInstance) {
   // Webhook endpoint for Razorpay payment notifications
   fastify.post(
-    "/api/plugins/razorpay/webhook",
+    '/api/plugins/razorpay/webhook',
     async (request: WebhookRequest, reply: FastifyReply) => {
       try {
         const webhookData = request.body;
@@ -50,7 +50,7 @@ export async function registerRazorpayWebhookRoutes(fastify: FastifyInstance) {
         // Get the context from the request
         const context = request.injections?.context as GraphQLContext;
         if (!context) {
-          reply.status(500).send({ error: "Context not available" });
+          reply.status(500).send({ error: 'Context not available' });
           return;
         }
 
@@ -61,22 +61,22 @@ export async function registerRazorpayWebhookRoutes(fastify: FastifyInstance) {
         await razorpayService.processWebhook(webhookData);
 
         // Return success response
-        reply.status(200).send({ status: "success" });
+        reply.status(200).send({ status: 'success' });
       } catch (error) {
-        context?.log?.error("Webhook processing failed:", error);
-        reply.status(500).send({ error: "Webhook processing failed" });
+        context?.log?.error('Webhook processing failed:', error);
+        reply.status(500).send({ error: 'Webhook processing failed' });
       }
     },
   );
 
   // Health check endpoint for the webhook
   fastify.get(
-    "/api/plugins/razorpay/webhook/health",
+    '/api/plugins/razorpay/webhook/health',
     async (request, reply) => {
       reply.status(200).send({
-        status: "healthy",
+        status: 'healthy',
         timestamp: new Date().toISOString(),
-        plugin: "razorpay",
+        plugin: 'razorpay',
       });
     },
   );

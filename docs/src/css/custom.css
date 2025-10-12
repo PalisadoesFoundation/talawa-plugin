@@ -64,13 +64,13 @@
   --ifm-color-emphasis-100: #f4f8fb;
   --ifm-color-emphasis-0: #fff;
   --ifm-font-family-base:
-    "Optimistic Display", system-ui, -apple-system, sans-serif;
+    'Optimistic Display', system-ui, -apple-system, sans-serif;
   --ifm-font-size-base: 17px;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --ifm-color-primary: #1e56e3;
   --ifm-color-primary-light: #29d5b0;
   --ifm-color-primary-lighter: #32d8b4;
@@ -78,17 +78,17 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
-[data-theme="dark"] .themedComponent--light_NVdE {
+[data-theme='dark'] .themedComponent--light_NVdE {
   display: initial;
 }
 
-[data-theme="dark"] .navbar {
+[data-theme='dark'] .navbar {
   border-bottom: 1px solid #2d3956;
 }
 
 /* Dark mode css */
 
-html[data-theme="dark"] {
+html[data-theme='dark'] {
   --ifm-background-color: #111927;
   --ifm-background-surface-color: var(--ifm-background-color);
   --ifm-menu-color: var(--neutral-mid-400);
@@ -119,8 +119,8 @@ html[data-theme="dark"] {
 
 /* stylelint-disable docusaurus/copyright-header */
 
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 
 .container > div > div:first-child {
   padding: 1rem 5rem;
@@ -369,33 +369,33 @@ h1 {
 }
 
 .header-github-link:before {
-  content: "";
+  content: '';
   width: 20px;
   height: 20px;
   display: flex;
-  background: url("/img/icons/github-dark.svg") no-repeat;
+  background: url('/img/icons/github-dark.svg') no-repeat;
   position: relative;
   right: 8px;
   top: 1.5px;
 }
 
 .header-twitter-link:before {
-  content: "";
+  content: '';
   width: 15px;
   height: 15px;
   display: flex;
-  background: url("/img/icons/twitter.svg") no-repeat 90% 100%;
+  background: url('/img/icons/twitter.svg') no-repeat 90% 100%;
   position: relative;
   right: 6px;
   top: 2px;
 }
 
 .header-youtube-link:before {
-  content: "";
+  content: '';
   width: 25px;
   height: 30px;
   display: flex;
-  background: url("/img/icons/youtube.svg") no-repeat;
+  background: url('/img/icons/youtube.svg') no-repeat;
   position: relative;
   right: 8px;
   top: 4.5px;
@@ -417,7 +417,7 @@ h1 {
 }
 
 .footer__icon:before {
-  content: "";
+  content: '';
   display: inline-flex;
   height: 16px;
   width: 16px;
@@ -473,11 +473,11 @@ h1 {
   mask-size: cover;
 }
 
-html[data-theme="dark"] .header-github-link:before {
+html[data-theme='dark'] .header-github-link:before {
   background: url(/img/icons/github.svg) no-repeat;
 }
 
-html[data-theme="dark"] .header-youtube-link:before {
+html[data-theme='dark'] .header-youtube-link:before {
   background: url(/img/icons/youtube-white.svg) no-repeat;
 }
 
@@ -714,7 +714,7 @@ a:hover {
 }
 
 .ActionButton.secondary::after {
-  content: "›";
+  content: '›';
   font-size: 24px;
   margin-left: 5px;
 }

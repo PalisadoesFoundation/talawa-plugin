@@ -6,7 +6,7 @@
  * in one place, regardless of which organization the transactions were made to.
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   Table,
@@ -21,16 +21,16 @@ import {
   DatePicker,
   Row,
   Col,
-} from "antd";
+} from 'antd';
 import {
   CreditCardOutlined,
   EyeOutlined,
   DownloadOutlined,
   SearchOutlined,
   FilterOutlined,
-} from "@ant-design/icons";
-import type { ColumnsType } from "antd/es/table";
-import dayjs from "dayjs";
+} from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -40,13 +40,13 @@ interface RazorpayTransaction {
   id: string;
   amount: number;
   currency: string;
-  status: "captured" | "authorized" | "failed" | "refunded";
+  status: 'captured' | 'authorized' | 'failed' | 'refunded';
   description: string;
   createdAt: string;
   organizationName: string;
   organizationId: string;
   paymentMethod: string;
-  category: "donation" | "event" | "membership" | "other";
+  category: 'donation' | 'event' | 'membership' | 'other';
 }
 
 const UserTransactions: React.FC = () => {
@@ -55,9 +55,9 @@ const UserTransactions: React.FC = () => {
     RazorpayTransaction[]
   >([]);
   const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [organizationFilter, setOrganizationFilter] = useState<string>("all");
+  const [searchText, setSearchText] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [organizationFilter, setOrganizationFilter] = useState<string>('all');
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(
     null,
   );
@@ -66,76 +66,76 @@ const UserTransactions: React.FC = () => {
     // Simulate loading all user transactions across organizations
     const mockTransactions: RazorpayTransaction[] = [
       {
-        id: "txn_123456789",
+        id: 'txn_123456789',
         amount: 1000,
-        currency: "INR",
-        status: "captured",
-        description: "Donation to Organization A",
-        createdAt: "2024-01-15T10:30:00Z",
-        organizationName: "Organization A",
-        organizationId: "org_a",
-        paymentMethod: "Card",
-        category: "donation",
+        currency: 'INR',
+        status: 'captured',
+        description: 'Donation to Organization A',
+        createdAt: '2024-01-15T10:30:00Z',
+        organizationName: 'Organization A',
+        organizationId: 'org_a',
+        paymentMethod: 'Card',
+        category: 'donation',
       },
       {
-        id: "txn_987654321",
+        id: 'txn_987654321',
         amount: 500,
-        currency: "INR",
-        status: "captured",
-        description: "Event Registration Fee",
-        createdAt: "2024-01-14T15:45:00Z",
-        organizationName: "Organization B",
-        organizationId: "org_b",
-        paymentMethod: "UPI",
-        category: "event",
+        currency: 'INR',
+        status: 'captured',
+        description: 'Event Registration Fee',
+        createdAt: '2024-01-14T15:45:00Z',
+        organizationName: 'Organization B',
+        organizationId: 'org_b',
+        paymentMethod: 'UPI',
+        category: 'event',
       },
       {
-        id: "txn_456789123",
+        id: 'txn_456789123',
         amount: 2000,
-        currency: "INR",
-        status: "refunded",
-        description: "Donation to Organization C",
-        createdAt: "2024-01-13T09:20:00Z",
-        organizationName: "Organization C",
-        organizationId: "org_c",
-        paymentMethod: "Net Banking",
-        category: "donation",
+        currency: 'INR',
+        status: 'refunded',
+        description: 'Donation to Organization C',
+        createdAt: '2024-01-13T09:20:00Z',
+        organizationName: 'Organization C',
+        organizationId: 'org_c',
+        paymentMethod: 'Net Banking',
+        category: 'donation',
       },
       {
-        id: "txn_789123456",
+        id: 'txn_789123456',
         amount: 750,
-        currency: "INR",
-        status: "captured",
-        description: "Membership Fee",
-        createdAt: "2024-01-12T14:15:00Z",
-        organizationName: "Organization A",
-        organizationId: "org_a",
-        paymentMethod: "Card",
-        category: "membership",
+        currency: 'INR',
+        status: 'captured',
+        description: 'Membership Fee',
+        createdAt: '2024-01-12T14:15:00Z',
+        organizationName: 'Organization A',
+        organizationId: 'org_a',
+        paymentMethod: 'Card',
+        category: 'membership',
       },
       {
-        id: "txn_321654987",
+        id: 'txn_321654987',
         amount: 1500,
-        currency: "INR",
-        status: "captured",
-        description: "Workshop Registration",
-        createdAt: "2024-01-11T11:20:00Z",
-        organizationName: "Organization D",
-        organizationId: "org_d",
-        paymentMethod: "UPI",
-        category: "event",
+        currency: 'INR',
+        status: 'captured',
+        description: 'Workshop Registration',
+        createdAt: '2024-01-11T11:20:00Z',
+        organizationName: 'Organization D',
+        organizationId: 'org_d',
+        paymentMethod: 'UPI',
+        category: 'event',
       },
       {
-        id: "txn_654987321",
+        id: 'txn_654987321',
         amount: 300,
-        currency: "INR",
-        status: "failed",
-        description: "Donation to Organization E",
-        createdAt: "2024-01-10T16:30:00Z",
-        organizationName: "Organization E",
-        organizationId: "org_e",
-        paymentMethod: "Card",
-        category: "donation",
+        currency: 'INR',
+        status: 'failed',
+        description: 'Donation to Organization E',
+        createdAt: '2024-01-10T16:30:00Z',
+        organizationName: 'Organization E',
+        organizationId: 'org_e',
+        paymentMethod: 'Card',
+        category: 'donation',
       },
     ];
 
@@ -165,14 +165,14 @@ const UserTransactions: React.FC = () => {
     }
 
     // Status filter
-    if (statusFilter !== "all") {
+    if (statusFilter !== 'all') {
       filtered = filtered.filter(
         (transaction) => transaction.status === statusFilter,
       );
     }
 
     // Organization filter
-    if (organizationFilter !== "all") {
+    if (organizationFilter !== 'all') {
       filtered = filtered.filter(
         (transaction) => transaction.organizationId === organizationFilter,
       );
@@ -194,29 +194,29 @@ const UserTransactions: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "captured":
-        return "success";
-      case "authorized":
-        return "processing";
-      case "failed":
-        return "error";
-      case "refunded":
-        return "warning";
+      case 'captured':
+        return 'success';
+      case 'authorized':
+        return 'processing';
+      case 'failed':
+        return 'error';
+      case 'refunded':
+        return 'warning';
       default:
-        return "default";
+        return 'default';
     }
   };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case "donation":
-        return "blue";
-      case "event":
-        return "green";
-      case "membership":
-        return "purple";
+      case 'donation':
+        return 'blue';
+      case 'event':
+        return 'green';
+      case 'membership':
+        return 'purple';
       default:
-        return "default";
+        return 'default';
     }
   };
 
@@ -225,12 +225,12 @@ const UserTransactions: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    return new Date(dateString).toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
@@ -254,35 +254,35 @@ const UserTransactions: React.FC = () => {
 
   const columns: ColumnsType<RazorpayTransaction> = [
     {
-      title: "Transaction ID",
-      dataIndex: "id",
-      key: "id",
+      title: 'Transaction ID',
+      dataIndex: 'id',
+      key: 'id',
       render: (id: string) => (
-        <Text code style={{ fontSize: "12px" }}>
+        <Text code style={{ fontSize: '12px' }}>
           {id}
         </Text>
       ),
     },
     {
-      title: "Amount",
-      dataIndex: "amount",
-      key: "amount",
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
       render: (amount: number, record: RazorpayTransaction) => (
         <Text strong>{formatAmount(amount, record.currency)}</Text>
       ),
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
       render: (status: string) => (
         <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
       ),
     },
     {
-      title: "Organization",
-      dataIndex: "organizationName",
-      key: "organizationName",
+      title: 'Organization',
+      dataIndex: 'organizationName',
+      key: 'organizationName',
       render: (name: string, record: RazorpayTransaction) => (
         <div>
           <div style={{ fontWeight: 500 }}>{name}</div>
@@ -291,27 +291,27 @@ const UserTransactions: React.FC = () => {
       ),
     },
     {
-      title: "Description",
-      dataIndex: "description",
-      key: "description",
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description',
       ellipsis: true,
     },
     {
-      title: "Payment Method",
-      dataIndex: "paymentMethod",
-      key: "paymentMethod",
+      title: 'Payment Method',
+      dataIndex: 'paymentMethod',
+      key: 'paymentMethod',
     },
     {
-      title: "Date",
-      dataIndex: "createdAt",
-      key: "createdAt",
+      title: 'Date',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
       render: (date: string) => formatDate(date),
       sorter: (a, b) =>
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     },
     {
-      title: "Actions",
-      key: "actions",
+      title: 'Actions',
+      key: 'actions',
       render: (_, record: RazorpayTransaction) => (
         <Space size="small">
           <Button
@@ -338,9 +338,9 @@ const UserTransactions: React.FC = () => {
   if (loading) {
     return (
       <Card>
-        <div style={{ textAlign: "center", padding: "40px" }}>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
           <Spin size="large" />
-          <div style={{ marginTop: "16px" }}>
+          <div style={{ marginTop: '16px' }}>
             <Text>Loading your transaction history...</Text>
           </div>
         </div>
@@ -350,17 +350,17 @@ const UserTransactions: React.FC = () => {
 
   return (
     <div>
-      <Card style={{ marginBottom: "16px" }}>
-        <div style={{ marginBottom: "16px" }}>
+      <Card style={{ marginBottom: '16px' }}>
+        <div style={{ marginBottom: '16px' }}>
           <Space align="center">
             <CreditCardOutlined
-              style={{ fontSize: "24px", color: "#1890ff" }}
+              style={{ fontSize: '24px', color: '#1890ff' }}
             />
             <Title level={3} style={{ margin: 0 }}>
               My Razorpay Transactions
             </Title>
           </Space>
-          <Text type="secondary" style={{ display: "block", marginTop: "4px" }}>
+          <Text type="secondary" style={{ display: 'block', marginTop: '4px' }}>
             View all your payment transactions across all organizations
           </Text>
         </div>
@@ -382,7 +382,7 @@ const UserTransactions: React.FC = () => {
               placeholder="Filter by status"
               value={statusFilter}
               onChange={setStatusFilter}
-              style={{ width: "100%" }}
+              style={{ width: '100%' }}
               allowClear
             >
               <Select.Option value="all">All Statuses</Select.Option>
@@ -397,7 +397,7 @@ const UserTransactions: React.FC = () => {
               placeholder="Filter by organization"
               value={organizationFilter}
               onChange={setOrganizationFilter}
-              style={{ width: "100%" }}
+              style={{ width: '100%' }}
               allowClear
             >
               <Select.Option value="all">All Organizations</Select.Option>
@@ -414,8 +414,8 @@ const UserTransactions: React.FC = () => {
               onChange={(dates) =>
                 setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs] | null)
               }
-              style={{ width: "100%" }}
-              placeholder={["Start Date", "End Date"]}
+              style={{ width: '100%' }}
+              placeholder={['Start Date', 'End Date']}
             />
           </Col>
         </Row>
