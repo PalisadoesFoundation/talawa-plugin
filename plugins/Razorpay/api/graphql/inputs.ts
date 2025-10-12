@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { builder } from "~/src/graphql/builder";
+import { z } from 'zod';
+import { builder } from '~/src/graphql/builder';
 
 // Razorpay Config Input
 export const razorpayConfigInputSchema = z.object({
@@ -13,9 +13,9 @@ export const razorpayConfigInputSchema = z.object({
 });
 
 export const RazorpayConfigInput = builder
-  .inputRef<z.infer<typeof razorpayConfigInputSchema>>("RazorpayConfigInput")
+  .inputRef<z.infer<typeof razorpayConfigInputSchema>>('RazorpayConfigInput')
   .implement({
-    description: "Input for Razorpay configuration",
+    description: 'Input for Razorpay configuration',
     fields: (t) => ({
       keyId: t.string({ required: false }),
       keySecret: t.string({ required: false }),
@@ -40,9 +40,9 @@ export const razorpayOrderInputSchema = z.object({
 });
 
 export const RazorpayOrderInput = builder
-  .inputRef<z.infer<typeof razorpayOrderInputSchema>>("RazorpayOrderInput")
+  .inputRef<z.infer<typeof razorpayOrderInputSchema>>('RazorpayOrderInput')
   .implement({
-    description: "Input for creating a Razorpay order",
+    description: 'Input for creating a Razorpay order',
     fields: (t) => ({
       organizationId: t.string({ required: false }),
       userId: t.string({ required: false }),
@@ -70,14 +70,14 @@ export const razorpayPaymentInputSchema = z.object({
 });
 
 export const RazorpayPaymentInput = builder
-  .inputRef<z.infer<typeof razorpayPaymentInputSchema>>("RazorpayPaymentInput")
+  .inputRef<z.infer<typeof razorpayPaymentInputSchema>>('RazorpayPaymentInput')
   .implement({
-    description: "Input for initiating a Razorpay payment",
+    description: 'Input for initiating a Razorpay payment',
     fields: (t) => ({
       orderId: t.string({ required: true }),
       paymentMethod: t.string({ required: true }),
       customerDetails: t.field({
-        type: builder.inputType("RazorpayCustomerDetails", {
+        type: builder.inputType('RazorpayCustomerDetails', {
           fields: (t) => ({
             name: t.string({ required: true }),
             email: t.string({ required: true }),
@@ -100,9 +100,9 @@ export const razorpayVerificationInputSchema = z.object({
 export const RazorpayVerificationInput = builder
   .inputRef<
     z.infer<typeof razorpayVerificationInputSchema>
-  >("RazorpayVerificationInput")
+  >('RazorpayVerificationInput')
   .implement({
-    description: "Input for verifying a Razorpay payment",
+    description: 'Input for verifying a Razorpay payment',
     fields: (t) => ({
       razorpayPaymentId: t.string({ required: true }),
       razorpayOrderId: t.string({ required: true }),

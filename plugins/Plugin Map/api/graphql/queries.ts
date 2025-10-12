@@ -1,15 +1,15 @@
-import { desc, eq, sql, and, isNull } from "drizzle-orm";
-import { z } from "zod";
-import { builder } from "~/src/graphql/builder";
-import type { GraphQLContext } from "~/src/graphql/context";
-import { TalawaGraphQLError } from "~/src/utilities/TalawaGraphQLError";
-import { pollsTable } from "../database/tables";
+import { desc, eq, sql, and, isNull } from 'drizzle-orm';
+import { z } from 'zod';
+import { builder } from '~/src/graphql/builder';
+import type { GraphQLContext } from '~/src/graphql/context';
+import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
+import { pollsTable } from '../database/tables';
 import {
   PluginMapPollsResultRef,
   ExtensionPointsOverviewRef,
   PluginMapRequestsResultRef,
-} from "./types";
-import { getPluginMapPollsInputSchema } from "./inputs";
+} from './types';
+import { getPluginMapPollsInputSchema } from './inputs';
 
 // Get extension points overview
 export async function getExtensionPointsOverviewResolver(
@@ -19,7 +19,7 @@ export async function getExtensionPointsOverviewResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -28,58 +28,58 @@ export async function getExtensionPointsOverviewResolver(
     return {
       extensionPoints: [
         {
-          id: "RA1",
-          name: "Admin Global Route",
+          id: 'RA1',
+          name: 'Admin Global Route',
           description: "Admin's global view and cross-organization features",
-          context: "Global",
-          userRole: "Admin",
+          context: 'Global',
+          userRole: 'Admin',
           features: [
-            "Global settings",
-            "Cross-org management",
-            "System-wide admin features",
+            'Global settings',
+            'Cross-org management',
+            'System-wide admin features',
           ],
         },
         {
-          id: "RA2",
-          name: "Admin Organization Route",
+          id: 'RA2',
+          name: 'Admin Organization Route',
           description: "Admin's organization-specific management features",
-          context: "Organization",
-          userRole: "Admin",
-          features: ["Org settings", "Member management", "Event management"],
+          context: 'Organization',
+          userRole: 'Admin',
+          features: ['Org settings', 'Member management', 'Event management'],
         },
         {
-          id: "RU1",
-          name: "User Organization Route",
+          id: 'RU1',
+          name: 'User Organization Route',
           description: "User's organization-specific features",
-          context: "Organization",
-          userRole: "User",
+          context: 'Organization',
+          userRole: 'User',
           features: [
-            "Org participation",
-            "Event registration",
-            "Member features",
+            'Org participation',
+            'Event registration',
+            'Member features',
           ],
         },
         {
-          id: "RU2",
-          name: "User Global Route",
+          id: 'RU2',
+          name: 'User Global Route',
           description: "User's global view and cross-organization features",
-          context: "Global",
-          userRole: "User",
+          context: 'Global',
+          userRole: 'User',
           features: [
-            "Global profile",
-            "Cross-org settings",
-            "Global preferences",
+            'Global profile',
+            'Cross-org settings',
+            'Global preferences',
           ],
         },
       ],
       totalCount: 4,
       description:
-        "Overview of all available extension points in the Talawa system",
+        'Overview of all available extension points in the Talawa system',
     };
   } catch (error) {
-    ctx.log?.error("Error getting extension points overview:", error);
+    ctx.log?.error('Error getting extension points overview:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 }
@@ -99,7 +99,7 @@ export async function getPluginMapRequestsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -111,9 +111,9 @@ export async function getPluginMapRequestsResolver(
   } = getPluginMapPollsInputSchema.safeParse(input);
 
   if (!success) {
-    ctx.log?.error("Invalid arguments for getPluginMapRequests:", error);
+    ctx.log?.error('Invalid arguments for getPluginMapRequests:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 
@@ -169,9 +169,9 @@ export async function getPluginMapRequestsResolver(
       hasMore: false, // Since we're not using pagination
     };
   } catch (error) {
-    ctx.log?.error("Error getting plugin map requests:", error);
+    ctx.log?.error('Error getting plugin map requests:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 }
@@ -190,7 +190,7 @@ export async function getPluginMapPollsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -202,9 +202,9 @@ export async function getPluginMapPollsResolver(
   } = getPluginMapPollsInputSchema.safeParse(input);
 
   if (!success) {
-    ctx.log?.error("Invalid arguments for getPluginMapPolls:", error);
+    ctx.log?.error('Invalid arguments for getPluginMapPolls:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 
@@ -256,9 +256,9 @@ export async function getPluginMapPollsResolver(
       hasMore: false, // Since we're not using pagination
     };
   } catch (error) {
-    ctx.log?.error("Error getting plugin map polls:", error);
+    ctx.log?.error('Error getting plugin map polls:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 }
@@ -268,22 +268,22 @@ export function registerPluginMapQueries(
   builderInstance: typeof builder,
 ): void {
   // Get extension points overview
-  builderInstance.queryField("getExtensionPointsOverview", (t) =>
+  builderInstance.queryField('getExtensionPointsOverview', (t) =>
     t.field({
       type: ExtensionPointsOverviewRef,
       description:
-        "Get an overview of all available extension points in the system",
+        'Get an overview of all available extension points in the system',
       resolve: getExtensionPointsOverviewResolver,
     }),
   );
 
   // Get plugin map requests
-  builderInstance.queryField("getPluginMapRequests", (t) =>
+  builderInstance.queryField('getPluginMapRequests', (t) =>
     t.field({
       type: PluginMapRequestsResultRef,
       args: {
         input: t.arg({
-          type: builder.inputType("GetPluginMapRequestsInput", {
+          type: builder.inputType('GetPluginMapRequestsInput', {
             fields: (t) => ({
               userId: t.string({ required: false }),
               userRole: t.string({ required: false }),
@@ -294,18 +294,18 @@ export function registerPluginMapQueries(
           required: false,
         }),
       },
-      description: "Get logged requests from different contexts",
+      description: 'Get logged requests from different contexts',
       resolve: getPluginMapRequestsResolver,
     }),
   );
 
   // Get plugin map polls
-  builderInstance.queryField("getPluginMapPolls", (t) =>
+  builderInstance.queryField('getPluginMapPolls', (t) =>
     t.field({
       type: PluginMapPollsResultRef,
       args: {
         input: t.arg({
-          type: builder.inputType("GetPluginMapPollsInput", {
+          type: builder.inputType('GetPluginMapPollsInput', {
             fields: (t) => ({
               userRole: t.string({ required: false }),
               organizationId: t.string({ required: false }),
@@ -315,7 +315,7 @@ export function registerPluginMapQueries(
           required: false,
         }),
       },
-      description: "Get plugin map polls with optional filtering",
+      description: 'Get plugin map polls with optional filtering',
       resolve: getPluginMapPollsResolver,
     }),
   );

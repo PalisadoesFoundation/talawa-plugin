@@ -1,21 +1,21 @@
-import { eq } from "drizzle-orm";
-import crypto from "node:crypto";
-import { z } from "zod";
-import { builder } from "~/src/graphql/builder";
-import type { GraphQLContext } from "~/src/graphql/context";
-import { TalawaGraphQLError } from "~/src/utilities/TalawaGraphQLError";
+import { eq } from 'drizzle-orm';
+import crypto from 'node:crypto';
+import { z } from 'zod';
+import { builder } from '~/src/graphql/builder';
+import type { GraphQLContext } from '~/src/graphql/context';
+import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
 import {
   configTable,
   ordersTable,
   transactionsTable,
-} from "../database/tables";
-import { createRazorpayService } from "../services/razorpayService";
+} from '../database/tables';
+import { createRazorpayService } from '../services/razorpayService';
 import {
   RazorpayConfigRef,
   RazorpayOrderRef,
   RazorpayPaymentResultRef,
   RazorpayTestResultRef,
-} from "./types";
+} from './types';
 import {
   RazorpayConfigInput,
   RazorpayOrderInput,
@@ -25,7 +25,7 @@ import {
   razorpayOrderInputSchema,
   razorpayPaymentInputSchema,
   razorpayVerificationInputSchema,
-} from "./inputs";
+} from './inputs';
 
 // Update Razorpay configuration resolver
 const updateRazorpayConfigArgumentsSchema = z.object({
@@ -39,7 +39,7 @@ export async function updateRazorpayConfigResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -52,7 +52,7 @@ export async function updateRazorpayConfigResolver(
   if (!success) {
     throw new TalawaGraphQLError({
       extensions: {
-        code: "invalid_arguments",
+        code: 'invalid_arguments',
         issues: error.issues.map((issue) => ({
           argumentPath: issue.path,
           message: issue.message,
@@ -87,7 +87,7 @@ export async function updateRazorpayConfigResolver(
 
       if (!newConfig) {
         throw new TalawaGraphQLError({
-          extensions: { code: "unexpected" },
+          extensions: { code: 'unexpected' },
         });
       }
 
@@ -97,15 +97,15 @@ export async function updateRazorpayConfigResolver(
         webhookSecret: newConfig.webhookSecret || undefined,
         isEnabled: newConfig.isEnabled || false,
         testMode: newConfig.testMode || true,
-        currency: newConfig.currency || "INR",
-        description: newConfig.description || "Donation to organization",
+        currency: newConfig.currency || 'INR',
+        description: newConfig.description || 'Donation to organization',
       };
     } else {
       // Update existing config
       const existingConfigItem = existingConfig[0];
       if (!existingConfigItem) {
         throw new TalawaGraphQLError({
-          extensions: { code: "unexpected" },
+          extensions: { code: 'unexpected' },
         });
       }
 
@@ -126,7 +126,7 @@ export async function updateRazorpayConfigResolver(
 
       if (!updatedConfig) {
         throw new TalawaGraphQLError({
-          extensions: { code: "unexpected" },
+          extensions: { code: 'unexpected' },
         });
       }
 
@@ -136,14 +136,14 @@ export async function updateRazorpayConfigResolver(
         webhookSecret: updatedConfig.webhookSecret || undefined,
         isEnabled: updatedConfig.isEnabled || false,
         testMode: updatedConfig.testMode || true,
-        currency: updatedConfig.currency || "INR",
-        description: updatedConfig.description || "Donation to organization",
+        currency: updatedConfig.currency || 'INR',
+        description: updatedConfig.description || 'Donation to organization',
       };
     }
   } catch (error) {
-    ctx.log?.error("Error updating Razorpay config:", error);
+    ctx.log?.error('Error updating Razorpay config:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 }
@@ -160,7 +160,7 @@ export async function createPaymentOrderResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -173,7 +173,7 @@ export async function createPaymentOrderResolver(
   if (!success) {
     throw new TalawaGraphQLError({
       extensions: {
-        code: "invalid_arguments",
+        code: 'invalid_arguments',
         issues: error.issues.map((issue) => ({
           argumentPath: issue.path,
           message: issue.message,
@@ -195,13 +195,13 @@ export async function createPaymentOrderResolver(
         .substr(2, 9)}`,
       notes: {
         organizationId: parsedArgs.input.organizationId,
-        userId: parsedArgs.input.userId || "guest",
+        userId: parsedArgs.input.userId || 'guest',
         donorName: parsedArgs.input.donorName,
       },
     });
 
     if (!razorpayOrder || !razorpayOrder.id) {
-      throw new Error("Failed to create Razorpay order.");
+      throw new Error('Failed to create Razorpay order.');
     }
 
     // Step 3: Save the REAL order details to your database
@@ -226,7 +226,7 @@ export async function createPaymentOrderResolver(
 
     if (!order) {
       throw new TalawaGraphQLError({
-        extensions: { code: "unexpected" },
+        extensions: { code: 'unexpected' },
       });
     }
 
@@ -248,13 +248,13 @@ export async function createPaymentOrderResolver(
       updatedAt: order.updatedAt,
     };
   } catch (error) {
-    ctx.log?.error("Error creating payment order:", error);
+    ctx.log?.error('Error creating payment order:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
       message:
         error instanceof Error
           ? error.message
-          : "Could not create payment order",
+          : 'Could not create payment order',
     });
   }
 }
@@ -271,7 +271,7 @@ export async function initiatePaymentResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -284,7 +284,7 @@ export async function initiatePaymentResolver(
   if (!success) {
     throw new TalawaGraphQLError({
       extensions: {
-        code: "invalid_arguments",
+        code: 'invalid_arguments',
         issues: error.issues.map((issue) => ({
           argumentPath: issue.path,
           message: issue.message,
@@ -304,8 +304,8 @@ export async function initiatePaymentResolver(
     if (order.length === 0) {
       throw new TalawaGraphQLError({
         extensions: {
-          code: "arguments_associated_resources_not_found",
-          issues: [{ argumentPath: ["input", "orderId"] }],
+          code: 'arguments_associated_resources_not_found',
+          issues: [{ argumentPath: ['input', 'orderId'] }],
         },
       });
     }
@@ -313,7 +313,7 @@ export async function initiatePaymentResolver(
     const orderItem = order[0];
     if (!orderItem) {
       throw new TalawaGraphQLError({
-        extensions: { code: "unexpected" },
+        extensions: { code: 'unexpected' },
       });
     }
 
@@ -323,8 +323,8 @@ export async function initiatePaymentResolver(
     if (config.length === 0) {
       throw new TalawaGraphQLError({
         extensions: {
-          code: "arguments_associated_resources_not_found",
-          issues: [{ argumentPath: ["input", "orderId"] }],
+          code: 'arguments_associated_resources_not_found',
+          issues: [{ argumentPath: ['input', 'orderId'] }],
         },
       });
     }
@@ -344,7 +344,7 @@ export async function initiatePaymentResolver(
         userId: orderItem.userId,
         amount: orderItem.amount,
         currency: orderItem.currency,
-        status: "pending",
+        status: 'pending',
         method: parsedArgs.input.paymentMethod,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -355,31 +355,31 @@ export async function initiatePaymentResolver(
     await ctx.drizzleClient
       .update(ordersTable)
       .set({
-        status: "pending",
+        status: 'pending',
         updatedAt: new Date(),
       })
       .where(eq(ordersTable.id, orderItem.id));
 
     return {
       success: true,
-      message: "Payment initiated successfully",
+      message: 'Payment initiated successfully',
       orderId: orderItem.id,
       paymentId: paymentId,
       amount: orderItem.amount || undefined,
-      currency: orderItem.currency || "INR",
+      currency: orderItem.currency || 'INR',
       transaction: {
         paymentId: paymentId,
-        status: "pending",
+        status: 'pending',
         amount: orderItem.amount || undefined,
-        currency: orderItem.currency || "INR",
+        currency: orderItem.currency || 'INR',
       },
     };
   } catch (error) {
-    ctx.log?.error("Error initiating payment:", error);
+    ctx.log?.error('Error initiating payment:', error);
     return {
       success: false,
       message:
-        error instanceof Error ? error.message : "Failed to initiate payment",
+        error instanceof Error ? error.message : 'Failed to initiate payment',
       transaction: null,
     };
   }
@@ -397,7 +397,7 @@ export async function verifyPaymentResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -410,7 +410,7 @@ export async function verifyPaymentResolver(
   if (!success) {
     throw new TalawaGraphQLError({
       extensions: {
-        code: "invalid_arguments",
+        code: 'invalid_arguments',
         issues: error.issues.map((issue) => ({
           argumentPath: issue.path,
           message: issue.message,
@@ -420,7 +420,7 @@ export async function verifyPaymentResolver(
   }
 
   try {
-    ctx.log?.info("Verifying payment:", {
+    ctx.log?.info('Verifying payment:', {
       razorpayPaymentId: parsedArgs.input.razorpayPaymentId,
       razorpayOrderId: parsedArgs.input.razorpayOrderId,
     });
@@ -431,8 +431,8 @@ export async function verifyPaymentResolver(
     if (config.length === 0) {
       throw new TalawaGraphQLError({
         extensions: {
-          code: "arguments_associated_resources_not_found",
-          issues: [{ argumentPath: ["input", "razorpayOrderId"] }],
+          code: 'arguments_associated_resources_not_found',
+          issues: [{ argumentPath: ['input', 'razorpayOrderId'] }],
         },
       });
     }
@@ -440,19 +440,19 @@ export async function verifyPaymentResolver(
     const configItem = config[0];
     if (!configItem) {
       throw new TalawaGraphQLError({
-        extensions: { code: "unexpected" },
+        extensions: { code: 'unexpected' },
       });
     }
 
     // Verify signature using keySecret (not webhookSecret)
     const expectedSignature = crypto
-      .createHmac("sha256", configItem.keySecret || "")
+      .createHmac('sha256', configItem.keySecret || '')
       .update(
         `${parsedArgs.input.razorpayOrderId}|${parsedArgs.input.razorpayPaymentId}`,
       )
-      .digest("hex");
+      .digest('hex');
 
-    ctx.log?.info("Signature verification:", {
+    ctx.log?.info('Signature verification:', {
       expected: expectedSignature,
       received: parsedArgs.input.razorpaySignature,
       match: expectedSignature === parsedArgs.input.razorpaySignature,
@@ -463,11 +463,11 @@ export async function verifyPaymentResolver(
     });
 
     if (expectedSignature !== parsedArgs.input.razorpaySignature) {
-      ctx.log?.error("Signature verification failed");
+      ctx.log?.error('Signature verification failed');
       throw new TalawaGraphQLError({
         extensions: {
-          code: "unauthorized_action_on_arguments_associated_resources",
-          issues: [{ argumentPath: ["input", "razorpaySignature"] }],
+          code: 'unauthorized_action_on_arguments_associated_resources',
+          issues: [{ argumentPath: ['input', 'razorpaySignature'] }],
         },
       });
     }
@@ -482,8 +482,8 @@ export async function verifyPaymentResolver(
     if (order.length === 0) {
       throw new TalawaGraphQLError({
         extensions: {
-          code: "arguments_associated_resources_not_found",
-          issues: [{ argumentPath: ["input", "razorpayOrderId"] }],
+          code: 'arguments_associated_resources_not_found',
+          issues: [{ argumentPath: ['input', 'razorpayOrderId'] }],
         },
       });
     }
@@ -500,7 +500,7 @@ export async function verifyPaymentResolver(
     const orderItem = order[0];
     if (!orderItem) {
       throw new TalawaGraphQLError({
-        extensions: { code: "unexpected" },
+        extensions: { code: 'unexpected' },
       });
     }
 
@@ -514,7 +514,7 @@ export async function verifyPaymentResolver(
         userId: orderItem.userId,
         amount: orderItem.amount,
         currency: orderItem.currency,
-        status: "captured",
+        status: 'captured',
         capturedAt: new Date(),
       };
 
@@ -525,28 +525,28 @@ export async function verifyPaymentResolver(
     await ctx.drizzleClient
       .update(ordersTable)
       .set({
-        status: "paid",
+        status: 'paid',
         updatedAt: new Date(),
       })
       .where(eq(ordersTable.id, orderItem.id));
 
     return {
       success: true,
-      message: "Payment verified successfully",
+      message: 'Payment verified successfully',
       transaction: {
         paymentId: parsedArgs.input.razorpayPaymentId,
-        status: "captured",
+        status: 'captured',
         amount: orderItem.amount || undefined,
-        currency: orderItem.currency || "INR",
+        currency: orderItem.currency || 'INR',
       },
     };
   } catch (error) {
-    ctx.log?.error("Error verifying payment:", error);
+    ctx.log?.error('Error verifying payment:', error);
 
     return {
       success: false,
       message:
-        error instanceof Error ? error.message : "Failed to verify payment",
+        error instanceof Error ? error.message : 'Failed to verify payment',
       transaction: null,
     };
   }
@@ -560,7 +560,7 @@ export async function testRazorpaySetupResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -572,7 +572,7 @@ export async function testRazorpaySetupResolver(
       return {
         success: false,
         message:
-          "No Razorpay configuration found. Please configure your API keys first.",
+          'No Razorpay configuration found. Please configure your API keys first.',
       };
     }
 
@@ -582,7 +582,7 @@ export async function testRazorpaySetupResolver(
       return {
         success: false,
         message:
-          "API keys are not configured. Please enter your Key ID and Key Secret.",
+          'API keys are not configured. Please enter your Key ID and Key Secret.',
       };
     }
 
@@ -590,13 +590,13 @@ export async function testRazorpaySetupResolver(
       return {
         success: false,
         message:
-          "Webhook secret is not configured. Please enter your webhook secret.",
+          'Webhook secret is not configured. Please enter your webhook secret.',
       };
     }
 
     // Import Razorpay service to test setup
     const { createRazorpayService } = await import(
-      "../services/razorpayService"
+      '../services/razorpayService'
     );
     const razorpayService = createRazorpayService(ctx);
 
@@ -607,11 +607,11 @@ export async function testRazorpaySetupResolver(
     // Test by creating a dummy payment order (₹1.00 = 100 paise)
     const testOrder = await razorpayService.createOrder({
       amount: 100, // 100 paise = ₹1.00
-      currency: configItem.currency || "INR",
+      currency: configItem.currency || 'INR',
       receipt: `test_${Date.now()}`,
       notes: {
-        test: "true",
-        purpose: "setup_verification",
+        test: 'true',
+        purpose: 'setup_verification',
       },
     });
 
@@ -622,20 +622,20 @@ export async function testRazorpaySetupResolver(
       message: `Setup verified! Test order created: ${testOrder.id} (₹1.00). Your Razorpay configuration is working correctly.`,
     };
   } catch (error) {
-    ctx.log?.error("Error testing Razorpay setup:", error);
+    ctx.log?.error('Error testing Razorpay setup:', error);
 
     if (error instanceof Error) {
-      if (error.message.includes("Invalid API credentials")) {
+      if (error.message.includes('Invalid API credentials')) {
         return {
           success: false,
           message:
-            "Invalid API credentials. Please check your Key ID and Key Secret.",
+            'Invalid API credentials. Please check your Key ID and Key Secret.',
         };
-      } else if (error.message.includes("Webhook secret not configured")) {
+      } else if (error.message.includes('Webhook secret not configured')) {
         return {
           success: false,
           message:
-            "Webhook secret not configured. Please add your webhook secret.",
+            'Webhook secret not configured. Please add your webhook secret.',
         };
       } else {
         return {
@@ -647,7 +647,7 @@ export async function testRazorpaySetupResolver(
       return {
         success: false,
         message:
-          "Setup test failed. Please check your configuration and try again.",
+          'Setup test failed. Please check your configuration and try again.',
       };
     }
   }
@@ -658,74 +658,74 @@ export function registerRazorpayMutations(
   builderInstance: typeof builder,
 ): void {
   // Update Razorpay configuration
-  builderInstance.mutationField("updateRazorpayConfig", (t) =>
+  builderInstance.mutationField('updateRazorpayConfig', (t) =>
     t.field({
       type: RazorpayConfigRef,
       args: {
         input: t.arg({
           type: RazorpayConfigInput,
           required: true,
-          description: "Razorpay configuration input",
+          description: 'Razorpay configuration input',
         }),
       },
-      description: "Update Razorpay configuration settings",
+      description: 'Update Razorpay configuration settings',
       resolve: updateRazorpayConfigResolver,
     }),
   );
 
   // Create payment order
-  builderInstance.mutationField("createPaymentOrder", (t) =>
+  builderInstance.mutationField('createPaymentOrder', (t) =>
     t.field({
       type: RazorpayOrderRef,
       args: {
         input: t.arg({
           type: RazorpayOrderInput,
           required: true,
-          description: "Payment order input",
+          description: 'Payment order input',
         }),
       },
-      description: "Create a new payment order",
+      description: 'Create a new payment order',
       resolve: createPaymentOrderResolver,
     }),
   );
 
   // Initiate payment
-  builderInstance.mutationField("initiatePayment", (t) =>
+  builderInstance.mutationField('initiatePayment', (t) =>
     t.field({
       type: RazorpayPaymentResultRef,
       args: {
         input: t.arg({
           type: RazorpayPaymentInput,
           required: true,
-          description: "Payment initiation input",
+          description: 'Payment initiation input',
         }),
       },
-      description: "Initiate a payment transaction",
+      description: 'Initiate a payment transaction',
       resolve: initiatePaymentResolver,
     }),
   );
 
   // Verify payment
-  builderInstance.mutationField("verifyPayment", (t) =>
+  builderInstance.mutationField('verifyPayment', (t) =>
     t.field({
       type: RazorpayPaymentResultRef,
       args: {
         input: t.arg({
           type: RazorpayVerificationInput,
           required: true,
-          description: "Payment verification input",
+          description: 'Payment verification input',
         }),
       },
-      description: "Verify payment signature and update transaction status",
+      description: 'Verify payment signature and update transaction status',
       resolve: verifyPaymentResolver,
     }),
   );
 
   // Test Razorpay setup with dummy payment
-  builderInstance.mutationField("testRazorpaySetup", (t) =>
+  builderInstance.mutationField('testRazorpaySetup', (t) =>
     t.field({
       type: RazorpayTestResultRef,
-      description: "Test Razorpay setup by creating a dummy payment order",
+      description: 'Test Razorpay setup by creating a dummy payment order',
       resolve: testRazorpaySetupResolver,
     }),
   );
