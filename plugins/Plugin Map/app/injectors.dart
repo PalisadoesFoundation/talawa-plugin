@@ -12,7 +12,7 @@ List<PluginInjectorExtension> g1MenuInjectors() {
       name: 'Plugin Map',
       description: 'Plugin Map documentation and demo',
       order: 0,
-      builder: (context) => Card(
+      builder: (context, {data}) => Card(
         margin: const EdgeInsets.symmetric(vertical: 4),
         elevation: 2,
         child: ListTile(
