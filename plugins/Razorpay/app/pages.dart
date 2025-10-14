@@ -120,11 +120,11 @@ class _RazorpayDonationPageState extends State<RazorpayDonationPage> {
               'razorpayPaymentId': response.paymentId,
               'razorpayOrderId': response.orderId,
               'razorpaySignature': response.signature,
-              'paymentData': {
+              'paymentData': json.encode({
                 'razorpay_payment_id': response.paymentId,
                 'razorpay_order_id': response.orderId,
                 'razorpay_signature': response.signature,
-              },
+              }),
             },
           },
           fetchPolicy: FetchPolicy.networkOnly,
