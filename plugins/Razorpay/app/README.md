@@ -144,10 +144,67 @@ isInstalled: Boolean   # Must be true
 - `flutter/material.dart` - UI framework
 - `graphql_flutter` - GraphQL client
 - `intl` - Number and date formatting
+- `razorpay_flutter: ^1.3.7` - Razorpay payment SDK
 - Talawa core services:
   - `locator` - Service locator
   - `UserConfig` - User and org data
   - `NavigationService` - Route navigation
+  - `GraphqlConfig` - GraphQL client configuration
+
+## Razorpay Integration Flow
+
+### 1. **Configuration Check**
+```dart
+query GetRazorpayConfig {
+  razorpay_getRazorpayConfig {
+    keyId
+    isEnabled
+    testMode
+    currency
+    description
+  }
+}
+```
+
+### 2. **Create Payment Order**
+```dart
+mutation CreatePaymentOrder($input: RazorpayOrderInput!) {
+  razorpay_createPaymentOrder(input: $input) {
+    id
+    razorpayOrderId
+    amount
+    currency
+    status
+    description
+  }
+}
+```
+
+### 3. **Open Razorpay Checkout**
+- Initialize Razorpay SDK with API key
+- Open payment modal with order details
+- Handle payment success/failure callbacks
+
+### 4. **Verify Payment**
+```dart
+mutation VerifyPayment($input: RazorpayVerificationInput!) {
+  razorpay_verifyPayment(input: $input) {
+    success
+    message
+    transaction {
+      paymentId
+      status
+      amount
+      currency
+    }
+  }
+}
+```
+
+### 5. **Show Success Screen**
+- Display confirmation message
+- Option to make another donation
+- Navigate to transaction history
 
 ## Implementation Status
 
@@ -159,14 +216,18 @@ isInstalled: Boolean   # Must be true
 - GraphQL query integration
 - Currency formatting
 - Status indicators
+- **Razorpay SDK integration**
+- **Payment order creation**
+- **Payment verification**
+- **Success/Error handling**
+- **Payment callbacks**
 
 ### 🚧 Pending
-- Razorpay SDK integration
-- Payment order creation
-- Payment verification
 - Receipt download
 - Refund handling
-- Error retry logic
+- Advanced error retry logic
+- Recurring donations
+- Donation campaigns
 
 ## Usage Example
 

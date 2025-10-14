@@ -8,3 +8,10 @@ const pluginRazorpayManifest = PluginManifest(
   name: 'Razorpay Payment Gateway',
   description: 'Enable donations and payment transactions through Razorpay',
 );
+
+/// Razorpay Plugin Dependencies
+/// 
+/// External packages required by this plugin
+const Map<String, String> razorpayDependencies = {
+  'razorpay_flutter': '^1.3.7',
+};
