@@ -17,9 +17,10 @@ List<PluginInjectorExtension> g1MenuInjectors() {
       name: 'Razorpay Payment Options',
       description: 'Donation and transaction management',
       order: 20, // After plugin_map (order: 10)
-      builder: (context) {
+      builder: (context, {data}) {
         return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          elevation: 2,
           child: Column(
             children: [
               ListTile(
@@ -33,7 +34,11 @@ List<PluginInjectorExtension> g1MenuInjectors() {
                   );
                 },
               ),
-              const Divider(height: 1),
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: Colors.grey.shade800,
+              ),
               ListTile(
                 leading: const Icon(Icons.receipt_long, color: Colors.blue),
                 title: const Text('My Transactions'),
