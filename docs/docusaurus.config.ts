@@ -27,6 +27,8 @@ const config: Config = {
     locales: ['en'],
   },
 
+  stylesheets: ['https://docs.talawa.io/css/styles-latest.css'],
+
   presets: [
     [
       'classic',
