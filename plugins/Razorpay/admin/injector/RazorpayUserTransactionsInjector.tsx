@@ -5,9 +5,9 @@
  * Razorpay payment provider transactions for users in their transaction history.
  */
 
-import React, { useState, useEffect } from "react";
-import { useQuery } from "@apollo/client";
-import { gql } from "graphql-tag";
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@apollo/client';
+import { gql } from 'graphql-tag';
 import {
   Card,
   Table,
@@ -17,15 +17,15 @@ import {
   Typography,
   message,
   Spin,
-} from "antd";
+} from 'antd';
 import {
   CreditCardOutlined,
   EyeOutlined,
   DownloadOutlined,
-} from "@ant-design/icons";
-import type { ColumnsType } from "antd/es/table";
-import { useParams } from "react-router-dom";
-import useLocalStorage from "utils/useLocalstorage";
+} from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import { useParams } from 'react-router-dom';
+import useLocalStorage from 'utils/useLocalstorage';
 
 const { Title, Text } = Typography;
 
@@ -89,7 +89,7 @@ interface RazorpayUserTransaction {
 const RazorpayUserTransactionsInjector: React.FC = () => {
   const { orgId } = useParams();
   const { getItem } = useLocalStorage();
-  const userId = getItem("id") as string | null;
+  const userId = getItem('id') as string | null;
 
   // GraphQL query
   const {
@@ -98,28 +98,28 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
     error: transactionsError,
   } = useQuery(GET_USER_TRANSACTIONS, {
     variables: {
-      userId: userId || "",
-      orgId: orgId || "",
+      userId: userId || '',
+      orgId: orgId || '',
       limit: 10, // Show recent 10 transactions in injector
     },
     skip: !userId || !orgId,
-    fetchPolicy: "network-only",
+    fetchPolicy: 'network-only',
   });
 
   const transactions = transactionsData?.razorpay_getUserTransactions || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "captured":
-        return "success";
-      case "authorized":
-        return "processing";
-      case "failed":
-        return "error";
-      case "refunded":
-        return "warning";
+      case 'captured':
+        return 'success';
+      case 'authorized':
+        return 'processing';
+      case 'failed':
+        return 'error';
+      case 'refunded':
+        return 'warning';
       default:
-        return "default";
+        return 'default';
     }
   };
 
@@ -128,12 +128,12 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    return new Date(dateString).toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
@@ -149,48 +149,48 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
 
   const columns: ColumnsType<RazorpayUserTransaction> = [
     {
-      title: "Transaction ID",
-      dataIndex: "paymentId",
-      key: "paymentId",
+      title: 'Transaction ID',
+      dataIndex: 'paymentId',
+      key: 'paymentId',
       render: (paymentId: string) => (
-        <Text code style={{ fontSize: "12px" }}>
-          {paymentId || "N/A"}
+        <Text code style={{ fontSize: '12px' }}>
+          {paymentId || 'N/A'}
         </Text>
       ),
     },
     {
-      title: "Amount",
-      dataIndex: "amount",
-      key: "amount",
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
       render: (amount: number, record: RazorpayUserTransaction) => (
         <Text strong>
-          {amount ? formatAmount(amount, record.currency) : "N/A"}
+          {amount ? formatAmount(amount, record.currency) : 'N/A'}
         </Text>
       ),
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
       render: (status: string) => (
         <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
       ),
     },
     {
-      title: "Payment Method",
-      dataIndex: "method",
-      key: "method",
-      render: (method: string) => method || "N/A",
+      title: 'Payment Method',
+      dataIndex: 'method',
+      key: 'method',
+      render: (method: string) => method || 'N/A',
     },
     {
-      title: "Date",
-      dataIndex: "createdAt",
-      key: "createdAt",
+      title: 'Date',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
       render: (date: string) => formatDate(date),
     },
     {
-      title: "Actions",
-      key: "actions",
+      title: 'Actions',
+      key: 'actions',
       render: (_, record: RazorpayUserTransaction) => (
         <Space size="small">
           <Button
@@ -217,9 +217,9 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
   if (transactionsLoading) {
     return (
       <Card>
-        <div style={{ textAlign: "center", padding: "40px" }}>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
           <Spin size="large" />
-          <div style={{ marginTop: "16px" }}>
+          <div style={{ marginTop: '16px' }}>
             <Text>Loading Razorpay transactions...</Text>
           </div>
         </div>
@@ -230,7 +230,7 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
   if (transactionsError) {
     return (
       <Card>
-        <div style={{ textAlign: "center", padding: "40px" }}>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
           <Text type="danger">
             Error loading transactions: {transactionsError.message}
           </Text>
@@ -241,14 +241,14 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
 
   return (
     <Card>
-      <div style={{ marginBottom: "16px" }}>
+      <div style={{ marginBottom: '16px' }}>
         <Space align="center">
-          <CreditCardOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
+          <CreditCardOutlined style={{ fontSize: '20px', color: '#1890ff' }} />
           <Title level={4} style={{ margin: 0 }}>
             Razorpay Transactions
           </Title>
         </Space>
-        <Text type="secondary" style={{ display: "block", marginTop: "4px" }}>
+        <Text type="secondary" style={{ display: 'block', marginTop: '4px' }}>
           Your payment transactions processed through Razorpay
         </Text>
       </div>

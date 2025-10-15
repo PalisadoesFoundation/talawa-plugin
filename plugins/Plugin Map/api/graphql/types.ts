@@ -1,4 +1,4 @@
-import { builder } from "~/src/graphql/builder";
+import { builder } from '~/src/graphql/builder';
 
 // ExtensionPoint type
 export const ExtensionPointRef = builder.objectRef<{
@@ -8,16 +8,16 @@ export const ExtensionPointRef = builder.objectRef<{
   context: string;
   userRole: string;
   features: string[];
-}>("ExtensionPoint");
+}>('ExtensionPoint');
 
 ExtensionPointRef.implement({
   fields: (t) => ({
-    id: t.exposeString("id"),
-    name: t.exposeString("name"),
-    description: t.exposeString("description"),
-    context: t.exposeString("context"),
-    userRole: t.exposeString("userRole"),
-    features: t.exposeStringList("features"),
+    id: t.exposeString('id'),
+    name: t.exposeString('name'),
+    description: t.exposeString('description'),
+    context: t.exposeString('context'),
+    userRole: t.exposeString('userRole'),
+    features: t.exposeStringList('features'),
   }),
 });
 
@@ -33,7 +33,7 @@ export const ExtensionPointsOverviewRef = builder.objectRef<{
   }>;
   totalCount: number;
   description: string;
-}>("ExtensionPointsOverview");
+}>('ExtensionPointsOverview');
 
 ExtensionPointsOverviewRef.implement({
   fields: (t) => ({
@@ -41,8 +41,8 @@ ExtensionPointsOverviewRef.implement({
       type: t.listRef(ExtensionPointRef),
       resolve: (parent) => parent.extensionPoints,
     }),
-    totalCount: t.exposeInt("totalCount"),
-    description: t.exposeString("description"),
+    totalCount: t.exposeInt('totalCount'),
+    description: t.exposeString('description'),
   }),
 });
 
@@ -55,17 +55,17 @@ export const PluginMapRequestRef = builder.objectRef<{
   organizationId: string | null;
   extensionPoint: string;
   createdAt: Date | null;
-}>("PluginMapRequest");
+}>('PluginMapRequest');
 
 PluginMapRequestRef.implement({
   fields: (t) => ({
-    id: t.exposeID("id"),
-    pollNumber: t.exposeInt("pollNumber"),
-    userId: t.exposeString("userId"),
-    userRole: t.exposeString("userRole"),
-    organizationId: t.exposeString("organizationId", { nullable: true }),
-    extensionPoint: t.exposeString("extensionPoint"),
-    createdAt: t.expose("createdAt", { type: "DateTime" }),
+    id: t.exposeID('id'),
+    pollNumber: t.exposeInt('pollNumber'),
+    userId: t.exposeString('userId'),
+    userRole: t.exposeString('userRole'),
+    organizationId: t.exposeString('organizationId', { nullable: true }),
+    extensionPoint: t.exposeString('extensionPoint'),
+    createdAt: t.expose('createdAt', { type: 'DateTime' }),
   }),
 });
 
@@ -82,7 +82,7 @@ export const PluginMapRequestsResultRef = builder.objectRef<{
   }>;
   totalCount: number;
   hasMore: boolean;
-}>("PluginMapRequestsResult");
+}>('PluginMapRequestsResult');
 
 PluginMapRequestsResultRef.implement({
   fields: (t) => ({
@@ -90,8 +90,8 @@ PluginMapRequestsResultRef.implement({
       type: t.listRef(PluginMapRequestRef),
       resolve: (parent) => parent.requests,
     }),
-    totalCount: t.exposeInt("totalCount"),
-    hasMore: t.exposeBoolean("hasMore"),
+    totalCount: t.exposeInt('totalCount'),
+    hasMore: t.exposeBoolean('hasMore'),
   }),
 });
 
@@ -104,17 +104,17 @@ export const PluginMapPollRef = builder.objectRef<{
   organizationId: string | null;
   extensionPoint: string;
   createdAt: Date | null;
-}>("PluginMapPoll");
+}>('PluginMapPoll');
 
 PluginMapPollRef.implement({
   fields: (t) => ({
-    id: t.exposeID("id"),
-    pollNumber: t.exposeInt("pollNumber"),
-    userId: t.exposeString("userId"),
-    userRole: t.exposeString("userRole"),
-    organizationId: t.exposeString("organizationId", { nullable: true }),
-    extensionPoint: t.exposeString("extensionPoint"),
-    createdAt: t.expose("createdAt", { type: "DateTime" }),
+    id: t.exposeID('id'),
+    pollNumber: t.exposeInt('pollNumber'),
+    userId: t.exposeString('userId'),
+    userRole: t.exposeString('userRole'),
+    organizationId: t.exposeString('organizationId', { nullable: true }),
+    extensionPoint: t.exposeString('extensionPoint'),
+    createdAt: t.expose('createdAt', { type: 'DateTime' }),
   }),
 });
 
@@ -131,7 +131,7 @@ export const PluginMapPollsResultRef = builder.objectRef<{
   }>;
   totalCount: number;
   hasMore: boolean;
-}>("PluginMapPollsResult");
+}>('PluginMapPollsResult');
 
 PluginMapPollsResultRef.implement({
   fields: (t) => ({
@@ -139,8 +139,8 @@ PluginMapPollsResultRef.implement({
       type: t.listRef(PluginMapPollRef),
       resolve: (parent) => parent.polls,
     }),
-    totalCount: t.exposeInt("totalCount"),
-    hasMore: t.exposeBoolean("hasMore"),
+    totalCount: t.exposeInt('totalCount'),
+    hasMore: t.exposeBoolean('hasMore'),
   }),
 });
 
@@ -149,12 +149,12 @@ export const ClearPollsResultRef = builder.objectRef<{
   success: boolean;
   clearedCount: number;
   message: string;
-}>("ClearPollsResult");
+}>('ClearPollsResult');
 
 ClearPollsResultRef.implement({
   fields: (t) => ({
-    success: t.exposeBoolean("success"),
-    clearedCount: t.exposeInt("clearedCount"),
-    message: t.exposeString("message"),
+    success: t.exposeBoolean('success'),
+    clearedCount: t.exposeInt('clearedCount'),
+    message: t.exposeString('message'),
   }),
 });

@@ -1,5 +1,5 @@
-import React from "react";
-import HomeCallToAction from "../../utils/HomeCallToAction";
+import React from 'react';
+import HomeCallToAction from '../../utils/HomeCallToAction';
 
 function HeaderHero() {
   return (

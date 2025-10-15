@@ -1,11 +1,11 @@
-import { sql } from "drizzle-orm";
-import { z } from "zod";
-import { builder } from "~/src/graphql/builder";
-import type { GraphQLContext } from "~/src/graphql/context";
-import { TalawaGraphQLError } from "~/src/utilities/TalawaGraphQLError";
-import { pollsTable } from "../database/tables";
-import { PluginMapPollRef, ClearPollsResultRef } from "./types";
-import { pluginMapPollInputSchema } from "./inputs";
+import { sql } from 'drizzle-orm';
+import { z } from 'zod';
+import { builder } from '~/src/graphql/builder';
+import type { GraphQLContext } from '~/src/graphql/context';
+import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
+import { pollsTable } from '../database/tables';
+import { PluginMapPollRef, ClearPollsResultRef } from './types';
+import { pluginMapPollInputSchema } from './inputs';
 
 // Log a new request from admin or user context (alias for logPluginMapPoll)
 export async function logPluginMapRequestResolver(
@@ -22,7 +22,7 @@ export async function logPluginMapRequestResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -33,9 +33,9 @@ export async function logPluginMapRequestResolver(
   } = pluginMapPollInputSchema.safeParse(args.input);
 
   if (!success) {
-    ctx.log?.error("Invalid arguments for logPluginMapRequest:", error);
+    ctx.log?.error('Invalid arguments for logPluginMapRequest:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 
@@ -68,9 +68,9 @@ export async function logPluginMapRequestResolver(
 
     return newPoll;
   } catch (error) {
-    ctx.log?.error("Error logging plugin map request:", error);
+    ctx.log?.error('Error logging plugin map request:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 }
@@ -83,7 +83,7 @@ export async function clearPluginMapRequestsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -106,9 +106,9 @@ export async function clearPluginMapRequestsResolver(
       message: `Cleared ${count} requests`,
     };
   } catch (error) {
-    ctx.log?.error("Error clearing plugin map requests:", error);
+    ctx.log?.error('Error clearing plugin map requests:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 }
@@ -128,7 +128,7 @@ export async function logPluginMapPollResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -139,9 +139,9 @@ export async function logPluginMapPollResolver(
   } = pluginMapPollInputSchema.safeParse(args.input);
 
   if (!success) {
-    ctx.log?.error("Invalid arguments for logPluginMapPoll:", error);
+    ctx.log?.error('Invalid arguments for logPluginMapPoll:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 
@@ -174,9 +174,9 @@ export async function logPluginMapPollResolver(
 
     return newPoll;
   } catch (error) {
-    ctx.log?.error("Error logging plugin map poll:", error);
+    ctx.log?.error('Error logging plugin map poll:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 }
@@ -189,7 +189,7 @@ export async function clearPluginMapPollsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
-      extensions: { code: "unauthenticated" },
+      extensions: { code: 'unauthenticated' },
     });
   }
 
@@ -212,9 +212,9 @@ export async function clearPluginMapPollsResolver(
       message: `Cleared ${count} polls`,
     };
   } catch (error) {
-    ctx.log?.error("Error clearing plugin map polls:", error);
+    ctx.log?.error('Error clearing plugin map polls:', error);
     throw new TalawaGraphQLError({
-      extensions: { code: "unexpected" },
+      extensions: { code: 'unexpected' },
     });
   }
 }
@@ -224,12 +224,12 @@ export function registerPluginMapMutations(
   builderInstance: typeof builder,
 ): void {
   // Log plugin map request
-  builderInstance.mutationField("logPluginMapRequest", (t) =>
+  builderInstance.mutationField('logPluginMapRequest', (t) =>
     t.field({
       type: PluginMapPollRef,
       args: {
         input: t.arg({
-          type: builder.inputType("PluginMapRequestInput", {
+          type: builder.inputType('PluginMapRequestInput', {
             fields: (t) => ({
               userId: t.string({ required: true }),
               userRole: t.string({ required: true }),
@@ -240,27 +240,27 @@ export function registerPluginMapMutations(
           required: true,
         }),
       },
-      description: "Log a new request from admin or user context",
+      description: 'Log a new request from admin or user context',
       resolve: logPluginMapRequestResolver,
     }),
   );
 
   // Clear plugin map requests
-  builderInstance.mutationField("clearPluginMapRequests", (t) =>
+  builderInstance.mutationField('clearPluginMapRequests', (t) =>
     t.field({
       type: ClearPollsResultRef,
-      description: "Clear all logged requests",
+      description: 'Clear all logged requests',
       resolve: clearPluginMapRequestsResolver,
     }),
   );
 
   // Log plugin map poll
-  builderInstance.mutationField("logPluginMapPoll", (t) =>
+  builderInstance.mutationField('logPluginMapPoll', (t) =>
     t.field({
       type: PluginMapPollRef,
       args: {
         input: t.arg({
-          type: builder.inputType("PluginMapPollInput", {
+          type: builder.inputType('PluginMapPollInput', {
             fields: (t) => ({
               userId: t.string({ required: true }),
               userRole: t.string({ required: true }),
@@ -271,16 +271,16 @@ export function registerPluginMapMutations(
           required: true,
         }),
       },
-      description: "Log a new plugin map poll",
+      description: 'Log a new plugin map poll',
       resolve: logPluginMapPollResolver,
     }),
   );
 
   // Clear plugin map polls
-  builderInstance.mutationField("clearPluginMapPolls", (t) =>
+  builderInstance.mutationField('clearPluginMapPolls', (t) =>
     t.field({
       type: ClearPollsResultRef,
-      description: "Clear all logged plugin map polls",
+      description: 'Clear all logged plugin map polls',
       resolve: clearPluginMapPollsResolver,
     }),
   );

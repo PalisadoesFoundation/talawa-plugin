@@ -1,12 +1,12 @@
-import crypto from "node:crypto";
-import Razorpay from "razorpay";
-import type { GraphQLContext } from "~/src/graphql/context";
+import crypto from 'node:crypto';
+import Razorpay from 'razorpay';
+import type { GraphQLContext } from '~/src/graphql/context';
 import {
   configTable,
   ordersTable,
   transactionsTable,
-} from "../database/tables";
-import { eq } from "drizzle-orm";
+} from '../database/tables';
+import { eq } from 'drizzle-orm';
 
 export interface RazorpayOrderData {
   amount: number;
@@ -74,7 +74,7 @@ export class RazorpayService {
         .limit(1);
 
       if (config.length === 0 || !config[0]?.keyId || !config[0]?.keySecret) {
-        throw new Error("Razorpay configuration not found or incomplete");
+        throw new Error('Razorpay configuration not found or incomplete');
       }
 
       const configItem = config[0];
@@ -83,9 +83,9 @@ export class RazorpayService {
         key_secret: configItem?.keySecret,
       });
 
-      this.context.log?.info("Razorpay service initialized successfully");
+      this.context.log?.info('Razorpay service initialized successfully');
     } catch (error) {
-      this.context.log?.error("Failed to initialize Razorpay service:", error);
+      this.context.log?.error('Failed to initialize Razorpay service:', error);
       throw error;
     }
   }
@@ -98,10 +98,10 @@ export class RazorpayService {
     try {
       // Format currency display based on currency type
       const currencySymbols: { [key: string]: string } = {
-        INR: "₹",
-        USD: "$",
-        EUR: "€",
-        GBP: "£",
+        INR: '₹',
+        USD: '$',
+        EUR: '€',
+        GBP: '£',
       };
       const symbol = currencySymbols[orderData.currency] || orderData.currency;
       const displayAmount = (orderData.amount / 100).toFixed(2);
@@ -122,30 +122,30 @@ export class RazorpayService {
       );
       return order;
     } catch (error) {
-      this.context.log?.error("Failed to create Razorpay order:", error);
+      this.context.log?.error('Failed to create Razorpay order:', error);
 
       // Provide more specific error messages
       if (error instanceof Error) {
         if (
-          error.message.includes("401") ||
-          error.message.includes("Unauthorized")
+          error.message.includes('401') ||
+          error.message.includes('Unauthorized')
         ) {
           throw new Error(
-            "Invalid API credentials. Please check your Key ID and Key Secret.",
+            'Invalid API credentials. Please check your Key ID and Key Secret.',
           );
         } else if (
-          error.message.includes("403") ||
-          error.message.includes("Forbidden")
+          error.message.includes('403') ||
+          error.message.includes('Forbidden')
         ) {
           throw new Error(
-            "Access forbidden. Please check if your Razorpay account is active.",
+            'Access forbidden. Please check if your Razorpay account is active.',
           );
         } else if (
-          error.message.includes("429") ||
-          error.message.includes("Rate limit")
+          error.message.includes('429') ||
+          error.message.includes('Rate limit')
         ) {
           throw new Error(
-            "Rate limit exceeded. Please try again in a few minutes.",
+            'Rate limit exceeded. Please try again in a few minutes.',
           );
         } else {
           throw new Error(`Razorpay API error: ${error.message}`);
@@ -173,7 +173,7 @@ export class RazorpayService {
       this.context.log?.info(`Razorpay payment created: ${payment.id}`);
       return payment;
     } catch (error) {
-      this.context.log?.error("Failed to create Razorpay payment:", error);
+      this.context.log?.error('Failed to create Razorpay payment:', error);
       throw error;
     }
   }
@@ -191,23 +191,23 @@ export class RazorpayService {
         .limit(1);
 
       if (config.length === 0 || !config[0]?.webhookSecret) {
-        throw new Error("Webhook secret not configured");
+        throw new Error('Webhook secret not configured');
       }
 
       const expectedSignature = crypto
-        .createHmac("sha256", config[0]?.webhookSecret)
+        .createHmac('sha256', config[0]?.webhookSecret)
         .update(paymentData)
-        .digest("hex");
+        .digest('hex');
 
       const isValid = crypto.timingSafeEqual(
-        Buffer.from(expectedSignature, "hex"),
-        Buffer.from(signature, "hex"),
+        Buffer.from(expectedSignature, 'hex'),
+        Buffer.from(signature, 'hex'),
       );
 
       this.context.log?.info(`Payment verification result: ${isValid}`);
       return isValid;
     } catch (error) {
-      this.context.log?.error("Failed to verify payment:", error);
+      this.context.log?.error('Failed to verify payment:', error);
       throw error;
     }
   }
@@ -223,17 +223,17 @@ export class RazorpayService {
         .limit(1);
 
       if (config.length === 0 || !config[0]?.webhookSecret) {
-        throw new Error("Webhook secret not configured");
+        throw new Error('Webhook secret not configured');
       }
 
       const expectedSignature = crypto
-        .createHmac("sha256", config[0]?.webhookSecret)
+        .createHmac('sha256', config[0]?.webhookSecret)
         .update(webhookBody)
-        .digest("hex");
+        .digest('hex');
 
       const isValid = crypto.timingSafeEqual(
-        Buffer.from(expectedSignature, "hex"),
-        Buffer.from(signature, "hex"),
+        Buffer.from(expectedSignature, 'hex'),
+        Buffer.from(signature, 'hex'),
       );
 
       this.context.log?.info(
@@ -241,7 +241,7 @@ export class RazorpayService {
       );
       return isValid;
     } catch (error) {
-      this.context.log?.error("Failed to verify webhook signature:", error);
+      this.context.log?.error('Failed to verify webhook signature:', error);
       throw error;
     }
   }
@@ -331,7 +331,7 @@ export class RazorpayService {
         await this.context.drizzleClient
           .update(ordersTable)
           .set({
-            status: "paid",
+            status: 'paid',
             updatedAt: new Date(),
           })
           .where(eq(ordersTable.razorpayOrderId, paymentEntity.order_id));
@@ -341,7 +341,7 @@ export class RazorpayService {
         `Webhook processed for payment: ${paymentEntity.id}`,
       );
     } catch (error) {
-      this.context.log?.error("Failed to process webhook:", error);
+      this.context.log?.error('Failed to process webhook:', error);
       throw error;
     }
   }
@@ -356,7 +356,7 @@ export class RazorpayService {
       this.context.log?.info(`Payment details retrieved: ${paymentId}`);
       return payment;
     } catch (error) {
-      this.context.log?.error("Failed to get payment details:", error);
+      this.context.log?.error('Failed to get payment details:', error);
       throw error;
     }
   }
@@ -374,7 +374,7 @@ export class RazorpayService {
       this.context.log?.info(`Payment refunded: ${paymentId}`);
       return refund;
     } catch (error) {
-      this.context.log?.error("Failed to refund payment:", error);
+      this.context.log?.error('Failed to refund payment:', error);
       throw error;
     }
   }
@@ -391,7 +391,7 @@ export class RazorpayService {
         return {
           success: false,
           message:
-            "No Razorpay configuration found. Please configure your API keys first.",
+            'No Razorpay configuration found. Please configure your API keys first.',
         };
       }
 
@@ -401,12 +401,12 @@ export class RazorpayService {
         return {
           success: false,
           message:
-            "API keys are not configured. Please enter your Key ID and Key Secret.",
+            'API keys are not configured. Please enter your Key ID and Key Secret.',
         };
       }
 
       // Validate key format
-      if (!configItem.keyId.startsWith("rzp_")) {
+      if (!configItem.keyId.startsWith('rzp_')) {
         return {
           success: false,
           message:
@@ -420,13 +420,13 @@ export class RazorpayService {
 
       // Test connection by making a simple API call to Razorpay
       const response = await fetch(
-        "https://api.razorpay.com/v1/payments?count=1",
+        'https://api.razorpay.com/v1/payments?count=1',
         {
-          method: "GET",
+          method: 'GET',
           headers: {
-            Authorization: `Basic ${Buffer.from(`${configItem.keyId}:${configItem.keySecret}`).toString("base64")}`,
-            "Content-Type": "application/json",
-            "User-Agent": "Talawa-Razorpay-Plugin/1.0.0",
+            Authorization: `Basic ${Buffer.from(`${configItem.keyId}:${configItem.keySecret}`).toString('base64')}`,
+            'Content-Type': 'application/json',
+            'User-Agent': 'Talawa-Razorpay-Plugin/1.0.0',
           },
         },
       );
@@ -437,11 +437,11 @@ export class RazorpayService {
 
       if (response.ok) {
         const data = await response.json();
-        this.context.log?.info("Razorpay API test successful");
+        this.context.log?.info('Razorpay API test successful');
         return {
           success: true,
           message:
-            "Connection successful! Your Razorpay credentials are valid.",
+            'Connection successful! Your Razorpay credentials are valid.',
         };
       } else if (response.status === 401) {
         return {
@@ -453,20 +453,20 @@ export class RazorpayService {
         return {
           success: false,
           message:
-            "Access forbidden. Please check if your Razorpay account is active and has the necessary permissions.",
+            'Access forbidden. Please check if your Razorpay account is active and has the necessary permissions.',
         };
       } else if (response.status === 429) {
         return {
           success: false,
-          message: "Rate limit exceeded. Please try again in a few minutes.",
+          message: 'Rate limit exceeded. Please try again in a few minutes.',
         };
       } else if (response.status >= 500) {
         return {
           success: false,
-          message: "Razorpay server error. Please try again later.",
+          message: 'Razorpay server error. Please try again later.',
         };
       } else {
-        const errorText = await response.text().catch(() => "Unknown error");
+        const errorText = await response.text().catch(() => 'Unknown error');
         this.context.log?.error(
           `Razorpay API error: ${response.status} - ${errorText}`,
         );
@@ -476,13 +476,13 @@ export class RazorpayService {
         };
       }
     } catch (error) {
-      this.context.log?.error("Error testing Razorpay connection:", error);
+      this.context.log?.error('Error testing Razorpay connection:', error);
 
-      if (error instanceof TypeError && error.message.includes("fetch")) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
         return {
           success: false,
           message:
-            "Network error. Please check your internet connection and try again.",
+            'Network error. Please check your internet connection and try again.',
         };
       } else if (error instanceof Error) {
         return {
@@ -493,7 +493,7 @@ export class RazorpayService {
         return {
           success: false,
           message:
-            "Connection test failed. Please check your internet connection and try again.",
+            'Connection test failed. Please check your internet connection and try again.',
         };
       }
     }

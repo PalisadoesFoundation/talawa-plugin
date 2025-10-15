@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { useMutation, useQuery, gql } from "@apollo/client";
-import { toast } from "react-toastify";
-import { Card, Form, Button, Row, Col, Alert } from "react-bootstrap";
-import Loader from "../../../../components/Loader/Loader";
+import React, { useState, useEffect } from 'react';
+import { useMutation, useQuery, gql } from '@apollo/client';
+import { toast } from 'react-toastify';
+import { Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
+import Loader from '../../../../components/Loader/Loader';
 
 // GraphQL operations
 const GET_RAZORPAY_CONFIG = gql`
@@ -59,8 +59,8 @@ const RazorpayConfiguration: React.FC = () => {
     webhookSecret: undefined,
     isEnabled: false,
     testMode: true,
-    currency: "INR",
-    description: "Donation to organization",
+    currency: 'INR',
+    description: 'Donation to organization',
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -105,11 +105,11 @@ const RazorpayConfiguration: React.FC = () => {
           },
         },
       });
-      toast.success("Razorpay configuration saved successfully!");
+      toast.success('Razorpay configuration saved successfully!');
       refetch();
     } catch (error) {
-      console.error("Error saving Razorpay configuration:", error);
-      toast.error("Failed to save Razorpay configuration");
+      console.error('Error saving Razorpay configuration:', error);
+      toast.error('Failed to save Razorpay configuration');
     } finally {
       setIsLoading(false);
     }
@@ -118,13 +118,13 @@ const RazorpayConfiguration: React.FC = () => {
   const handleTestSetup = async () => {
     if (!config.keyId || !config.keySecret || !config.webhookSecret) {
       toast.error(
-        "Please enter Key ID, Key Secret, and Webhook Secret before testing setup",
+        'Please enter Key ID, Key Secret, and Webhook Secret before testing setup',
       );
       return;
     }
 
     // Validate key format
-    if (!config.keyId.startsWith("rzp_")) {
+    if (!config.keyId.startsWith('rzp_')) {
       toast.error(
         'Invalid Key ID format. Razorpay Key ID should start with "rzp_"',
       );
@@ -133,23 +133,23 @@ const RazorpayConfiguration: React.FC = () => {
 
     setIsLoading(true);
     try {
-      toast.info("Testing Razorpay setup with dummy payment...");
+      toast.info('Testing Razorpay setup with dummy payment...');
       const { data: result } = await testSetup();
 
       if (result?.razorpay_testRazorpaySetup?.success) {
         toast.success(
-          "Setup test successful! Razorpay configuration is working correctly.",
+          'Setup test successful! Razorpay configuration is working correctly.',
         );
       } else {
         const errorMessage =
-          result?.razorpay_testRazorpaySetup?.message || "Setup test failed";
+          result?.razorpay_testRazorpaySetup?.message || 'Setup test failed';
         toast.error(errorMessage);
 
         // Log the error for debugging
-        console.error("Razorpay setup test failed:", {
+        console.error('Razorpay setup test failed:', {
           error: errorMessage,
           config: {
-            keyId: config.keyId?.substring(0, 8) + "...",
+            keyId: config.keyId?.substring(0, 8) + '...',
             hasKeySecret: !!config.keySecret,
             hasWebhookSecret: !!config.webhookSecret,
             testMode: config.testMode,
@@ -157,9 +157,9 @@ const RazorpayConfiguration: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error("Error testing Razorpay setup:", error);
+      console.error('Error testing Razorpay setup:', error);
       toast.error(
-        "Setup test failed. Please check your configuration and try again.",
+        'Setup test failed. Please check your configuration and try again.',
       );
     } finally {
       setIsLoading(false);
@@ -196,14 +196,14 @@ const RazorpayConfiguration: React.FC = () => {
           </div>
           <div className="d-flex align-items-center gap-2">
             <span
-              className={`badge ${config.isEnabled ? "bg-success" : "bg-secondary"}`}
+              className={`badge ${config.isEnabled ? 'bg-success' : 'bg-secondary'}`}
             >
-              {config.isEnabled ? "Enabled" : "Disabled"}
+              {config.isEnabled ? 'Enabled' : 'Disabled'}
             </span>
             <span
-              className={`badge ${config.testMode ? "bg-warning" : "bg-info"}`}
+              className={`badge ${config.testMode ? 'bg-warning' : 'bg-info'}`}
             >
-              {config.testMode ? "Test Mode" : "Live Mode"}
+              {config.testMode ? 'Test Mode' : 'Live Mode'}
             </span>
           </div>
         </div>
@@ -229,8 +229,8 @@ const RazorpayConfiguration: React.FC = () => {
                   <Form.Control
                     type="text"
                     placeholder="rzp_test_..."
-                    value={config.keyId || ""}
-                    onChange={(e) => handleInputChange("keyId", e.target.value)}
+                    value={config.keyId || ''}
+                    onChange={(e) => handleInputChange('keyId', e.target.value)}
                     required
                   />
                   <Form.Text className="text-muted">
@@ -242,11 +242,11 @@ const RazorpayConfiguration: React.FC = () => {
                   <Form.Label>Key Secret *</Form.Label>
                   <div className="input-group">
                     <Form.Control
-                      type={showSecrets ? "text" : "password"}
+                      type={showSecrets ? 'text' : 'password'}
                       placeholder="Enter your key secret"
-                      value={config.keySecret || ""}
+                      value={config.keySecret || ''}
                       onChange={(e) =>
-                        handleInputChange("keySecret", e.target.value)
+                        handleInputChange('keySecret', e.target.value)
                       }
                       required
                     />
@@ -254,7 +254,7 @@ const RazorpayConfiguration: React.FC = () => {
                       variant="outline-secondary"
                       onClick={() => setShowSecrets(!showSecrets)}
                     >
-                      {showSecrets ? "👁️" : "👁️‍🗨️"}
+                      {showSecrets ? '👁️' : '👁️‍🗨️'}
                     </Button>
                   </div>
                   <Form.Text className="text-muted">
@@ -266,11 +266,11 @@ const RazorpayConfiguration: React.FC = () => {
                   <Form.Label>Webhook Secret *</Form.Label>
                   <div className="input-group">
                     <Form.Control
-                      type={showSecrets ? "text" : "password"}
+                      type={showSecrets ? 'text' : 'password'}
                       placeholder="Enter your webhook secret"
-                      value={config.webhookSecret || ""}
+                      value={config.webhookSecret || ''}
                       onChange={(e) =>
-                        handleInputChange("webhookSecret", e.target.value)
+                        handleInputChange('webhookSecret', e.target.value)
                       }
                       required
                     />
@@ -278,7 +278,7 @@ const RazorpayConfiguration: React.FC = () => {
                       variant="outline-secondary"
                       onClick={() => setShowSecrets(!showSecrets)}
                     >
-                      {showSecrets ? "👁️" : "👁️‍🗨️"}
+                      {showSecrets ? '👁️' : '👁️‍🗨️'}
                     </Button>
                   </div>
                   <Form.Text className="text-muted">
@@ -296,7 +296,7 @@ const RazorpayConfiguration: React.FC = () => {
                   <Form.Select
                     value={config.currency}
                     onChange={(e) =>
-                      handleInputChange("currency", e.target.value)
+                      handleInputChange('currency', e.target.value)
                     }
                   >
                     <option value="INR">INR (Indian Rupee)</option>
@@ -312,7 +312,7 @@ const RazorpayConfiguration: React.FC = () => {
                     placeholder="Payment description"
                     value={config.description}
                     onChange={(e) =>
-                      handleInputChange("description", e.target.value)
+                      handleInputChange('description', e.target.value)
                     }
                   />
                 </Form.Group>
@@ -324,7 +324,7 @@ const RazorpayConfiguration: React.FC = () => {
                     label="Test Mode"
                     checked={config.testMode}
                     onChange={(e) =>
-                      handleInputChange("testMode", e.target.checked)
+                      handleInputChange('testMode', e.target.checked)
                     }
                   />
                   <Form.Text className="text-muted">
@@ -339,7 +339,7 @@ const RazorpayConfiguration: React.FC = () => {
                     label="Enable Razorpay"
                     checked={config.isEnabled}
                     onChange={(e) =>
-                      handleInputChange("isEnabled", e.target.checked)
+                      handleInputChange('isEnabled', e.target.checked)
                     }
                   />
                   <Form.Text className="text-muted">
@@ -357,11 +357,11 @@ const RazorpayConfiguration: React.FC = () => {
                 onClick={handleTestSetup}
                 disabled={isLoading || !isConfigComplete()}
               >
-                {isLoading ? "Testing..." : "Test with Dummy Payment"}
+                {isLoading ? 'Testing...' : 'Test with Dummy Payment'}
               </Button>
 
               <Button type="submit" variant="primary" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save Configuration"}
+                {isLoading ? 'Saving...' : 'Save Configuration'}
               </Button>
             </div>
 
@@ -387,7 +387,7 @@ const RazorpayConfiguration: React.FC = () => {
               <ul className="list-unstyled">
                 <li>• Get your API keys from Razorpay Dashboard</li>
                 <li>
-                  • Configure webhook URL:{" "}
+                  • Configure webhook URL:{' '}
                   <code>/api/plugins/razorpay/webhook/</code>
                 </li>
                 <li>• Copy webhook secret from Razorpay Dashboard</li>
@@ -403,7 +403,7 @@ const RazorpayConfiguration: React.FC = () => {
                   rel="noopener noreferrer"
                 >
                   Razorpay Documentation
-                </a>{" "}
+                </a>{' '}
                 •
                 <a
                   href="https://dashboard.razorpay.com"

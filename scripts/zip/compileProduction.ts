@@ -5,9 +5,9 @@ import {
   mkdirSync,
   readdirSync,
   statSync,
-} from "node:fs";
-import { join, sep } from "node:path";
-import archiver from "archiver";
+} from 'node:fs';
+import { join, sep } from 'node:path';
+import archiver from 'archiver';
 
 interface PluginInfo {
   name: string;
@@ -23,20 +23,20 @@ type ZipRoot = {
   includeGlobs?: string[];
 };
 
-const IGNORE_BASENAMES = new Set([".DS_Store", "Thumbs.db"]);
+const IGNORE_BASENAMES = new Set(['.DS_Store', 'Thumbs.db']);
 
 const IGNORE_DIRS = new Set([
-  "__MACOSX",
-  ".git",
-  ".svn",
-  ".hg",
-  "node_modules", // exclude runtime deps by default; flip if your runtime needs them
-  "dist", // exclude stray build dirs unless they are your root; see below
-  "build",
-  "src",
-  "test",
-  "tests",
-  "__tests__",
+  '__MACOSX',
+  '.git',
+  '.svn',
+  '.hg',
+  'node_modules', // exclude runtime deps by default; flip if your runtime needs them
+  'dist', // exclude stray build dirs unless they are your root; see below
+  'build',
+  'src',
+  'test',
+  'tests',
+  '__tests__',
 ]);
 
 // Allowed file types for runtime
@@ -85,10 +85,10 @@ function listFilesRecursive(
       if (ent.isDirectory()) {
         if (shouldIgnoreDir(name)) continue;
         const zipPath =
-          (prefix ? `${prefix}/` : "") +
+          (prefix ? `${prefix}/` : '') +
           name.replace(
-            new RegExp(sep.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"),
-            "/",
+            new RegExp(sep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+            '/',
           );
         stack.push({ dir: fsPath, prefix: zipPath });
       } else if (ent.isFile()) {
@@ -96,10 +96,10 @@ function listFilesRecursive(
         if (!ALLOWED_EXT_RE.test(name)) continue; // only runtime/asset files
         const stats = statSync(fsPath);
         const zipPath =
-          (prefix ? `${prefix}/` : "") +
+          (prefix ? `${prefix}/` : '') +
           name.replace(
-            new RegExp(sep.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"),
-            "/",
+            new RegExp(sep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+            '/',
           );
         out.push({ fsPath, zipPath, stats });
       }
@@ -113,11 +113,11 @@ export async function compileForProduction(
   plugin: PluginInfo,
   skipTypeCheck: boolean = false,
 ): Promise<void> {
-  const { execSync } = await import("node:child_process");
+  const { execSync } = await import('node:child_process');
   const { existsSync, rmSync, mkdirSync, readdirSync, statSync } = await import(
-    "node:fs"
+    'node:fs'
   );
-  const { join, extname, basename, dirname } = await import("node:path");
+  const { join, extname, basename, dirname } = await import('node:path');
 
   // Create backup of original plugin
   const backupPath = `${plugin.path}.backup`;
@@ -128,15 +128,15 @@ export async function compileForProduction(
 
   try {
     // Compile Admin module (React/JSX)
-    if (plugin.hasAdmin && existsSync(join(plugin.path, "admin"))) {
-      const adminPath = join(plugin.path, "admin");
-      const adminTsConfig = join(adminPath, "tsconfig.json");
+    if (plugin.hasAdmin && existsSync(join(plugin.path, 'admin'))) {
+      const adminPath = join(plugin.path, 'admin');
+      const adminTsConfig = join(adminPath, 'tsconfig.json');
 
       // Create temporary tsconfig for admin compilation
       const adminTsConfigContent = {
         compilerOptions: {
-          target: "ES2020",
-          lib: ["DOM", "DOM.Iterable", "ES6"],
+          target: 'ES2020',
+          lib: ['DOM', 'DOM.Iterable', 'ES6'],
           allowJs: true,
           skipLibCheck: true,
           esModuleInterop: true,
@@ -144,21 +144,21 @@ export async function compileForProduction(
           strict: skipTypeCheck ? false : true,
           forceConsistentCasingInFileNames: true,
           noFallthroughCasesInSwitch: true,
-          module: "ESNext",
-          moduleResolution: "node",
+          module: 'ESNext',
+          moduleResolution: 'node',
           resolveJsonModule: true,
           isolatedModules: true,
           noEmit: false,
-          jsx: "react-jsx",
-          outDir: "./dist",
+          jsx: 'react-jsx',
+          outDir: './dist',
           noEmitOnError: skipTypeCheck ? false : true,
         },
-        include: ["**/*.ts", "**/*.tsx"],
-        exclude: ["node_modules", "dist"],
+        include: ['**/*.ts', '**/*.tsx'],
+        exclude: ['node_modules', 'dist'],
       };
 
       // Write temporary tsconfig
-      const { writeFileSync } = await import("node:fs");
+      const { writeFileSync } = await import('node:fs');
       writeFileSync(
         adminTsConfig,
         JSON.stringify(adminTsConfigContent, null, 2),
@@ -166,18 +166,18 @@ export async function compileForProduction(
 
       try {
         // Compile admin TypeScript files
-        const tscCommand = "npx tsc";
+        const tscCommand = 'npx tsc';
         console.log(`Compiling admin module: ${tscCommand}`);
 
         try {
-          execSync(tscCommand, { cwd: adminPath, stdio: "inherit" });
+          execSync(tscCommand, { cwd: adminPath, stdio: 'inherit' });
         } catch (compileError) {
           if (skipTypeCheck) {
             console.warn(
-              "⚠️  TypeScript compilation failed, but continuing due to skip type check option",
+              '⚠️  TypeScript compilation failed, but continuing due to skip type check option',
             );
             // Create dist directory manually if compilation failed
-            const distPath = join(adminPath, "dist");
+            const distPath = join(adminPath, 'dist');
             if (!existsSync(distPath)) {
               mkdirSync(distPath, { recursive: true });
             }
@@ -192,7 +192,7 @@ export async function compileForProduction(
         }
 
         // Copy non-TS files to dist
-        const distPath = join(adminPath, "dist");
+        const distPath = join(adminPath, 'dist');
         if (existsSync(distPath)) {
           execSync(
             `find . -name "*.json" -o -name "*.css" -o -name "*.scss" -o -name "*.svg" -o -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.webp" | xargs -I {} cp --parents {} dist/`,
@@ -234,7 +234,7 @@ export async function compileForProduction(
                 removeTsFiles(fullPath);
               } else if (
                 entry.isFile() &&
-                (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx"))
+                (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx'))
               ) {
                 rmSync(fullPath, { force: true });
               }
@@ -250,15 +250,15 @@ export async function compileForProduction(
     }
 
     // Compile API module (CommonJS)
-    if (plugin.hasApi && existsSync(join(plugin.path, "api"))) {
-      const apiPath = join(plugin.path, "api");
-      const apiTsConfig = join(apiPath, "tsconfig.json");
+    if (plugin.hasApi && existsSync(join(plugin.path, 'api'))) {
+      const apiPath = join(plugin.path, 'api');
+      const apiTsConfig = join(apiPath, 'tsconfig.json');
 
       // Create temporary tsconfig for API compilation
       const apiTsConfigContent = {
         compilerOptions: {
-          target: "ES2020",
-          lib: ["ES2020"],
+          target: 'ES2020',
+          lib: ['ES2020'],
           allowJs: true,
           skipLibCheck: true,
           esModuleInterop: true,
@@ -266,36 +266,36 @@ export async function compileForProduction(
           strict: skipTypeCheck ? false : true,
           forceConsistentCasingInFileNames: true,
           noFallthroughCasesInSwitch: true,
-          module: "CommonJS",
-          moduleResolution: "node",
+          module: 'CommonJS',
+          moduleResolution: 'node',
           resolveJsonModule: true,
           isolatedModules: true,
           noEmit: false,
-          outDir: "./dist",
+          outDir: './dist',
           noEmitOnError: skipTypeCheck ? false : true,
         },
-        include: ["**/*.ts"],
-        exclude: ["node_modules", "dist"],
+        include: ['**/*.ts'],
+        exclude: ['node_modules', 'dist'],
       };
 
       // Write temporary tsconfig
-      const { writeFileSync } = await import("node:fs");
+      const { writeFileSync } = await import('node:fs');
       writeFileSync(apiTsConfig, JSON.stringify(apiTsConfigContent, null, 2));
 
       try {
         // Compile API TypeScript files
-        const tscCommand = "npx tsc";
+        const tscCommand = 'npx tsc';
         console.log(`Compiling API module: ${tscCommand}`);
 
         try {
-          execSync(tscCommand, { cwd: apiPath, stdio: "inherit" });
+          execSync(tscCommand, { cwd: apiPath, stdio: 'inherit' });
         } catch (compileError) {
           if (skipTypeCheck) {
             console.warn(
-              "⚠️  TypeScript compilation failed, but continuing due to skip type check option",
+              '⚠️  TypeScript compilation failed, but continuing due to skip type check option',
             );
             // Create dist directory manually if compilation failed
-            const distPath = join(apiPath, "dist");
+            const distPath = join(apiPath, 'dist');
             if (!existsSync(distPath)) {
               mkdirSync(distPath, { recursive: true });
             }
@@ -310,7 +310,7 @@ export async function compileForProduction(
         }
 
         // Copy non-TS files to dist
-        const distPath = join(apiPath, "dist");
+        const distPath = join(apiPath, 'dist');
         if (existsSync(distPath)) {
           execSync(
             `find . -name "*.json" -o -name "*.graphql" | xargs -I {} cp --parents {} dist/`,
@@ -350,7 +350,7 @@ export async function compileForProduction(
 
               if (entry.isDirectory()) {
                 removeTsFiles(fullPath);
-              } else if (entry.isFile() && entry.name.endsWith(".ts")) {
+              } else if (entry.isFile() && entry.name.endsWith('.ts')) {
                 rmSync(fullPath, { force: true });
               }
             }
@@ -365,11 +365,11 @@ export async function compileForProduction(
     }
 
     console.log(
-      `✅ TypeScript compilation completed successfully${skipTypeCheck ? " (type checking skipped)" : ""}`,
+      `✅ TypeScript compilation completed successfully${skipTypeCheck ? ' (type checking skipped)' : ''}`,
     );
   } catch (error) {
     // Restore original files on error
-    console.error("❌ Compilation failed, restoring original files...");
+    console.error('❌ Compilation failed, restoring original files...');
     rmSync(plugin.path, { recursive: true, force: true });
     execSync(`cp -r "${backupPath}" "${plugin.path}"`);
     rmSync(backupPath, { recursive: true, force: true });
@@ -386,12 +386,12 @@ export async function createProductionZip(
   // If your compiled output lives *inside* `root/dist`, set `root` to that dist:
   // const root = opts.root ?? join(plugin.path, 'dist');
 
-  const zipOutputDir = join(process.cwd(), "plugin-zips");
+  const zipOutputDir = join(process.cwd(), 'plugin-zips');
   if (!existsSync(zipOutputDir)) mkdirSync(zipOutputDir, { recursive: true });
 
   // Use plugin.name as fallback if manifest-based ID isn’t available here
-  const buildType = "prod";
-  const zipFileName = `${plugin.name || "plugin"}-${buildType}.zip`;
+  const buildType = 'prod';
+  const zipFileName = `${plugin.name || 'plugin'}-${buildType}.zip`;
   const zipPath = join(zipOutputDir, zipFileName);
 
   // Determine the exact subtrees/files to include
@@ -402,19 +402,19 @@ export async function createProductionZip(
   }> = [];
 
   // If your layout keeps admin/api at top-level after compile:
-  if (plugin.hasAdmin && existsSync(join(root, "admin"))) {
-    files.push(...listFilesRecursive(join(root, "admin"), "admin"));
+  if (plugin.hasAdmin && existsSync(join(root, 'admin'))) {
+    files.push(...listFilesRecursive(join(root, 'admin'), 'admin'));
   }
-  if (plugin.hasApi && existsSync(join(root, "api"))) {
-    files.push(...listFilesRecursive(join(root, "api"), "api"));
+  if (plugin.hasApi && existsSync(join(root, 'api'))) {
+    files.push(...listFilesRecursive(join(root, 'api'), 'api'));
   }
 
   // Include top-level runtime files (manifest/package are important)
   for (const base of [
-    "manifest.json",
-    "package.json",
-    "README.md",
-    "LICENSE",
+    'manifest.json',
+    'package.json',
+    'README.md',
+    'LICENSE',
   ]) {
     const p = join(root, base);
     if (existsSync(p)) {
@@ -427,28 +427,28 @@ export async function createProductionZip(
 
   // If neither admin/api, include everything under root (compiled-only)
   if (files.length === 0) {
-    files.push(...listFilesRecursive(root, ""));
+    files.push(...listFilesRecursive(root, ''));
   }
 
   // Create the archive safely (no append(), no ZIP64)
   const out = createWriteStream(zipPath);
-  const archive = archiver("zip", {
+  const archive = archiver('zip', {
     zlib: { level: 9 },
     store: false,
     forceZip64: false,
   });
 
   const done = new Promise<void>((resolve, reject) => {
-    out.on("close", () => resolve());
-    out.on("error", reject);
-    archive.on("warning", (err: any) => {
-      if (err?.code === "ENOENT") {
-        console.warn("Archive warning:", err);
+    out.on('close', () => resolve());
+    out.on('error', reject);
+    archive.on('warning', (err: any) => {
+      if (err?.code === 'ENOENT') {
+        console.warn('Archive warning:', err);
       } else {
         reject(err);
       }
     });
-    archive.on("error", reject);
+    archive.on('error', reject);
   });
 
   archive.pipe(out);
@@ -458,7 +458,7 @@ export async function createProductionZip(
     const mtimeMs = Number(f.stats.mtimeMs);
     const mtime = new Date(Math.floor(mtimeMs / 1000) * 1000);
     archive.file(f.fsPath, {
-      name: f.zipPath.replace(/\\/g, "/"),
+      name: f.zipPath.replace(/\\/g, '/'),
       stats: { ...f.stats, mtime } as any,
       // keep compression on to avoid "uncompressed content" issues
     });
@@ -473,7 +473,7 @@ export async function createProductionZip(
     `📊 Approx size: ${(statSync(zipPath).size / 1024 / 1024).toFixed(2)} MB`,
   );
   console.log(
-    "🔧 Flags: no append(), ZIP64 disabled, filtered to runtime files",
+    '🔧 Flags: no append(), ZIP64 disabled, filtered to runtime files',
   );
 
   return zipPath;
