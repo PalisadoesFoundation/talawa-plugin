@@ -24,7 +24,7 @@ class PluginMapAppPlugin implements TalawaMobilePlugin {
   @override
   PluginExtensions getExtensions() {
     return PluginExtensions(
-      G1: g1MenuInjectors(),
+      g1: g1MenuInjectors(),
     );
   }
 }

@@ -23,8 +23,8 @@ class SummarizeT5Plugin implements TalawaMobilePlugin {
   @override
   PluginExtensions getExtensions() {
     return PluginExtensions(
-      // G2 is for post content injectors
-      G2: [
+      // g2 is for post content injectors
+      g2: [
         PluginInjectorExtension(
           pluginId: manifest.id,
           name: 'Summarize Button',

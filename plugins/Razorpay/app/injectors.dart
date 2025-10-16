@@ -5,7 +5,7 @@ import 'package:talawa/services/navigation_service.dart';
 import 'manifest.dart';
 import 'routes.dart';
 
-/// G1 Menu Injectors for Razorpay Plugin
+/// g1 Menu Injectors for Razorpay Plugin
 /// 
 /// Provides two menu buttons:
 /// 1. Donate (Razorpay) - Navigate to donation page

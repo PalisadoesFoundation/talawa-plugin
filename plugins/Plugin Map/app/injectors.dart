@@ -4,7 +4,7 @@ import 'package:talawa/locator.dart';
 import 'package:talawa/plugin/available/plugin_map/manifest.dart';
 import 'package:talawa/plugin/available/plugin_map/routes.dart';
 
-/// G1 injector - Menu page plugins section
+/// g1 injector - Menu page plugins section
 List<PluginInjectorExtension> g1MenuInjectors() {
   return [
     PluginInjectorExtension(
