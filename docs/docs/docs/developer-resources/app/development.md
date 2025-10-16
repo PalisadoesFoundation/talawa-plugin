@@ -925,7 +925,7 @@ final eventAnalyticsPlugin = EventAnalyticsPlugin();
 
 ## Step 6: Testing
 
-See [Testing Guide](./testing) for comprehensive testing strategies.
+See [Testing Guide] for comprehensive testing strategies.
 
 ## Step 7: Package Plugin
 
