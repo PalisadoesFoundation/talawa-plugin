@@ -324,7 +324,6 @@ A: No, mobile plugins must be bundled during the app build process. However, you
 
 ### Get Support
 
-- [Read the detailed documentation](../docs)
 - [Ask in the community forum](https://community.talawa.io)
 - [Report installation issues](https://github.com/PalisadoesFoundation/talawa/issues)
 - Contact your organization's technical team

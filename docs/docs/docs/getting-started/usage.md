@@ -412,17 +412,6 @@ Actions:
 
 ---
 
-## Next Steps
-
-Now you know how to manage plugins! Here's what to explore next:
-
-- 📚 **[Plugin Catalog](../plugins/)**: Browse available plugins
-- 🎓 **[Plugin Tutorials](../tutorials/)**: Step-by-step guides for specific plugins
-- 💡 **[Best Practices](../best-practices/)**: Tips for effective plugin management
-- 🛠️ **[Developer Guide](../developers/)**: Want to create your own plugin?
-
----
-
 ## Need Help?
 
 ### Quick Help

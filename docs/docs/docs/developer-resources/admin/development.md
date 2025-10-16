@@ -329,9 +329,8 @@ export default HelloPluginLifecycle;
 
 Ready to build your plugin? Continue with:
 
-1. **[Architecture](./architecture)**: Deep dive into plugin architecture
-2. **[Development](./development)**: Step-by-step development guide
-3. **[Testing](https://docs-admin.talawa.io/docs/developer-resources/testing)**: How to test your plugins
+1. **[Development](./development)**: Step-by-step development guide
+2. **[Testing](https://docs-admin.talawa.io/docs/developer-resources/testing)**: How to test your plugins
 
 ## Resources
 

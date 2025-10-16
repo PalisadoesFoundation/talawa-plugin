@@ -781,8 +781,6 @@ export default PaymentGatewayPlugin;
 ## Next Steps
 
 - **[Testing Guide](https://docs-api.talawa.io/docs/developer-resources/testing)**: Write tests
-- **[Containerization](./containerization)**: Deploy services
-- **[Deployment](../deployment)**: Publish plugin
 
 ## Resources
 

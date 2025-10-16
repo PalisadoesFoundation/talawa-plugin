@@ -1006,8 +1006,7 @@ Semantics(
 
 ## Next Steps
 
-- **[Testing Guide](./testing)**: Write comprehensive tests
-- **[Distribution](../distribution)**: Bundle and distribute
+- **[Testing Guide](https://docs-mobile.talawa.io/docs/docs/flutter-testing)**: Write comprehensive tests
 
 ## Resources
 
