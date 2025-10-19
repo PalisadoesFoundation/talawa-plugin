@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-docs/getting-started/usage" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.1">
+<title data-rh="true">Using Plugins | Talawa-Plugin Documentation</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://docs-plugin.talawa.io/docs/getting-started/usage"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Using Plugins | Talawa-Plugin Documentation"><meta data-rh="true" name="description" content="Once you&#x27;ve installed plugins, you need to know how to manage them effectively. This guide covers everything from activation to uninstallation in simple, non-technical terms."><meta data-rh="true" property="og:description" content="Once you&#x27;ve installed plugins, you need to know how to manage them effectively. This guide covers everything from activation to uninstallation in simple, non-technical terms."><link data-rh="true" rel="icon" href="/img/icons/favicon_palisadoes.ico"><link data-rh="true" rel="canonical" href="https://docs-plugin.talawa.io/docs/getting-started/usage"><link data-rh="true" rel="alternate" href="https://docs-plugin.talawa.io/docs/getting-started/usage" hreflang="en"><link data-rh="true" rel="alternate" href="https://docs-plugin.talawa.io/docs/getting-started/usage" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Using Plugins","item":"https://docs-plugin.talawa.io/docs/getting-started/usage"}]}</script><link rel="stylesheet" href="https://docs.talawa.io/css/styles-latest.css"><link rel="stylesheet" href="/assets/css/styles.72cfe288.css">
+<script src="/assets/js/runtime~main.d8f0c88c.js" defer="defer"></script>
+<script src="/assets/js/main.70dc237b.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_T8qH" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a href="https://docs.talawa.io/" target="_blank" rel="noopener noreferrer" class="navbar__brand"><div class="navbar__logo"><img src="/img/icons/logo.png" alt="Talawa Logo" class="LogoAnimation themedComponent_sQja themedComponent--light_a0ND"><img src="/img/icons/logo.png" alt="Talawa Logo" class="LogoAnimation themedComponent_sQja themedComponent--dark_YYnw"></div><b class="navbar__title text--truncate">Talawa</b></a><a href="https://docs.talawa.io/docs" target="_self" rel="noopener noreferrer" class="navbar__item navbar__link">General</a><a href="https://docs-mobile.talawa.io/docs" target="_self" rel="noopener noreferrer" class="navbar__item navbar__link">Mobile Guide</a><a href="https://docs-admin.talawa.io/docs" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">Admin Guide</a><a href="https://docs-api.talawa.io/docs" target="_self" rel="noopener noreferrer" class="navbar__item navbar__link">API Guide</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" target="_self" href="/docs">Plugin Guide</a><a href="https://community.talawa.io" target="_self" rel="noopener noreferrer" class="navbar__item navbar__link">Community</a><a href="https://demo.talawa.io/" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">Demo</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href="https://github.com/PalisadoesFoundation" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link header-github-link" aria-label="GitHub repository"></a><a href="https://www.youtube.com/@PalisadoesOrganization" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link header-youtube-link" aria-label="Palisadoes Youtube channel"></a><div class="toggle_kKFj colorModeToggle_JA6J"><button class="clean-btn toggleButton_EaMF toggleButtonDisabled_JmwE" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_n6OQ lightToggleIcon_RsS_"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_n6OQ darkToggleIcon_wQeP"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_n6OQ systemToggleIcon_yzPn"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_sU4n"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_FUkw"><div class="docsWrapper_sDaT"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_z18S" type="button"></button><div class="docRoot_fAKH"><aside class="theme-doc-sidebar-container docSidebarContainer_I3vr"><div class="sidebarViewport_HSaG"><div class="sidebar_as8j"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_p1Q_"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/"><span title="Introduction" class="linkLabel_kTun">Introduction</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_hGTh menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/docs/getting-started/introduction"><span title="Getting Started" class="categoryLinkLabel_GZSo">Getting Started</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/getting-started/introduction"><span title="Introduction" class="linkLabel_kTun">Introduction</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/getting-started/installation"><span title="Plugin Installation" class="linkLabel_kTun">Plugin Installation</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/getting-started/usage"><span title="Using Plugins" class="linkLabel_kTun">Using Plugins</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_hGTh menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/developer-resources/admin/introduction"><span title="Developer Resources" class="categoryLinkLabel_GZSo">Developer Resources</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_P6A7"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_edOG"><div class="docItemContainer_iEZs"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_TE6n" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_Hruw"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Getting Started</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Using Plugins</span></li></ul></nav><div class="tocCollapsible_EfFQ theme-doc-toc-mobile tocMobile_CI8n"><button type="button" class="clean-btn tocCollapsibleButton_s92I">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Managing and Using Plugins</h1></header>
+<p>Once you&#x27;ve installed plugins, you need to know how to manage them effectively. This guide covers everything from activation to uninstallation in simple, non-technical terms.</p>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="plugin-states-explained">Plugin States Explained<a href="#plugin-states-explained" class="hash-link" aria-label="Direct link to Plugin States Explained" title="Direct link to Plugin States Explained" translate="no">​</a></h2>
+<p>Think of plugins like light switches - they can be in different states:</p>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="-inactive-installed-but-off">🔵 Inactive (Installed but Off)<a href="#-inactive-installed-but-off" class="hash-link" aria-label="Direct link to 🔵 Inactive (Installed but Off)" title="Direct link to 🔵 Inactive (Installed but Off)" translate="no">​</a></h3>
+<ul>
+<li><strong>What it means</strong>: Plugin files are in your system but features are not available</li>
+<li><strong>Like</strong>: Having an app on your phone but not running it</li>
+<li><strong>Uses</strong>: Keep plugins ready but not active until you need them</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="-active-running">🟢 Active (Running)<a href="#-active-running" class="hash-link" aria-label="Direct link to 🟢 Active (Running)" title="Direct link to 🟢 Active (Running)" translate="no">​</a></h3>
+<ul>
+<li><strong>What it means</strong>: Plugin is running and all features are available</li>
+<li><strong>Like</strong>: Having an app open and using it</li>
+<li><strong>Uses</strong>: The plugin&#x27;s features are accessible to users</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="-not-installed">⚪ Not Installed<a href="#-not-installed" class="hash-link" aria-label="Direct link to ⚪ Not Installed" title="Direct link to ⚪ Not Installed" translate="no">​</a></h3>
+<ul>
+<li><strong>What it means</strong>: Plugin is not in your system at all</li>
+<li><strong>Like</strong>: An app you haven&#x27;t downloaded yet</li>
+<li><strong>Uses</strong>: Before you upload/install a plugin</li>
+</ul>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="accessing-plugin-management">Accessing Plugin Management<a href="#accessing-plugin-management" class="hash-link" aria-label="Direct link to Accessing Plugin Management" title="Direct link to Accessing Plugin Management" translate="no">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="step-1-log-into-admin-dashboard">Step 1: Log Into Admin Dashboard<a href="#step-1-log-into-admin-dashboard" class="hash-link" aria-label="Direct link to Step 1: Log Into Admin Dashboard" title="Direct link to Step 1: Log Into Admin Dashboard" translate="no">​</a></h3>
+<ol>
+<li>Open your web browser</li>
+<li>Go to your Talawa-Admin URL</li>
+<li>Log in with administrator credentials</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="step-2-navigate-to-plugins">Step 2: Navigate to Plugins<a href="#step-2-navigate-to-plugins" class="hash-link" aria-label="Direct link to Step 2: Navigate to Plugins" title="Direct link to Step 2: Navigate to Plugins" translate="no">​</a></h3>
+<ol>
+<li>Click <strong>Plugin Store</strong> in the sidebar</li>
+<li>Select <strong>Manage</strong></li>
+<li>You&#x27;ll see the Plugin Management page</li>
+</ol>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="activating-plugins">Activating Plugins<a href="#activating-plugins" class="hash-link" aria-label="Direct link to Activating Plugins" title="Direct link to Activating Plugins" translate="no">  ​</a></h2>
+<p>Activation enables a plugin&#x27;s features for all users across web, mobile, and API (if applicable).</p>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="how-to-activate-a-plugin">How to Activate a Plugin<a href="#how-to-activate-a-plugin" class="hash-link" aria-label="Direct link to How to Activate a Plugin" title="Direct link to How to Activate a Plugin" translate="no">​</a></h3>
+<ol>
+<li>In the Plugin Management modal, click the <strong>Activate</strong> button next to the desired plugin.</li>
+<li>The activation process begins:<!-- -->
+<ul>
+<li>Plugin features are registered</li>
+<li>Database connections are established</li>
+<li>Extensions are loaded</li>
+<li>Services are started</li>
+</ul>
+</li>
+<li>Once complete, the button changes to <strong>Deactivate</strong>.</li>
+<li>New features immediately appear in the appropriate places:<!-- -->
+<ul>
+<li>Menu items (sidebar, app menu)</li>
+<li>Widgets (dashboard, app screens)</li>
+<li>API endpoints and webhooks (if applicable)</li>
+</ul>
+</li>
+</ol>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="where-features-appear">Where Features Appear<a href="#where-features-appear" class="hash-link" aria-label="Direct link to Where Features Appear" title="Direct link to Where Features Appear" translate="no">​</a></h4>
+<p><strong>Admin Dashboard:</strong></p>
+<ul>
+<li>Sidebar menu items</li>
+<li>New tabs or sections</li>
+<li>Tools in existing pages</li>
+</ul>
+<p><strong>Mobile App:</strong></p>
+<ul>
+<li>New screens in the app menu</li>
+<li>Additional widgets</li>
+</ul>
+<p><strong>API:</strong></p>
+<ul>
+<li>New GraphQL data</li>
+<li>Webhooks</li>
+<li>Background services</li>
+</ul>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="using-active-plugins">Using Active Plugins<a href="#using-active-plugins" class="hash-link" aria-label="Direct link to Using Active Plugins" title="Direct link to Using Active Plugins" translate="no">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="accessing-plugin-features">Accessing Plugin Features<a href="#accessing-plugin-features" class="hash-link" aria-label="Direct link to Accessing Plugin Features" title="Direct link to Accessing Plugin Features" translate="no">​</a></h3>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="admin-dashboard">Admin Dashboard<a href="#admin-dashboard" class="hash-link" aria-label="Direct link to Admin Dashboard" title="Direct link to Admin Dashboard" translate="no">​</a></h4>
+<p><strong>New Pages/Screens</strong>:</p>
+<ol>
+<li>Check the sidebar menu for new items</li>
+<li>Look for plugin-specific sections</li>
+</ol>
+<p><strong>Dashboard Widgets</strong>:</p>
+<ol>
+<li>New widgets appear on your dashboard</li>
+<li>Some may need configuration</li>
+<li>Click to interact or view details</li>
+</ol>
+<p><strong>Tools &amp; Features</strong>:</p>
+<ol>
+<li>Look for new buttons or options in existing pages</li>
+<li>Check for new tabs in data views</li>
+<li>Hover over icons for tooltips</li>
+</ol>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="mobile-app">Mobile App<a href="#mobile-app" class="hash-link" aria-label="Direct link to Mobile App" title="Direct link to Mobile App" translate="no">​</a></h4>
+<p><strong>New Menu Items</strong>:</p>
+<ol>
+<li>Open the app menu</li>
+<li>Look for &quot;Plugins&quot; section</li>
+<li>Tap to access plugin features</li>
+</ol>
+<p><strong>Injected Widgets &amp; Components</strong>:</p>
+<ol>
+<li>Plugin features may appear in any part of the app.</li>
+<li>Injectors can be used to add widgets, screens, or enhance existing components throughout the app.</li>
+<li>Examples include new screens, custom widgets, or additional functionality in any UI area.</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="configuring-plugin-settings">Configuring Plugin Settings<a href="#configuring-plugin-settings" class="hash-link" aria-label="Direct link to Configuring Plugin Settings" title="Direct link to Configuring Plugin Settings" translate="no">​</a></h3>
+<p>Many plugins have settings you can customize.</p>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="accessing-settings">Accessing Settings<a href="#accessing-settings" class="hash-link" aria-label="Direct link to Accessing Settings" title="Direct link to Accessing Settings" translate="no">​</a></h4>
+<ol>
+<li>Go to <strong>Admin Panel</strong> → <strong>Plugin Settings</strong></li>
+<li>Find the plugin</li>
+<li>Adjust settings as needed</li>
+</ol>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="common-settings">Common Settings<a href="#common-settings" class="hash-link" aria-label="Direct link to Common Settings" title="Direct link to Common Settings" translate="no">​</a></h4>
+<p><strong>API Keys</strong>:</p>
+<ul>
+<li>For plugins that connect to external services</li>
+<li>Example: Payment gateway credentials</li>
+</ul>
+<p><strong>Display Options</strong>:</p>
+<ul>
+<li>How plugin features appear</li>
+<li>Color schemes, layouts</li>
+</ul>
+<p><strong>Permissions</strong>:</p>
+<ul>
+<li>Who can access plugin features</li>
+<li>User role restrictions</li>
+</ul>
+<p><strong>Behavior</strong>:</p>
+<ul>
+<li>How the plugin operates</li>
+<li>Automation settings, triggers</li>
+</ul>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="deactivating-plugins">Deactivating Plugins<a href="#deactivating-plugins" class="hash-link" aria-label="Direct link to Deactivating Plugins" title="Direct link to Deactivating Plugins" translate="no">​</a></h2>
+<p>Deactivation temporarily turns off a plugin without removing it. Think of it as putting an app to sleep.</p>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="how-to-deactivate">How to Deactivate<a href="#how-to-deactivate" class="hash-link" aria-label="Direct link to How to Deactivate" title="Direct link to How to Deactivate" translate="no">​</a></h3>
+<p>Deactivation works just like activation and uses the same Plugin Management modal:</p>
+<ol>
+<li>In the Plugin Management modal, click the <strong>Deactivate</strong> button next to the active plugin.</li>
+<li>The deactivation process begins:<!-- -->
+<ul>
+<li>Plugin features are removed from the interface</li>
+<li>Services are stopped</li>
+<li>Plugin data is kept intact</li>
+</ul>
+</li>
+<li>The button changes back to <strong>Activate</strong>.</li>
+<li>You can reactivate the plugin at any time using the same modal.</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="what-happens-when-deactivated">What Happens When Deactivated<a href="#what-happens-when-deactivated" class="hash-link" aria-label="Direct link to What Happens When Deactivated" title="Direct link to What Happens When Deactivated" translate="no">​</a></h3>
+<p><strong>Immediately</strong>:</p>
+<ul>
+<li>Features disappear from interface</li>
+<li>Menu items are removed</li>
+<li>Widgets stop showing</li>
+<li>Services stop running</li>
+</ul>
+<p><strong>What&#x27;s Preserved</strong>:</p>
+<ul>
+<li>Plugin files remain installed</li>
+<li>Plugin data is kept</li>
+<li>Settings are saved</li>
+<li>Can reactivate anytime</li>
+</ul>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="uninstalling-plugins">Uninstalling Plugins<a href="#uninstalling-plugins" class="hash-link" aria-label="Direct link to Uninstalling Plugins" title="Direct link to Uninstalling Plugins" translate="no">​</a></h2>
+<p>Uninstalling completely removes a plugin from your system. <strong>This is permanent!</strong></p>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="before-you-uninstall">Before You Uninstall<a href="#before-you-uninstall" class="hash-link" aria-label="Direct link to Before You Uninstall" title="Direct link to Before You Uninstall" translate="no">​</a></h3>
+<p>** Important Considerations**:</p>
+<ol>
+<li><strong>Data Loss</strong>: Plugin data will be deleted</li>
+<li><strong>Dependencies</strong>: Other features might rely on this plugin</li>
+<li><strong>No Undo</strong>: You&#x27;ll need to reinstall to get it back</li>
+<li><strong>Backup</strong>: Consider backing up if you might need the data</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="when-to-uninstall">When to Uninstall<a href="#when-to-uninstall" class="hash-link" aria-label="Direct link to When to Uninstall" title="Direct link to When to Uninstall" translate="no">​</a></h3>
+<ul>
+<li><strong>Never Using</strong>: Plugin serves no purpose</li>
+<li><strong>Free Space</strong>: Need to reduce server/app size</li>
+<li><strong>Replacing</strong>: Installing a better alternative</li>
+<li><strong>Issues</strong>: Plugin is causing persistent problems</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="how-to-uninstall">How to Uninstall<a href="#how-to-uninstall" class="hash-link" aria-label="Direct link to How to Uninstall" title="Direct link to How to Uninstall" translate="no">​</a></h3>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="step-1-deactivate-first">Step 1: Deactivate First<a href="#step-1-deactivate-first" class="hash-link" aria-label="Direct link to Step 1: Deactivate First" title="Direct link to Step 1: Deactivate First" translate="no">​</a></h4>
+<p><strong>Must be deactivated before uninstalling</strong>:</p>
+<ol>
+<li>If active, click <strong>Deactivate</strong></li>
+<li>Wait for deactivation to complete</li>
+<li>Status changes to <strong>Inactive</strong></li>
+</ol>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="step-2-click-uninstall">Step 2: Click Uninstall<a href="#step-2-click-uninstall" class="hash-link" aria-label="Direct link to Step 2: Click Uninstall" title="Direct link to Step 2: Click Uninstall" translate="no">​</a></h4>
+<ol>
+<li>Find the inactive plugin</li>
+<li>Click <strong>Uninstall</strong></li>
+<li>A serious warning appears:<!-- -->
+<div class="language-text codeBlockContainer_kgIi theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_PTPn"><pre tabindex="0" class="prism-code language-text codeBlock_v4Fo thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_DxRU"><span class="token-line" style="color:#393A34"><span class="token plain">⚠️ Uninstall Plugin?</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">Are you sure you want to uninstall Plugin?</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">This action will permanently remove the plugin and all its data. This action cannot be undone.</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">[Cancel] [Uninstall Permanently]</span><br></span></code></pre></div></div>
+</li>
+</ol>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="step-3-confirm-uninstallation">Step 3: Confirm Uninstallation<a href="#step-3-confirm-uninstallation" class="hash-link" aria-label="Direct link to Step 3: Confirm Uninstallation" title="Direct link to Step 3: Confirm Uninstallation" translate="no">​</a></h4>
+<ol>
+<li>Click <strong>Uninstall Permanently</strong></li>
+</ol>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="step-4-uninstallation-process">Step 4: Uninstallation Process<a href="#step-4-uninstallation-process" class="hash-link" aria-label="Direct link to Step 4: Uninstallation Process" title="Direct link to Step 4: Uninstallation Process" translate="no">​</a></h4>
+<div class="language-text codeBlockContainer_kgIi theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_PTPn"><pre tabindex="0" class="prism-code language-text codeBlock_v4Fo thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_DxRU"><span class="token-line" style="color:#393A34"><span class="token plain">⏳ Uninstalling plugin...</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">⏳ Removing files...</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">⏳ Dropping database tables...</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">⏳ Cleaning up connections...</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">⏳ Removing configuration...</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">✅ Plugin uninstalled successfully</span><br></span></code></pre></div></div>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="what-gets-removed">What Gets Removed<a href="#what-gets-removed" class="hash-link" aria-label="Direct link to What Gets Removed" title="Direct link to What Gets Removed" translate="no">​</a></h3>
+<ul>
+<li>All plugin files</li>
+<li>Database tables and data</li>
+<li>Settings and configuration</li>
+<li>Menu items and routes</li>
+<li>Background services</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="uninstalling-mobile-plugins">Uninstalling Mobile Plugins<a href="#uninstalling-mobile-plugins" class="hash-link" aria-label="Direct link to Uninstalling Mobile Plugins" title="Direct link to Uninstalling Mobile Plugins" translate="no">​</a></h3>
+<p>Mobile plugins work differently:</p>
+<p><strong>Can&#x27;t Fully Remove Without Rebuild</strong>:</p>
+<ul>
+<li>Plugin code is bundled in the app</li>
+<li>Can deactivate to hide features</li>
+<li>Full removal requires rebuilding app</li>
+</ul>
+<p><strong>Recommended Approach</strong>:</p>
+<ol>
+<li><strong>Deactivate</strong> the plugin in admin dashboard</li>
+<li>Features hide from all mobile apps</li>
+<li><strong>If you must remove completely</strong>, contact technical team to rebuild app without the plugin</li>
+</ol>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="plugin-management-best-practices">Plugin Management Best Practices<a href="#plugin-management-best-practices" class="hash-link" aria-label="Direct link to Plugin Management Best Practices" title="Direct link to Plugin Management Best Practices" translate="no">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="activation-strategy">Activation Strategy<a href="#activation-strategy" class="hash-link" aria-label="Direct link to Activation Strategy" title="Direct link to Activation Strategy" translate="no">​</a></h3>
+<p><strong>Start Small</strong>:</p>
+<ul>
+<li>Activate one plugin at a time</li>
+<li>Test thoroughly before adding more</li>
+<li>Ensure each works as expected</li>
+</ul>
+<p><strong>Monitor Performance</strong>:</p>
+<ul>
+<li>Watch app speed after activation</li>
+<li>Check server resource usage</li>
+<li>Disable plugins that slow things down</li>
+</ul>
+<p><strong>User Training</strong>:</p>
+<ul>
+<li>Train users on new features</li>
+<li>Provide documentation</li>
+<li>Announce new plugins to members</li>
+</ul>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="troubleshooting-common-issues">Troubleshooting Common Issues<a href="#troubleshooting-common-issues" class="hash-link" aria-label="Direct link to Troubleshooting Common Issues" title="Direct link to Troubleshooting Common Issues" translate="no">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="plugin-not-working-after-activation">Plugin Not Working After Activation<a href="#plugin-not-working-after-activation" class="hash-link" aria-label="Direct link to Plugin Not Working After Activation" title="Direct link to Plugin Not Working After Activation" translate="no">​</a></h3>
+<p><strong>Symptoms</strong>: Activated but features don&#x27;t appear</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Refresh</strong>: Hard refresh browser (Ctrl+Shift+R or Cmd+Shift+R)</li>
+<li><strong>Clear Cache</strong>: Clear browser cache and cookies</li>
+<li><strong>Check Permissions</strong>: Ensure you have rights to access features</li>
+<li><strong>Reactivate</strong>: Deactivate, wait 10 seconds, reactivate</li>
+<li><strong>Check Logs</strong>: Review error logs in admin dashboard</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="features-disappeared-suddenly">Features Disappeared Suddenly<a href="#features-disappeared-suddenly" class="hash-link" aria-label="Direct link to Features Disappeared Suddenly" title="Direct link to Features Disappeared Suddenly" translate="no">​</a></h3>
+<p><strong>Symptoms</strong>: Working plugin stops showing features</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Check Status</strong>: Plugin might have auto-deactivated</li>
+<li><strong>Error State</strong>: Look for error indicators</li>
+<li><strong>Dependencies</strong>: Check if required services are running</li>
+<li><strong>Reactivate</strong>: Try deactivating and reactivating</li>
+<li><strong>Contact Support</strong>: If issue persists</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="mobile-plugin-not-syncing">Mobile Plugin Not Syncing<a href="#mobile-plugin-not-syncing" class="hash-link" aria-label="Direct link to Mobile Plugin Not Syncing" title="Direct link to Mobile Plugin Not Syncing" translate="no">​</a></h3>
+<p><strong>Symptoms</strong>: Dashboard changes don&#x27;t reflect in mobile app</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Wait</strong>: Changes can take 1-2 minutes to sync</li>
+<li><strong>Restart App</strong>: Close and reopen mobile app</li>
+<li><strong>Check Connection</strong>: Ensure mobile has internet</li>
+<li><strong>Verify Activation</strong>: Confirm plugin is active in dashboard</li>
+<li><strong>App Version</strong>: Ensure mobile app has the plugin bundled</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="cant-deactivate-plugin">Can&#x27;t Deactivate Plugin<a href="#cant-deactivate-plugin" class="hash-link" aria-label="Direct link to Can&#x27;t Deactivate Plugin" title="Direct link to Can&#x27;t Deactivate Plugin" translate="no">​</a></h3>
+<p><strong>Symptoms</strong>: Deactivate button doesn&#x27;t work or errors occur</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Dependencies</strong>: Another plugin might depend on it</li>
+<li><strong>Running Processes</strong>: Wait for background tasks to complete</li>
+<li><strong>Force Deactivate</strong>: Contact technical team if stuck</li>
+<li><strong>System Restart</strong>: Restart Talawa services (technical team)</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="uninstall-stuck-or-failed">Uninstall Stuck or Failed<a href="#uninstall-stuck-or-failed" class="hash-link" aria-label="Direct link to Uninstall Stuck or Failed" title="Direct link to Uninstall Stuck or Failed" translate="no">​</a></h3>
+<p><strong>Symptoms</strong>: Uninstall process hangs or shows errors</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Deactivate First</strong>: Must be inactive before uninstalling</li>
+<li><strong>Active Connections</strong>: Close all admin dashboard tabs</li>
+<li><strong>Database Lock</strong>: Wait and try again</li>
+<li><strong>Manual Cleanup</strong>: Contact technical team for manual removal</li>
+<li><strong>Check Logs</strong>: Review error messages for specific issues</li>
+</ol>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="understanding-plugin-impact">Understanding Plugin Impact<a href="#understanding-plugin-impact" class="hash-link" aria-label="Direct link to Understanding Plugin Impact" title="Direct link to Understanding Plugin Impact" translate="no">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="what-happens-when-you-activate">What Happens When You Activate<a href="#what-happens-when-you-activate" class="hash-link" aria-label="Direct link to What Happens When You Activate" title="Direct link to What Happens When You Activate" translate="no">​</a></h3>
+<p><strong>Immediately</strong>:</p>
+<ul>
+<li>New features appear</li>
+<li>Services start running</li>
+</ul>
+<p><strong>Behind the Scenes</strong>:</p>
+<ul>
+<li>Plugin code is loaded</li>
+<li>API endpoints are registered</li>
+<li>Webhooks become active</li>
+<li>Background jobs may start</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="what-happens-when-you-deactivate">What Happens When You Deactivate<a href="#what-happens-when-you-deactivate" class="hash-link" aria-label="Direct link to What Happens When You Deactivate" title="Direct link to What Happens When You Deactivate" translate="no">​</a></h3>
+<p><strong>Immediately</strong>:</p>
+<ul>
+<li>Features disappear</li>
+<li>Services stop</li>
+<li>Webhooks inactive</li>
+</ul>
+<p><strong>What Stays</strong>:</p>
+<ul>
+<li>Data is preserved</li>
+<li>Settings remain</li>
+<li>Files stay on server</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="what-happens-when-you-uninstall">What Happens When You Uninstall<a href="#what-happens-when-you-uninstall" class="hash-link" aria-label="Direct link to What Happens When You Uninstall" title="Direct link to What Happens When You Uninstall" translate="no">​</a></h3>
+<p><strong>Completely Removed</strong>:</p>
+<ul>
+<li>All files deleted</li>
+<li>Data erased</li>
+<li>Settings gone</li>
+<li>Database tables dropped</li>
+</ul>
+<p><strong>Cannot Be Undone</strong>:</p>
+<ul>
+<li>Must reinstall from scratch</li>
+<li>Data cannot be recovered</li>
+<li>Settings must be reconfigured</li>
+</ul>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="plugin-lifecycle-summary">Plugin Lifecycle Summary<a href="#plugin-lifecycle-summary" class="hash-link" aria-label="Direct link to Plugin Lifecycle Summary" title="Direct link to Plugin Lifecycle Summary" translate="no">​</a></h2>
+<div class="language-text codeBlockContainer_kgIi theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_PTPn"><pre tabindex="0" class="prism-code language-text codeBlock_v4Fo thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_DxRU"><span class="token-line" style="color:#393A34"><span class="token plain">┌─────────────────────────────────────────────────────┐</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│                                                     │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│  1. NOT INSTALLED                                   │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│     └─► Upload ZIP ──────────────┐                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│                                  │                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│  2. UPLOADED                     │                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│     └─► Install ───────────┐     │                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│                            │     │                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│  3. INACTIVE (Installed)   │     │                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│     ├─► Activate ─────┐    │     │                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│     └─► Uninstall ────┘    │     │                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│                       │    │     │                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│  4. ACTIVE (Running)  │    │     │                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│     └─► Deactivate  ──┘    │     │                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│                      │     │     │                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│  5. UNINSTALLED      │     │     │                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│     (Removed) ◄──────┴─────┴─────┘                  │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">│                                                     │</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└─────────────────────────────────────────────────────┘</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">Actions:</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">• Upload → Install: Add plugin to system</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">• Activate: Enable features</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">• Deactivate: Disable features (reversible)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">• Uninstall: Remove completely (permanent)</span><br></span></code></pre></div></div>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="need-help">Need Help?<a href="#need-help" class="hash-link" aria-label="Direct link to Need Help?" title="Direct link to Need Help?" translate="no">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="quick-help">Quick Help<a href="#quick-help" class="hash-link" aria-label="Direct link to Quick Help" title="Direct link to Quick Help" translate="no">​</a></h3>
+<p><strong>Q: How many plugins can I activate?</strong><br>
+<!-- -->A: As many as you need! But start with a few and add more gradually.</p>
+<p><strong>Q: Will deactivating a plugin delete my data?</strong><br>
+<!-- -->A: No! Deactivation keeps all data. Only uninstalling deletes data.</p>
+<p><strong>Q: Do mobile users need to update their app when I activate a plugin?</strong><br>
+<!-- -->A: Only if the plugin is new and wasn&#x27;t bundled. Activating/deactivating existing plugins happens instantly.</p>
+<p><strong>Q: How do I know if a plugin is causing problems?</strong><br>
+<!-- -->A: Deactivate plugins one by one to isolate the issue.</p>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="get-support">Get Support<a href="#get-support" class="hash-link" aria-label="Direct link to Get Support" title="Direct link to Get Support" translate="no">​</a></h3>
+<ul>
+<li><strong>Community Forum</strong>: <a href="https://community.talawa.io" target="_blank" rel="noopener noreferrer">community.talawa.io</a></li>
+<li><strong>Email Support</strong>: <a href="mailto:support@talawa.io" target="_blank" rel="noopener noreferrer">support@talawa.io</a></li>
+<li><strong>Bug Reports</strong>: <a href="https://github.com/PalisadoesFoundation/talawa/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a></li>
+<li><strong>Documentation</strong>: <a href="https://docs.talawa.io" target="_blank" rel="noopener noreferrer">docs.talawa.io</a></li>
+</ul>
+<hr>
+<p><strong>Happy plugin managing! 🎉</strong></p>
+<p>Remember: Start small, test thoroughly, and always backup before making major changes.</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col"><a href="https://github.com/PalisadoesFoundation/talawa-plugin/edit/develop/docs/docs/docs/getting-started/usage.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_REi8" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_KbiR"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/getting-started/installation"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Plugin Installation</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/developer-resources/admin/introduction"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Admin Plugin Development - Introduction</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_t3gV thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#plugin-states-explained" class="table-of-contents__link toc-highlight">Plugin States Explained</a><ul><li><a href="#-inactive-installed-but-off" class="table-of-contents__link toc-highlight">🔵 Inactive (Installed but Off)</a></li><li><a href="#-active-running" class="table-of-contents__link toc-highlight">🟢 Active (Running)</a></li><li><a href="#-not-installed" class="table-of-contents__link toc-highlight">⚪ Not Installed</a></li></ul></li><li><a href="#accessing-plugin-management" class="table-of-contents__link toc-highlight">Accessing Plugin Management</a><ul><li><a href="#step-1-log-into-admin-dashboard" class="table-of-contents__link toc-highlight">Step 1: Log Into Admin Dashboard</a></li><li><a href="#step-2-navigate-to-plugins" class="table-of-contents__link toc-highlight">Step 2: Navigate to Plugins</a></li></ul></li><li><a href="#activating-plugins" class="table-of-contents__link toc-highlight">Activating Plugins</a><ul><li><a href="#how-to-activate-a-plugin" class="table-of-contents__link toc-highlight">How to Activate a Plugin</a></li></ul></li><li><a href="#using-active-plugins" class="table-of-contents__link toc-highlight">Using Active Plugins</a><ul><li><a href="#accessing-plugin-features" class="table-of-contents__link toc-highlight">Accessing Plugin Features</a></li><li><a href="#configuring-plugin-settings" class="table-of-contents__link toc-highlight">Configuring Plugin Settings</a></li></ul></li><li><a href="#deactivating-plugins" class="table-of-contents__link toc-highlight">Deactivating Plugins</a><ul><li><a href="#how-to-deactivate" class="table-of-contents__link toc-highlight">How to Deactivate</a></li><li><a href="#what-happens-when-deactivated" class="table-of-contents__link toc-highlight">What Happens When Deactivated</a></li></ul></li><li><a href="#uninstalling-plugins" class="table-of-contents__link toc-highlight">Uninstalling Plugins</a><ul><li><a href="#before-you-uninstall" class="table-of-contents__link toc-highlight">Before You Uninstall</a></li><li><a href="#when-to-uninstall" class="table-of-contents__link toc-highlight">When to Uninstall</a></li><li><a href="#how-to-uninstall" class="table-of-contents__link toc-highlight">How to Uninstall</a></li><li><a href="#what-gets-removed" class="table-of-contents__link toc-highlight">What Gets Removed</a></li><li><a href="#uninstalling-mobile-plugins" class="table-of-contents__link toc-highlight">Uninstalling Mobile Plugins</a></li></ul></li><li><a href="#plugin-management-best-practices" class="table-of-contents__link toc-highlight">Plugin Management Best Practices</a><ul><li><a href="#activation-strategy" class="table-of-contents__link toc-highlight">Activation Strategy</a></li></ul></li><li><a href="#troubleshooting-common-issues" class="table-of-contents__link toc-highlight">Troubleshooting Common Issues</a><ul><li><a href="#plugin-not-working-after-activation" class="table-of-contents__link toc-highlight">Plugin Not Working After Activation</a></li><li><a href="#features-disappeared-suddenly" class="table-of-contents__link toc-highlight">Features Disappeared Suddenly</a></li><li><a href="#mobile-plugin-not-syncing" class="table-of-contents__link toc-highlight">Mobile Plugin Not Syncing</a></li><li><a href="#cant-deactivate-plugin" class="table-of-contents__link toc-highlight">Can&#39;t Deactivate Plugin</a></li><li><a href="#uninstall-stuck-or-failed" class="table-of-contents__link toc-highlight">Uninstall Stuck or Failed</a></li></ul></li><li><a href="#understanding-plugin-impact" class="table-of-contents__link toc-highlight">Understanding Plugin Impact</a><ul><li><a href="#what-happens-when-you-activate" class="table-of-contents__link toc-highlight">What Happens When You Activate</a></li><li><a href="#what-happens-when-you-deactivate" class="table-of-contents__link toc-highlight">What Happens When You Deactivate</a></li><li><a href="#what-happens-when-you-uninstall" class="table-of-contents__link toc-highlight">What Happens When You Uninstall</a></li></ul></li><li><a href="#plugin-lifecycle-summary" class="table-of-contents__link toc-highlight">Plugin Lifecycle Summary</a></li><li><a href="#need-help" class="table-of-contents__link toc-highlight">Need Help?</a><ul><li><a href="#quick-help" class="table-of-contents__link toc-highlight">Quick Help</a></li><li><a href="#get-support" class="table-of-contents__link toc-highlight">Get Support</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/PalisadoesFoundation" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__slack">Slack</a></li><li class="footer__item"><a href="https://www.palisadoes.org/news/" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__news">News</a></li><li class="footer__item"><a href="https://www.palisadoes.org/contact/" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__contact">Contact Us</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Social Media</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://twitter.com/palisadoesorg?lang=en" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__twitter"> Twitter</a></li><li class="footer__item"><a href="https://www.facebook.com/palisadoesproject/" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__facebook"> Facebook</a></li><li class="footer__item"><a href="https://www.instagram.com/palisadoes/?hl=en" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__instagram"> Instagram</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Development</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/PalisadoesFoundation" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__github"> GitHub</a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2025 The Palisadoes Foundation, LLC. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

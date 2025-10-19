@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-docs/getting-started/installation" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.1">
+<title data-rh="true">Plugin Installation | Talawa-Plugin Documentation</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://docs-plugin.talawa.io/docs/getting-started/installation"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Plugin Installation | Talawa-Plugin Documentation"><meta data-rh="true" name="description" content="This guide will walk you through the complete process of getting plugins from the repository and installing them in your Talawa system. No technical expertise required!"><meta data-rh="true" property="og:description" content="This guide will walk you through the complete process of getting plugins from the repository and installing them in your Talawa system. No technical expertise required!"><link data-rh="true" rel="icon" href="/img/icons/favicon_palisadoes.ico"><link data-rh="true" rel="canonical" href="https://docs-plugin.talawa.io/docs/getting-started/installation"><link data-rh="true" rel="alternate" href="https://docs-plugin.talawa.io/docs/getting-started/installation" hreflang="en"><link data-rh="true" rel="alternate" href="https://docs-plugin.talawa.io/docs/getting-started/installation" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Plugin Installation","item":"https://docs-plugin.talawa.io/docs/getting-started/installation"}]}</script><link rel="stylesheet" href="https://docs.talawa.io/css/styles-latest.css"><link rel="stylesheet" href="/assets/css/styles.72cfe288.css">
+<script src="/assets/js/runtime~main.d8f0c88c.js" defer="defer"></script>
+<script src="/assets/js/main.70dc237b.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_T8qH" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a href="https://docs.talawa.io/" target="_blank" rel="noopener noreferrer" class="navbar__brand"><div class="navbar__logo"><img src="/img/icons/logo.png" alt="Talawa Logo" class="LogoAnimation themedComponent_sQja themedComponent--light_a0ND"><img src="/img/icons/logo.png" alt="Talawa Logo" class="LogoAnimation themedComponent_sQja themedComponent--dark_YYnw"></div><b class="navbar__title text--truncate">Talawa</b></a><a href="https://docs.talawa.io/docs" target="_self" rel="noopener noreferrer" class="navbar__item navbar__link">General</a><a href="https://docs-mobile.talawa.io/docs" target="_self" rel="noopener noreferrer" class="navbar__item navbar__link">Mobile Guide</a><a href="https://docs-admin.talawa.io/docs" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">Admin Guide</a><a href="https://docs-api.talawa.io/docs" target="_self" rel="noopener noreferrer" class="navbar__item navbar__link">API Guide</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" target="_self" href="/docs">Plugin Guide</a><a href="https://community.talawa.io" target="_self" rel="noopener noreferrer" class="navbar__item navbar__link">Community</a><a href="https://demo.talawa.io/" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">Demo</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href="https://github.com/PalisadoesFoundation" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link header-github-link" aria-label="GitHub repository"></a><a href="https://www.youtube.com/@PalisadoesOrganization" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link header-youtube-link" aria-label="Palisadoes Youtube channel"></a><div class="toggle_kKFj colorModeToggle_JA6J"><button class="clean-btn toggleButton_EaMF toggleButtonDisabled_JmwE" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_n6OQ lightToggleIcon_RsS_"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_n6OQ darkToggleIcon_wQeP"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_n6OQ systemToggleIcon_yzPn"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_sU4n"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_FUkw"><div class="docsWrapper_sDaT"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_z18S" type="button"></button><div class="docRoot_fAKH"><aside class="theme-doc-sidebar-container docSidebarContainer_I3vr"><div class="sidebarViewport_HSaG"><div class="sidebar_as8j"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_p1Q_"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/"><span title="Introduction" class="linkLabel_kTun">Introduction</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_hGTh menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/docs/getting-started/introduction"><span title="Getting Started" class="categoryLinkLabel_GZSo">Getting Started</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/getting-started/introduction"><span title="Introduction" class="linkLabel_kTun">Introduction</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/getting-started/installation"><span title="Plugin Installation" class="linkLabel_kTun">Plugin Installation</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/getting-started/usage"><span title="Using Plugins" class="linkLabel_kTun">Using Plugins</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_hGTh menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/developer-resources/admin/introduction"><span title="Developer Resources" class="categoryLinkLabel_GZSo">Developer Resources</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_P6A7"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_edOG"><div class="docItemContainer_iEZs"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_TE6n" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_Hruw"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Getting Started</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Plugin Installation</span></li></ul></nav><div class="tocCollapsible_EfFQ theme-doc-toc-mobile tocMobile_CI8n"><button type="button" class="clean-btn tocCollapsibleButton_s92I">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Installing Talawa Plugins</h1></header>
+<p>This guide will walk you through the complete process of getting plugins from the repository and installing them in your Talawa system. No technical expertise required!</p>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="prerequisites">Prerequisites<a href="#prerequisites" class="hash-link" aria-label="Direct link to Prerequisites" title="Direct link to Prerequisites" translate="no">​</a></h2>
+<p>Before you start, make sure you have:</p>
+<ul>
+<li><strong>Internet Connection</strong>: To download plugins from the repository</li>
+<li><strong>Browser</strong>: Any modern web browser (Chrome, Firefox, Safari, Edge)</li>
+<li><strong>Admin Access</strong>: You need to be logged in as an administrator in Talawa-Admin</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="understanding-plugin-distribution">Understanding Plugin Distribution<a href="#understanding-plugin-distribution" class="hash-link" aria-label="Direct link to Understanding Plugin Distribution" title="Direct link to Understanding Plugin Distribution" translate="no">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="whats-in-a-plugin-zip">What&#x27;s in a Plugin ZIP?<a href="#whats-in-a-plugin-zip" class="hash-link" aria-label="Direct link to What&#x27;s in a Plugin ZIP?" title="Direct link to What&#x27;s in a Plugin ZIP?" translate="no">​</a></h3>
+<p>When you download a plugin, you get a ZIP file that contains everything the plugin needs to work:</p>
+<div class="language-text codeBlockContainer_kgIi theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_PTPn"><pre tabindex="0" class="prism-code language-text codeBlock_v4Fo thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_DxRU"><span class="token-line" style="color:#393A34"><span class="token plain">my-plugin.zip</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── 🎨 admin/                 (Admin dashboard components)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── 📱 mobile/                (Mobile app components)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── 🔧 api/                   (Backend logic)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── 📚 README.md              (Plugin documentation)</span><br></span></code></pre></div></div>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="-two-types-of-plugin-installation">🔄 Two Types of Plugin Installation<a href="#-two-types-of-plugin-installation" class="hash-link" aria-label="Direct link to 🔄 Two Types of Plugin Installation" title="Direct link to 🔄 Two Types of Plugin Installation" translate="no">​</a></h3>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="1-web-plugins-admin--api">1. Web Plugins (Admin &amp; API)<a href="#1-web-plugins-admin--api" class="hash-link" aria-label="Direct link to 1. Web Plugins (Admin &amp; API)" title="Direct link to 1. Web Plugins (Admin &amp; API)" translate="no">​</a></h4>
+<p>These plugins are <strong>uploaded and installed through the admin dashboard</strong>. They add features to:</p>
+<ul>
+<li>Admin Dashboard (new pages, widgets, tools)</li>
+<li>Backend API (new data, webhooks, integrations)</li>
+</ul>
+<p><strong>Installation</strong>: Upload ZIP file → Install → Activate</p>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="2-mobile-plugins-app">2. Mobile Plugins (App)<a href="#2-mobile-plugins-app" class="hash-link" aria-label="Direct link to 2. Mobile Plugins (App)" title="Direct link to 2. Mobile Plugins (App)" translate="no">​</a></h4>
+<p>These plugins are <strong>pre-bundled into the mobile app</strong> before it&#x27;s built. They add features to:</p>
+<ul>
+<li>Mobile app (new screens, widgets, enhanced posts)</li>
+</ul>
+<p><strong>Installation</strong>: Include in build → Download APK → Control via dashboard</p>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="part-1-getting-plugins-from-the-repository">Part 1: Getting Plugins from the Repository<a href="#part-1-getting-plugins-from-the-repository" class="hash-link" aria-label="Direct link to Part 1: Getting Plugins from the Repository" title="Direct link to Part 1: Getting Plugins from the Repository" translate="no">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="step-1-visit-the-plugin-repository">Step 1: Visit the Plugin Repository<a href="#step-1-visit-the-plugin-repository" class="hash-link" aria-label="Direct link to Step 1: Visit the Plugin Repository" title="Direct link to Step 1: Visit the Plugin Repository" translate="no">​</a></h3>
+<ol>
+<li>Open your web browser</li>
+<li>Go to the <strong>Talawa Plugin Repository</strong> (link provided by your organization)</li>
+<li>You&#x27;ll see a gallery of available plugins</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="step-2-review-plugin-details">Step 2: Review Plugin Details<a href="#step-2-review-plugin-details" class="hash-link" aria-label="Direct link to Step 2: Review Plugin Details" title="Direct link to Step 2: Review Plugin Details" translate="no">​</a></h3>
+<p>Before downloading, check:</p>
+<ul>
+<li><strong>Description</strong>: What the plugin does</li>
+<li><strong>Features</strong>: List of capabilities</li>
+<li><strong>Screenshots</strong>: How it looks in action</li>
+<li><strong>Requirements</strong>: Any special setup needed</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="step-3-download-the-plugin">Step 3: Download the Plugin<a href="#step-3-download-the-plugin" class="hash-link" aria-label="Direct link to Step 3: Download the Plugin" title="Direct link to Step 3: Download the Plugin" translate="no">​</a></h3>
+<ol>
+<li>Click the <strong>Download</strong> button</li>
+<li>The ZIP file will download to your computer</li>
+<li><strong>Important</strong>: Don&#x27;t unzip the file! Keep it as a ZIP</li>
+</ol>
+<p><strong>File naming</strong>: Plugins are named like <code>plugin_name.zip</code></p>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="part-2-installing-web-plugins-admin--api">Part 2: Installing Web Plugins (Admin &amp; API)<a href="#part-2-installing-web-plugins-admin--api" class="hash-link" aria-label="Direct link to Part 2: Installing Web Plugins (Admin &amp; API)" title="Direct link to Part 2: Installing Web Plugins (Admin &amp; API)" translate="no">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="step-1-access-the-admin-dashboard">Step 1: Access the Admin Dashboard<a href="#step-1-access-the-admin-dashboard" class="hash-link" aria-label="Direct link to Step 1: Access the Admin Dashboard" title="Direct link to Step 1: Access the Admin Dashboard" translate="no">​</a></h3>
+<ol>
+<li>Open your web browser</li>
+<li>Navigate to your Talawa-Admin URL<!-- -->
+<ul>
+<li>Example: <code>https://admin.yourorg.com</code></li>
+</ul>
+</li>
+<li>Log in with your administrator credentials</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="step-2-navigate-to-plugin-management">Step 2: Navigate to Plugin Management<a href="#step-2-navigate-to-plugin-management" class="hash-link" aria-label="Direct link to Step 2: Navigate to Plugin Management" title="Direct link to Step 2: Navigate to Plugin Management" translate="no">​</a></h3>
+<ol>
+<li>Open the <strong>Plugin Store</strong> directly from the left drawer in the admin portal.</li>
+<li>The Plugin Store is accessible at the route <code>/pluginstore</code>.</li>
+<li>You&#x27;ll see the plugin management page with:<!-- -->
+<ul>
+<li><strong>Installed Plugins</strong>: Plugins already in your system</li>
+<li><strong>Available Plugins</strong>: Plugins you can activate</li>
+<li><strong>Upload Plugin</strong>: Button to add new plugins</li>
+</ul>
+</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="step-3-upload-the-plugin">Step 3: Upload the Plugin<a href="#step-3-upload-the-plugin" class="hash-link" aria-label="Direct link to Step 3: Upload the Plugin" title="Direct link to Step 3: Upload the Plugin" translate="no">​</a></h3>
+<ol>
+<li>Click the <strong>Upload Plugin</strong> button</li>
+<li>A file picker dialog will appear</li>
+<li>Navigate to where you downloaded the plugin ZIP</li>
+<li>Select the ZIP file (don&#x27;t unzip it!)</li>
+<li>Review Plugin Information</li>
+<li>Click <strong>Upload Plugin</strong></li>
+</ol>
+<p><strong>What happens next</strong>:</p>
+<ul>
+<li>The ZIP is uploaded to your server</li>
+<li>Files are extracted and validated</li>
+<li>Plugin information is displayed</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="step-4-install-the-plugin">Step 4: Install the Plugin<a href="#step-4-install-the-plugin" class="hash-link" aria-label="Direct link to Step 4: Install the Plugin" title="Direct link to Step 4: Install the Plugin" translate="no">​</a></h3>
+<ol>
+<li>Click the <strong>Manage</strong> button next to the plugin you want to install.</li>
+<li>Then click the <strong>Install</strong> button.</li>
+<li>Installation process begins:<!-- -->
+<div class="language-text codeBlockContainer_kgIi theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_PTPn"><pre tabindex="0" class="prism-code language-text codeBlock_v4Fo thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_DxRU"><span class="token-line" style="color:#393A34"><span class="token plain">Validating plugin files...</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">Installing dependencies...</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">Setting up database...</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">Registering plugin...</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">Installation complete!</span><br></span></code></pre></div></div>
+</li>
+</ol>
+<p><strong>What happens during installation</strong>:</p>
+<ul>
+<li>Plugin files are copied to the correct locations</li>
+<li>Required packages are installed</li>
+<li>Database tables are created (if needed)</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="step-5-installation-complete">Step 5: Installation Complete<a href="#step-5-installation-complete" class="hash-link" aria-label="Direct link to Step 5: Installation Complete" title="Direct link to Step 5: Installation Complete" translate="no">​</a></h3>
+<p>You&#x27;ll see a success message and the plugin appears in your <strong>Installed Plugins</strong> list with status: <strong>Inactive</strong></p>
+<p><strong>Note</strong>: Installed doesn&#x27;t mean active! You need to activate it to use it.</p>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="part-3-installing-mobile-plugins-pre-bundling">Part 3: Installing Mobile Plugins (Pre-Bundling)<a href="#part-3-installing-mobile-plugins-pre-bundling" class="hash-link" aria-label="Direct link to Part 3: Installing Mobile Plugins (Pre-Bundling)" title="Direct link to Part 3: Installing Mobile Plugins (Pre-Bundling)" translate="no">​</a></h2>
+<p>Mobile plugins work differently - they must be included when the app is built.</p>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="for-organization-administrators">For Organization Administrators<a href="#for-organization-administrators" class="hash-link" aria-label="Direct link to For Organization Administrators" title="Direct link to For Organization Administrators" translate="no">​</a></h3>
+<p><strong>You don&#x27;t build the app yourself</strong> - contact your technical team or app developer.</p>
+<p><strong>What to tell them</strong>:</p>
+<ol>
+<li>&quot;I need the [plugin name] included in the next app build&quot;</li>
+<li>Provide the plugin ZIP file or plugin ID</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="for-technical-teams">For Technical Teams<a href="#for-technical-teams" class="hash-link" aria-label="Direct link to For Technical Teams" title="Direct link to For Technical Teams" translate="no">​</a></h3>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="step-1-get-the-plugin">Step 1: Get the Plugin<a href="#step-1-get-the-plugin" class="hash-link" aria-label="Direct link to Step 1: Get the Plugin" title="Direct link to Step 1: Get the Plugin" translate="no">​</a></h4>
+<p>Download the plugin ZIP from the repository or receive it from your admin.</p>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="step-2-extract-to-mobile-plugin-directory">Step 2: Extract to Mobile Plugin Directory<a href="#step-2-extract-to-mobile-plugin-directory" class="hash-link" aria-label="Direct link to Step 2: Extract to Mobile Plugin Directory" title="Direct link to Step 2: Extract to Mobile Plugin Directory" translate="no">​</a></h4>
+<p>To pre-bundle a mobile plugin:</p>
+<ol>
+<li>Open the plugin ZIP file and locate the <code>mobile</code> folder inside it.</li>
+<li>Rename the <code>mobile</code> folder to match the plugin ID (e.g., <code>razorpay</code>, <code>summarize_t5</code>, etc.).</li>
+<li>Place the renamed folder inside <code>talawa-mobile/lib/plugin/available/</code>.</li>
+</ol>
+<p>For example, your <code>available/</code> directory might look like:</p>
+<div class="language-text codeBlockContainer_kgIi theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_PTPn"><pre tabindex="0" class="prism-code language-text codeBlock_v4Fo thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_DxRU"><span class="token-line" style="color:#393A34"><span class="token plain">lib/plugin/available/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   razorpay/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      index.dart</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      ...</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   summarize_t5/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      index.dart</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      widgets/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">         summarize_button.dart</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">   plugin_map/</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      index.dart</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">      ...</span><br></span></code></pre></div></div>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="step-3-install-dependencies">Step 3: Install Dependencies<a href="#step-3-install-dependencies" class="hash-link" aria-label="Direct link to Step 3: Install Dependencies" title="Direct link to Step 3: Install Dependencies" translate="no">​</a></h4>
+<div class="language-bash codeBlockContainer_kgIi theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_PTPn"><pre tabindex="0" class="prism-code language-bash codeBlock_v4Fo thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_DxRU"><span class="token-line" style="color:#393A34"><span class="token plain"># Run the dependency installer script</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">cd talawa-mobile</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">python3 lib/plugin/scripts/install_plugin_dependencies.py</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"># Install Flutter packages</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">flutter pub get</span><br></span></code></pre></div></div>
+<p><strong>What this does</strong>:</p>
+<ul>
+<li>Scans all plugins for required packages</li>
+<li>Adds them to <code>pubspec.yaml</code></li>
+<li>Downloads packages</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="step-4-register-the-plugin">Step 4: Register the Plugin<a href="#step-4-register-the-plugin" class="hash-link" aria-label="Direct link to Step 4: Register the Plugin" title="Direct link to Step 4: Register the Plugin" translate="no">​</a></h4>
+<p>Edit <code>lib/plugin/available/index.dart</code>:</p>
+<div class="language-dart codeBlockContainer_kgIi theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_PTPn"><pre tabindex="0" class="prism-code language-dart codeBlock_v4Fo thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_DxRU"><span class="token-line" style="color:#393A34"><span class="token plain">import &#x27;package:talawa/plugin/available/new_plugin/index.dart&#x27;;</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">List&lt;TalawaMobilePlugin&gt; getBundledPlugins() =&gt; [</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  // Existing plugins...</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  NewPluginName(),  // Add your plugin here</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">];</span><br></span></code></pre></div></div>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="step-5-build-the-app">Step 5: Build the App<a href="#step-5-build-the-app" class="hash-link" aria-label="Direct link to Step 5: Build the App" title="Direct link to Step 5: Build the App" translate="no">​</a></h4>
+<div class="language-bash codeBlockContainer_kgIi theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_PTPn"><pre tabindex="0" class="prism-code language-bash codeBlock_v4Fo thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_DxRU"><span class="token-line" style="color:#393A34"><span class="token plain"># For Android</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">flutter build apk</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"># For iOS  </span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">flutter build ios</span><br></span></code></pre></div></div>
+<h4 class="anchor anchorWithStickyNavbar_YTSi" id="step-6-distribute-the-apk">Step 6: Distribute the APK<a href="#step-6-distribute-the-apk" class="hash-link" aria-label="Direct link to Step 6: Distribute the APK" title="Direct link to Step 6: Distribute the APK" translate="no">​</a></h4>
+<ol>
+<li>Share the built APK with organization</li>
+<li>Plugins appear in the app but are <strong>inactive by default</strong></li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="controlling-mobile-plugins">Controlling Mobile Plugins<a href="#controlling-mobile-plugins" class="hash-link" aria-label="Direct link to Controlling Mobile Plugins" title="Direct link to Controlling Mobile Plugins" translate="no">​</a></h3>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="how-plugin-activation-works">How Plugin Activation Works<a href="#how-plugin-activation-works" class="hash-link" aria-label="Direct link to How Plugin Activation Works" title="Direct link to How Plugin Activation Works" translate="no">​</a></h3>
+<p>Talawa plugins are unified: each plugin ZIP may contain both web (admin/API) and app (mobile) parts. The admin dashboard is the single source of truth for plugin management.</p>
+<ul>
+<li>If the app part of a plugin is prebundled in the mobile app, installing and activating the plugin from the admin dashboard will automatically enable its mobile features for users.</li>
+<li>There is no separate control for mobile plugins; activation and deactivation is managed centrally via the admin dashboard.</li>
+<li>If a plugin is not installed in the admin dashboard, its mobile features remain inactive, even if prebundled in the app.</li>
+</ul>
+<p>This unified approach ensures consistent plugin management and feature rollout across web and mobile platforms.</p>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="installation-troubleshooting">Installation Troubleshooting<a href="#installation-troubleshooting" class="hash-link" aria-label="Direct link to Installation Troubleshooting" title="Direct link to Installation Troubleshooting" translate="no">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="-upload-failed-error">❌ &quot;Upload Failed&quot; Error<a href="#-upload-failed-error" class="hash-link" aria-label="Direct link to ❌ &quot;Upload Failed&quot; Error" title="Direct link to ❌ &quot;Upload Failed&quot; Error" translate="no">​</a></h3>
+<p><strong>Possible causes</strong>:</p>
+<ul>
+<li>File is too large (check server upload limits)</li>
+<li>File is corrupted (re-download the plugin)</li>
+<li>Not a valid ZIP file (ensure you didn&#x27;t unzip it)</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>Check file size (should be under 50MB typically)</li>
+<li>Re-download from repository</li>
+<li>Try a different browser</li>
+<li>Contact your system administrator</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="-invalid-plugin-error">❌ &quot;Invalid Plugin&quot; Error<a href="#-invalid-plugin-error" class="hash-link" aria-label="Direct link to ❌ &quot;Invalid Plugin&quot; Error" title="Direct link to ❌ &quot;Invalid Plugin&quot; Error" translate="no">​</a></h3>
+<p><strong>Possible causes</strong>:</p>
+<ul>
+<li>Plugin ZIP is corrupted</li>
+<li>Missing required files (manifest.json)</li>
+<li>Plugin is for wrong Talawa version</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>Verify you downloaded the correct version</li>
+<li>Check plugin compatibility with your Talawa version</li>
+<li>Re-download the plugin</li>
+<li>Contact plugin author if issue persists</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="-installation-failed-error">❌ &quot;Installation Failed&quot; Error<a href="#-installation-failed-error" class="hash-link" aria-label="Direct link to ❌ &quot;Installation Failed&quot; Error" title="Direct link to ❌ &quot;Installation Failed&quot; Error" translate="no">​</a></h3>
+<p><strong>Possible causes</strong>:</p>
+<ul>
+<li>Missing dependencies</li>
+<li>Database connection issues</li>
+<li>Permission problems</li>
+<li>Conflicting plugins</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>Check error message details</li>
+<li>Ensure your server has internet access (for dependencies)</li>
+<li>Verify database is working</li>
+<li>Try disabling other plugins temporarily</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="-mobile-plugin-not-appearing">❌ Mobile Plugin Not Appearing<a href="#-mobile-plugin-not-appearing" class="hash-link" aria-label="Direct link to ❌ Mobile Plugin Not Appearing" title="Direct link to ❌ Mobile Plugin Not Appearing" translate="no">​</a></h3>
+<p><strong>Possible causes</strong>:</p>
+<ul>
+<li>Plugin not added to <code>getBundledPlugins()</code></li>
+<li>App not rebuilt after adding plugin</li>
+<li>Using old APK</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>Verify plugin is in <code>available/index.dart</code></li>
+<li>Rebuild the mobile app</li>
+<li>Distribute the new APK</li>
+<li>Check users have latest version</li>
+</ol>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="next-steps">Next Steps<a href="#next-steps" class="hash-link" aria-label="Direct link to Next Steps" title="Direct link to Next Steps" translate="no">​</a></h2>
+<p>Now that your plugin is installed, you&#x27;re ready to activate and use it!</p>
+<p><strong><a href="/docs/getting-started/usage">Continue to Usage Guide →</a></strong></p>
+<p>Learn how to:</p>
+<ul>
+<li>✅ Activate plugins</li>
+<li>✅ Configure plugin settings</li>
+<li>✅ Use plugin features</li>
+<li>✅ Deactivate when needed</li>
+<li>✅ Uninstall completely</li>
+</ul>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_YTSi" id="need-help">Need Help?<a href="#need-help" class="hash-link" aria-label="Direct link to Need Help?" title="Direct link to Need Help?" translate="no">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="common-questions">Common Questions<a href="#common-questions" class="hash-link" aria-label="Direct link to Common Questions" title="Direct link to Common Questions" translate="no">​</a></h3>
+<p><strong>Q: Can I install multiple plugins at once?</strong><br>
+<!-- -->A: You need to upload and install plugins one at a time, but you can activate multiple plugins simultaneously.</p>
+<p><strong>Q: Do I need to restart anything after installation?</strong><br>
+<!-- -->A: For web/admin features, plugins are ready to activate immediately after installation. For mobile features, if the app part is prebundled, users may need to reopen the app to see new plugin features.</p>
+<p><strong>Q: What happens to plugin data if I uninstall?</strong><br>
+<!-- -->A: Most plugins remove their data on uninstall, but check the plugin documentation to be sure.</p>
+<p><strong>Q: Can mobile plugins be installed without rebuilding the app?</strong><br>
+<!-- -->A: No, mobile plugins must be bundled during the app build process. However, you can activate/deactivate them remotely via the admin dashboard.</p>
+<h3 class="anchor anchorWithStickyNavbar_YTSi" id="get-support">Get Support<a href="#get-support" class="hash-link" aria-label="Direct link to Get Support" title="Direct link to Get Support" translate="no">​</a></h3>
+<ul>
+<li><a href="https://community.talawa.io" target="_blank" rel="noopener noreferrer">Ask in the community forum</a></li>
+<li><a href="https://github.com/PalisadoesFoundation/talawa/issues" target="_blank" rel="noopener noreferrer">Report installation issues</a></li>
+<li>Contact your organization&#x27;s technical team</li>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col"><a href="https://github.com/PalisadoesFoundation/talawa-plugin/edit/develop/docs/docs/docs/getting-started/installation.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_REi8" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_KbiR"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/getting-started/introduction"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Introduction</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/getting-started/usage"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Using Plugins</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_t3gV thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#prerequisites" class="table-of-contents__link toc-highlight">Prerequisites</a></li><li><a href="#understanding-plugin-distribution" class="table-of-contents__link toc-highlight">Understanding Plugin Distribution</a><ul><li><a href="#whats-in-a-plugin-zip" class="table-of-contents__link toc-highlight">What&#39;s in a Plugin ZIP?</a></li><li><a href="#-two-types-of-plugin-installation" class="table-of-contents__link toc-highlight">🔄 Two Types of Plugin Installation</a></li></ul></li><li><a href="#part-1-getting-plugins-from-the-repository" class="table-of-contents__link toc-highlight">Part 1: Getting Plugins from the Repository</a><ul><li><a href="#step-1-visit-the-plugin-repository" class="table-of-contents__link toc-highlight">Step 1: Visit the Plugin Repository</a></li><li><a href="#step-2-review-plugin-details" class="table-of-contents__link toc-highlight">Step 2: Review Plugin Details</a></li><li><a href="#step-3-download-the-plugin" class="table-of-contents__link toc-highlight">Step 3: Download the Plugin</a></li></ul></li><li><a href="#part-2-installing-web-plugins-admin--api" class="table-of-contents__link toc-highlight">Part 2: Installing Web Plugins (Admin &amp; API)</a><ul><li><a href="#step-1-access-the-admin-dashboard" class="table-of-contents__link toc-highlight">Step 1: Access the Admin Dashboard</a></li><li><a href="#step-2-navigate-to-plugin-management" class="table-of-contents__link toc-highlight">Step 2: Navigate to Plugin Management</a></li><li><a href="#step-3-upload-the-plugin" class="table-of-contents__link toc-highlight">Step 3: Upload the Plugin</a></li><li><a href="#step-4-install-the-plugin" class="table-of-contents__link toc-highlight">Step 4: Install the Plugin</a></li><li><a href="#step-5-installation-complete" class="table-of-contents__link toc-highlight">Step 5: Installation Complete</a></li></ul></li><li><a href="#part-3-installing-mobile-plugins-pre-bundling" class="table-of-contents__link toc-highlight">Part 3: Installing Mobile Plugins (Pre-Bundling)</a><ul><li><a href="#for-organization-administrators" class="table-of-contents__link toc-highlight">For Organization Administrators</a></li><li><a href="#for-technical-teams" class="table-of-contents__link toc-highlight">For Technical Teams</a></li><li><a href="#controlling-mobile-plugins" class="table-of-contents__link toc-highlight">Controlling Mobile Plugins</a></li><li><a href="#how-plugin-activation-works" class="table-of-contents__link toc-highlight">How Plugin Activation Works</a></li></ul></li><li><a href="#installation-troubleshooting" class="table-of-contents__link toc-highlight">Installation Troubleshooting</a><ul><li><a href="#-upload-failed-error" class="table-of-contents__link toc-highlight">❌ &quot;Upload Failed&quot; Error</a></li><li><a href="#-invalid-plugin-error" class="table-of-contents__link toc-highlight">❌ &quot;Invalid Plugin&quot; Error</a></li><li><a href="#-installation-failed-error" class="table-of-contents__link toc-highlight">❌ &quot;Installation Failed&quot; Error</a></li><li><a href="#-mobile-plugin-not-appearing" class="table-of-contents__link toc-highlight">❌ Mobile Plugin Not Appearing</a></li></ul></li><li><a href="#next-steps" class="table-of-contents__link toc-highlight">Next Steps</a></li><li><a href="#need-help" class="table-of-contents__link toc-highlight">Need Help?</a><ul><li><a href="#common-questions" class="table-of-contents__link toc-highlight">Common Questions</a></li><li><a href="#get-support" class="table-of-contents__link toc-highlight">Get Support</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/PalisadoesFoundation" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__slack">Slack</a></li><li class="footer__item"><a href="https://www.palisadoes.org/news/" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__news">News</a></li><li class="footer__item"><a href="https://www.palisadoes.org/contact/" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__contact">Contact Us</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Social Media</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://twitter.com/palisadoesorg?lang=en" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__twitter"> Twitter</a></li><li class="footer__item"><a href="https://www.facebook.com/palisadoesproject/" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__facebook"> Facebook</a></li><li class="footer__item"><a href="https://www.instagram.com/palisadoes/?hl=en" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__instagram"> Instagram</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Development</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/PalisadoesFoundation" target="_blank" rel="noopener noreferrer" class="footer__link-item footer__icon footer__github"> GitHub</a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2025 The Palisadoes Foundation, LLC. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>
