@@ -10,6 +10,9 @@
 # Docusaurus related
 .docusaurus
 
+# NPM related
+package-lock.json
+
 # Don't upload configuration files
 /.env
 /.env.*
