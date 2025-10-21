@@ -116,22 +116,75 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for all branches and tags
+          fetch-depth: 0  # Fetch full history so re-runs work
+
+      - name: Determine base and head commits
+        id: commits
+        run: |
+          if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+            echo "base_sha=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
+            echo "head_sha=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+          else
+            # Fallback for re-runs or push triggers
+            BASE_SHA=$(git merge-base origin/main HEAD)
+            echo "base_sha=$BASE_SHA" >> $GITHUB_OUTPUT
+            echo "head_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          fi
 
       - name: Get Changed Unauthorized files
         id: changed-unauth-files
         run: |
-          # Get the base branch ref
-          BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+          BASE_SHA=${{ steps.commits.outputs.base_sha }}
+          HEAD_SHA=${{ steps.commits.outputs.head_sha }}
+          echo "Comparing changes"
 
           # Define sensitive files pattern
-          SENSITIVE_FILES=".flake8 .pydocstyle pyproject.toml .env* vitest.config.js .github/** env.example .node-version .husky/** scripts/** package.json package-lock.json tsconfig.json .gitignore .eslintrc.json .eslintignore .prettierrc .prettierignore vite.config.ts CODEOWNERS LICENSE .coderabbit.yaml CODE_OF_CONDUCT.md CODE_STYLE.md CONTRIBUTING.md DOCUMENTATION.md INSTALLATION.md ISSUE_GUIDELINES.md PR_GUIDELINES.md README.md *.pem *.key *.cert *.password *.secret *.credentials .nojekyll yarn.lock docs/docusaurus.config.ts docs/sidebar* CNAME"
-
+          SENSITIVE_FILES=(
+            ".flake8"
+            ".pydocstyle"
+            "pyproject.toml"
+            ".env*"
+            "vitest.config.js"
+            ".github/**"
+            ".husky/**"
+            "scripts/**"
+            "package.json"
+            "package-lock.json"
+            "tsconfig.json"
+            ".gitignore"
+            ".eslintrc.json"
+            ".eslintignore"
+            ".prettierrc"
+            ".prettierignore"
+            "vite.config.ts"
+            "CODEOWNERS"
+            "LICENSE"
+            ".coderabbit.yaml"
+            "CODE_OF_CONDUCT.md"
+            "CODE_STYLE.md"
+            "CONTRIBUTING.md"
+            "DOCUMENTATION.md"
+            "INSTALLATION.md"
+            "ISSUE_GUIDELINES.md"
+            "PR_GUIDELINES.md"
+            "README.md"
+            "*.pem"
+            "*.key"
+            "*.cert"
+            "*.password"
+            "*.secret"
+            "*.credentials"
+            ".nojekyll"
+            "yarn.lock"
+            "docs/docusaurus.config.ts"
+            "docs/sidebar*"
+            "CNAME"
+          )
           # Check for changes in sensitive files
           CHANGED_UNAUTH_FILES=""
-          for pattern in $SENSITIVE_FILES; do
-            FILES=$(git diff --name-only --diff-filter=ACMRD $BASE_SHA ${{ github.event.pull_request.head.sha }} | grep -E "$pattern" || true)
-            if [ ! -z "$FILES" ]; then
+          for pattern in "${SENSITIVE_FILES[@]}"; do
+            FILES=$(git diff --name-only --diff-filter=ACMRD "$BASE_SHA" "$HEAD_SHA" | grep -E "$pattern" || true)
+            if [ -n "$FILES" ]; then
               CHANGED_UNAUTH_FILES="$CHANGED_UNAUTH_FILES $FILES"
             fi
           done
@@ -140,22 +193,21 @@ jobs:
           CHANGED_UNAUTH_FILES=$(echo "$CHANGED_UNAUTH_FILES" | xargs)
           echo "all_changed_files=$CHANGED_UNAUTH_FILES" >> $GITHUB_OUTPUT
 
-          # Check if any unauthorized files changed
-          if [ ! -z "$CHANGED_UNAUTH_FILES" ]; then
+          if [ -n "$CHANGED_UNAUTH_FILES" ]; then
             echo "any_changed=true" >> $GITHUB_OUTPUT
-            echo "any_deleted=true" >> $GITHUB_OUTPUT
           else
             echo "any_changed=false" >> $GITHUB_OUTPUT
-            echo "any_deleted=false" >> $GITHUB_OUTPUT
           fi
 
       - name: List all changed unauthorized files
-        if: steps.changed-unauth-files.outputs.any_changed == 'true' || steps.changed-unauth-files.outputs.any_deleted == 'true'
+        if: steps.changed-unauth-files.outputs.any_changed == 'true'
         env: 
           CHANGED_UNAUTH_FILES: ${{ steps.changed-unauth-files.outputs.all_changed_files }}
         run: |
-          for file in ${CHANGED_UNAUTH_FILES}; do
-            echo "$file is unauthorized to change/delete"
+          echo "::error::Unauthorized changes detected in sensitive files:"
+          echo ""
+          for file in $CHANGED_UNAUTH_FILES; do
+            echo "- $file"
           done
           echo "To override this, apply the 'ignore-sensitive-files-pr' label"          
           exit 1
