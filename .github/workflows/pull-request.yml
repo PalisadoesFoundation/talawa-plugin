@@ -126,7 +126,7 @@ jobs:
             echo "head_sha=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
           else
             # Fallback for re-runs or push triggers
-            BASE_SHA=$(git merge-base origin/main HEAD)
+            BASE_SHA=$(git merge-base origin/${{ github.event.pull_request.base.ref }} HEAD)
             echo "base_sha=$BASE_SHA" >> $GITHUB_OUTPUT
             echo "head_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
           fi
