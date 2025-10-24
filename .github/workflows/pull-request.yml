@@ -107,22 +107,6 @@ jobs:
           echo "Error: Source and Target Branches are the same. Please ensure they are different."
           echo "Error: Close this PR and try again."
           exit 1
-
-      - name: Install docs dependencies
-        working-directory: ./docs
-        run: pnpm install
-
-      - name: Run docs lint
-        working-directory: ./docs
-        run: pnpm run lint:check
-
-      - name: Run docs typecheck
-        working-directory: ./docs
-        run: pnpm run typecheck
-
-      - name: Run docs format check
-        working-directory: ./docs
-        run: pnpm run format:check
   Check-Sensitive-Files:
     if: ${{ github.actor != 'dependabot[bot]'}}
     name: Checks if sensitive files have been changed without authorization
@@ -392,25 +376,40 @@ jobs:
       #     path: "./coverage/vitest/lcov.info"
       #     min_coverage: 86.6
 
-  Test-Docusaurus-Deployment:
-    name: Test Deployment to https://docs-plugin.talawa.io
+  Docs-Checks-and-Build:
+    name: Verify Docs Quality and Build Docusaurus Site
     runs-on: ubuntu-latest
     needs: [Test-Application]
     # Run only if the develop branch and not dependabot
     if: ${{ github.actor != 'dependabot[bot]' && github.event.pull_request.base.ref == 'develop' }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout the Repository
+        uses: actions/checkout@v4
+
       - uses: pnpm/action-setup@v4
         with:
           cache: pnpm
           cache-dependency-path: |
             docs/pnpm-lock.yaml
             docs/package.json
-      # Run Docusaurus in the ./docs directory
-      - name: Install dependencies
+
+      - name: Install Docs Dependencies
         working-directory: ./docs
         run: pnpm install --frozen-lockfile
-      - name: Test building the website
+
+      - name: Run Docs Lint
+        working-directory: ./docs
+        run: pnpm run lint:check
+
+      - name: Run Docs Typecheck
+        working-directory: ./docs
+        run: pnpm run typecheck
+
+      - name: Run Docs Format Check
+        working-directory: ./docs
+        run: pnpm run format:check
+
+      - name: Build Docusaurus Site
         working-directory: ./docs
         run: pnpm build
 
