@@ -56,7 +56,6 @@ module.exports = [
     plugins: {
       react,
       '@typescript-eslint': ts,
-      vitest,
       import: imports,
       prettier,
       tsdoc,
