@@ -78,7 +78,7 @@ jobs:
       - name: Check formatting
         if: steps.changed-files.outputs.only_changed != 'true'
         run: pnpm run format:check
-    
+        
       - name: Run formatting if check fails
         if: failure()
         run: pnpm run format:fix
