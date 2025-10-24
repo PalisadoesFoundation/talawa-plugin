@@ -1,4 +1,3 @@
-import React from 'react';
 import ActionButton from './ActionButton';
 
 const HomeCallToAction = () => {
@@ -8,7 +7,7 @@ const HomeCallToAction = () => {
         type="primary"
         href="/docs"
         buttonClassName="custom-button"
-        ariaLabel="Learn more about Talawa Admin"
+        aria-label="Learn more about Talawa Admin"
       >
         Learn More
       </ActionButton>

@@ -1,0 +1,25 @@
+{
+  "extends": "@docusaurus/tsconfig",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node", "react"]
+  },
+  "include": [
+    "src",
+    "docusaurus.config.ts",
+    "plugins",
+    "theme"
+  ],
+  "exclude": ["node_modules", "build", ".docusaurus"]
+}
