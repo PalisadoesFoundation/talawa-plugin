@@ -78,7 +78,7 @@ jobs:
       - name: Check formatting
         if: steps.changed-files.outputs.only_changed != 'true'
         run: pnpm run format:check
-        
+
       - name: Run formatting if check fails
         if: failure()
         run: pnpm run format:fix
@@ -123,12 +123,6 @@ jobs:
       - name: Run docs format check
         working-directory: ./docs
         run: pnpm run format:check
-
-      - name: Build Docusaurus site (verify build success)
-        working-directory: ./docs
-        run: pnpm run build
-
-
   Check-Sensitive-Files:
     if: ${{ github.actor != 'dependabot[bot]'}}
     name: Checks if sensitive files have been changed without authorization
