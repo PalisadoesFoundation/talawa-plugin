@@ -4,7 +4,6 @@ const tsParser = require('@typescript-eslint/parser');
 const imports = require('eslint-plugin-import');
 const prettier = require('eslint-plugin-prettier');
 const react = require('eslint-plugin-react');
-const vitest = require('eslint-plugin-vitest');
 const tsdoc = require('eslint-plugin-tsdoc');
 
 module.exports = [
@@ -87,9 +86,6 @@ module.exports = [
       'react/no-this-in-sfc': 'error',
       'react/no-unstable-nested-components': ['error', { allowAsProps: true }],
       'prettier/prettier': 'error',
-      'vitest/no-disabled-tests': 'warn',
-      'vitest/no-focused-tests': 'error',
-      'vitest/no-identical-title': 'error',
       '@typescript-eslint/no-unused-expressions': 'error',
     },
   },
