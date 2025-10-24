@@ -15,11 +15,6 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["node", "react"]
   },
-  "include": [
-    "src",
-    "docusaurus.config.ts",
-    "plugins",
-    "theme"
-  ],
+  "include": ["src", "docusaurus.config.ts", "plugins", "theme"],
   "exclude": ["node_modules", "build", ".docusaurus"]
 }
