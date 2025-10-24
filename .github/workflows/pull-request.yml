@@ -21,7 +21,7 @@ env:
 
 jobs:
   Code-Quality-Checks:
-    name: Performs linting, formatting, type-checking, checking for different source and target branch
+    name: Performs linting, formatting, type-checking, and docs quality checks
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -107,6 +107,27 @@ jobs:
           echo "Error: Source and Target Branches are the same. Please ensure they are different."
           echo "Error: Close this PR and try again."
           exit 1
+
+      - name: Install docs dependencies
+        working-directory: ./docs
+        run: pnpm install
+
+      - name: Run docs lint
+        working-directory: ./docs
+        run: pnpm run lint:check
+
+      - name: Run docs typecheck
+        working-directory: ./docs
+        run: pnpm run typecheck
+
+      - name: Run docs format check
+        working-directory: ./docs
+        run: pnpm run format:check
+
+      - name: Build Docusaurus site (verify build success)
+        working-directory: ./docs
+        run: pnpm run build
+
 
   Check-Sensitive-Files:
     if: ${{ github.actor != 'dependabot[bot]'}}
