@@ -27,7 +27,7 @@ module.exports = [
 
   // TypeScript and TSX files
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['**/*.ts', '**/*.tsx',  'docs/src/**/*.{ts,tsx}'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {

@@ -12,18 +12,7 @@
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
-    "typecheck": "tsc",
-    "lint:check": "eslint ./src --max-warnings=0",
-    "lint:fix": "eslint ./src --ext .ts,.tsx --fix",
-    "format:check": "prettier --check 'src/**/*.{ts,tsx,js,json,md}'",
-    "format:fix": "prettier --write 'src/**/*.{ts,tsx,js,json,md}'",
-    "precommit": "pnpm run lint:check && pnpm run typecheck && pnpm run format:check"
-  },
-  "lint-staged": {
-    "src/**/*.{ts,tsx,js,json,md}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
+    "typecheck": "tsc"
   },
   "dependencies": {
     "@docusaurus/core": "^3.9.2",
@@ -39,19 +28,6 @@
     "@docusaurus/module-type-aliases": "^3.9.2",
     "@docusaurus/tsconfig": "^3.9.2",
     "@docusaurus/types": "^3.9.2",
-    "@eslint/js": "^9.38.0",
-    "@types/node": "^24.9.1",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
-    "@typescript-eslint/eslint-plugin": "^8.46.2",
-    "@typescript-eslint/parser": "^8.46.2",
-    "eslint": "^9.22.0",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-prettier": "^5.5.4",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-tsdoc": "^0.4.0",
-    "husky": "^9.1.7",
-    "prettier": "^3.6.2",
     "typescript": "~5.6.2"
   },
   "browserslist": {
