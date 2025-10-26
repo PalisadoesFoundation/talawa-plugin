@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface ActionButtonProps{
+interface ActionButtonProps {
   href: string;
   type?: 'primary' | 'secondary';
   target?: string;
