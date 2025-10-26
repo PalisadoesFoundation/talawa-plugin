@@ -1,7 +1,6 @@
 import React from 'react';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-interface ActionButtonProps {
+interface IActionButtonProps {
   href: string;
   type?: 'primary' | 'secondary';
   target?: string;
@@ -17,7 +16,7 @@ function ActionButton({
   children,
   buttonClassName,
   ariaLabel,
-}: ActionButtonProps) {
+}: IActionButtonProps) {
   return (
     <a
       className={`ActionButton ${type}${buttonClassName ? ` ${buttonClassName}` : ''}`}
