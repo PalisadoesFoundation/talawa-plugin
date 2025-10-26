@@ -1,12 +1,12 @@
-const js = require('@eslint/js');
-const ts = require('@typescript-eslint/eslint-plugin');
-const tsParser = require('@typescript-eslint/parser');
-const imports = require('eslint-plugin-import');
-const prettier = require('eslint-plugin-prettier');
-const react = require('eslint-plugin-react');
-const tsdoc = require('eslint-plugin-tsdoc');
+import js from '@eslint/js';
+import ts from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
+import imports from 'eslint-plugin-import';
+import prettier from 'eslint-plugin-prettier';
+import react from 'eslint-plugin-react';
+import tsdoc from 'eslint-plugin-tsdoc';
 
-module.exports = [
+export default [
   {
     ignores: [
       'node_modules/**',
@@ -27,12 +27,11 @@ module.exports = [
 
   // TypeScript and TSX files
   {
-    files: ['**/*.ts', '**/*.tsx',  'docs/src/**/*.{ts,tsx}'],
+    files: ['docs/src/**/*.{ts,tsx}'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         project: './tsconfig.json',
-        tsconfigRootDir: __dirname,
         ecmaVersion: 'latest',
         sourceType: 'module',
         ecmaFeatures: { jsx: true },
@@ -96,8 +95,9 @@ module.exports = [
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
+         ecmaFeatures: {
+          jsx: true,
+        },
       },
       globals: {
         require: 'readonly',

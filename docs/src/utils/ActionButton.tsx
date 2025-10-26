@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface IActionButtonProps
+interface ActionButtonProps
   extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
   type?: 'primary' | 'secondary';
@@ -15,8 +15,8 @@ function ActionButton({
   target,
   children,
   buttonClassName,
-  ...props
-}: IActionButtonProps) {
+  ariaLabel
+}: ActionButtonProps) {
   return (
     <a
       className={`ActionButton ${type}${buttonClassName ? ` ${buttonClassName}` : ''}`}
@@ -24,7 +24,7 @@ function ActionButton({
       href={href}
       target={target}
       role="button"
-      {...props}
+      aria-label={ariaLabel}
     >
       {children}
     </a>

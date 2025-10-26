@@ -111,15 +111,13 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
    "include": [
-    "src",
     "docs/src",
-    "tests",
-    "scripts"
   ],
   "exclude": [
     "node_modules",
     "build",
     "dist",
-    ".docusaurus"
+    "docs/build",
+    "docs/dist",
   ]
 }
