@@ -1,12 +1,12 @@
 import React from 'react';
 
-interface ActionButtonProps
-  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+interface ActionButtonProps{
   href: string;
   type?: 'primary' | 'secondary';
   target?: string;
   children: React.ReactNode;
   buttonClassName?: string;
+  ariaLabel: string;
 }
 
 function ActionButton({
@@ -15,7 +15,7 @@ function ActionButton({
   target,
   children,
   buttonClassName,
-  ariaLabel
+  ariaLabel,
 }: ActionButtonProps) {
   return (
     <a
