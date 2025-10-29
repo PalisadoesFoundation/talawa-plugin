@@ -3,3 +3,4 @@ node_modules
 src/components/CheckIn/tagTemplate.ts
 pnpm-lock.yaml
 **/pnpm-lock.yaml
+.github/depandabot.yml
