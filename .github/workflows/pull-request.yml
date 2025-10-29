@@ -153,8 +153,7 @@ jobs:
 
           # Define sensitive files pattern list
           SENSITIVE_PATTERNS=(
-            '.eslint.config.js$'
-            '.tsconfig.json$'
+            'eslint.config.js$'
             '.flake8$'
             '.pydocstyle$'
             'pyproject.toml$'
