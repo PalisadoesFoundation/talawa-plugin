@@ -23,7 +23,6 @@ function ActionButton({
       rel={target === '_blank' ? 'noopener noreferrer' : undefined}
       href={href}
       target={target}
-      role="button"
       aria-label={ariaLabel}
     >
       {children}
