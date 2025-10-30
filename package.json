@@ -32,10 +32,10 @@
     "typescript": "^5.9.3"
   },
   "lint-staged": {
-    "**/*.{ts, tsx, json, scss, css}": [
+    "**/*.{ts,tsx,json,scss,css}": [
       "prettier --write"
     ],
-    "**/*.{ts, tsx, json}": "eslint --fix"
+    "**/*.{ts,tsx,json}": "eslint --fix"
   },
   "dependencies": {
     "archiver": "^7.0.1",
