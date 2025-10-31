@@ -166,7 +166,8 @@ const DonationForm: React.FC = () => {
 
   useEffect(() => {
     // Load user data if available
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const { getItem } = useLocalStorage();
+    const user = getItem('user');
     if (user.firstName && user.lastName) {
       setFormData((prev) => ({
         ...prev,
