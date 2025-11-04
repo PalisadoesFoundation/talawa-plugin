@@ -64,7 +64,7 @@ importers:
         specifier: ^0.5.4
         version: 0.5.4(@typescript-eslint/eslint-plugin@5.62.0(@typescript-eslint/parser@5.62.0(eslint@9.37.0)(typescript@5.9.3))(eslint@9.37.0)(typescript@5.9.3))(eslint@9.37.0)(typescript@5.9.3)(vitest@3.2.4(@types/node@24.7.0)(tsx@4.20.5)(yaml@2.8.1))
       husky:
-        specifier: ^9.1.7
+        specifier: ^9.1.6
         version: 9.1.7
       lint-staged:
         specifier: ^15.3.0
