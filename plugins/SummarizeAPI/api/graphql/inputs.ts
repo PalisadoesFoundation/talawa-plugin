@@ -25,9 +25,9 @@ export const summarizeAPIConfigInputSchema = z.object({
 });
 
 export const SummarizeAPIConfigInput = builder
-  .inputRef<z.infer<typeof summarizeAPIConfigInputSchema>>(
-    'SummarizeAPIConfigInput',
-  )
+  .inputRef<
+    z.infer<typeof summarizeAPIConfigInputSchema>
+  >('SummarizeAPIConfigInput')
   .implement({
     description: 'Input for updating SummarizeAPI (Hugging Face) configuration',
     fields: (t) => ({

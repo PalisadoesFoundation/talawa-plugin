@@ -367,10 +367,14 @@ const SummarizeAPIConfiguration: React.FC = () => {
               <h6>Example Configuration</h6>
               <ul className="list-unstyled">
                 <li>
-                  • <strong>API Endpoint:</strong> <code>https://api-inference.huggingface.co/models/facebook/bart-large-cnn</code>
+                  • <strong>API Endpoint:</strong>{' '}
+                  <code>
+                    https://api-inference.huggingface.co/models/facebook/bart-large-cnn
+                  </code>
                 </li>
                 <li>
-                  • <strong>API Key:</strong> Your Hugging Face token (starts with <code>hf_</code>)
+                  • <strong>API Key:</strong> Your Hugging Face token (starts
+                  with <code>hf_</code>)
                 </li>
                 <li>
                   • <strong>Max Length:</strong> 150 characters
@@ -385,14 +389,26 @@ const SummarizeAPIConfiguration: React.FC = () => {
             <Col md={12}>
               <h6>Recommended Summarization Models</h6>
               <ul>
-                <li><code>facebook/bart-large-cnn</code> - Best for news & general text</li>
-                <li><code>google/pegasus-xsum</code> - Very short summaries</li>
-                <li><code>sshleifer/distilbart-cnn-12-6</code> - Faster processing</li>
-                <li><code>t5-base</code> - General purpose</li>
-                <li><code>t5-small</code> - Quick summaries</li>
+                <li>
+                  <code>facebook/bart-large-cnn</code> - Best for news & general
+                  text
+                </li>
+                <li>
+                  <code>google/pegasus-xsum</code> - Very short summaries
+                </li>
+                <li>
+                  <code>sshleifer/distilbart-cnn-12-6</code> - Faster processing
+                </li>
+                <li>
+                  <code>t5-base</code> - General purpose
+                </li>
+                <li>
+                  <code>t5-small</code> - Quick summaries
+                </li>
               </ul>
               <p className="text-danger mt-2">
-                ⚠️ <strong>Important:</strong> Use only summarization models, not sentiment analysis or classification models!
+                ⚠️ <strong>Important:</strong> Use only summarization models,
+                not sentiment analysis or classification models!
               </p>
             </Col>
           </Row>
@@ -400,8 +416,17 @@ const SummarizeAPIConfiguration: React.FC = () => {
             <Col md={12}>
               <h6>Get Your Hugging Face API Token</h6>
               <p>
-                1. Visit <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer">Hugging Face Tokens</a><br />
-                2. Create a new token (Read permission is enough)<br />
+                1. Visit{' '}
+                <a
+                  href="https://huggingface.co/settings/tokens"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Hugging Face Tokens
+                </a>
+                <br />
+                2. Create a new token (Read permission is enough)
+                <br />
                 3. Copy and paste it in the API Key field above
               </p>
             </Col>
