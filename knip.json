@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "project": [
+    "plugins/**/*.{ts,tsx}",
+    "scripts/**/*.{ts,tsx}",
+    "docs/src/**/*.{ts,tsx}",
+    "docs/**/*.{md}"
+  ],
+  "typescript": { "config": ["tsconfig.json"] },
+  "ignore": [
+    ".github/**",
+    "node_modules/**",
+    "scripts/zip/compileProduction.ts"
+  ],
+  "rules": {
+    "exports": "error",
+    "nsExports": "error"
+  }
+}
