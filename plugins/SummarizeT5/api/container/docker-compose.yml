@@ -3,7 +3,7 @@ services:
     build: .
     container_name: t5-summarizer
     ports:
-      - "8000:8000"
+      - '8000:8000'
     volumes:
       - cache:/app/cache
       - input:/app/input
