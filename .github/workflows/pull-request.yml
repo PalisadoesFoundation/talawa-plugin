@@ -331,7 +331,7 @@ jobs:
         run: |
           python .github/workflows/scripts/code_coverage_disable_check.py --files ${{ steps.changed-files.outputs.all_changed_files }} 
 
-  Check-for-unused-code:
+  Check-For-Unused-Code:
     name: Check for unused exports
     runs-on: ubuntu-latest
     steps:
@@ -357,7 +357,7 @@ jobs:
     strategy:
       matrix:
         node-version: ['24.x']
-    needs: [Code-Quality-Checks, Check-ESlint-Disable, Check-Code-Coverage-Disable]
+    needs: [Code-Quality-Checks, Check-ESlint-Disable, Check-Code-Coverage-Disable, Check-For-Unused-Code]
     steps:
       - name: Checkout the Repository
         uses: actions/checkout@v4
