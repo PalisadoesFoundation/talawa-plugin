@@ -101,12 +101,12 @@ async function callSummarizeAPI(
     // Hugging Face API response format
     let summary: string;
     const data = await response.json();
-    
+
     // Hugging Face returns array: [{"summary_text": "..."}] or {"error": "..."}
     if (data.error) {
       throw new Error(`Hugging Face API error: ${data.error}`);
     }
-    
+
     if (Array.isArray(data) && data.length > 0) {
       summary = data[0]?.summary_text || '';
     } else {

@@ -21,7 +21,7 @@ env:
 
 jobs:
   Code-Quality-Checks:
-    name: Performs linting, formatting, type-checking, checking for different source and target branch
+    name: Performs linting, formatting, type-checking, checking for different source and target branch, checking for unused exports
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -331,6 +331,26 @@ jobs:
         run: |
           python .github/workflows/scripts/code_coverage_disable_check.py --files ${{ steps.changed-files.outputs.all_changed_files }} 
 
+  Check-for-unused-code:
+    name: Check for unused exports
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '23.7.0'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install            
+      - name: Run Knip
+        run: pnpm knip --include exports
+
+  
   Test-Application:
     name: Test Application
     runs-on: ubuntu-latest
