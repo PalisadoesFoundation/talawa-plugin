@@ -56,11 +56,10 @@ importers:
         version: 0.4.0
       eslint-plugin-vitest:
         specifier: ^0.5.4
-        version: 0.5.4(eslint@9.37.0)(typescript@5.9.3)(vitest@3.2.4(@types/node@24.7.0)(tsx@4.20.5)(yaml@2.8.1))
+        version: 0.5.4(eslint@9.37.0(jiti@2.6.1))(typescript@5.9.3)(vitest@3.2.4(@types/node@24.7.0)(jiti@2.6.1)(tsx@4.20.5)(yaml@2.8.1))
       husky:
         specifier: ^9.1.7
         version: 9.1.7
-        version: 0.5.4(eslint@9.37.0(jiti@2.6.1))(typescript@5.9.3)(vitest@3.2.4(@types/node@24.7.0)(jiti@2.6.1)(tsx@4.20.5)(yaml@2.8.1))
       knip:
         specifier: ^5.67.0
         version: 5.68.0(@types/node@24.7.0)(typescript@5.9.3)
