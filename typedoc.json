@@ -9,7 +9,7 @@
   "hideGenerator": true,
   "categorizeByGroup": true,
   "entryPointStrategy": "expand",
-  "entryPoints": ["plugins/**/*"],
+  "entryPoints": ["plugins"],
   "exclude": [
     "src/vite-env.d.ts",
     "**/*.spec.{ts,tsx}",
