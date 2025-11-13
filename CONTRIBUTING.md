@@ -10,100 +10,20 @@ If you are new to contributing to open source, please read the Open Source Guide
 
 - [Contributing to Talawa-Plugin](#contributing-to-talawa-plugin)
   - [Table of Contents](#table-of-contents)
-  - [Code of Conduct](#code-of-conduct)
-  - [Videos](#videos)
-  - [Ways to Contribute](#ways-to-contribute)
-    - [Who Can Contribute](#who-can-contribute)
-    - [Our Development Process](#our-development-process)
-      - [Issues](#issues)
-      - [Pull Requests](#pull-requests)
-      - [Branching Strategy](#branching-strategy)
-      - [Conflict Resolution](#conflict-resolution)
+  - [General](#general)
     - [Contributing Code](#contributing-code)
-    - [General:](#general)
+    - [General:](#general-1)
     - [Testing:](#testing)
       - [Jest Testing](#jest-testing)
       - [Vitest Testing](#vitest-testing)
       - [Combined testing and coverage](#combined-testing-and-coverage)
       - [Test Code Coverage:](#test-code-coverage)
-  - [Internships](#internships)
-  - [Community](#community)
 
 <!-- tocstop -->
 
-## Code of Conduct
+## General
 
-A safe environment is required for everyone to contribute. Read our [Code of Conduct Guide](CODE_OF_CONDUCT.md) to understand what this means. Let us know immediately if you have unacceptable experiences in this area.
-
-No one should fear voicing their opinion. Respones must be respectful.
-
-## Videos
-
-1. Visit our [YouTube Channel playlists](https://www.youtube.com/@PalisadoesOrganization/playlists) for more insights
-   1. The "[Getting Started - Developers](https://www.youtube.com/watch?v=YpBUoHxEeyg&list=PLv50qHwThlJUIzscg9a80a9-HmAlmUdCF&index=1)" videos are extremely helpful for new open source contributors.
-
-## Ways to Contribute
-
-If you are ready to start contributing code right away, get ready!
-
-1. Join our [community forum](https://community.talawa.io) and introduce yourself. See details on how to join below in the Community section.
-   1. There are many persons on the various forums who are willing to assist you in getting started.
-1. Take a look at our issues (**_after reading our guidelines below_**):
-   1. We have a list of [good first issues](https://github.com/PalisadoesFoundation/talawa-plugin/labels/good%20first%20issue) that contain challenges with a limited scope for beginners.
-   1. There are issues for creating tests for our code base. We need to increase reliablility. Try those issues, or create your own for files that don't already have tests. This is another good strategy for beginners.
-   1. There are [dormant issues on which nobody has worked for some time](https://github.com/PalisadoesFoundation/talawa-plugin/issues?q=is%3Aopen+is%3Aissue+label%3Ano-issue-activity). These are another place to start
-   1. There may also be [dormant PRs on which nobody has worked for some time](https://github.com/PalisadoesFoundation/talawa-plugin/issues?q=is%3Aopen+is%3Aissue+label%3Ano-issue-activity+label%3Ano-pr-activity)!
-1. Create an issue based on a bug you have found or a feature you would like to add. We value meaningful sugestions and will prioritize them.
-
-Welcome aboard!
-
-### Who Can Contribute
-
-Unfortunately, because of recent abuse, we will only be assigning issues to persons who have:
-
-1. At least two years of GitHub history
-1. Consistent code updates throughout their GitHub life, especially the most recent 18 months.
-1. If we cannot validate these criteria, you won’t be assigned.
-
-This is a new policy triggered by newly created accounts that: 
-
-1. Use automation to blindly submit and update pull requests.
-1. SPAM our volunteers to be assigned issues to the exclusion of others.
-1. Frequently abandon issues after being assigned.
-1. Frequently close pull requests with ratios of merged to closed PRs approaching 10:1
-1. Repeatedly ignore PR requested changes from reviewers
-1. Resolve Code Rabbit suggestions without implementing them.
-1. Use AI to generate generic plans of action without an in-depth knowledge of the code base. This is not helpful for us.
-
-As expected, we need contributors who are interested in coding with a proven track record. This is an unfortunate development but the recent abuse of the system has given us no choice.
-
-### Our Development Process
-
-We utilize GitHub issues and pull requests to keep track of issues and contributions from the community.
-
-#### Issues
-
-Make sure you are following [issue report guidelines](ISSUE_GUIDELINES.md) available here before creating any new issues on Talawa Plugin project.
-
-#### Pull Requests
-
-[Pull Request guidelines](PR_GUIDELINES.md) is best resource to follow to start working on open issues.
-
-#### Branching Strategy
-
-For Talawa Plugin, we had employed the following branching strategy to simplify the development process and to ensure that only stable code is pushed to the `main` branch:
-
-- `develop`: For unstable code and bug fixing
-- `main`: Where the stable production ready code lies. This is our default branch.
-
-#### Conflict Resolution
-
-When multiple developers are working on issues there is bound to be a conflict of interest (not to be confused with git conflicts) among issues, PRs or even ideas. Usually these conflicts are resolved in a **First Come First Serve** basis however there are certain exceptions to it.
-
-- In the cases where you feel your potential issues could be an extension or in conflict with other PRs it is important to ask the author of the PR in our community forums or in their PRs or issues themselves why he/she did not write code for something that would require minimal effort on their part.
-- Based on basic courtesy, it is good practice to let the person who created a function apply and test that function when needed.
-- Last but not the least, communication is important make sure to talk to other contributors, in these cases, in the community forum or in a issue/PR thread.
-- As a last resort the Admins would be responsible for deciding how to resolve this conflict.
+Please read the [Palisadoes Contributing Guidelines](https://github.com/PalisadoesFoundation/.github/blob/main/profile/CONTRIBUTING.md).
 
 ### Contributing Code
 
@@ -228,14 +148,3 @@ The process of proposing a change to Talawa Plugin can be summarized as:
 1. Now create a pull request to the Talawa-plugin repository from your forked repo. Open an issue regarding the same and link your PR to it.
 1. Ensure the test suite passes, either locally or on CI once a PR has been created.
 1. Review and address comments on your pull request if requested.
-
-## Internships
-
-If you are participating in any of the various internship programs we are members of, then please read the [introduction guides on our documentation website](https://docs.talawa.io/docs/).
-
-## Community
-
-There are many ways to communicate with the community.
-
-1. The Palisadoes Foundation has an [online community](https://community.talawa.io/) where members can assist with support and clarification. 
-1. We also have a technical email list run by [freelists.org](https://www.freelists.org/). Search for "palisadoes" and join. Members on this list are also periodically added to our marketing email list that focuses on less technical aspects of our work.
