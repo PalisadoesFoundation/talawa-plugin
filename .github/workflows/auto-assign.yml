@@ -23,6 +23,31 @@ jobs:
           # - org:read (to enumerate organization repos)
           github-token: ${{ secrets.ORG_ACCESS_TOKEN }}
           script: |
+            /**
+            * Auto-assign workflow for organization-wide issue assignment limits
+            * 
+            * Features:
+            * - Self-assignment only: Users comment /assign to assign themselves
+            * - Organization-wide limit: Enforces MAX_OPEN_ASSIGNMENTS across all org repos
+            * - Race condition mitigation: Re-checks assignment count before final assignment
+            * 
+            * Required GitHub Token Permissions (ORG_ACCESS_TOKEN):
+            * - repo (or public_repo for public repos only)
+            * - org:read (to enumerate organization repositories)
+            * 
+            * Configuration:
+            * - MAX_OPEN_ASSIGNMENTS: Maximum open issues per user (default: 2)
+            * 
+            * Commands:
+            * - /assign: Self-assign an issue (if under limit)
+            * - /unassign: Remove self-assignment from an issue
+            * 
+            * Limitations:
+            * - Small race condition window exists between checks and assignment
+            * - Only self-assignment supported (cannot assign others)
+            * - Requires archived repos to be properly marked in GitHub
+            */
+
             const comment = context.payload.comment;
             const body = (comment.body || "").trim();
             const user = comment.user.login;
@@ -34,6 +59,13 @@ jobs:
 
             // Default assignment limit is 2 if not configured
             const maxAssignments = parseInt(process.env.MAX_OPEN_ASSIGNMENTS || '2');
+
+            // New contributors get only 1 assignment
+            let userMaxAssignments = maxAssignments;
+            if (association === 'FIRST_TIME_CONTRIBUTOR' || association === 'FIRST_TIMER') {
+              userMaxAssignments = 1; 
+              console.log(`User ${user} is a first-time contributor, limiting to 1 assignment`);
+            }            
 
             // Ignore bots only
             if (comment.user.type === "Bot") {
@@ -48,6 +80,17 @@ jobs:
               console.log("Not an /assign or /unassign command");
               return;
             }
+
+            // After checking isAssign
+            if (isAssign && body.trim() !== "/assign") {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: issueNumber,
+                body: `❌ @${user} This workflow only supports self-assignment. Use \`/assign\` without specifying a username.`,
+              });
+              return;
+            }            
 
             if (isUnassign) {
               const currentAssignees = issue.assignees.map(a => a.login);
@@ -178,7 +221,7 @@ jobs:
             //    if over limit (but this creates noise in notifications).
             //
             // Current implementation: Option 1 (accept transient violations for simplicity).
-            if (totalAssigned >= maxAssignments) {
+            if (totalAssigned >= userMaxAssignments) {
               const message = `⚠️ @${user} already has ${totalAssigned} open assignments across the org. Please finish or unassign before taking new ones.`;
               await github.rest.issues.createComment({
                 owner,
@@ -211,7 +254,7 @@ jobs:
                 }                
               }
               
-              if (reCheckCount >= maxAssignments) {
+              if (reCheckCount >= userMaxAssignments) {
                 const message = `⚠️ @${user}, another issue was assigned to you while processing this request. You now have ${reCheckCount} open assignments. Please finish or unassign before taking new ones.`;
                 await github.rest.issues.createComment({
                   owner,
