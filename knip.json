@@ -3,8 +3,15 @@
   "project": [
     "plugins/**/*.{ts,tsx}",
     "scripts/**/*.{ts,tsx}",
-    "docs/src/**/*.{ts,tsx}",
-    "docs/**/*.{md}"
+    "docs/src/**/*.{css,tsx}",
+    "docs/docs/**/*.{md,mdx}"
+  ],
+  "entry": [
+    "docs/docusaurus.config.ts",
+    "docs/src/pages/index.tsx",
+    "docs/docs/**/*.{md,mdx}",
+    "scripts/init/initApp.ts",
+    "scripts/githooks/check-localstorage-usage.ts"
   ],
   "typescript": { "config": ["tsconfig.json"] },
   "ignore": [
@@ -12,8 +19,10 @@
     "node_modules/**",
     "scripts/zip/compileProduction.ts"
   ],
+  "ignoreFiles": ["plugins/**"],
   "rules": {
     "exports": "error",
-    "nsExports": "error"
+    "nsExports": "error",
+    "files": "error"
   }
 }
