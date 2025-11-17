@@ -13,7 +13,7 @@
     "**/*.d.ts",
     "**/pnpm-lock.yaml"
   ],
-  "project": ["**/*.{ts,tsx,js,jsx,json}", "**/*.md"],
+  "project": ["**/*.{ts,tsx,js,jsx,json}", "**/*.{md,mdx}"],
   "ignoreExportsUsedInFile": true,
   "ignoreDependencies": [
     "@types/react-dom",
