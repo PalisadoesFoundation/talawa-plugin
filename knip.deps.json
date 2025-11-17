@@ -1,0 +1,26 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["**/*.{ts,tsx,js,md,mdx}"],
+  "ignore": [
+    "node_modules/**",
+    "build/**",
+    "coverage/**",
+    "**/*.d.ts",
+    "**/pnpm-lock.yaml"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": [
+    "@types/react-dom",
+    "vite",
+    "vite-plugin-istanbul",
+    "vite-plugin-svgr",
+    "vitest",
+    "eslint-config-prettier",
+    "eslint-plugin-import",
+    "eslint-plugin-jest",
+    "eslint-plugin-prettier",
+    "eslint-plugin-react",
+    "eslint-plugin-tsdoc",
+    "eslint-plugin-vitest"
+  ]
+}
