@@ -1,12 +1,21 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": ["**/*.{ts,tsx,js,md,mdx}"],
+  "entry": [
+    "scripts/**/*.{ts,js}",
+    "plugins/**/index.{ts,tsx}",
+    "docs/**/*.{ts,tsx}",
+    ".github/workflows/scripts/*.{js,ts}"
+  ],
   "ignore": [
     "node_modules/**",
     "build/**",
     "coverage/**",
     "**/*.d.ts",
     "**/pnpm-lock.yaml"
+  ],
+  "project": [
+    "**/*.{ts,tsx,js,jsx,json}",
+    "**/*.md"
   ],
   "ignoreExportsUsedInFile": true,
   "ignoreDependencies": [

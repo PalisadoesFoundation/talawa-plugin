@@ -2,24 +2,18 @@
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "project": [
     "plugins/**/*.{ts,tsx}",
-    "scripts/**/*.{ts,tsx}",
-    "docs/src/**/*.{css,tsx}",
-    "docs/docs/**/*.{md,mdx}"
-  ],
-  "entry": [
-    "docs/docusaurus.config.ts",
-    "docs/src/pages/index.tsx",
-    "docs/docs/**/*.{md,mdx}",
-    "scripts/init/initApp.ts",
-    "scripts/githooks/check-localstorage-usage.ts"
+    "scripts/**/*.{ts,tsx}"
   ],
   "typescript": { "config": ["tsconfig.json"] },
   "ignore": [
     ".github/**",
     "node_modules/**",
-    "scripts/zip/compileProduction.ts"
+    "scripts/zip/compileProduction.ts",
+    "scripts/githooks/**",
+    "scripts/init/**"
   ],
-  "ignoreFiles": ["plugins/**"],
+  "ignoreFiles": [
+    "plugins/**"],
   "rules": {
     "exports": "error",
     "nsExports": "error",
