@@ -1,9 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "project": [
-    "plugins/**/*.{ts,tsx}",
-    "scripts/**/*.{ts,tsx}"
-  ],
+  "project": ["plugins/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx}"],
   "typescript": { "config": ["tsconfig.json"] },
   "ignore": [
     ".github/**",
@@ -12,8 +9,7 @@
     "scripts/githooks/**",
     "scripts/init/**"
   ],
-  "ignoreFiles": [
-    "plugins/**"],
+  "ignoreFiles": ["plugins/**"],
   "rules": {
     "exports": "error",
     "nsExports": "error",
