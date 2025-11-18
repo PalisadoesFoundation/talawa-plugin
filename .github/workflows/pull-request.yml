@@ -405,7 +405,7 @@ jobs:
           python .github/workflows/scripts/itskip_disable_check.py --files ${{ steps.changed-files.outputs.all_changed_files }}
 
   Check-For-Unused-Code:
-    name: Check for unused exports
+    name: Check for Unused Files, Exports and Dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -420,8 +420,10 @@ jobs:
         uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install
-      - name: Run Knip
-        run: pnpm knip --include exports
+      - name: Run Knip for files and exports
+        run: pnpm knip --include files,exports
+      - name: Run Knip for dependencies
+        run: pnpm knip --config knip.deps.json --include dependencies
 
   Test-Application:
     name: Test Application
