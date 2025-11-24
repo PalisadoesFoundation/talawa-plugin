@@ -17,7 +17,11 @@ const config: Config = {
   projectName: 'talawa-plugin', // repo name
 
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'warn', // Or 'throw', 'ignore'
+    },
+  },
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -26,6 +30,8 @@ const config: Config = {
     defaultLocale: 'en',
     locales: ['en'],
   },
+
+  stylesheets: ['https://docs.talawa.io/css/styles-latest.css'],
 
   presets: [
     [
@@ -44,7 +50,7 @@ const config: Config = {
             'https://github.com/PalisadoesFoundation/talawa-plugin/tree/develop/docs/docs',
         },
         theme: {
-          customCss: [require.resolve('./src/css/custom.css')],
+          customCss: undefined,
         },
       },
     ],
@@ -95,6 +101,12 @@ const config: Config = {
             to: '/docs',
             label: 'Plugin Guide',
             position: 'left',
+            target: '_self',
+          },
+          {
+            label: 'Community',
+            position: 'left',
+            to: 'https://community.talawa.io',
             target: '_self',
           },
           {
@@ -175,7 +187,7 @@ const config: Config = {
       colorMode: {
         defaultMode: 'light',
         disableSwitch: false,
-        respectPrefersColorScheme: false,
+        respectPrefersColorScheme: true,
       },
       prism: {
         theme: prismThemes.github,

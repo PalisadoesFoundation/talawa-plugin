@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useQuery, gql } from '@apollo/client';
 import {
   Card,
   Table,
@@ -31,166 +32,189 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
+import { useParams, Navigate } from 'react-router-dom';
+import useLocalStorage from 'utils/useLocalstorage';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
 const { RangePicker } = DatePicker;
 
+// GraphQL operations
+const GET_USER_TRANSACTIONS = gql`
+  query GetUserTransactions(
+    $userId: String!
+    $limit: Int
+    $offset: Int
+    $status: String
+    $dateFrom: String
+    $dateTo: String
+  ) {
+    razorpay_getUserTransactions(
+      userId: $userId
+      limit: $limit
+      offset: $offset
+      status: $status
+      dateFrom: $dateFrom
+      dateTo: $dateTo
+    ) {
+      id
+      paymentId
+      amount
+      currency
+      status
+      donorName
+      donorEmail
+      method
+      bank
+      wallet
+      vpa
+      email
+      contact
+      fee
+      tax
+      errorCode
+      errorDescription
+      refundStatus
+      capturedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+const GET_USER_TRANSACTION_STATS = gql`
+  query GetUserTransactionStats(
+    $userId: String!
+    $dateFrom: String
+    $dateTo: String
+  ) {
+    razorpay_getUserTransactionStats(
+      userId: $userId
+      dateFrom: $dateFrom
+      dateTo: $dateTo
+    ) {
+      totalTransactions
+      totalAmount
+      currency
+      successCount
+      failedCount
+      pendingCount
+    }
+  }
+`;
+
 interface RazorpayTransaction {
   id: string;
-  amount: number;
+  paymentId?: string;
+  amount?: number;
   currency: string;
-  status: 'captured' | 'authorized' | 'failed' | 'refunded';
-  description: string;
+  status: string;
+  donorName?: string;
+  donorEmail?: string;
+  method?: string;
+  bank?: string;
+  wallet?: string;
+  vpa?: string;
+  email?: string;
+  contact?: string;
+  fee?: number;
+  tax?: number;
+  errorCode?: string;
+  errorDescription?: string;
+  refundStatus?: string;
+  capturedAt?: string;
   createdAt: string;
-  organizationName: string;
-  organizationId: string;
-  paymentMethod: string;
-  category: 'donation' | 'event' | 'membership' | 'other';
+  updatedAt: string;
 }
 
 const UserTransactions: React.FC = () => {
-  const [transactions, setTransactions] = useState<RazorpayTransaction[]>([]);
-  const [filteredTransactions, setFilteredTransactions] = useState<
-    RazorpayTransaction[]
-  >([]);
-  const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [organizationFilter, setOrganizationFilter] = useState<string>('all');
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(
     null,
   );
 
-  useEffect(() => {
-    // Simulate loading all user transactions across organizations
-    const mockTransactions: RazorpayTransaction[] = [
-      {
-        id: 'txn_123456789',
-        amount: 1000,
-        currency: 'INR',
-        status: 'captured',
-        description: 'Donation to Organization A',
-        createdAt: '2024-01-15T10:30:00Z',
-        organizationName: 'Organization A',
-        organizationId: 'org_a',
-        paymentMethod: 'Card',
-        category: 'donation',
-      },
-      {
-        id: 'txn_987654321',
-        amount: 500,
-        currency: 'INR',
-        status: 'captured',
-        description: 'Event Registration Fee',
-        createdAt: '2024-01-14T15:45:00Z',
-        organizationName: 'Organization B',
-        organizationId: 'org_b',
-        paymentMethod: 'UPI',
-        category: 'event',
-      },
-      {
-        id: 'txn_456789123',
-        amount: 2000,
-        currency: 'INR',
-        status: 'refunded',
-        description: 'Donation to Organization C',
-        createdAt: '2024-01-13T09:20:00Z',
-        organizationName: 'Organization C',
-        organizationId: 'org_c',
-        paymentMethod: 'Net Banking',
-        category: 'donation',
-      },
-      {
-        id: 'txn_789123456',
-        amount: 750,
-        currency: 'INR',
-        status: 'captured',
-        description: 'Membership Fee',
-        createdAt: '2024-01-12T14:15:00Z',
-        organizationName: 'Organization A',
-        organizationId: 'org_a',
-        paymentMethod: 'Card',
-        category: 'membership',
-      },
-      {
-        id: 'txn_321654987',
-        amount: 1500,
-        currency: 'INR',
-        status: 'captured',
-        description: 'Workshop Registration',
-        createdAt: '2024-01-11T11:20:00Z',
-        organizationName: 'Organization D',
-        organizationId: 'org_d',
-        paymentMethod: 'UPI',
-        category: 'event',
-      },
-      {
-        id: 'txn_654987321',
-        amount: 300,
-        currency: 'INR',
-        status: 'failed',
-        description: 'Donation to Organization E',
-        createdAt: '2024-01-10T16:30:00Z',
-        organizationName: 'Organization E',
-        organizationId: 'org_e',
-        paymentMethod: 'Card',
-        category: 'donation',
-      },
-    ];
+  // Get user data (no orgId needed for global user transactions)
+  const { getItem } = useLocalStorage();
+  const userId = getItem('id') as string | null;
 
-    setTimeout(() => {
-      setTransactions(mockTransactions);
-      setFilteredTransactions(mockTransactions);
-      setLoading(false);
-    }, 1000);
-  }, []);
+  // Debug logging
+  console.log('UserTransactions: userId =', userId);
 
-  useEffect(() => {
-    // Apply filters
-    let filtered = transactions;
+  // Redirect if no userId is available
+  if (!userId) {
+    console.log('UserTransactions: No userId, redirecting to /');
+    return <Navigate to="/" replace />;
+  }
 
+  // GraphQL queries
+  const {
+    data: transactionsData,
+    loading: transactionsLoading,
+    error: transactionsError,
+    refetch: refetchTransactions,
+  } = useQuery(GET_USER_TRANSACTIONS, {
+    variables: {
+      userId: userId || '',
+      limit: 100, // Get more transactions for user view
+    },
+    skip: !userId,
+    fetchPolicy: 'network-only',
+  });
+
+  const {
+    data: statsData,
+    loading: statsLoading,
+    error: statsError,
+  } = useQuery(GET_USER_TRANSACTION_STATS, {
+    variables: {
+      userId: userId || '',
+    },
+    skip: !userId,
+    fetchPolicy: 'network-only',
+  });
+
+  const transactions = transactionsData?.razorpay_getUserTransactions || [];
+  const stats = statsData?.razorpay_getUserTransactionStats;
+
+  // Debug logging
+  console.log('UserTransactions: transactionsData =', transactionsData);
+  console.log('UserTransactions: transactions =', transactions);
+  console.log('UserTransactions: transactionsLoading =', transactionsLoading);
+  console.log('UserTransactions: transactionsError =', transactionsError);
+
+  // Apply filters to transactions
+  const filteredTransactions = transactions.filter((transaction) => {
     // Search filter
     if (searchText) {
-      filtered = filtered.filter(
-        (transaction) =>
-          transaction.description
-            .toLowerCase()
-            .includes(searchText.toLowerCase()) ||
-          transaction.organizationName
-            .toLowerCase()
-            .includes(searchText.toLowerCase()) ||
-          transaction.id.toLowerCase().includes(searchText.toLowerCase()),
-      );
+      const searchLower = searchText.toLowerCase();
+      const matchesSearch =
+        transaction.paymentId?.toLowerCase().includes(searchLower) ||
+        transaction.donorName?.toLowerCase().includes(searchLower) ||
+        transaction.donorEmail?.toLowerCase().includes(searchLower) ||
+        transaction.id.toLowerCase().includes(searchLower);
+
+      if (!matchesSearch) return false;
     }
 
     // Status filter
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(
-        (transaction) => transaction.status === statusFilter,
-      );
-    }
-
-    // Organization filter
-    if (organizationFilter !== 'all') {
-      filtered = filtered.filter(
-        (transaction) => transaction.organizationId === organizationFilter,
-      );
+      if (transaction.status !== statusFilter) return false;
     }
 
     // Date range filter
     if (dateRange && dateRange[0] && dateRange[1]) {
-      filtered = filtered.filter((transaction) => {
-        const transactionDate = dayjs(transaction.createdAt);
-        return (
-          transactionDate.isAfter(dateRange[0]) &&
-          transactionDate.isBefore(dateRange[1])
-        );
-      });
+      const transactionDate = dayjs(transaction.createdAt);
+      if (
+        !transactionDate.isAfter(dateRange[0]) ||
+        !transactionDate.isBefore(dateRange[1])
+      ) {
+        return false;
+      }
     }
 
-    setFilteredTransactions(filtered);
-  }, [transactions, searchText, statusFilter, organizationFilter, dateRange]);
+    return true;
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -207,14 +231,16 @@ const UserTransactions: React.FC = () => {
     }
   };
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'donation':
+  const getMethodColor = (method: string) => {
+    switch (method?.toLowerCase()) {
+      case 'card':
         return 'blue';
-      case 'event':
+      case 'upi':
         return 'green';
-      case 'membership':
+      case 'netbanking':
         return 'purple';
+      case 'wallet':
+        return 'orange';
       default:
         return 'default';
     }
@@ -242,24 +268,14 @@ const UserTransactions: React.FC = () => {
     message.success(`Downloading receipt for transaction: ${transaction.id}`);
   };
 
-  const getUniqueOrganizations = () => {
-    const orgs = transactions.map((t) => ({
-      id: t.organizationId,
-      name: t.organizationName,
-    }));
-    return orgs.filter(
-      (org, index, self) => index === self.findIndex((o) => o.id === org.id),
-    );
-  };
-
   const columns: ColumnsType<RazorpayTransaction> = [
     {
       title: 'Transaction ID',
-      dataIndex: 'id',
-      key: 'id',
-      render: (id: string) => (
+      dataIndex: 'paymentId',
+      key: 'paymentId',
+      render: (paymentId: string) => (
         <Text code style={{ fontSize: '12px' }}>
-          {id}
+          {paymentId || 'N/A'}
         </Text>
       ),
     },
@@ -268,7 +284,9 @@ const UserTransactions: React.FC = () => {
       dataIndex: 'amount',
       key: 'amount',
       render: (amount: number, record: RazorpayTransaction) => (
-        <Text strong>{formatAmount(amount, record.currency)}</Text>
+        <Text strong>
+          {amount ? formatAmount(amount, record.currency) : 'N/A'}
+        </Text>
       ),
     },
     {
@@ -280,26 +298,25 @@ const UserTransactions: React.FC = () => {
       ),
     },
     {
-      title: 'Organization',
-      dataIndex: 'organizationName',
-      key: 'organizationName',
+      title: 'Donor',
+      dataIndex: 'donorName',
+      key: 'donorName',
       render: (name: string, record: RazorpayTransaction) => (
         <div>
-          <div style={{ fontWeight: 500 }}>{name}</div>
-          <Tag color={getCategoryColor(record.category)}>{record.category}</Tag>
+          <div style={{ fontWeight: 500 }}>{name || 'Anonymous'}</div>
+          <div style={{ fontSize: '12px', color: '#666' }}>
+            {record.donorEmail}
+          </div>
         </div>
       ),
     },
     {
-      title: 'Description',
-      dataIndex: 'description',
-      key: 'description',
-      ellipsis: true,
-    },
-    {
       title: 'Payment Method',
-      dataIndex: 'paymentMethod',
-      key: 'paymentMethod',
+      dataIndex: 'method',
+      key: 'method',
+      render: (method: string) => (
+        <Tag color={getMethodColor(method)}>{method || 'N/A'}</Tag>
+      ),
     },
     {
       title: 'Date',
@@ -335,7 +352,7 @@ const UserTransactions: React.FC = () => {
     },
   ];
 
-  if (loading) {
+  if (transactionsLoading || statsLoading) {
     return (
       <Card>
         <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -343,6 +360,19 @@ const UserTransactions: React.FC = () => {
           <div style={{ marginTop: '16px' }}>
             <Text>Loading your transaction history...</Text>
           </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (transactionsError || statsError) {
+    return (
+      <Card>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <Text type="danger">
+            Failed to load transaction data:{' '}
+            {transactionsError?.message || statsError?.message}
+          </Text>
         </div>
       </Card>
     );
@@ -367,7 +397,7 @@ const UserTransactions: React.FC = () => {
 
         {/* Filters */}
         <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} md={8} lg={6}>
+          <Col xs={24} sm={12} md={8} lg={8}>
             <Search
               placeholder="Search transactions..."
               value={searchText}
@@ -377,7 +407,7 @@ const UserTransactions: React.FC = () => {
               allowClear
             />
           </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
+          <Col xs={24} sm={12} md={8} lg={8}>
             <Select
               placeholder="Filter by status"
               value={statusFilter}
@@ -392,23 +422,7 @@ const UserTransactions: React.FC = () => {
               <Select.Option value="refunded">Refunded</Select.Option>
             </Select>
           </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
-            <Select
-              placeholder="Filter by organization"
-              value={organizationFilter}
-              onChange={setOrganizationFilter}
-              style={{ width: '100%' }}
-              allowClear
-            >
-              <Select.Option value="all">All Organizations</Select.Option>
-              {getUniqueOrganizations().map((org) => (
-                <Select.Option key={org.id} value={org.id}>
-                  {org.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={6}>
+          <Col xs={24} sm={12} md={8} lg={8}>
             <RangePicker
               value={dateRange}
               onChange={(dates) =>

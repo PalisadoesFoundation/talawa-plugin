@@ -21,26 +21,35 @@ env:
 
 jobs:
   Code-Quality-Checks:
-    name: Performs linting, formatting, type-checking, checking for different source and target branch
+    name: Performs linting, formatting, type-checking, checking for different source and target branch, checking for unused exports
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['24.x']
     steps:
       - name: Checkout the Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for all branches and tags
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
-      - name: Set up Node.js
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          run_install: false
+
+      - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.x'
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Count number of lines
         run: |
           chmod +x ./.github/workflows/scripts/countline.py
-          ./.github/workflows/scripts/countline.py --lines 600 
+          ./.github/workflows/scripts/countline.py --lines 600
 
       - name: Get changed TypeScript files
         id: changed-files
@@ -68,24 +77,24 @@ jobs:
 
       - name: Check formatting
         if: steps.changed-files.outputs.only_changed != 'true'
-        run: npm run format:check
-        
+        run: pnpm run format:check
+
       - name: Run formatting if check fails
         if: failure()
-        run: npm run format:fix
+        run: pnpm run format:fix
 
       # - name: Check for type errors
       #   if: steps.changed-files.outputs.only_changed != 'true'
-      #   run: npm run typecheck
+      #   run: pnpm run typecheck
 
       # - name: Check for linting errors in modified files
       #   if: steps.changed-files.outputs.only_changed != 'true'
-      #   env: 
+      #   env:
       #     CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
       #   run: npx eslint ${CHANGED_FILES}
-        
+
       - name: Check for TSDoc comments
-        run: npm run check-tsdoc # Run the TSDoc check script
+        run: pnpm run check-tsdoc # Run the TSDoc check script
 
       # - name: Check for localStorage Usage
       #   run: npx tsx scripts/githooks/check-localstorage-usage.ts --scan-entire-repo
@@ -99,29 +108,150 @@ jobs:
           echo "Error: Close this PR and try again."
           exit 1
 
+  Check-AutoDocs:
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    name: Generate and Validate Documentation
+    runs-on: ubuntu-latest
+    needs: [Code-Quality-Checks]
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.4.1
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: 'pnpm'
+
+      - name: Prepare dependency store
+        run: pnpm fetch
+
+      - name: Install Dependencies (frozen)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Run documentation generation
+        run: pnpm run generate-docs
+
+      - name: Check for uncommitted doc changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Documentation files are outdated or missing."
+            echo "Please run 'pnpm run generate-docs' locally and commit the updated files."
+            echo ""
+            echo "Changed files:"
+            git status --porcelain
+            exit 1
+          else
+            echo "Documentation is up to date."
+          fi
+
   Check-Sensitive-Files:
-    if: ${{ github.actor != 'dependabot[bot]' && !contains(github.event.pull_request.labels.*.name, 'ignore-sensitive-files-pr') }}
+    if: ${{ github.actor != 'dependabot[bot]'}}
     name: Checks if sensitive files have been changed without authorization
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for all branches and tags
+          fetch-depth: 0 # Fetch full history so re-runs work
+
+      - name: Get PR labels
+        id: check-labels
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "${{ github.event.pull_request.number }}" ]; then
+            echo "skip=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          LABELS="$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/labels --jq '.[].name' | tr '\n' ' ')"
+
+          if echo "$LABELS" | grep -qw "ignore-sensitive-files-pr"; then
+            echo "::notice::Skipping sensitive files check due to 'ignore-sensitive-files-pr' label."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Get Changed Unauthorized files
+        if: steps.check-labels.outputs.skip != 'true'
         id: changed-unauth-files
         run: |
-          # Get the base branch ref
-          BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+          # Skip if not in PR context
+          if [ -z "${{ github.event.pull_request.base.sha }}" ]; then
+            echo "any_changed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
 
-          # Define sensitive files pattern
-          SENSITIVE_FILES=".flake8 .pydocstyle pyproject.toml .env* vitest.config.js .github/** env.example .node-version .husky/** scripts/** package.json package-lock.json tsconfig.json .gitignore .eslintrc.json .eslintignore .prettierrc .prettierignore vite.config.ts CODEOWNERS LICENSE .coderabbit.yaml CODE_OF_CONDUCT.md CODE_STYLE.md CONTRIBUTING.md DOCUMENTATION.md INSTALLATION.md ISSUE_GUIDELINES.md PR_GUIDELINES.md README.md *.pem *.key *.cert *.password *.secret *.credentials .nojekyll yarn.lock docs/docusaurus.config.ts docs/sidebar* CNAME"
+          # Determine base and head commits
+          HEAD_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          BASE_SHA=$(git merge-base "${{ github.event.pull_request.base.sha }}" "$HEAD_SHA")
+
+          # Define sensitive files pattern list
+          SENSITIVE_PATTERNS=(
+            '.flake8$'
+            '.pydocstyle$'
+            'pyproject.toml$'
+            '.env..*$'
+            'vitest.config.js$'
+            'src/App.tsx$'
+            '^.github/.*'
+            '^.husky/.*'
+            '^scripts/.*'
+            '^src/style/.*'
+            'schema.graphql$'
+            'package.json$'
+            'package-lock.json$'
+            'tsconfig.json$'
+            '^.gitignore$'
+            '^env.example$'
+            '.node-version$'
+            '.eslintrc.json$'
+            '.eslintignore$'
+            '.prettierrc$'
+            '.prettierignore$'
+            'vite.config.ts$'
+            '^docker/.*'
+            '^config/.*'
+            'CODEOWNERS$'
+            'LICENSE$'
+            'setup.ts$'
+            '.coderabbit.yaml$'
+            'CODE_OF_CONDUCT.md$'
+            'CODE_STYLE.md$'
+            'CONTRIBUTING.md$'
+            'DOCUMENTATION.md$'
+            'INSTALLATION.md$'
+            'ISSUE_GUIDELINES.md$'
+            'PR_GUIDELINES.md$'
+            'README.md$'
+            '.*.pem$'
+            '.*.key$'
+            '.*.cert$'
+            '.*.password$'
+            '.*.secret$'
+            '.*.credentials$'
+            '.nojekyll$'
+            'yarn.lock$'
+            'knip.json$'
+            '^docs/docusaurus.config.ts$'
+            '^docs/sidebar..*'
+            'CNAME$'
+          )
 
           # Check for changes in sensitive files
           CHANGED_UNAUTH_FILES=""
-          for pattern in $SENSITIVE_FILES; do
-            FILES=$(git diff --name-only --diff-filter=ACMRD $BASE_SHA ${{ github.event.pull_request.head.sha }} | grep -E "$pattern" || true)
+          for pattern in "${SENSITIVE_PATTERNS[@]}"; do
+            FILES=$(git diff --name-only --diff-filter=ACMRD "$BASE_SHA" "$HEAD_SHA" | grep -E "$pattern" || true)
             if [ ! -z "$FILES" ]; then
               CHANGED_UNAUTH_FILES="$CHANGED_UNAUTH_FILES $FILES"
             fi
@@ -134,21 +264,23 @@ jobs:
           # Check if any unauthorized files changed
           if [ ! -z "$CHANGED_UNAUTH_FILES" ]; then
             echo "any_changed=true" >> $GITHUB_OUTPUT
-            echo "any_deleted=true" >> $GITHUB_OUTPUT
           else
             echo "any_changed=false" >> $GITHUB_OUTPUT
-            echo "any_deleted=false" >> $GITHUB_OUTPUT
           fi
 
       - name: List all changed unauthorized files
-        if: steps.changed-unauth-files.outputs.any_changed == 'true' || steps.changed-unauth-files.outputs.any_deleted == 'true'
-        env: 
+        if: steps.changed-unauth-files.outputs.any_changed == 'true'
+        env:
           CHANGED_UNAUTH_FILES: ${{ steps.changed-unauth-files.outputs.all_changed_files }}
         run: |
-          for file in ${CHANGED_UNAUTH_FILES}; do
-            echo "$file is unauthorized to change/delete"
+          echo "::error::Unauthorized changes detected in sensitive files:"
+          echo ""
+          for file in $CHANGED_UNAUTH_FILES; do
+            echo "- $file"
           done
-          echo "To override this, apply the 'ignore-sensitive-files-pr' label"          
+          echo ""
+          echo "To override:"
+          echo "Add the 'ignore-sensitive-files-pr' label to this PR."
           exit 1
 
   Count-Changed-Files:
@@ -159,7 +291,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for all branches and tags
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Get changed files
         id: changed-files
@@ -172,14 +304,14 @@ jobs:
           echo "all_changed_files_count=$ALL_CHANGED_FILES_COUNT" >> $GITHUB_OUTPUT
 
       - name: Echo number of changed files
-        env: 
+        env:
           CHANGED_FILES_COUNT: ${{ steps.changed-files.outputs.all_changed_files_count }}
         run: |
           echo "Number of files changed: $CHANGED_FILES_COUNT"
 
       - name: Check if the number of changed files is less than 100
         if: steps.changed-files.outputs.all_changed_files_count > 100
-        env: 
+        env:
           CHANGED_FILES_COUNT: ${{ steps.changed-files.outputs.all_changed_files_count }}
         run: |
           echo "Error: Too many files (greater than 100) changed in the pull request."
@@ -195,7 +327,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for all branches and tags
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Get changed files
         id: changed-files
@@ -223,7 +355,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for all branches and tags
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Get changed files
         id: changed-files
@@ -242,32 +374,105 @@ jobs:
 
       - name: Run Python script
         run: |
-          python .github/workflows/scripts/code_coverage_disable_check.py --files ${{ steps.changed-files.outputs.all_changed_files }} 
+          python .github/workflows/scripts/code_coverage_disable_check.py --files ${{ steps.changed-files.outputs.all_changed_files }}
+
+  Check-ItSkip-Disable:
+    name: Check for it.skip commands
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          # Get the base branch ref
+          BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+
+          # Get all changed files
+          ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | tr '\n' ' ')
+          echo "all_changed_files=${ALL_CHANGED_FILES}" >> $GITHUB_OUTPUT
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      - name: Run Python script
+        run: |
+          python .github/workflows/scripts/itskip_disable_check.py --files ${{ steps.changed-files.outputs.all_changed_files }}
+
+  Check-For-Unused-Code:
+    name: Check for Unused Files, Exports and Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '23.7.0'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run Knip for files and exports
+        run: pnpm knip --include files,exports
+      - name: Run Knip for dependencies
+        run: pnpm knip --config knip.deps.json --include dependencies
 
   Test-Application:
     name: Test Application
     runs-on: ubuntu-latest
-    needs: [Code-Quality-Checks, Check-ESlint-Disable, Check-Code-Coverage-Disable]
+    strategy:
+      matrix:
+        node-version: ['24.x']
+
+    needs:
+      [
+        Code-Quality-Checks,
+        Check-ESlint-Disable,
+        Check-Code-Coverage-Disable,
+        Check-AutoDocs,
+        Check-ItSkip-Disable,
+        Check-For-Unused-Code,
+      ]
     steps:
       - name: Checkout the Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Node.js
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          run_install: false
+
+      - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.x'
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
 
-      # - name: Upload Coverage to Codecov
+      - name: Install dependencies
+        run: pnpm install
+
+      # #######################################################################
+      # # DO NOT DELETE ANY references to env.CODECOV_UNIQUE_NAME in this
+      # # section. They are required for accurate calculations
+      # #######################################################################
+      # - name: Present and upload coverage to Codecov as ${{env.CODECOV_UNIQUE_NAME}}
       #   uses: codecov/codecov-action@v5
       #   with:
+      #     name: "${{env.CODECOV_UNIQUE_NAME}}"
       #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     exclude: 'docs/'
-      #     files: ./coverage/vitest/lcov.info
-      #     flags: vitest
-      #     fail_ci_if_error: true
+      #     fail_ci_if_error: false
       #     verbose: true
+      #     exclude: 'docs/'
 
       # - name: Test acceptable level of code coverage
       #   uses: VeryGoodOpenSource/very_good_coverage@v3
@@ -282,18 +487,20 @@ jobs:
     # Run only if the develop branch and not dependabot
     if: ${{ github.actor != 'dependabot[bot]' && github.event.pull_request.base.ref == 'develop' }}
     steps:
-      - name: Checkout the Repository
-        uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
-          node-version: '24.x' 
+          cache: pnpm
+          cache-dependency-path: |
+            docs/pnpm-lock.yaml
+            docs/package.json
+      # Run Docusaurus in the ./docs directory
       - name: Install dependencies
         working-directory: ./docs
-        run: npm install
+        run: pnpm install --frozen-lockfile
       - name: Test building the website
         working-directory: ./docs
-        run: npm run build
+        run: pnpm build
 
   Check-Target-Branch:
     if: ${{ github.actor != 'dependabot[bot]' }}
@@ -345,14 +552,14 @@ jobs:
       - name: Run Flake8 Linter
         run: |
           source venv/bin/activate
-          flake8 --docstring-convention google --ignore E402,E722,E203,F401,W503 .github
+          flake8 --docstring-convention google --ignore E402,E722,E203,F401,W503 .github plugins scripts
 
       - name: Run pydocstyle
         run: |
           source venv/bin/activate
-          pydocstyle --convention=google --add-ignore=D415,D205 .github
+          pydocstyle --convention=google --add-ignore=D415,D205 .github plugins scripts
 
       - name: Run docstring compliance check
         run: |
           source venv/bin/activate
-          python .github/workflows/scripts/check_docstrings.py --directories .github
+          python .github/workflows/scripts/check_docstrings.py --directories .github plugins scripts
