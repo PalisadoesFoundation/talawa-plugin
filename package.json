@@ -28,7 +28,7 @@
     "knip": "^5.67.0",
     "tsx": "^4.19.4",
     "typedoc-plugin-markdown": "^4.5.0",
-    "typedoc": "^0.28.1",
+    "typedoc": "^0.28.14",
     "typescript": "^5.9.3"
   },
   "lint-staged": {
