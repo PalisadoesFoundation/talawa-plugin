@@ -7,7 +7,7 @@
   "description": "Microkernel-based plugin system for extending Talawa with modular features across API, Admin, and Mobile.",
   "devDependencies": {
     "@clack/prompts": "^0.11.0",
-    "@types/archiver": "^6.0.3",
+    "@types/archiver": "^7.0.0",
     "@types/node": "^24.7.0",
     "@types/react": "^19.1.1",
     "@types/react-dom": "^19.1.1",
