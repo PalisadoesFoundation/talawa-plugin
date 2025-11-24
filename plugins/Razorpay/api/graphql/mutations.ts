@@ -9,6 +9,7 @@ import {
   ordersTable,
   transactionsTable,
 } from '../database/tables';
+import { createRazorpayService } from '../services/razorpayService';
 import {
   RazorpayConfigRef,
   RazorpayOrderRef,
@@ -182,25 +183,41 @@ export async function createPaymentOrderResolver(
   }
 
   try {
-    // Generate Razorpay order ID
-    const razorpayOrderId = `order_${Date.now()}_${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
+    // Step 1: Initialize the Razorpay service
+    const razorpayService = createRazorpayService(ctx);
 
+    // Step 2: Create a real order with the Razorpay API
+    const razorpayOrder = await razorpayService.createOrder({
+      amount: parsedArgs.input.amount,
+      currency: parsedArgs.input.currency,
+      receipt: `receipt_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`,
+      notes: {
+        organizationId: parsedArgs.input.organizationId,
+        userId: parsedArgs.input.userId || 'guest',
+        donorName: parsedArgs.input.donorName,
+      },
+    });
+
+    if (!razorpayOrder || !razorpayOrder.id) {
+      throw new Error('Failed to create Razorpay order.');
+    }
+
+    // Step 3: Save the REAL order details to your database
     const [order] = await ctx.drizzleClient
       .insert(ordersTable)
       .values({
-        razorpayOrderId,
+        razorpayOrderId: razorpayOrder.id, // Use the REAL ID from Razorpay
         organizationId: parsedArgs.input.organizationId,
         userId: parsedArgs.input.userId,
-        amount: parsedArgs.input.amount,
-        currency: parsedArgs.input.currency,
-        receipt: `receipt_${Date.now()}_${Math.random()
-          .toString(36)
-          .substr(2, 9)}`,
-        status: 'created',
+        amount: razorpayOrder.amount, // Use amount from Razorpay response as source of truth
+        currency: razorpayOrder.currency,
+        receipt: razorpayOrder.receipt,
+        status: razorpayOrder.status, // Status will be "created"
         donorName: parsedArgs.input.donorName,
         donorEmail: parsedArgs.input.donorEmail,
+        donorPhone: parsedArgs.input.donorPhone,
         description: parsedArgs.input.description,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -213,26 +230,31 @@ export async function createPaymentOrderResolver(
       });
     }
 
+    // Return the correct data to the frontend
     return {
       id: order.id,
-      razorpayOrderId: order.razorpayOrderId || undefined,
-      organizationId: order.organizationId || undefined,
-      userId: order.userId || undefined,
-      amount: order.amount || undefined,
-      currency: order.currency || 'INR',
-      status: order.status || 'created',
-      donorName: order.donorName || undefined,
-      donorEmail: order.donorEmail || undefined,
-      donorPhone: order.donorPhone || undefined,
-      description: order.description || undefined,
-      anonymous: order.anonymous || false,
-      createdAt: order.createdAt || new Date(),
-      updatedAt: order.updatedAt || new Date(),
+      razorpayOrderId: order.razorpayOrderId, // This is now the REAL order ID
+      organizationId: order.organizationId,
+      userId: order.userId,
+      amount: order.amount,
+      currency: order.currency,
+      status: order.status,
+      donorName: order.donorName,
+      donorEmail: order.donorEmail,
+      donorPhone: order.donorPhone,
+      description: order.description,
+      anonymous: order.anonymous,
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
     };
   } catch (error) {
     ctx.log?.error('Error creating payment order:', error);
     throw new TalawaGraphQLError({
       extensions: { code: 'unexpected' },
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Could not create payment order',
     });
   }
 }
@@ -398,6 +420,11 @@ export async function verifyPaymentResolver(
   }
 
   try {
+    ctx.log?.info('Verifying payment:', {
+      razorpayPaymentId: parsedArgs.input.razorpayPaymentId,
+      razorpayOrderId: parsedArgs.input.razorpayOrderId,
+    });
+
     // Get Razorpay configuration
     const config = await ctx.drizzleClient.select().from(configTable).limit(1);
 
@@ -417,15 +444,26 @@ export async function verifyPaymentResolver(
       });
     }
 
-    // Verify signature
+    // Verify signature using keySecret (not webhookSecret)
     const expectedSignature = crypto
-      .createHmac('sha256', configItem.webhookSecret || '')
+      .createHmac('sha256', configItem.keySecret || '')
       .update(
         `${parsedArgs.input.razorpayOrderId}|${parsedArgs.input.razorpayPaymentId}`,
       )
       .digest('hex');
 
+    ctx.log?.info('Signature verification:', {
+      expected: expectedSignature,
+      received: parsedArgs.input.razorpaySignature,
+      match: expectedSignature === parsedArgs.input.razorpaySignature,
+      keySecretLength: configItem.keySecret?.length || 0,
+      webhookSecretLength: configItem.webhookSecret?.length || 0,
+      orderId: parsedArgs.input.razorpayOrderId,
+      paymentId: parsedArgs.input.razorpayPaymentId,
+    });
+
     if (expectedSignature !== parsedArgs.input.razorpaySignature) {
+      ctx.log?.error('Signature verification failed');
       throw new TalawaGraphQLError({
         extensions: {
           code: 'unauthorized_action_on_arguments_associated_resources',
@@ -450,10 +488,7 @@ export async function verifyPaymentResolver(
       });
     }
 
-    // Parse payment data
-    const paymentData = JSON.parse(parsedArgs.input.paymentData);
-
-    // Create or update transaction
+    // Check if transaction already exists (created by webhook)
     const existingTransaction = await ctx.drizzleClient
       .select()
       .from(transactionsTable)
@@ -469,40 +504,21 @@ export async function verifyPaymentResolver(
       });
     }
 
-    const transactionData = {
-      paymentId: parsedArgs.input.razorpayPaymentId,
-      orderId: orderItem.id,
-      organizationId: orderItem.organizationId,
-      userId: orderItem.userId,
-      amount: orderItem.amount,
-      currency: orderItem.currency,
-      status: 'captured',
-      method: paymentData.method,
-      bank: paymentData.bank,
-      wallet: paymentData.wallet,
-      cardId: paymentData.card_id,
-      vpa: paymentData.vpa,
-      email: paymentData.email,
-      contact: paymentData.contact,
-      fee: paymentData.fee,
-      tax: paymentData.tax,
-      capturedAt: new Date(),
-    };
-
+    // If transaction doesn't exist, create a basic one
+    // (The webhook should have created it, but just in case)
     if (existingTransaction.length === 0) {
-      // Create new transaction
+      const transactionData = {
+        paymentId: parsedArgs.input.razorpayPaymentId,
+        orderId: orderItem.id,
+        organizationId: orderItem.organizationId,
+        userId: orderItem.userId,
+        amount: orderItem.amount,
+        currency: orderItem.currency,
+        status: 'captured',
+        capturedAt: new Date(),
+      };
+
       await ctx.drizzleClient.insert(transactionsTable).values(transactionData);
-    } else {
-      // Update existing transaction
-      await ctx.drizzleClient
-        .update(transactionsTable)
-        .set({
-          ...transactionData,
-          updatedAt: new Date(),
-        })
-        .where(
-          eq(transactionsTable.paymentId, parsedArgs.input.razorpayPaymentId),
-        );
     }
 
     // Update order status
@@ -536,8 +552,8 @@ export async function verifyPaymentResolver(
   }
 }
 
-// Test Razorpay connection resolver
-export async function testRazorpayConnectionResolver(
+// Test Razorpay setup with dummy payment
+export async function testRazorpaySetupResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
   ctx: GraphQLContext,
@@ -570,26 +586,70 @@ export async function testRazorpayConnectionResolver(
       };
     }
 
-    // Import Razorpay service to test connection
+    if (!configItem.webhookSecret) {
+      return {
+        success: false,
+        message:
+          'Webhook secret is not configured. Please enter your webhook secret.',
+      };
+    }
+
+    // Import Razorpay service to test setup
     const { createRazorpayService } = await import(
       '../services/razorpayService'
     );
     const razorpayService = createRazorpayService(ctx);
 
-    // Test the connection by making a simple API call
-    const testResult = await razorpayService.testConnection();
+    ctx.log?.info(
+      `Testing Razorpay setup with Key ID: ${configItem.keyId?.substring(0, 8)}...`,
+    );
+
+    // Test by creating a dummy payment order (₹1.00 = 100 paise)
+    const testOrder = await razorpayService.createOrder({
+      amount: 100, // 100 paise = ₹1.00
+      currency: configItem.currency || 'INR',
+      receipt: `test_${Date.now()}`,
+      notes: {
+        test: 'true',
+        purpose: 'setup_verification',
+      },
+    });
+
+    ctx.log?.info(`Test order created successfully: ${testOrder.id}`);
 
     return {
-      success: testResult.success,
-      message: testResult.message,
+      success: true,
+      message: `Setup verified! Test order created: ${testOrder.id} (₹1.00). Your Razorpay configuration is working correctly.`,
     };
   } catch (error) {
-    ctx.log?.error('Error testing Razorpay connection:', error);
-    return {
-      success: false,
-      message:
-        'Connection test failed. Please check your API keys and try again.',
-    };
+    ctx.log?.error('Error testing Razorpay setup:', error);
+
+    if (error instanceof Error) {
+      if (error.message.includes('Invalid API credentials')) {
+        return {
+          success: false,
+          message:
+            'Invalid API credentials. Please check your Key ID and Key Secret.',
+        };
+      } else if (error.message.includes('Webhook secret not configured')) {
+        return {
+          success: false,
+          message:
+            'Webhook secret not configured. Please add your webhook secret.',
+        };
+      } else {
+        return {
+          success: false,
+          message: `Setup test failed: ${error.message}`,
+        };
+      }
+    } else {
+      return {
+        success: false,
+        message:
+          'Setup test failed. Please check your configuration and try again.',
+      };
+    }
   }
 }
 
@@ -661,12 +721,12 @@ export function registerRazorpayMutations(
     }),
   );
 
-  // Test Razorpay connection
-  builderInstance.mutationField('testRazorpayConnection', (t) =>
+  // Test Razorpay setup with dummy payment
+  builderInstance.mutationField('testRazorpaySetup', (t) =>
     t.field({
       type: RazorpayTestResultRef,
-      description: 'Test Razorpay API connection with current credentials',
-      resolve: testRazorpayConnectionResolver,
+      description: 'Test Razorpay setup by creating a dummy payment order',
+      resolve: testRazorpaySetupResolver,
     }),
   );
 }

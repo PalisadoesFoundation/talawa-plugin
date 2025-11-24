@@ -35,7 +35,6 @@ export const ordersTable = pgTable('razorpay_orders', {
   donorName: text('donor_name'), // Donor's name
   donorEmail: text('donor_email'), // Donor's email
   donorPhone: text('donor_phone'), // Donor's phone
-  anonymous: boolean('anonymous').default(false), // Whether donation is anonymous
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
