@@ -14,7 +14,7 @@
     "vite": "^6.3.5",
     "vite-plugin-istanbul": "^7.1.0",
     "vite-plugin-svgr": "^4.3.0",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.13",
     "chalk": "^5.6.2",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.0.2",
