@@ -2,6 +2,7 @@
 
 💬 Join our [community forum](https://community.talawa.io/) to meet others using and improving Talawa!
 
+
 [![N|Solid](docs/static/img/markdown/misc/talawa-logo-lite-200x200.png)](https://github.com/PalisadoesFoundation/talawa-plugin)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
