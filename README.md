@@ -1,6 +1,6 @@
 # Talawa Plugin
 
-💬 Join our [community forum](https://community.talawa.io/) to meet others using and improving Talawa!
+💬 Join our [community forum](https://community.talawa.io/) to meet others using and improving the Talawa apps!
 
 [![N|Solid](docs/static/img/markdown/misc/talawa-logo-lite-200x200.png)](https://github.com/PalisadoesFoundation/talawa-plugin)
 
@@ -17,7 +17,9 @@ Talawa Plugin is the official plugin architecture for extending the features of 
 
 <!-- toc -->
 
-- [Talawa Components](#talawa-components)
+- [Talawa Plugin](#talawa-plugin)
+  - [Table of Contents](#table-of-contents)
+  - [Talawa Components](#talawa-components)
 - [Documentation](#documentation)
   - [Videos](#videos)
 
