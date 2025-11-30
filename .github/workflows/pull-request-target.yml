@@ -50,8 +50,8 @@ jobs:
         with:
           close_pr_on_failure: 'true'
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          no_assignee_message: 'The linked issue must be assigned to the PR author. Please fill in our PR template correctly. Follow the GitHub [Linking a pull request to an issue](https://github.com/PalisadoesFoundation/talawa-plugin/pull/107) guide to correctly link an issue.'
-          no_issue_message: 'The PR must be linked to an issue assigned to the PR author. Follow the GitHub [Linking a pull request to an issue](https://github.com/PalisadoesFoundation/talawa-plugin/pull/107) guide to correctly link an issue.'
+          no_assignee_message: 'The linked issue must be assigned to the PR author. Please fill in our PR template correctly. Follow the GitHub guide on linking a pull request to an issue https://github.com/PalisadoesFoundation/talawa-plugin/pull/107'
+          no_issue_message: 'The PR must be linked to an issue assigned to the PR author. Please fill in our PR template correctly. Follow the GitHub guide on linking a pull request to an issue https://github.com/PalisadoesFoundation/talawa-plugin/pull/107'
           check_issue_reference: 'true'
           require_assignee: 'true'
           # List of usernames who can create PRs without having an assigned issue
