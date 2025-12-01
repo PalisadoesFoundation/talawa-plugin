@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "archiver": "^7.0.1",
-    "prettier": "^3.6.2"
+    "prettier": "^3.7.3"
   },
   "homepage": "https://github.com/PalisadoesFoundation/talawa-plugin#readme",
   "license": "GNU General Public License v3.0",
