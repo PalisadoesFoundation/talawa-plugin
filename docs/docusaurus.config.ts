@@ -50,7 +50,7 @@ const config: Config = {
             'https://github.com/PalisadoesFoundation/talawa-plugin/tree/develop/docs/docs',
         },
         theme: {
-          customCss: undefined,
+          customCss: require.resolve('./src/css/custom.css'),
         },
       },
     ],
