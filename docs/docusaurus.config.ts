@@ -40,7 +40,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: ({ docPath }) => {
+          editUrl: ({ docPath }: { docPath: string }) => {
             return `https://github.com/PalisadoesFoundation/talawa-plugin/edit/develop/docs/docs/${docPath}`;
           },
         },
@@ -50,7 +50,7 @@ const config: Config = {
             'https://github.com/PalisadoesFoundation/talawa-plugin/tree/develop/docs/docs',
         },
         theme: {
-          customCss: undefined,
+          customCss: require.resolve("./src/css/custom.css"),
         },
       },
     ],
