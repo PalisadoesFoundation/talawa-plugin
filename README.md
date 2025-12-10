@@ -1,4 +1,5 @@
 # Talawa Plugin
+<!-- Workflow approval access -->
 
 💬 Join our [community forum](https://community.talawa.io/) to meet others using and improving Talawa!
 
