@@ -39,14 +39,20 @@ The test configuration is defined in `vitest.config.ts` at the repository root.
 - Ensures optimal performance without over-subscription
 
 **Test File Patterns:**
-- `__tests__/**/*.{test,spec}.{js,ts}` - Platform tests
+- `__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}` - Platform tests
 - `plugins/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}` - Plugin-specific tests
 
 **Coverage Configuration:**
 - Provider: v8 (faster than istanbul)
 - Reporters: text, lcov, html, json
 - Output directory: `./coverage/vitest`
-- Thresholds: 60% lines, 60% functions, 50% branches, 60% statements
+- Excludes: node_modules, dist, coverage, docs, config files, scripts/docs, scripts/githooks
+- Current Thresholds:
+  - Lines: 60%
+  - Functions: 60%
+  - Branches: 50%
+  - Statements: 60%
+- Note: Platform infrastructure tests achieve >95% coverage for tested modules; thresholds will be gradually increased as more tests are added
 
 ## Available Test Scripts
 
