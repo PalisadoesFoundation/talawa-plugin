@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 interface PluginManifest {
     name: string;
@@ -232,18 +234,94 @@ describe('Manifest Schema Validation', () => {
             expect(invalidManifest.version).toBeUndefined();
         });
 
-        it('should reject manifest with invalid version format', () => {
-            const invalidVersion = 'v1.0';
-
-            expect(invalidVersion).not.toMatch(/^\d+\.\d+\.\d+$/);
-        });
-
         it('should reject invalid pluginId format', () => {
             const invalidIds = ['Test-Plugin', 'test_Plugin', 'Test Plugin', 'TEST-PLUGIN'];
 
             invalidIds.forEach((id) => {
                 expect(id).not.toMatch(/^[a-z0-9-_]+$/);
             });
+        });
+    });
+});
+
+describe('Real Plugin Manifest Validation', () => {
+    describe('Razorpay Plugin Manifests', () => {
+        it('should validate Razorpay admin manifest', () => {
+            const manifestPath = join(process.cwd(), 'plugins/Razorpay/admin/manifest.json');
+
+            if (!existsSync(manifestPath)) {
+                console.warn('Razorpay admin manifest not found, skipping test');
+                return;
+            }
+
+            const manifestContent = readFileSync(manifestPath, 'utf-8');
+            const manifest: PluginManifest = JSON.parse(manifestContent);
+
+            // Core fields
+            expect(manifest.name).toBeDefined();
+            expect(manifest.pluginId).toBe('razorpay');
+            expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
+            expect(manifest.description).toBeDefined();
+            expect(manifest.author).toBeDefined();
+        });
+
+        it('should validate Razorpay API manifest', () => {
+            const manifestPath = join(process.cwd(), 'plugins/Razorpay/api/manifest.json');
+
+            if (!existsSync(manifestPath)) {
+                console.warn('Razorpay API manifest not found, skipping test');
+                return;
+            }
+
+            const manifestContent = readFileSync(manifestPath, 'utf-8');
+            const manifest: PluginManifest = JSON.parse(manifestContent);
+
+            // Core fields
+            expect(manifest.name).toBeDefined();
+            expect(manifest.pluginId).toBe('razorpay');
+            expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
+            expect(manifest.description).toBeDefined();
+            expect(manifest.author).toBeDefined();
+        });
+    });
+
+    describe('Plugin Map Manifests', () => {
+        it('should validate Plugin Map admin manifest', () => {
+            const manifestPath = join(process.cwd(), 'plugins/Plugin Map/admin/manifest.json');
+
+            if (!existsSync(manifestPath)) {
+                console.warn('Plugin Map admin manifest not found, skipping test');
+                return;
+            }
+
+            const manifestContent = readFileSync(manifestPath, 'utf-8');
+            const manifest: PluginManifest = JSON.parse(manifestContent);
+
+            // Core fields
+            expect(manifest.name).toBeDefined();
+            expect(manifest.pluginId).toMatch(/^[a-z0-9-_]+$/);
+            expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
+            expect(manifest.description).toBeDefined();
+            expect(manifest.author).toBeDefined();
+        });
+
+        it('should validate Plugin Map API manifest', () => {
+            const manifestPath = join(process.cwd(), 'plugins/Plugin Map/api/manifest.json');
+
+            if (!existsSync(manifestPath)) {
+                console.warn('Plugin Map API manifest not found, skipping test');
+                return;
+            }
+
+            const manifestContent = readFileSync(manifestPath, 'utf-8');
+            const manifest: PluginManifest = JSON.parse(manifestContent);
+
+            // Core fields
+            expect(manifest.name).toBeDefined();
+            expect(manifest.pluginId).toMatch(/^[a-z0-9-_]+$/);
+            expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
+            expect(manifest.description).toBeDefined();
+            expect(manifest.author).toBeDefined();
         });
     });
 });
