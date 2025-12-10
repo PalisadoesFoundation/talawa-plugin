@@ -360,7 +360,15 @@ describe('Real Plugin Manifest Validation', () => {
       'should validate Razorpay admin manifest',
       () => {
         const manifestContent = readFileSync(manifestPath, 'utf-8');
-        const manifest: PluginManifest = JSON.parse(manifestContent);
+        let manifest: PluginManifest;
+
+        try {
+          manifest = JSON.parse(manifestContent);
+        } catch (error) {
+          throw new Error(
+            `Failed to parse JSON in ${manifestPath}: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
 
         // Use validation function
         const result = validateManifest(manifest);
@@ -383,7 +391,15 @@ describe('Real Plugin Manifest Validation', () => {
       'should validate Razorpay API manifest',
       () => {
         const manifestContent = readFileSync(apiManifestPath, 'utf-8');
-        const manifest: PluginManifest = JSON.parse(manifestContent);
+        let manifest: PluginManifest;
+
+        try {
+          manifest = JSON.parse(manifestContent);
+        } catch (error) {
+          throw new Error(
+            `Failed to parse JSON in ${apiManifestPath}: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
 
         const result = validateManifest(manifest);
         expect(result.valid).toBe(true);
@@ -404,7 +420,15 @@ describe('Real Plugin Manifest Validation', () => {
       'should validate Plugin Map admin manifest',
       () => {
         const manifestContent = readFileSync(pluginMapAdminPath, 'utf-8');
-        const manifest: PluginManifest = JSON.parse(manifestContent);
+        let manifest: PluginManifest;
+
+        try {
+          manifest = JSON.parse(manifestContent);
+        } catch (error) {
+          throw new Error(
+            `Failed to parse JSON in ${pluginMapAdminPath}: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
 
         const result = validateManifest(manifest);
         expect(result.valid).toBe(true);
@@ -421,7 +445,15 @@ describe('Real Plugin Manifest Validation', () => {
       'should validate Plugin Map API manifest',
       () => {
         const manifestContent = readFileSync(pluginMapApiPath, 'utf-8');
-        const manifest: PluginManifest = JSON.parse(manifestContent);
+        let manifest: PluginManifest;
+
+        try {
+          manifest = JSON.parse(manifestContent);
+        } catch (error) {
+          throw new Error(
+            `Failed to parse JSON in ${pluginMapApiPath}: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
 
         const result = validateManifest(manifest);
         expect(result.valid).toBe(true);
