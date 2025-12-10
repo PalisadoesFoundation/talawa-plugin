@@ -29,6 +29,8 @@ export function validateManifest(manifest: unknown): ValidationResult {
       errors.push(`Missing required field: ${field}`);
     } else if (typeof m[field] !== 'string') {
       errors.push(`Field "${field}" must be a string`);
+    } else if (m[field].trim().length === 0) {
+      errors.push(`Field "${field}" must be a non-empty string`);
     }
   }
 

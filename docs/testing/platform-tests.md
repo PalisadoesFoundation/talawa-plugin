@@ -9,10 +9,10 @@ Platform tests validate the core plugin system infrastructure:
 
 ## Test Location
 
-All platform tests are in `tests/platform/`:
+All platform tests are in `test/platform/`:
 
 ```
-tests/platform/
+test/platform/
 ├── manifestValidation.test.ts  # Manifest schema validation
 ├── generator.test.ts           # Plugin scaffolding tests
 └── packaging.test.ts           # Packaging & zip creation tests
@@ -22,10 +22,10 @@ tests/platform/
 
 ```bash
 # Run all platform tests
-pnpm test tests/platform
+pnpm test test/platform
 
 # Run specific platform test
-pnpm test tests/platform/manifestValidation.test.ts
+pnpm test test/platform/manifestValidation.test.ts
 ```
 
 ## Manifest Validation Tests
@@ -73,7 +73,7 @@ Tests in `packaging.test.ts` validate:
 
 When adding platform functionality:
 
-1. Create test file in `tests/platform/`
+1. Create test file in `test/platform/`
 2. Follow naming convention: `[feature].test.ts`
 3. Test both success and failure cases
 4. Clean up temporary files/directories
@@ -83,4 +83,4 @@ When adding platform functionality:
 
 Platform tests should maintain **80%+ coverage** as they form the foundation for all plugin testing.
 
-Current stats: Run `pnpm test:coverage tests/platform` to see latest coverage.
+Current stats: Run `pnpm test:coverage test/platform` to see latest coverage.

@@ -22,7 +22,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: [
-      'tests/**/*.{test,spec}.{js,jsx,ts,tsx}',
+      'test/**/*.{test,spec}.{js,jsx,ts,tsx}',
       'plugins/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}',
     ],
     exclude: [

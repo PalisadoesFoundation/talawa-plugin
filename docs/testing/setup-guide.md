@@ -41,7 +41,7 @@ The test configuration is defined in `vitest.config.ts` at the repository root.
 - Ensures optimal performance without over-subscription
 
 **Test File Patterns:**
-- `tests/**/*.{test,spec}.{js,jsx,ts,tsx}` - Platform tests
+- `test/**/*.{test,spec}.{js,jsx,ts,tsx}` - Platform tests
 - `plugins/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}` - Plugin-specific tests
 
 **Coverage Configuration:**
@@ -72,10 +72,10 @@ pnpm test:watch
 pnpm test:ui
 
 # Run specific test file
-pnpm test tests/platform/manifestValidation.test.ts
+pnpm test test/platform/manifestValidation.test.ts
 
 # Run all platform tests
-pnpm test tests/platform
+pnpm test test/platform
 ```
 
 ## Coverage Reports
@@ -100,7 +100,7 @@ npx serve coverage/vitest
 
 ```
 talawa-plugin/
-├── tests/                  # Platform infrastructure tests
+├── test/                  # Platform infrastructure tests
 │   ├── platform/
 │   │   ├── manifestValidation.test.ts
 │   │   ├── generator.test.ts
