@@ -42,7 +42,7 @@ export function validateManifest(manifest: unknown): ValidationResult {
   }
 
   // PluginId format (lowercase with hyphens/underscores)
-  if (m.pluginId && !/^[a-z0-9-_]+$/.test(m.pluginId)) {
+  if (m.pluginId && !/^[a-z0-9_-]+$/.test(m.pluginId)) {
     errors.push(
       'Field "pluginId" must be lowercase with hyphens or underscores only',
     );
