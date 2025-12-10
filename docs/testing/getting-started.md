@@ -22,7 +22,7 @@ pnpm test:coverage
 Create a test file with `.test.ts` or `.test.tsx` extension:
 
 ```typescript
-// __tests__/example.test.ts
+// tests/example.test.ts
 import { describe, it, expect } from 'vitest';
 
 describe('My First Test', () => {
@@ -34,7 +34,7 @@ describe('My First Test', () => {
 
 Run it:
 ```bash
-pnpm test __tests__/example.test.ts
+pnpm test tests/example.test.ts
 ```
 
 ## Common Test Patterns

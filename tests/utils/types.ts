@@ -2,14 +2,14 @@
  * Shared types for plugin manifest validation
  */
 export interface PluginManifest {
-    name: string;
-    pluginId: string;
-    version: string;
-    description: string;
-    author: string;
-    main?: string;
-    icon?: string;
-    extensionPoints?: Record<string, unknown[]>;
+  name: string;
+  pluginId: string;
+  version: string;
+  description: string;
+  author: string;
+  main?: string;
+  icon?: string;
+  extensionPoints?: Record<string, unknown[]>;
 }
 
 /**

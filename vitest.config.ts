@@ -21,7 +21,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}', 'plugins/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+    include: [
+      'tests/**/*.{test,spec}.{js,jsx,ts,tsx}',
+      'plugins/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}',
+    ],
     exclude: [
       'node_modules/**',
       'dist/**',
