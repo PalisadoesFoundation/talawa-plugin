@@ -1,3 +1,10 @@
+---
+id: getting-started
+title: Testing - Getting Started
+slug: /developer-resources/testing/getting-started
+sidebar_position: 16
+---
+
 # Getting Started with Testing
 
 ## Quick Start
@@ -85,5 +92,5 @@ try {
 
 ## Next Steps
 
-- Read [Platform Tests Guide](./platform-tests.md) for platform-specific patterns
-- Read [Setup Guide](./setup-guide.md) for detailed configuration
+- Read [Platform Tests Guide](platform-tests) for platform-specific patterns
+- Read [Setup Guide](setup) for detailed configuration
