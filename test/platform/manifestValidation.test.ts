@@ -32,7 +32,7 @@ describe('Manifest Schema Validation', () => {
       expect(typeof manifest.pluginId).toBe('string');
       expect(manifest.pluginId.length).toBeGreaterThan(0);
       // PluginId should be lowercase with hyphens or underscores
-      expect(manifest.pluginId).toMatch(/^[a-z0-9-_]+$/);
+      expect(manifest.pluginId).toMatch(/^[a-z0-9_-]+$/);
     });
 
     it('should validate version format (semver)', () => {

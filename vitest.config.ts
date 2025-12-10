@@ -72,7 +72,10 @@ export default defineConfig({
         statements: 60,
       },
     },
-    testTimeout: 30000,
-    hookTimeout: 10000,
+    // Test timeouts - configurable via env vars
+    // CI environments can be slower; local runs typically complete in <1s per test
+    // Packaging tests do actual zip operations which can vary in duration
+    testTimeout: parseInt(process.env.VITEST_TEST_TIMEOUT || '10000', 10), // 10s default, 30s for CI
+    hookTimeout: parseInt(process.env.VITEST_HOOK_TIMEOUT || '5000', 10),  // 5s default
   },
 });
