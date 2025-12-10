@@ -1,42 +1,51 @@
+import { PluginManifest, SEMVER_SIMPLE_REGEX } from './types';
+
 export interface ValidationResult {
     valid: boolean;
     errors: string[];
 }
 
-export function validateManifest(manifest: any): ValidationResult {
+export function validateManifest(manifest: unknown): ValidationResult {
     const errors: string[] = [];
 
+    // Type guard for basic object structure
+    if (!manifest || typeof manifest !== 'object') {
+        return { valid: false, errors: ['Manifest must be an object'] };
+    }
+
+    const m = manifest as Partial<PluginManifest>;
+
     // Required fields
-    if (!manifest.name) errors.push('Missing required field: name');
-    if (!manifest.pluginId) errors.push('Missing required field: pluginId');
-    if (!manifest.version) errors.push('Missing required field: version');
-    if (!manifest.description) errors.push('Missing required field: description');
-    if (!manifest.author) errors.push('Missing required field: author');
+    if (!m.name) errors.push('Missing required field: name');
+    if (!m.pluginId) errors.push('Missing required field: pluginId');
+    if (!m.version) errors.push('Missing required field: version');
+    if (!m.description) errors.push('Missing required field: description');
+    if (!m.author) errors.push('Missing required field: author');
 
     // Field types
-    if (manifest.name && typeof manifest.name !== 'string') {
+    if (m.name && typeof m.name !== 'string') {
         errors.push('Field "name" must be a string');
     }
-    if (manifest.pluginId && typeof manifest.pluginId !== 'string') {
+    if (m.pluginId && typeof m.pluginId !== 'string') {
         errors.push('Field "pluginId" must be a string');
     }
-    if (manifest.version && typeof manifest.version !== 'string') {
+    if (m.version && typeof m.version !== 'string') {
         errors.push('Field "version" must be a string');
     }
-    if (manifest.description && typeof manifest.description !== 'string') {
+    if (m.description && typeof m.description !== 'string') {
         errors.push('Field "description" must be a string');
     }
-    if (manifest.author && typeof manifest.author !== 'string') {
+    if (m.author && typeof m.author !== 'string') {
         errors.push('Field "author" must be a string');
     }
 
     // PluginId format (lowercase with hyphens/underscores)
-    if (manifest.pluginId && !/^[a-z0-9-_]+$/.test(manifest.pluginId)) {
+    if (m.pluginId && !/^[a-z0-9-_]+$/.test(m.pluginId)) {
         errors.push('Field "pluginId" must be lowercase with hyphens or underscores only');
     }
 
     // Version format (semantic versioning)
-    if (manifest.version && !/^\d+\.\d+\.\d+$/.test(manifest.version)) {
+    if (m.version && !SEMVER_SIMPLE_REGEX.test(m.version)) {
         errors.push('Field "version" must follow semantic versioning (e.g., 1.0.0)');
     }
 

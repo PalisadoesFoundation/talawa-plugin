@@ -6,11 +6,9 @@ import { createAdminSkeleton } from '../../scripts/init/initAdmin';
 import { createAPISkeleton } from '../../scripts/init/initApi';
 
 describe('Plugin Generator', () => {
-    let tempDir: string;
-
     describe('Admin Module Generation', () => {
         it('should create admin module structure', () => {
-            tempDir = mkdtempSync(join(tmpdir(), 'plugin-test-'));
+            const tempDir = mkdtempSync(join(tmpdir(), 'plugin-test-'));
 
             try {
                 createAdminSkeleton('TestPlugin', tempDir);
@@ -42,7 +40,7 @@ describe('Plugin Generator', () => {
 
     describe('API Module Generation', () => {
         it('should create api module structure', () => {
-            tempDir = mkdtempSync(join(tmpdir(), 'plugin-test-'));
+            const tempDir = mkdtempSync(join(tmpdir(), 'plugin-test-'));
 
             try {
                 createAPISkeleton('TestPlugin', tempDir);

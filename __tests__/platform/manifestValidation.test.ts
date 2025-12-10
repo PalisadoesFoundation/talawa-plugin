@@ -2,17 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { validateManifest } from '../utils/validateManifest';
-
-interface PluginManifest {
-    name: string;
-    pluginId: string;
-    version: string;
-    description: string;
-    author: string;
-    main?: string;
-    icon?: string;
-    extensionPoints?: Record<string, unknown[]>;
-}
+import type { PluginManifest } from '../utils/types';
 
 describe('Manifest Schema Validation', () => {
     describe('Core Schema Requirements', () => {

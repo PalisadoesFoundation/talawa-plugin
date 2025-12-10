@@ -6,8 +6,8 @@ The talawa-plugin repository uses [Vitest](https://vitest.dev/) as the testing f
 
 ## Prerequisites
 
-- Node.js 24.x or higher
-- pnpm 10.x or higher
+- Node.js 24.x (as used in CI - see [`.github/workflows/pull-request.yml`](../../.github/workflows/pull-request.yml))
+- pnpm 10.x or higher (see [`package.json`](../../package.json) `packageManager` field)
 
 ## Installation
 
