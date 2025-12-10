@@ -21,9 +21,16 @@ describe('Plugin Generator', () => {
                 // Check if essential files exist
                 expect(existsSync(join(tempDir, 'TestPlugin/admin/index.tsx'))).toBe(true);
                 expect(existsSync(join(tempDir, 'TestPlugin/admin/manifest.json'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/admin/info.json'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/admin/README.md'))).toBe(true);
 
-                // Check if directories exist
+                // Check if directories and nested files exist
                 expect(existsSync(join(tempDir, 'TestPlugin/admin/pages'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/admin/pages/index.tsx'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/admin/assets'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/admin/assets/placeholder.txt'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/admin/injector'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/admin/injector/IconInjector.tsx'))).toBe(true);
             } finally {
                 // Cleanup
                 if (existsSync(tempDir)) {
@@ -46,9 +53,16 @@ describe('Plugin Generator', () => {
                 // Check if essential files exist
                 expect(existsSync(join(tempDir, 'TestPlugin/api/index.ts'))).toBe(true);
                 expect(existsSync(join(tempDir, 'TestPlugin/api/manifest.json'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/api/README.md'))).toBe(true);
 
-                // Check if directories exist
+                // Check if nested directories and files exist
                 expect(existsSync(join(tempDir, 'TestPlugin/api/graphql'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/api/graphql/inputs.ts'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/api/graphql/queries.ts'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/api/graphql/mutations.ts'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/api/graphql/types.ts'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/api/database'))).toBe(true);
+                expect(existsSync(join(tempDir, 'TestPlugin/api/database/tables.ts'))).toBe(true);
             } finally {
                 // Cleanup
                 if (existsSync(tempDir)) {

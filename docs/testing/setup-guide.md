@@ -21,9 +21,11 @@ pnpm install
 
 The following packages are used for testing:
 
-- `vitest@4.0.15` - Test framework
-- `@vitest/coverage-v8@4.0.15` - Code coverage provider
-- `@vitest/ui@4.0.15` - Interactive test UI
+- `vitest` - Test framework
+- `@vitest/coverage-v8` - Code coverage provider
+- `@vitest/ui` - Interactive test UI
+
+See [`package.json`](../../package.json) for current versions.
 
 ## Vitest Configuration
 

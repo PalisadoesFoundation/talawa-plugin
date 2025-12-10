@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { validateManifest } from '../utils/validateManifest';
 
 interface PluginManifest {
     name: string;
@@ -15,8 +16,8 @@ interface PluginManifest {
 
 describe('Manifest Schema Validation', () => {
     describe('Core Schema Requirements', () => {
-        it('should validate required fields in manifest', () => {
-            const validManifest: PluginManifest = {
+        it('should validate a complete valid manifest', () => {
+            const validManifest = {
                 name: 'Test Plugin',
                 pluginId: 'test-plugin',
                 version: '1.0.0',
@@ -24,11 +25,9 @@ describe('Manifest Schema Validation', () => {
                 author: 'Test Author',
             };
 
-            expect(validManifest.name).toBeDefined();
-            expect(validManifest.pluginId).toBeDefined();
-            expect(validManifest.version).toBeDefined();
-            expect(validManifest.description).toBeDefined();
-            expect(validManifest.author).toBeDefined();
+            const result = validateManifest(validManifest);
+            expect(result.valid).toBe(true);
+            expect(result.errors).toHaveLength(0);
         });
 
         it('should validate pluginId format', () => {
@@ -218,27 +217,45 @@ describe('Manifest Schema Validation', () => {
             const invalidManifest = {
                 name: 'Test Plugin',
                 version: '1.0.0',
+                description: 'A test plugin',
+                author: 'Test Author',
                 // Missing pluginId
-            } as Record<string, unknown>;
+            };
 
-            expect(invalidManifest.pluginId).toBeUndefined();
+            const result = validateManifest(invalidManifest);
+            expect(result.valid).toBe(false);
+            expect(result.errors).toContain('Missing required field: pluginId');
         });
 
         it('should reject manifest without version', () => {
             const invalidManifest = {
                 name: 'Test Plugin',
-                pluginId: 'test',
+                pluginId: 'test-plugin',
+                description: 'A test plugin',
+                author: 'Test Author',
                 // Missing version
-            } as Record<string, unknown>;
+            };
 
-            expect(invalidManifest.version).toBeUndefined();
+            const result = validateManifest(invalidManifest);
+            expect(result.valid).toBe(false);
+            expect(result.errors).toContain('Missing required field: version');
         });
 
         it('should reject invalid pluginId format', () => {
             const invalidIds = ['Test-Plugin', 'test_Plugin', 'Test Plugin', 'TEST-PLUGIN'];
 
             invalidIds.forEach((id) => {
-                expect(id).not.toMatch(/^[a-z0-9-_]+$/);
+                const invalidManifest = {
+                    name: 'Test Plugin',
+                    pluginId: id,
+                    version: '1.0.0',
+                    description: 'A test plugin',
+                    author: 'Test Author',
+                };
+
+                const result = validateManifest(invalidManifest);
+                expect(result.valid).toBe(false);
+                expect(result.errors).toContain('Field "pluginId" must be lowercase with hyphens or underscores only');
             });
         });
     });
@@ -246,82 +263,58 @@ describe('Manifest Schema Validation', () => {
 
 describe('Real Plugin Manifest Validation', () => {
     describe('Razorpay Plugin Manifests', () => {
-        it('should validate Razorpay admin manifest', () => {
-            const manifestPath = join(process.cwd(), 'plugins/Razorpay/admin/manifest.json');
+        const manifestPath = join(process.cwd(), 'plugins/Razorpay/admin/manifest.json');
 
-            if (!existsSync(manifestPath)) {
-                console.warn('Razorpay admin manifest not found, skipping test');
-                return;
-            }
-
+        it.skipIf(!existsSync(manifestPath))('should validate Razorpay admin manifest', () => {
             const manifestContent = readFileSync(manifestPath, 'utf-8');
             const manifest: PluginManifest = JSON.parse(manifestContent);
 
+            // Use validation function
+            const result = validateManifest(manifest);
+            expect(result.valid).toBe(true);
+            expect(result.errors).toHaveLength(0);
+
             // Core fields
-            expect(manifest.name).toBeDefined();
             expect(manifest.pluginId).toBe('razorpay');
-            expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
             expect(manifest.description).toBeDefined();
             expect(manifest.author).toBeDefined();
         });
 
-        it('should validate Razorpay API manifest', () => {
-            const manifestPath = join(process.cwd(), 'plugins/Razorpay/api/manifest.json');
+        const apiManifestPath = join(process.cwd(), 'plugins/Razorpay/api/manifest.json');
 
-            if (!existsSync(manifestPath)) {
-                console.warn('Razorpay API manifest not found, skipping test');
-                return;
-            }
-
-            const manifestContent = readFileSync(manifestPath, 'utf-8');
+        it.skipIf(!existsSync(apiManifestPath))('should validate Razorpay API manifest', () => {
+            const manifestContent = readFileSync(apiManifestPath, 'utf-8');
             const manifest: PluginManifest = JSON.parse(manifestContent);
 
-            // Core fields
-            expect(manifest.name).toBeDefined();
+            const result = validateManifest(manifest);
+            expect(result.valid).toBe(true);
+            expect(result.errors).toHaveLength(0);
+
             expect(manifest.pluginId).toBe('razorpay');
-            expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
-            expect(manifest.description).toBeDefined();
-            expect(manifest.author).toBeDefined();
         });
     });
 
     describe('Plugin Map Manifests', () => {
-        it('should validate Plugin Map admin manifest', () => {
-            const manifestPath = join(process.cwd(), 'plugins/Plugin Map/admin/manifest.json');
+        const pluginMapAdminPath = join(process.cwd(), 'plugins/Plugin Map/admin/manifest.json');
 
-            if (!existsSync(manifestPath)) {
-                console.warn('Plugin Map admin manifest not found, skipping test');
-                return;
-            }
-
-            const manifestContent = readFileSync(manifestPath, 'utf-8');
+        it.skipIf(!existsSync(pluginMapAdminPath))('should validate Plugin Map admin manifest', () => {
+            const manifestContent = readFileSync(pluginMapAdminPath, 'utf-8');
             const manifest: PluginManifest = JSON.parse(manifestContent);
 
-            // Core fields
-            expect(manifest.name).toBeDefined();
-            expect(manifest.pluginId).toMatch(/^[a-z0-9-_]+$/);
-            expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
-            expect(manifest.description).toBeDefined();
-            expect(manifest.author).toBeDefined();
+            const result = validateManifest(manifest);
+            expect(result.valid).toBe(true);
+            expect(result.errors).toHaveLength(0);
         });
 
-        it('should validate Plugin Map API manifest', () => {
-            const manifestPath = join(process.cwd(), 'plugins/Plugin Map/api/manifest.json');
+        const pluginMapApiPath = join(process.cwd(), 'plugins/Plugin Map/api/manifest.json');
 
-            if (!existsSync(manifestPath)) {
-                console.warn('Plugin Map API manifest not found, skipping test');
-                return;
-            }
-
-            const manifestContent = readFileSync(manifestPath, 'utf-8');
+        it.skipIf(!existsSync(pluginMapApiPath))('should validate Plugin Map API manifest', () => {
+            const manifestContent = readFileSync(pluginMapApiPath, 'utf-8');
             const manifest: PluginManifest = JSON.parse(manifestContent);
 
-            // Core fields
-            expect(manifest.name).toBeDefined();
-            expect(manifest.pluginId).toMatch(/^[a-z0-9-_]+$/);
-            expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
-            expect(manifest.description).toBeDefined();
-            expect(manifest.author).toBeDefined();
+            const result = validateManifest(manifest);
+            expect(result.valid).toBe(true);
+            expect(result.errors).toHaveLength(0);
         });
     });
 });
