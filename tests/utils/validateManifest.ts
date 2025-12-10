@@ -1,4 +1,4 @@
-import { PluginManifest, SEMVER_SIMPLE_REGEX } from "./types";
+import { PluginManifest, SEMVER_SIMPLE_REGEX } from './types';
 
 export interface ValidationResult {
   valid: boolean;
@@ -9,34 +9,34 @@ export function validateManifest(manifest: unknown): ValidationResult {
   const errors: string[] = [];
 
   // Type guard for basic object structure
-  if (!manifest || typeof manifest !== "object") {
-    return { valid: false, errors: ["Manifest must be an object"] };
+  if (!manifest || typeof manifest !== 'object') {
+    return { valid: false, errors: ['Manifest must be an object'] };
   }
 
   const m = manifest as Partial<PluginManifest>;
 
   // Required string fields
   const requiredFields: Array<keyof PluginManifest> = [
-    "name",
-    "pluginId",
-    "version",
-    "description",
-    "author",
+    'name',
+    'pluginId',
+    'version',
+    'description',
+    'author',
   ];
 
   for (const field of requiredFields) {
     if (!m[field]) {
       errors.push(`Missing required field: ${field}`);
-    } else if (typeof m[field] !== "string") {
+    } else if (typeof m[field] !== 'string') {
       errors.push(`Field "${field}" must be a string`);
     }
   }
 
   // Optional string fields
-  const optionalFields: Array<keyof PluginManifest> = ["main", "icon"];
+  const optionalFields: Array<keyof PluginManifest> = ['main', 'icon'];
 
   for (const field of optionalFields) {
-    if (m[field] !== undefined && typeof m[field] !== "string") {
+    if (m[field] !== undefined && typeof m[field] !== 'string') {
       errors.push(`Field "${field}" must be a string when provided`);
     }
   }
