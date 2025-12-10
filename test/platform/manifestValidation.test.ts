@@ -21,35 +21,94 @@ describe('Manifest Schema Validation', () => {
     });
 
     it('should validate pluginId format', () => {
-      const manifest: PluginManifest = {
-        name: 'Test Plugin',
-        pluginId: 'test-plugin',
-        version: '1.0.0',
-        description: 'A test plugin',
-        author: 'Test Author',
-      };
+      // Valid pluginIds
+      const validIds = [
+        'test-plugin',
+        'my_plugin',
+        'plugin-123',
+        'abc_def-ghi',
+      ];
 
-      expect(typeof manifest.pluginId).toBe('string');
-      expect(manifest.pluginId.length).toBeGreaterThan(0);
-      // PluginId should be lowercase with hyphens or underscores
-      expect(manifest.pluginId).toMatch(/^[a-z0-9_-]+$/);
+      validIds.forEach((id) => {
+        const manifest = {
+          name: 'Test Plugin',
+          pluginId: id,
+          version: '1.0.0',
+          description: 'A test plugin',
+          author: 'Test Author',
+        };
+
+        const result = validateManifest(manifest);
+        expect(result.valid).toBe(true);
+        expect(result.errors).toHaveLength(0);
+      });
+
+      // Invalid pluginIds
+      const invalidIds = [
+        'Test-Plugin',
+        'test Plugin',
+        'TEST_PLUGIN',
+        'test@plugin',
+      ];
+
+      invalidIds.forEach((id) => {
+        const manifest = {
+          name: 'Test Plugin',
+          pluginId: id,
+          version: '1.0.0',
+          description: 'A test plugin',
+          author: 'Test Author',
+        };
+
+        const result = validateManifest(manifest);
+        expect(result.valid).toBe(false);
+        expect(result.errors).toContain(
+          'Field "pluginId" must be lowercase with hyphens or underscores only',
+        );
+      });
     });
 
     it('should validate version format (semver)', () => {
-      const manifest: PluginManifest = {
-        name: 'Test Plugin',
-        pluginId: 'test-plugin',
-        version: '1.0.0',
-        description: 'A test plugin',
-        author: 'Test Author',
-      };
+      // Valid versions
+      const validVersions = ['1.0.0', '0.0.1', '10.20.30'];
 
-      // Version should follow semantic versioning (major.minor.patch)
-      expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
+      validVersions.forEach((ver) => {
+        const manifest = {
+          name: 'Test Plugin',
+          pluginId: 'test-plugin',
+          version: ver,
+          description: 'A test plugin',
+          author: 'Test Author',
+        };
+
+        const result = validateManifest(manifest);
+        expect(result.valid).toBe(true);
+        expect(result.errors).toHaveLength(0);
+      });
+
+      // Invalid versions
+      const invalidVersions = ['1.0', 'v1.0.0', '1.0.0-beta', '1.0.0.0'];
+
+      invalidVersions.forEach((ver) => {
+        const manifest = {
+          name: 'Test Plugin',
+          pluginId: 'test-plugin',
+          version: ver,
+          description: 'A test plugin',
+          author: 'Test Author',
+        };
+
+        const result = validateManifest(manifest);
+        expect(result.valid).toBe(false);
+        expect(result.errors).toContain(
+          'Field "version" must follow semantic versioning (e.g., 1.0.0)',
+        );
+      });
     });
 
     it('should validate optional fields', () => {
-      const manifest: PluginManifest = {
+      // Valid optional fields
+      const manifestWithOptional = {
         name: 'Test Plugin',
         pluginId: 'test-plugin',
         version: '1.0.0',
@@ -59,15 +118,33 @@ describe('Manifest Schema Validation', () => {
         icon: '/assets/icon.png',
       };
 
-      if (manifest.main) {
-        expect(typeof manifest.main).toBe('string');
-      }
-      if (manifest.icon) {
-        expect(typeof manifest.icon).toBe('string');
-      }
+      const result = validateManifest(manifestWithOptional);
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+
+      // Invalid optional field types
+      const manifestWithInvalidMain = {
+        name: 'Test Plugin',
+        pluginId: 'test-plugin',
+        version: '1.0.0',
+        description: 'A test plugin',
+        author: 'Test Author',
+        main: 123, // Invalid: should be string
+      };
+
+      const result2 = validateManifest(manifestWithInvalidMain);
+      expect(result2.valid).toBe(false);
+      expect(result2.errors).toContain(
+        'Field "main" must be a string when provided',
+      );
     });
   });
 
+  // NOTE: Extension point validation is intentionally deferred
+  // The validateManifest function currently validates core manifest fields only.
+  // Extension point schema validation will be added in a future update when
+  // the complete extension point spec is finalized. These tests verify the
+  // expected structure but don't enforce it through the validator yet.
   describe('Extension Points Schema', () => {
     it('should validate extension points structure', () => {
       const manifest: PluginManifest = {
