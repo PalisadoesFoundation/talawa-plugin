@@ -42,7 +42,7 @@ The test configuration is defined in `vitest.config.ts` at the repository root.
 
 **Test File Patterns:**
 - `test/**/*.{test,spec}.{js,jsx,ts,tsx}` - Platform tests
-- `plugins/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}` - Plugin-specific tests
+- `plugins/**/test/**/*.{test,spec}.{js,jsx,ts,tsx}` - Plugin-specific tests
 
 **Coverage Configuration:**
 - Provider: v8 (faster than istanbul)
@@ -108,11 +108,11 @@ talawa-plugin/
 │   └── utils/              # Shared test utilities
 │       └── testUtils.ts
 ├── plugins/
-│   └── [PluginName]/
-│       ├── admin/
-│       │   └── __tests__/  # Admin UI tests
-│       └── api/
-│           └── __tests__/  # API/backend tests
+│   ├── Razorpay/
+│   │   ├── admin/
+│   │   │   └── test/           # Admin UI tests
+│   │   └── api/
+│   │       └── test/           # API/backend tests
 └── vitest.config.ts        # Test configuration
 ```
 
