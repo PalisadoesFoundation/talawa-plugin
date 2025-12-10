@@ -49,6 +49,14 @@ export function validateManifest(manifest: unknown): ValidationResult {
         errors.push('Field "version" must follow semantic versioning (e.g., 1.0.0)');
     }
 
+    // Optional fields
+    if (m.main !== undefined && typeof m.main !== 'string') {
+        errors.push('Field "main" must be a string when provided');
+    }
+    if (m.icon !== undefined && typeof m.icon !== 'string') {
+        errors.push('Field "icon" must be a string when provided');
+    }
+
     return {
         valid: errors.length === 0,
         errors,

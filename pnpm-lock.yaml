@@ -88,7 +88,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       vite:
-        specifier: ^6.3.5
+        specifier: ^6.3.6
         version: 6.3.6(@types/node@24.7.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.1)
       vite-plugin-istanbul:
         specifier: ^7.1.0

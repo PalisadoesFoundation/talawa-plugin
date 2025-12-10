@@ -15,7 +15,7 @@
     "@vitest/coverage-v8": "^4.0.15",
     "@vitest/ui": "^4.0.15",
     "adm-zip": "^0.5.16",
-    "vite": "^6.3.5",
+    "vite": "^6.3.6",
     "vite-plugin-istanbul": "^7.1.0",
     "vite-plugin-svgr": "^4.3.0",
     "vitest": "^4.0.15",

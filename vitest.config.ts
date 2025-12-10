@@ -52,7 +52,7 @@ export default defineConfig({
         'coverage/**',
         'docs/**',
         '**/*.d.ts',
-        '**/*.{test,spec}.{js,ts,tsx}',
+        '**/*.{test,spec}.{js,ts,tsx,jsx}',
         'plugin-zips/**',
         'scripts/docs/**',
         'scripts/githooks/**',
