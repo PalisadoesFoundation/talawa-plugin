@@ -7,6 +7,9 @@ const cpuCount = cpus().length;
 const MAX_CI_THREADS = 12;
 const MAX_LOCAL_THREADS = 16;
 
+// Calculate optimal threads based on environment
+// CI: Cap at 12 threads, use 85% of available CPUs (min 4) to avoid over-subscription
+// Local: Cap at 16 threads, use 100% of available CPUs (min 4) for maximum speed
 const ciThreads = Math.min(
   MAX_CI_THREADS,
   Math.max(4, Math.floor(cpuCount * 0.85)),
