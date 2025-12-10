@@ -9,11 +9,11 @@ describe('Plugin Generator', () => {
     let tempDir: string;
 
     describe('Admin Module Generation', () => {
-        it('should create admin module structure', () => {
+        it('should create admin module structure', async () => {
             tempDir = mkdtempSync(join(tmpdir(), 'plugin-test-'));
 
             try {
-                createAdminSkeleton('TestPlugin', tempDir);
+                await createAdminSkeleton('TestPlugin', tempDir);
 
                 // Check if admin directory exists
                 expect(existsSync(join(tempDir, 'TestPlugin/admin'))).toBe(true);
@@ -34,11 +34,11 @@ describe('Plugin Generator', () => {
     });
 
     describe('API Module Generation', () => {
-        it('should create api module structure', () => {
+        it('should create api module structure', async () => {
             tempDir = mkdtempSync(join(tmpdir(), 'plugin-test-'));
 
             try {
-                createAPISkeleton('TestPlugin', tempDir);
+                await createAPISkeleton('TestPlugin', tempDir);
 
                 // Check if api directory exists
                 expect(existsSync(join(tempDir, 'TestPlugin/api'))).toBe(true);

@@ -53,9 +53,20 @@ describe('Plugin Packager', () => {
     });
 
     afterEach(() => {
-        // Cleanup
+        // Cleanup test plugin directory
         if (existsSync(testPluginDir)) {
             rmSync(testPluginDir, { recursive: true, force: true });
+        }
+
+        // Cleanup generated zip files
+        const devZipPath = join(testOutputDir, 'test-plugin-dev.zip');
+        const prodZipPath = join(testOutputDir, 'test-plugin-prod.zip');
+
+        if (existsSync(devZipPath)) {
+            rmSync(devZipPath, { force: true });
+        }
+        if (existsSync(prodZipPath)) {
+            rmSync(prodZipPath, { force: true });
         }
     });
 

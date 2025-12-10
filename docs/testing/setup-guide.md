@@ -2,9 +2,7 @@
 
 ## Overview
 
-The talawa-plugin repository uses [Vitest](https://vitest.dev/) as the testing framework. This guide covers how to set up and configure testing in the repository
-
-.
+The talawa-plugin repository uses [Vitest](https://vitest.dev/) as the testing framework. This guide covers how to set up and configure testing in the repository.
 
 ## Prerequisites
 

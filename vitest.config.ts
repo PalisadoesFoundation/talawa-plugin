@@ -18,7 +18,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['__tests__/**/*.{test,spec}.{js,ts}', 'plugins/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+    include: ['__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}', 'plugins/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}'],
     exclude: [
       'node_modules/**',
       'dist/**',
@@ -54,7 +54,8 @@ export default defineConfig({
         '**/*.d.ts',
         '**/*.{test,spec}.{js,ts,tsx}',
         'plugin-zips/**',
-        'scripts/**',
+        'scripts/docs/**',
+        'scripts/githooks/**',
         '**/*.config.{js,ts}',
         '**/index.{js,ts}',
       ],
