@@ -461,6 +461,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Run tests
+        run: pnpm test -- --run
+
       # #######################################################################
       # # DO NOT DELETE ANY references to env.CODECOV_UNIQUE_NAME in this
       # # section. They are required for accurate calculations

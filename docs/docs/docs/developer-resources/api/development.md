@@ -1,69 +1,6 @@
-## Webhook Implementation
-
-### Example: Razorpay Webhook Registration and Handler
-
-Register your webhook in the plugin entry point (index.ts):
-
-```typescript
-import { webhookRegistry } from '../../webhooks';
-import { handleRazorpayWebhook } from './webhooks/razorpay';
-
-// ...existing code...
-
-async function onActivate() {
-  webhookRegistry.register({
-    path: '/plugin/razorpay/webhook',
-    method: 'POST',
-    handler: handleRazorpayWebhook,
-  });
-}
-
-async function onDeactivate() {
-  webhookRegistry.unregister('/plugin/razorpay/webhook');
-}
-```
-
-Example webhook handler (webhooks/razorpay.ts):
-
-```typescript
-import { FastifyRequest, FastifyReply } from 'fastify';
-import crypto from 'node:crypto';
-
-export async function handleRazorpayWebhook(req: FastifyRequest, reply: FastifyReply) {
-  const signature = req.headers['x-razorpay-signature'] as string;
-  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  const expectedSignature = crypto
-    .createHmac('sha256', webhookSecret!)
-    .update(req.body as string)
-    .digest('hex');
-
-  if (signature !== expectedSignature) {
-    reply.code(400).send({ error: 'Invalid signature' });
-    return;
-  }
-
-  // Handle event
-  const event = req.body;
-  switch (event.event) {
-    case 'payment.captured':
-      // Update payment status in DB
-      break;
-    case 'payment.failed':
-      // Handle failed payment
-      break;
-    default:
-      // Log unhandled event
-      break;
-  }
-
-  reply.send({ received: true });
-}
-```
-
-Refer to your Razorpay plugin code for more details on webhook event handling and security.
 ---
 id: api-development
-title: API Plugin Development Guide
+title: Development
 slug: /developer-resources/api/development
 sidebar_position: 3
 ---
@@ -584,7 +521,53 @@ export function createPaymentService(provider: string): IPaymentService {
 
 ## Webhook Implementation
 
+Webhooks are HTTP callbacks that payment providers use to notify your application about payment events in real-time. When a payment status changes (e.g., successful payment, failed payment, refund), the payment provider sends a POST request to your webhook endpoint with event details. Implementing webhooks is essential for keeping your payment records synchronized with the payment provider's state, especially for asynchronous payment methods where the final status may not be immediately available.
+
+### webhooks/razorpay.ts
+
+The Razorpay webhook handler validates incoming webhook requests using HMAC-SHA256 signature verification to ensure requests are authentic and come from Razorpay. This security measure prevents malicious actors from sending fake payment notifications. The handler then processes different event types to update payment statuses in your database accordingly.
+
+```typescript
+import { FastifyRequest, FastifyReply } from 'fastify';
+import crypto from 'crypto';
+
+// Razorpay Webhook Handler
+export async function handleRazorpayWebhook(req: FastifyRequest, reply: FastifyReply) {
+  const signature = req.headers['x-razorpay-signature'] as string;
+  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  const expectedSignature = crypto
+    .createHmac('sha256', webhookSecret!)
+    .update(req.body as string)
+    .digest('hex');
+
+  if (signature !== expectedSignature) {
+    reply.code(400).send({ error: 'Invalid signature' });
+    return;
+  }
+
+  // Handle event
+  const event = req.body as any;
+  switch (event.event) {
+    case 'payment.captured':
+      // Update payment status in DB
+      break;
+    case 'payment.failed':
+      // Handle failed payment
+      break;
+    default:
+      // Log unhandled event
+      break;
+  }
+
+  reply.send({ received: true });
+}
+```
+
+After processing each webhook event, always respond with a 200 status code to acknowledge receipt. Payment providers typically retry webhook deliveries if they don't receive a successful response, which could lead to duplicate event processing if not handled properly. Consider implementing idempotency checks using the event ID to prevent duplicate processing.
+
 ### webhooks/stripe.ts
+
+The Stripe webhook implementation uses Stripe's official SDK to verify webhook signatures and construct event objects. This approach provides additional type safety and automatic signature verification compared to manual verification. The handler processes critical payment lifecycle events including successful payments, failed payments, and refunds. Each event type triggers specific database updates and emits internal events that other parts of your application can listen to.
 
 ```typescript
 import { FastifyRequest, FastifyReply } from 'fastify';
