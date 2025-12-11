@@ -72,45 +72,53 @@ export async function validateExtensionPoints(
 
         if (ext.file) {
           // 2. File Existence
-          const filePath = path.join(pluginRoot, ext.file);
-          try {
-            await fs.access(filePath); // Async check for existence
+          const resolvedPath = path.resolve(pluginRoot, ext.file);
+          const normalizedRoot = path.resolve(pluginRoot);
 
-            // 3. Function Exports
-            if (ext.builderDefinition) {
-              try {
-                const fileContent = await fs.readFile(filePath, 'utf-8');
-                const safeDef = escapeRegExp(ext.builderDefinition);
+          if (!resolvedPath.startsWith(normalizedRoot)) {
+            errors.push(
+              `File "${ext.file}" for extension "${ext.name ?? ext.id ?? `index ${i}`}" is outside plugin root`,
+            );
+          } else {
+            try {
+              await fs.access(resolvedPath); // Async check for existence
 
-                // Robust regex to check for various export styles:
-                // 1. Named: export const/function/class/type name ...
-                // 2. Default: export default function name ...
-                // 3. Re-export: export { name } from ...
-                // 4. In-block: export { name }
-                const exportRegex = new RegExp(
-                  `export\\s+(const|function|async\\s+function|class|type)\\s+${safeDef}\\b|` +
-                    `export\\s+default\\s+(function|class|async\\s+function)\\s+${safeDef}\\b|` +
-                    `export\\s*{[^}]*\\b${safeDef}\\b[^}]*}`,
-                  'm',
-                );
+              // 3. Function Exports
+              if (ext.builderDefinition) {
+                try {
+                  const fileContent = await fs.readFile(resolvedPath, 'utf-8');
+                  const safeDef = escapeRegExp(ext.builderDefinition);
 
-                if (!exportRegex.test(fileContent)) {
+                  // Robust regex to check for various export styles:
+                  // 1. Named: export const/function/class/type name ...
+                  // 2. Default: export default function name ...
+                  // 3. Re-export: export { name } from ...
+                  // 4. In-block: export { name }
+                  const exportRegex = new RegExp(
+                    `export\\s+(const|function|async\\s+function|class|type)\\s+${safeDef}\\b|` +
+                      `export\\s+default\\s+(function|class|async\\s+function)\\s+${safeDef}\\b|` +
+                      `export\\s*{[^}]*\\b${safeDef}\\b[^}]*}`,
+                    'm',
+                  );
+
+                  if (!exportRegex.test(fileContent)) {
+                    errors.push(
+                      `Function "${ext.builderDefinition}" is not exported from "${ext.file}"`,
+                    );
+                  }
+                } catch (e) {
                   errors.push(
-                    `Function "${ext.builderDefinition}" is not exported from "${ext.file}"`,
+                    `Error reading file "${ext.file}" for export check: ${e}`,
                   );
                 }
-              } catch (e) {
-                errors.push(
-                  `Error reading file "${ext.file}" for export check: ${e}`,
-                );
               }
+            } catch (err: unknown) {
+              const errorMessage =
+                err instanceof Error ? err.message : String(err);
+              errors.push(
+                `File "${ext.file}" not found for extension "${ext.name}": ${errorMessage}`,
+              );
             }
-          } catch (err: unknown) {
-            const errorMessage =
-              err instanceof Error ? err.message : String(err);
-            errors.push(
-              `File "${ext.file}" not found for extension "${ext.name}": ${errorMessage}`,
-            );
           }
         } else if (pointId === 'api:graphql' || pointId === 'api:rest') {
           // File is required for code-based extensions

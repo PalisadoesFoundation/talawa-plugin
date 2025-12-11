@@ -148,6 +148,28 @@ describe('validateExtensionPoints', () => {
     );
   });
 
+  it('should invalidate paths attempting traversal outside plugin root', async () => {
+    const manifest: PluginManifest = {
+      ...validManifest,
+      extensionPoints: {
+        'api:graphql': [
+          {
+            type: 'query',
+            name: 'maliciousQuery',
+            file: '../secrets.txt',
+            builderDefinition: 'myQuery',
+          },
+        ],
+      },
+    };
+
+    const result = await validateExtensionPoints(manifest, mockPluginRoot);
+    expect(result.valid).toBe(false);
+    expect(result.errors[0]).toContain('is outside plugin root');
+    // Ensure no FS access was attempted for the traversal path
+    expect(vi.mocked(fs.access)).not.toHaveBeenCalled();
+  });
+
   it('should pass given valid file and named export', async () => {
     const manifest: PluginManifest = {
       ...validManifest,
