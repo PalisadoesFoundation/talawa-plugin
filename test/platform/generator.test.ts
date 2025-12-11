@@ -185,16 +185,14 @@ describe('Plugin Generator', () => {
         expect(indexContent).toContain('TestPlugin');
 
         // Verify lifecycle hooks
-        const mainIndexPath = join(tempDir, 'TestPlugin/admin/index.tsx');
-        const mainIndexContent = readFileSync(mainIndexPath, 'utf-8');
-        expect(mainIndexContent).toContain('onActivate');
-        expect(mainIndexContent).toContain('onDeactivate');
-        expect(mainIndexContent).toContain('onInstall');
-        expect(mainIndexContent).toContain('onUninstall');
+        expect(indexContent).toContain('onActivate');
+        expect(indexContent).toContain('onDeactivate');
+        expect(indexContent).toContain('onInstall');
+        expect(indexContent).toContain('onUninstall');
 
         // Verify API lifecycle hooks
-        createAPISkeleton('TestPlugin', tempDir);
-        const apiIndexPath = join(tempDir, 'TestPlugin/api/index.ts');
+        createAPISkeleton('TestPluginAPI', tempDir);
+        const apiIndexPath = join(tempDir, 'TestPluginAPI/api/index.ts');
         const apiIndexContent = readFileSync(apiIndexPath, 'utf-8');
         expect(apiIndexContent).toContain('onLoad');
         expect(apiIndexContent).toContain('onActivate');
