@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { validateExtensionPoints } from '../utils/validateExtensionPoints';
 import { PluginManifest } from '../utils/types';
+import { validManifest } from '../utils/fixtures';
 
 // Mock fs module
 vi.mock('fs', async () => {
@@ -27,11 +28,8 @@ describe('validateExtensionPoints', () => {
 
     it('should return valid for empty extensionPoints', async () => {
         const manifest: PluginManifest = {
-            name: 'Test',
-            pluginId: 'test',
-            version: '1.0.0',
-            description: 'desc',
-            author: 'me',
+            ...validManifest,
+            extensionPoints: undefined,
         };
         const result = await validateExtensionPoints(manifest, mockPluginRoot);
         expect(result.valid).toBe(true);
@@ -40,11 +38,7 @@ describe('validateExtensionPoints', () => {
 
     it('should validate file existence', async () => {
         const manifest: PluginManifest = {
-            name: 'Test',
-            pluginId: 'test',
-            version: '1.0.0',
-            description: 'desc',
-            author: 'me',
+            ...validManifest,
             extensionPoints: {
                 'api:graphql': [
                     {
@@ -69,11 +63,7 @@ describe('validateExtensionPoints', () => {
 
     it('should validate function exports', async () => {
         const manifest: PluginManifest = {
-            name: 'Test',
-            pluginId: 'test',
-            version: '1.0.0',
-            description: 'desc',
-            author: 'me',
+            ...validManifest,
             extensionPoints: {
                 'api:graphql': [
                     {
@@ -100,11 +90,7 @@ describe('validateExtensionPoints', () => {
 
     it('should pass given valid file and export', async () => {
         const manifest: PluginManifest = {
-            name: 'Test',
-            pluginId: 'test',
-            version: '1.0.0',
-            description: 'desc',
-            author: 'me',
+            ...validManifest,
             extensionPoints: {
                 'api:graphql': [
                     {
@@ -128,11 +114,7 @@ describe('validateExtensionPoints', () => {
 
     it('should detect duplicate names', async () => {
         const manifest: PluginManifest = {
-            name: 'Test',
-            pluginId: 'test',
-            version: '1.0.0',
-            description: 'desc',
-            author: 'me',
+            ...validManifest,
             extensionPoints: {
                 'api:graphql': [
                     {

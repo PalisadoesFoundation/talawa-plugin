@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createZip } from '../../scripts/zip/createZip';
 import AdmZip from 'adm-zip';
+import { validManifest } from '../utils/fixtures';
 
 describe('Plugin Packager', () => {
   const testOutputDir = join(process.cwd(), 'plugin-zips');
@@ -33,11 +34,9 @@ describe('Plugin Packager', () => {
     writeFileSync(
       join(adminDir, 'manifest.json'),
       JSON.stringify({
-        name: 'Test Plugin',
-        pluginId: 'test-plugin',
-        version: '1.0.0',
+        ...validManifest,
+        extensionPoints: {},
         description: 'Test plugin for packaging',
-        author: 'Test Author',
       }),
     );
 
@@ -51,11 +50,10 @@ describe('Plugin Packager', () => {
     writeFileSync(
       join(apiDir, 'manifest.json'),
       JSON.stringify({
+        ...validManifest,
+        extensionPoints: {},
         name: 'Test Plugin API',
-        pluginId: 'test-plugin',
-        version: '1.0.0',
         description: 'Test plugin API for packaging',
-        author: 'Test Author',
       }),
     );
   });

@@ -3,19 +3,14 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { validateManifest } from '../utils/validateManifest';
 import type { PluginManifest } from '../utils/types';
+import { validManifest, validExtensionPointManifest } from '../utils/fixtures';
 
 describe('Manifest Schema Validation', () => {
   describe('Core Schema Requirements', () => {
     it('should validate a complete valid manifest', () => {
-      const validManifest = {
-        name: 'Test Plugin',
-        pluginId: 'test-plugin',
-        version: '1.0.0',
-        description: 'A test plugin',
-        author: 'Test Author',
-      };
+      const manifest = { ...validManifest };
 
-      const result = validateManifest(validManifest);
+      const result = validateManifest(manifest);
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
@@ -31,11 +26,8 @@ describe('Manifest Schema Validation', () => {
 
       validIds.forEach((id) => {
         const manifest = {
-          name: 'Test Plugin',
+          ...validManifest,
           pluginId: id,
-          version: '1.0.0',
-          description: 'A test plugin',
-          author: 'Test Author',
         };
 
         const result = validateManifest(manifest);
@@ -53,11 +45,8 @@ describe('Manifest Schema Validation', () => {
 
       invalidIds.forEach((id) => {
         const manifest = {
-          name: 'Test Plugin',
+          ...validManifest,
           pluginId: id,
-          version: '1.0.0',
-          description: 'A test plugin',
-          author: 'Test Author',
         };
 
         const result = validateManifest(manifest);
@@ -74,11 +63,8 @@ describe('Manifest Schema Validation', () => {
 
       validVersions.forEach((ver) => {
         const manifest = {
-          name: 'Test Plugin',
-          pluginId: 'test-plugin',
+          ...validManifest,
           version: ver,
-          description: 'A test plugin',
-          author: 'Test Author',
         };
 
         const result = validateManifest(manifest);
@@ -91,11 +77,8 @@ describe('Manifest Schema Validation', () => {
 
       invalidVersions.forEach((ver) => {
         const manifest = {
-          name: 'Test Plugin',
-          pluginId: 'test-plugin',
+          ...validManifest,
           version: ver,
-          description: 'A test plugin',
-          author: 'Test Author',
         };
 
         const result = validateManifest(manifest);
@@ -109,11 +92,7 @@ describe('Manifest Schema Validation', () => {
     it('should validate optional fields', () => {
       // Valid optional fields
       const manifestWithOptional = {
-        name: 'Test Plugin',
-        pluginId: 'test-plugin',
-        version: '1.0.0',
-        description: 'A test plugin',
-        author: 'Test Author',
+        ...validManifest,
         main: 'index.tsx',
         icon: '/assets/icon.png',
       };
@@ -124,12 +103,8 @@ describe('Manifest Schema Validation', () => {
 
       // Invalid optional field types
       const manifestWithInvalidMain = {
-        name: 'Test Plugin',
-        pluginId: 'test-plugin',
-        version: '1.0.0',
-        description: 'A test plugin',
-        author: 'Test Author',
-        main: 123, // Invalid: should be string
+        ...validManifest,
+        main: 123 as any, // Invalid: should be string
       };
 
       const result2 = validateManifest(manifestWithInvalidMain);
@@ -141,27 +116,16 @@ describe('Manifest Schema Validation', () => {
   });
 
   // NOTE: Extension point validation is intentionally deferred
-  // The validateManifest function currently validates core manifest fields only.
-  // Extension point schema validation will be added in a future update when
-  // the complete extension point spec is finalized. These tests verify the
-  // expected structure but don't enforce it through the validator yet.
   describe('Extension Points Schema', () => {
     it('should validate extension points structure', () => {
-      const manifest: PluginManifest = {
-        name: 'Test Plugin',
-        pluginId: 'test-plugin',
-        version: '1.0.0',
-        description: 'A test plugin',
-        author: 'Test Author',
-        extensionPoints: {
-          G1: [{ injector: 'TestInjector', description: 'Test' }],
-        },
-      };
+      const manifest = { ...validExtensionPointManifest };
 
       expect(manifest.extensionPoints).toBeDefined();
       expect(typeof manifest.extensionPoints).toBe('object');
     });
 
+    // Reuse existing extensive tests as they validate specific structures not easily generalizable from fixtures
+    // but they can still benefit from type safety
     it('should validate admin extension points (G1, G2)', () => {
       interface InjectorExtensionPoint {
         injector: string;
@@ -296,11 +260,8 @@ describe('Manifest Schema Validation', () => {
   describe('Negative Schema Validation', () => {
     it('should reject manifest without pluginId', () => {
       const invalidManifest = {
-        name: 'Test Plugin',
-        version: '1.0.0',
-        description: 'A test plugin',
-        author: 'Test Author',
-        // Missing pluginId
+        ...validManifest,
+        pluginId: undefined,
       };
 
       const result = validateManifest(invalidManifest);
@@ -310,11 +271,8 @@ describe('Manifest Schema Validation', () => {
 
     it('should reject manifest without version', () => {
       const invalidManifest = {
-        name: 'Test Plugin',
-        pluginId: 'test-plugin',
-        description: 'A test plugin',
-        author: 'Test Author',
-        // Missing version
+        ...validManifest,
+        version: undefined,
       };
 
       const result = validateManifest(invalidManifest);
@@ -332,11 +290,8 @@ describe('Manifest Schema Validation', () => {
 
       invalidIds.forEach((id) => {
         const invalidManifest = {
-          name: 'Test Plugin',
+          ...validManifest,
           pluginId: id,
-          version: '1.0.0',
-          description: 'A test plugin',
-          author: 'Test Author',
         };
 
         const result = validateManifest(invalidManifest);
