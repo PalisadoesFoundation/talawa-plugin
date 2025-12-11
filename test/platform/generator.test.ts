@@ -132,6 +132,13 @@ describe('Plugin Generator', () => {
         expect(manifest.version).toBe('1.0.0');
         expect(manifest.description).toBeDefined();
         expect(manifest.author).toBeDefined();
+
+        // Verify extension points
+        expect(manifest.extensionPoints).toBeDefined();
+        expect(manifest.extensionPoints.RA1).toBeDefined();
+        expect(manifest.extensionPoints.DA1).toBeDefined();
+        expect(manifest.extensionPoints.G1).toBeDefined();
+        expect(manifest.extensionPoints.RA1[0].path).toContain('testplugin');
       } finally {
         rmSync(tempDir, { recursive: true, force: true });
       }
@@ -152,6 +159,13 @@ describe('Plugin Generator', () => {
         expect(manifest.version).toBe('1.0.0');
         expect(manifest.description).toBeDefined();
         expect(manifest.author).toBeDefined();
+
+        // Verify extension points
+        expect(manifest.extensionPoints).toBeDefined();
+        expect(manifest.extensionPoints.graphql).toBeDefined();
+        expect(manifest.extensionPoints.database).toBeDefined();
+        expect(manifest.extensionPoints.graphql[0].type).toBe('query');
+        expect(manifest.extensionPoints.database[0].type).toBe('table');
       } finally {
         rmSync(tempDir, { recursive: true, force: true });
       }
@@ -169,6 +183,58 @@ describe('Plugin Generator', () => {
         // Should contain valid React/TypeScript code
         expect(indexContent).toContain('export default');
         expect(indexContent).toContain('TestPlugin');
+
+        // Verify lifecycle hooks
+        const mainIndexPath = join(tempDir, 'TestPlugin/admin/index.tsx');
+        const mainIndexContent = readFileSync(mainIndexPath, 'utf-8');
+        expect(mainIndexContent).toContain('onActivate');
+        expect(mainIndexContent).toContain('onDeactivate');
+        expect(mainIndexContent).toContain('onInstall');
+        expect(mainIndexContent).toContain('onUninstall');
+
+        // Verify API lifecycle hooks
+        createAPISkeleton('TestPlugin', tempDir);
+        const apiIndexPath = join(tempDir, 'TestPlugin/api/index.ts');
+        const apiIndexContent = readFileSync(apiIndexPath, 'utf-8');
+        expect(apiIndexContent).toContain('onLoad');
+        expect(apiIndexContent).toContain('onActivate');
+        expect(apiIndexContent).toContain('onDeactivate');
+        expect(apiIndexContent).toContain('onUnload');
+      } finally {
+        rmSync(tempDir, { recursive: true, force: true });
+      }
+    });
+
+    it('should handle name transformations correctly', () => {
+      const tempDir = mkdtempSync(join(tmpdir(), 'plugin-test-names-'));
+
+      try {
+        const testCases = [
+          {
+            input: 'test-plugin',
+            expectedName: 'TestPlugin',
+            expectedId: 'testPlugin',
+          },
+          {
+            input: 'test_plugin',
+            expectedName: 'TestPlugin',
+            expectedId: 'testPlugin',
+          },
+        ];
+
+        testCases.forEach(({ input, expectedName, expectedId }) => {
+          createAdminSkeleton(input, tempDir);
+
+          const manifestPath = join(tempDir, `${input}/admin/manifest.json`);
+          const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+
+          expect(manifest.name).toBe(expectedName);
+          expect(manifest.pluginId).toBe(expectedId);
+
+          const indexPath = join(tempDir, `${input}/admin/index.tsx`);
+          const indexContent = readFileSync(indexPath, 'utf-8');
+          expect(indexContent).toContain(expectedName);
+        });
       } finally {
         rmSync(tempDir, { recursive: true, force: true });
       }
@@ -194,6 +260,12 @@ describe('Plugin Generator', () => {
         'Plugin name cannot be empty',
       );
       expect(() => createAPISkeleton('', tempDir)).toThrow(
+        'Plugin name cannot be empty',
+      );
+      expect(() => createAdminSkeleton('   ', tempDir)).toThrow(
+        'Plugin name cannot be empty',
+      );
+      expect(() => createAPISkeleton('   ', tempDir)).toThrow(
         'Plugin name cannot be empty',
       );
     });
