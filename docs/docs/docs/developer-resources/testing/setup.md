@@ -128,12 +128,16 @@ CI Configuration: `.github/workflows/pull-request.yml`
 Common issues and their solutions are listed below. Most problems relate to dependency mismatches or configuration errors.
 
 ### Tests fail with module not found
+
+This error typically occurs when dependencies are out of sync or when switching between branches with different package versions. The Node.js module resolution system can't locate required packages, often due to corrupted node_modules or mismatched lockfile state.
 ```bash
 # Reinstall dependencies
 pnpm install
 ```
 
 ### Coverage reports not generated
+
+Coverage generation can fail silently if the output directory is gitignored globally or if the v8 provider encounters permissions issues. Running with verbose output helps identify whether the test runner is actually collecting coverage or encountering configuration problems.
 ```bash
 # Ensure coverage directory is not gitignored
 # Run with verbose output

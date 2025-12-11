@@ -46,7 +46,11 @@ pnpm test test/example.test.ts
 
 ## Common Test Patterns
 
+These patterns demonstrate frequently used testing scenarios that you'll encounter when developing plugins. Each pattern addresses a specific testing need, from validating configuration files to managing test isolation with temporary directories. Use these as templates to build your own test suites.
+
 ### Testing manifest files
+
+Manifest files define critical plugin metadata like IDs, versions, and extension points. Testing them ensures your plugin can be properly loaded and validated by the platform. This pattern shows how to read and verify manifest structure before deployment.
 ```typescript
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -58,6 +62,8 @@ expect(manifest.pluginId).toBeDefined();
 ```
 
 ### Testing with temporary directories
+
+Many plugin operations involve file system interactions like generating scaffolding, creating archives, or processing uploads. Using temporary directories ensures tests don't pollute your workspace and can run in parallel safely. Always clean up temporary directories in a finally block to prevent resource leaks.
 ```typescript
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -72,6 +78,8 @@ try {
 ```
 
 ## Test Commands Reference
+
+The following table provides a quick reference for all available test commands. Different commands serve different workflows: use watch mode during active development, coverage mode before committing, and UI mode for debugging complex test scenarios.
 
 | Command | Purpose |
 |---------|---------|
