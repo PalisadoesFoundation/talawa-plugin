@@ -145,15 +145,21 @@ export async function createZip(
           // 1. Basic Manifest Validation
           const manifestResult = validateManifest(manifest);
           if (!manifestResult.valid) {
-            throw new Error(`Manifest validation failed for ${manifestPath}:\n${manifestResult.errors.join('\n')}`);
+            throw new Error(
+              `Manifest validation failed for ${manifestPath}:\n${manifestResult.errors.join('\n')}`,
+            );
           }
 
           // 2. Extension Point Validation
-          const extensionResult = await validateExtensionPoints(manifest, dirname(manifestPath));
+          const extensionResult = await validateExtensionPoints(
+            manifest,
+            dirname(manifestPath),
+          );
           if (!extensionResult.valid) {
-            throw new Error(`Extension point validation failed for ${manifestPath}:\n${extensionResult.errors.join('\n')}`);
+            throw new Error(
+              `Extension point validation failed for ${manifestPath}:\n${extensionResult.errors.join('\n')}`,
+            );
           }
-
         } catch (e) {
           return reject(e);
         }
@@ -161,7 +167,9 @@ export async function createZip(
     }
 
     if (!manifestFound) {
-      console.warn(`Warning: No manifest.json found in ${plugin.path} (checked root, admin, api)`);
+      console.warn(
+        `Warning: No manifest.json found in ${plugin.path} (checked root, admin, api)`,
+      );
     }
 
     // Prepare list of files deterministically
