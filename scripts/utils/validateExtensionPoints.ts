@@ -6,6 +6,7 @@ import { ValidationResult } from './validateManifest';
 interface ExtensionPoint {
   type?: string;
   name?: string;
+  id?: string;
   file?: string;
   builderDefinition?: string;
   [key: string]: unknown;

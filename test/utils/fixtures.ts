@@ -1,4 +1,4 @@
-import { PluginManifest } from './types';
+import { PluginManifest } from '../../scripts/utils/types';
 
 export const validManifest: PluginManifest = {
   name: 'Test Plugin',
