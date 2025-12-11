@@ -253,4 +253,49 @@ describe('validateExtensionPoints', () => {
       'Duplicate extension name "duplicateName" found in "api:graphql" (already defined in "api:graphql")',
     );
   });
+
+  it('should pass given re-export syntax', async () => {
+    const manifest: PluginManifest = {
+      ...validManifest,
+      extensionPoints: {
+        'api:graphql': [
+          {
+            type: 'query',
+            name: 'myQuery',
+            file: 'index.ts',
+            builderDefinition: 'myQuery',
+          },
+        ],
+      },
+    };
+
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(fs.readFile).mockResolvedValue(
+      "export { myQuery } from './queries';",
+    );
+
+    const result = await validateExtensionPoints(manifest, mockPluginRoot);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should invalidate missing file for code-based extensions', async () => {
+    const manifest: PluginManifest = {
+      ...validManifest,
+      extensionPoints: {
+        'api:graphql': [
+          {
+            type: 'query',
+            name: 'myQuery',
+            // Missing file
+            builderDefinition: 'myQuery',
+          },
+        ],
+      },
+    };
+
+    const result = await validateExtensionPoints(manifest, mockPluginRoot);
+    expect(result.valid).toBe(false);
+    expect(result.errors[0]).toContain('Missing "file" for extension');
+  });
 });

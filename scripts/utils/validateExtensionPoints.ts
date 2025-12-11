@@ -107,7 +107,8 @@ export async function validateExtensionPoints(
                   const exportRegex = new RegExp(
                     `export\\s+(const|function|async\\s+function|class|type)\\s+${safeDef}\\b|` +
                       `export\\s+default\\s+(function|class|async\\s+function)\\s+${safeDef}\\b|` +
-                      `export\\s*{[^}]*\\b${safeDef}\\b[^}]*}`,
+                      `export\\s+default\\s+${safeDef}\\b|` +
+                      `export\\s*{[^}]*\\b(?:\\w+\\s+as\\s+)?${safeDef}\\b[^}]*}`,
                     'm',
                   );
 
