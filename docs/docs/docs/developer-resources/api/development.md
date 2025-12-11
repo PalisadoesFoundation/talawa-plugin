@@ -521,6 +521,44 @@ export function createPaymentService(provider: string): IPaymentService {
 
 ## Webhook Implementation
 
+### webhooks/razorpay.ts
+
+```typescript
+import { FastifyRequest, FastifyReply } from 'fastify';
+import crypto from 'crypto';
+
+// Razorpay Webhook Handler
+export async function handleRazorpayWebhook(req: FastifyRequest, reply: FastifyReply) {
+  const signature = req.headers['x-razorpay-signature'] as string;
+  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  const expectedSignature = crypto
+    .createHmac('sha256', webhookSecret!)
+    .update(req.body as string)
+    .digest('hex');
+
+  if (signature !== expectedSignature) {
+    reply.code(400).send({ error: 'Invalid signature' });
+    return;
+  }
+
+  // Handle event
+  const event = req.body as any;
+  switch (event.event) {
+    case 'payment.captured':
+      // Update payment status in DB
+      break;
+    case 'payment.failed':
+      // Handle failed payment
+      break;
+    default:
+      // Log unhandled event
+      break;
+  }
+
+  reply.send({ received: true });
+}
+```
+
 ### webhooks/stripe.ts
 
 ```typescript
