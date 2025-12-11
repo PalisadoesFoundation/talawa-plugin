@@ -1,9 +1,23 @@
-import { describe, it, expect } from 'vitest';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import {
+  existsSync,
+  mkdtempSync,
+  rmSync,
+  readFileSync,
+  mkdirSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createAdminSkeleton } from '../../scripts/init/initAdmin';
 import { createAPISkeleton } from '../../scripts/init/initApi';
+
+vi.mock('node:fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs')>();
+  return {
+    ...actual,
+    mkdirSync: vi.fn(actual.mkdirSync),
+  };
+});
 
 describe('Plugin Generator', () => {
   describe('Admin Module Generation', () => {
@@ -99,6 +113,122 @@ describe('Plugin Generator', () => {
           rmSync(tempDir, { recursive: true, force: true });
         }
       }
+    });
+  });
+
+  describe('Content Validation', () => {
+    it('should validate generated admin manifest content', () => {
+      const tempDir = mkdtempSync(join(tmpdir(), 'plugin-test-'));
+
+      try {
+        createAdminSkeleton('TestPlugin', tempDir);
+
+        const manifestPath = join(tempDir, 'TestPlugin/admin/manifest.json');
+        const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+
+        // Verify name transformations
+        expect(manifest.name).toBe('TestPlugin');
+        expect(manifest.pluginId).toBe('testplugin'); // Should be lowercase
+        expect(manifest.version).toBe('1.0.0');
+        expect(manifest.description).toBeDefined();
+        expect(manifest.author).toBeDefined();
+      } finally {
+        rmSync(tempDir, { recursive: true, force: true });
+      }
+    });
+
+    it('should validate generated API manifest content', () => {
+      const tempDir = mkdtempSync(join(tmpdir(), 'plugin-test-'));
+
+      try {
+        createAPISkeleton('TestPlugin', tempDir);
+
+        const manifestPath = join(tempDir, 'TestPlugin/api/manifest.json');
+        const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+
+        // Verify name transformations
+        expect(manifest.name).toBe('TestPlugin');
+        expect(manifest.pluginId).toBe('testplugin');
+        expect(manifest.version).toBe('1.0.0');
+        expect(manifest.description).toBeDefined();
+        expect(manifest.author).toBeDefined();
+      } finally {
+        rmSync(tempDir, { recursive: true, force: true });
+      }
+    });
+
+    it('should generate valid TypeScript files', () => {
+      const tempDir = mkdtempSync(join(tmpdir(), 'plugin-test-'));
+
+      try {
+        createAdminSkeleton('TestPlugin', tempDir);
+
+        const indexPath = join(tempDir, 'TestPlugin/admin/index.tsx');
+        const indexContent = readFileSync(indexPath, 'utf-8');
+
+        // Should contain valid React/TypeScript code
+        expect(indexContent).toContain('export default');
+        expect(indexContent).toContain('TestPlugin');
+      } finally {
+        rmSync(tempDir, { recursive: true, force: true });
+      }
+    });
+  });
+
+  describe('Error Handling', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'plugin-test-error-'));
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('should throw error for empty plugin name', () => {
+      expect(() => createAdminSkeleton('', tempDir)).toThrow(
+        'Plugin name cannot be empty',
+      );
+      expect(() => createAPISkeleton('', tempDir)).toThrow(
+        'Plugin name cannot be empty',
+      );
+    });
+
+    it('should throw error for invalid characters in plugin name', () => {
+      const invalidNames = [
+        'My Plugin',
+        'Plugin!',
+        'Plugin@123',
+        'Plugin/Name',
+      ];
+
+      invalidNames.forEach((name) => {
+        expect(() => createAdminSkeleton(name, tempDir)).toThrow(
+          'Plugin name can only contain letters, numbers, hyphens, and underscores',
+        );
+        expect(() => createAPISkeleton(name, tempDir)).toThrow(
+          'Plugin name can only contain letters, numbers, hyphens, and underscores',
+        );
+      });
+    });
+
+    it('should handle filesystem errors during admin generation', () => {
+      // Mock mkdirSync to throw an error
+      vi.mocked(mkdirSync).mockImplementation(() => {
+        throw new Error('Permission denied');
+      });
+
+      expect(() => createAdminSkeleton('TestPlugin', tempDir)).toThrow(
+        'Permission denied',
+      );
+    });
+
+    it('should handle filesystem errors during API generation', () => {
+      // Mock mkdirSync to throw an error
+      vi.mocked(mkdirSync).mockImplementation(() => {
+        throw new Error('Disk full');
+      });
+
+      expect(() => createAPISkeleton('TestPlugin', tempDir)).toThrow(
+        'Disk full',
+      );
     });
   });
 });

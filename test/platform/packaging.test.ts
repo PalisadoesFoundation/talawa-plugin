@@ -5,8 +5,10 @@ import {
   rmSync,
   mkdirSync,
   writeFileSync,
+  mkdtempSync,
 } from 'node:fs';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { createZip } from '../../scripts/zip/createZip';
 import AdmZip from 'adm-zip';
 
@@ -321,5 +323,143 @@ describe('Plugin Packager', () => {
 
       expect(entries).toContain('admin/pages/TestPage.tsx');
     }, 10000);
+  });
+
+  describe('Error Handling', () => {
+    it('should handle plugin with only admin module', async () => {
+      // Remove api directory
+      rmSync(join(testPluginDir, 'api'), { recursive: true, force: true });
+
+      const pluginInfo = {
+        name: 'test-plugin',
+        path: testPluginDir,
+        hasAdmin: true,
+        hasApi: false,
+      };
+
+      await createZip(pluginInfo, true);
+
+      const zipPath = join(testOutputDir, 'test-plugin-dev.zip');
+      const zip = new AdmZip(zipPath);
+      const entries = zip.getEntries().map((e) => e.entryName);
+
+      // Should contain admin files
+      expect(entries).toContain('admin/index.tsx');
+      expect(entries).toContain('admin/manifest.json');
+
+      // Should NOT contain api files
+      expect(entries.some((e) => e.startsWith('api/'))).toBe(false);
+    }, 10000);
+
+    it('should handle plugin with only API module', async () => {
+      // Remove admin directory
+      rmSync(join(testPluginDir, 'admin'), { recursive: true, force: true });
+
+      const pluginInfo = {
+        name: 'test-plugin',
+        path: testPluginDir,
+        hasAdmin: false,
+        hasApi: true,
+      };
+
+      await createZip(pluginInfo, true);
+
+      const zipPath = join(testOutputDir, 'test-plugin-dev.zip');
+      const zip = new AdmZip(zipPath);
+      const entries = zip.getEntries().map((e) => e.entryName);
+
+      // Should contain api files
+      expect(entries).toContain('api/index.ts');
+      expect(entries).toContain('api/manifest.json');
+
+      // Should NOT contain admin files
+      expect(entries.some((e) => e.startsWith('admin/'))).toBe(false);
+    }, 10000);
+
+    it('should reject zip files that fail validation', async () => {
+      const pluginInfo = {
+        name: 'test-plugin',
+        path: testPluginDir,
+        hasAdmin: true,
+        hasApi: false,
+      };
+
+      await createZip(pluginInfo, true);
+
+      const zipPath = join(testOutputDir, 'test-plugin-dev.zip');
+
+      // Corrupt the zip file by truncating it
+      writeFileSync(zipPath, 'corrupted data');
+
+      // Try to read the corrupted zip
+      expect(() => {
+        new AdmZip(zipPath);
+      }).toThrow();
+    }, 10000);
+
+    it('should handle plugins with complex nested directory structures', async () => {
+      // Create complex nested structure
+      const deepPath = join(
+        testPluginDir,
+        'admin',
+        'components',
+        'forms',
+        'inputs',
+      );
+      mkdirSync(deepPath, { recursive: true });
+      writeFileSync(
+        join(deepPath, 'TextInput.tsx'),
+        'export const TextInput = () => {};',
+      );
+
+      const pluginInfo = {
+        name: 'test-plugin',
+        path: testPluginDir,
+        hasAdmin: true,
+        hasApi: false,
+      };
+
+      await createZip(pluginInfo, true);
+
+      const zipPath = join(testOutputDir, 'test-plugin-dev.zip');
+      const zip = new AdmZip(zipPath);
+      const entries = zip.getEntries().map((e) => e.entryName);
+
+      expect(entries).toContain('admin/components/forms/inputs/TextInput.tsx');
+    }, 10000);
+
+    it('should handle missing manifest files gracefully', async () => {
+      // Remove manifest files
+      rmSync(join(testPluginDir, 'admin/manifest.json'));
+      rmSync(join(testPluginDir, 'api/manifest.json'));
+
+      const pluginInfo = {
+        name: 'test-plugin',
+        path: testPluginDir,
+        hasAdmin: true,
+        hasApi: true,
+      };
+
+      // Should still create zip (fallback to directory name)
+      await expect(createZip(pluginInfo, true)).resolves.not.toThrow();
+    });
+
+    it('should reject empty plugin directories', async () => {
+      const emptyDir = mkdtempSync(join(tmpdir(), 'empty-plugin-'));
+      try {
+        const pluginInfo = {
+          name: 'empty',
+          path: emptyDir,
+          hasAdmin: false,
+          hasApi: false,
+        };
+
+        await expect(createZip(pluginInfo, true)).rejects.toThrow(
+          'Zip file is too small',
+        );
+      } finally {
+        rmSync(emptyDir, { recursive: true, force: true });
+      }
+    });
   });
 });

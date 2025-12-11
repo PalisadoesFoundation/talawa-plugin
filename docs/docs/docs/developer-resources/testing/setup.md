@@ -1,24 +1,24 @@
 ---
 id: setup
-title: Testing - Setup Guide  
+title: Setup Guide
 slug: /developer-resources/testing/setup
-sidebar_position: 18
+sidebar_position: 16
 ---
-
-# Testing Setup Guide
 
 Complete guide to setting up and configuring the testing infrastructure.
 
 ## Prerequisites
 
-- Node.js 24.x (as used in CI - see [`.github/workflows/pull-request.yml`](https://github.com/PalisadoesFoundation/talawa-plugin/blob/develop/.github/workflows/pull-request.yml))
-- pnpm 10.x or higher (see [`package.json`](https://github.com/PalisadoesFoundation/talawa-plugin/blob/develop/package.json) `packageManager` field)
+- Node.js 24.x (as used in CI - see `.github/workflows/pull-request.yml`)
+- pnpm 10.x or higher (see `package.json` `packageManager` field)
 
 ## Installation
 
 Testing dependencies are already included in `package.json`. Refer to the file for current versions.
 
 ## Test Configuration
+
+The testing infrastructure uses Vitest as the test runner with specific configuration for platform tests. The setup includes glob patterns for test discovery, coverage thresholds, and environment-specific timeout values.
 
 ### Framework
 
@@ -49,6 +49,8 @@ We use **Vitest** - a fast, modern test framework compatible with Jest API.
 
 ## Running Tests
 
+The test suite provides multiple commands for different workflows. Use watch mode during development for instant feedback, or run the full suite before committing changes.
+
 ```bash
 # Run all tests
 pnpm test
@@ -71,6 +73,8 @@ pnpm test:ui
 
 ## Coverage Reports
 
+Coverage reports help identify untested code paths. Generate HTML reports to visualize which lines, branches, and functions are covered by your tests.
+
 ```bash
 # Generate coverage report
 pnpm test:coverage
@@ -83,6 +87,14 @@ npx serve coverage/vitest
 ```
 
 ## Test Organization
+
+The testing infrastructure is organized into two distinct layers to separate platform concerns from plugin-specific tests:
+
+**Platform Tests (`test/`)**: These validate the core plugin infrastructure—the scaffolding generators, packaging system, and manifest validation. Platform tests ensure that the fundamental building blocks for creating plugins work correctly. They run against the platform's own code, not individual plugins.
+
+**Plugin Tests (`plugins/*/test/`)**: Each plugin has its own isolated test directory. This separation ensures that plugin tests don't interfere with platform tests or other plugins. Plugin tests verify the plugin's specific functionality, UI components, API resolvers, and business logic.
+
+This two-tier structure allows platform improvements to be tested independently while giving each plugin complete testing autonomy.
 
 ```
 talawa-plugin/
@@ -112,6 +124,8 @@ Tests run automatically on:
 CI Configuration: `.github/workflows/pull-request.yml`
 
 ## Troubleshooting
+
+Common issues and their solutions are listed below. Most problems relate to dependency mismatches or configuration errors.
 
 ### Tests fail with module not found
 ```bash

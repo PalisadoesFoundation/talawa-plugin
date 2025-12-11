@@ -1,11 +1,11 @@
 ---
 id: getting-started
-title: Testing - Getting Started
+title: Getting Started
 slug: /developer-resources/testing/getting-started
-sidebar_position: 16
+sidebar_position: 17
 ---
 
-# Getting Started with Testing
+This guide will help you quickly start writing and running tests for the Talawa Plugin system. Learn the essential commands, common patterns, and best practices for testing plugins.
 
 ## Quick Start
 

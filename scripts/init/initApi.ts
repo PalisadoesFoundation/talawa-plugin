@@ -26,6 +26,16 @@ export function createAPISkeleton(
   const s = spinner();
   s.start('Creating API skeleton…');
 
+  if (!pluginName || pluginName.trim() === '') {
+    throw new Error('Plugin name cannot be empty');
+  }
+
+  if (!/^[a-zA-Z0-9-_]+$/.test(pluginName)) {
+    throw new Error(
+      'Plugin name can only contain letters, numbers, hyphens, and underscores',
+    );
+  }
+
   const apiRoot = join(pluginsRoot, pluginName, 'api');
   const dbDir = join(apiRoot, 'database');
   const gqlDir = join(apiRoot, 'graphql');

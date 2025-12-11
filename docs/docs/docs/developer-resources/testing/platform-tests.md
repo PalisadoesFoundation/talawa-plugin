@@ -1,11 +1,9 @@
 ---
 id: platform-tests
-title: Testing - Platform Tests
+title: Platform Tests
 slug: /developer-resources/testing/platform-tests
-sidebar_position: 17
+sidebar_position: 18
 ---
-
-# Platform Tests
 
 Platform tests validate the core plugin infrastructure and tooling.
 
@@ -21,6 +19,8 @@ test/platform/
 ```
 
 ## Running Platform Tests
+
+Platform tests can be run individually or as a suite. Use the commands below to execute tests and verify that all platform infrastructure is working correctly.
 
 ```bash
 # Run all platform tests
@@ -43,6 +43,8 @@ Tests in `manifestValidation.test.ts` validate plugin manifest files.
 
 ### Example Test
 
+These tests verify that plugin manifest files conform to the required schema. They read actual manifest files from existing plugins and validate field types, required properties, and format constraints.
+
 ```typescript
 it('should validate Razorpay admin manifest', () => {
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
@@ -62,9 +64,13 @@ Tests in `generator.test.ts` validate plugin scaffolding creation.
 - **Admin module creation**: Verifies all admin plugin files are created
 - **API module creation**: Verifies all API plugin files are created
 - **File structure**: Checks nested directories and files
+- **Input Validation**: Verifies plugin name validation
+- **Error Handling**: Verifies filesystem error handling
 - **Cleanup**: Ensures temporary directories are removed
 
 ### Example Test Structure
+
+Platform tests follow a consistent pattern using Vitest's `beforeEach` and `afterEach` hooks to set up isolated test environments. Each test creates its own temporary directory to avoid interference between tests.
 
 ```typescript
 it('should create admin module structure', () => {
@@ -94,6 +100,8 @@ Tests in `packaging.test.ts` validate plugin packaging and zip creation.
 - **File filtering**: Ensures junk files are excluded
 
 ### Key Testing Patterns
+
+Packaging tests ensure that plugins are correctly bundled into distributable zip files. They verify file inclusion, exclusion rules (e.g., ignoring `.DS_Store`), zip integrity, and proper directory structure preservation.
 
 ```typescript
 it('should create development build zip', () => {
