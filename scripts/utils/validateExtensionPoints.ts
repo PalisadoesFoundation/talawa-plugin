@@ -36,7 +36,12 @@ export async function validateExtensionPoints(
     return { valid: true, errors: [] };
   }
 
-  const registeredNames = new Set<string>();
+  /*
+   * Enforce global uniqueness of extension names across all extension points.
+   * This prevents collisions when extensions are registered in a flat namespace
+   * or when looking up extensions by name.
+   */
+  const registeredExtensions = new Map<string, string>();
 
   for (const [pointId, extensions] of Object.entries(extensionPoints)) {
     if (!Array.isArray(extensions)) {
@@ -50,10 +55,14 @@ export async function validateExtensionPoints(
       if (!ext.name) {
         errors.push(`Missing "name" in extension point "${pointId}"`);
       } else {
-        if (registeredNames.has(ext.name)) {
-          errors.push(`Duplicate extension name "${ext.name}" found`);
+        if (registeredExtensions.has(ext.name)) {
+          const existingPoint = registeredExtensions.get(ext.name);
+          errors.push(
+            `Duplicate extension name "${ext.name}" found in "${pointId}" (already defined in "${existingPoint}")`,
+          );
+        } else {
+          registeredExtensions.set(ext.name, pointId);
         }
-        registeredNames.add(ext.name);
       }
 
       // Specific checks for known extension point types (e.g., api:graphql)

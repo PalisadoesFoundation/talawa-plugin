@@ -250,7 +250,7 @@ describe('validateExtensionPoints', () => {
     const result = await validateExtensionPoints(manifest, mockPluginRoot);
     expect(result.valid).toBe(false);
     expect(result.errors).toContain(
-      'Duplicate extension name "duplicateName" found',
+      'Duplicate extension name "duplicateName" found in "api:graphql" (already defined in "api:graphql")',
     );
   });
 });
