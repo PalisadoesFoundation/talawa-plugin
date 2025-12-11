@@ -43,7 +43,8 @@ export async function validateExtensionPoints(
       continue;
     }
 
-    for (const ext of extensions as ExtensionPoint[]) {
+    for (let i = 0; i < extensions.length; i++) {
+      const ext = extensions[i] as ExtensionPoint;
       // 1. Schema Validation
       if (!ext.name) {
         errors.push(`Missing "name" in extension point "${pointId}"`);
@@ -58,7 +59,7 @@ export async function validateExtensionPoints(
       if (pointId.startsWith('api:')) {
         if (!ext.type) {
           errors.push(
-            `Missing "type" in extension point "${pointId}" (entry: ${ext.name})`,
+            `Missing "type" in extension point "${pointId}" (entry: ${ext.name ?? ext.id ?? `index ${i}`})`,
           );
         } else if (
           pointId === 'api:graphql' &&
@@ -104,9 +105,11 @@ export async function validateExtensionPoints(
                 );
               }
             }
-          } catch {
+          } catch (err: unknown) {
+            const errorMessage =
+              err instanceof Error ? err.message : String(err);
             errors.push(
-              `File "${ext.file}" not found for extension "${ext.name}"`,
+              `File "${ext.file}" not found for extension "${ext.name}": ${errorMessage}`,
             );
           }
         } else if (pointId === 'api:graphql' || pointId === 'api:rest') {

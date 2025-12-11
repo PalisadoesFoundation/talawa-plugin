@@ -24,10 +24,6 @@ describe('validateExtensionPoints', () => {
     vi.resetAllMocks();
   });
 
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('should return valid for empty extensionPoints', async () => {
     const manifest: PluginManifest = {
       ...validManifest,
@@ -68,6 +64,8 @@ describe('validateExtensionPoints', () => {
       },
     };
 
+    // Explicitly mock fs.access to resolve (file exists) so validation proceeds to schema checks if order changes
+    vi.mocked(fs.access).mockResolvedValue(undefined);
     const result = await validateExtensionPoints(manifest, mockPluginRoot);
     expect(result.valid).toBe(false);
     expect(result.errors[0]).toContain('Missing "type" in extension point');
@@ -119,7 +117,7 @@ describe('validateExtensionPoints', () => {
     const result = await validateExtensionPoints(manifest, mockPluginRoot);
     expect(result.valid).toBe(false);
     expect(result.errors).toContain(
-      'File "query.ts" not found for extension "myQuery"',
+      'File "query.ts" not found for extension "myQuery": File not found',
     );
   });
 

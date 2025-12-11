@@ -104,7 +104,7 @@ describe('Manifest Schema Validation', () => {
       // Invalid optional field types
       const manifestWithInvalidMain = {
         ...validManifest,
-        main: 123 as any, // Invalid: should be string
+        main: 123 as unknown as string, // Invalid: should be string
       };
 
       const result2 = validateManifest(manifestWithInvalidMain);
