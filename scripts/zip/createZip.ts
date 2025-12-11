@@ -9,8 +9,8 @@ import {
 } from 'node:fs';
 import { join, relative, sep, dirname } from 'node:path';
 import archiver from 'archiver';
-import { validateManifest } from '../../test/utils/validateManifest';
-import { validateExtensionPoints } from '../../test/utils/validateExtensionPoints';
+import { validateManifest } from '../utils/validateManifest';
+import { validateExtensionPoints } from '../utils/validateExtensionPoints';
 
 interface PluginInfo {
   name: string;

@@ -1,17 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import * as fs from 'fs';
-import * as path from 'path';
-import { validateExtensionPoints } from '../utils/validateExtensionPoints';
-import { PluginManifest } from '../utils/types';
+import { promises as fs } from 'fs';
+import { validateExtensionPoints } from '../../scripts/utils/validateExtensionPoints';
+import { PluginManifest } from '../../scripts/utils/types';
 import { validManifest } from '../utils/fixtures';
 
-// Mock fs module
+// Mock fs.promises
 vi.mock('fs', async () => {
   const actual = await vi.importActual<typeof import('fs')>('fs');
   return {
     ...actual,
-    existsSync: vi.fn(),
-    readFileSync: vi.fn(),
+    promises: {
+      ...actual.promises,
+      access: vi.fn(),
+      readFile: vi.fn(),
+    },
   };
 });
 
@@ -36,6 +38,66 @@ describe('validateExtensionPoints', () => {
     expect(result.errors).toHaveLength(0);
   });
 
+  it('should invalidate non-array extensionPoints', async () => {
+    const manifest: PluginManifest = {
+      ...validManifest,
+      extensionPoints: {
+        'api:graphql': 'not-an-array' as any,
+      },
+    };
+
+    const result = await validateExtensionPoints(manifest, mockPluginRoot);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain(
+      'Extension point "api:graphql" must be an array',
+    );
+  });
+
+  it('should invalidate missing type for api:* extensions', async () => {
+    const manifest: PluginManifest = {
+      ...validManifest,
+      extensionPoints: {
+        'api:graphql': [
+          {
+            name: 'myQuery',
+            file: 'query.ts',
+            builderDefinition: 'myQuery',
+            // Missing type
+          },
+        ],
+      },
+    };
+
+    const result = await validateExtensionPoints(manifest, mockPluginRoot);
+    expect(result.valid).toBe(false);
+    expect(result.errors[0]).toContain('Missing "type" in extension point');
+  });
+
+  it('should invalidate invalid graphql type', async () => {
+    const manifest: PluginManifest = {
+      ...validManifest,
+      extensionPoints: {
+        'api:graphql': [
+          {
+            type: 'invalid-type',
+            name: 'myQuery',
+            file: 'query.ts',
+            builderDefinition: 'myQuery',
+          },
+        ],
+      },
+    };
+
+    // We mock file access to succeed so it hits the type check logic logic fully
+    // (though type check happens before file access usually, redundancy is safe)
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(fs.readFile).mockResolvedValue('export const myQuery = {};');
+
+    const result = await validateExtensionPoints(manifest, mockPluginRoot);
+    expect(result.valid).toBe(false);
+    expect(result.errors[0]).toContain('Invalid graphql type "invalid-type"');
+  });
+
   it('should validate file existence', async () => {
     const manifest: PluginManifest = {
       ...validManifest,
@@ -52,7 +114,7 @@ describe('validateExtensionPoints', () => {
     };
 
     // Mock file not found
-    vi.mocked(fs.existsSync).mockReturnValue(false);
+    vi.mocked(fs.access).mockRejectedValue(new Error('File not found'));
 
     const result = await validateExtensionPoints(manifest, mockPluginRoot);
     expect(result.valid).toBe(false);
@@ -77,9 +139,9 @@ describe('validateExtensionPoints', () => {
     };
 
     // Mock file exists
-    vi.mocked(fs.existsSync).mockReturnValue(true);
+    vi.mocked(fs.access).mockResolvedValue(undefined);
     // Mock file content missing export
-    vi.mocked(fs.readFileSync).mockReturnValue('const foo = "bar";');
+    vi.mocked(fs.readFile).mockResolvedValue('const foo = "bar";');
 
     const result = await validateExtensionPoints(manifest, mockPluginRoot);
     expect(result.valid).toBe(false);
@@ -88,7 +150,7 @@ describe('validateExtensionPoints', () => {
     );
   });
 
-  it('should pass given valid file and export', async () => {
+  it('should pass given valid file and named export', async () => {
     const manifest: PluginManifest = {
       ...validManifest,
       extensionPoints: {
@@ -103,10 +165,35 @@ describe('validateExtensionPoints', () => {
       },
     };
 
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    // Mock correct export
-    vi.mocked(fs.readFileSync).mockReturnValue(
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(fs.readFile).mockResolvedValue(
       'export const myQuery = () => {};',
+    );
+
+    const result = await validateExtensionPoints(manifest, mockPluginRoot);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should pass given valid default export', async () => {
+    const manifest: PluginManifest = {
+      ...validManifest,
+      extensionPoints: {
+        'api:graphql': [
+          {
+            type: 'query',
+            name: 'myQuery',
+            file: 'query.ts',
+            builderDefinition: 'defaultQuery',
+          },
+        ],
+      },
+    };
+
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    // "export default function defaultQuery..."
+    vi.mocked(fs.readFile).mockResolvedValue(
+      'export default function defaultQuery() {}',
     );
 
     const result = await validateExtensionPoints(manifest, mockPluginRoot);
@@ -135,8 +222,8 @@ describe('validateExtensionPoints', () => {
       },
     };
 
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFileSync).mockReturnValue(
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(fs.readFile).mockResolvedValue(
       'export const query1 = {}; export const query2 = {};',
     );
 

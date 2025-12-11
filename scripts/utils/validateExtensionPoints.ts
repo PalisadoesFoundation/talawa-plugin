@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { promises as fs } from 'fs';
 import * as path from 'path';
 import { PluginManifest } from './types';
 import { ValidationResult } from './validateManifest';
@@ -9,6 +9,10 @@ interface ExtensionPoint {
   file?: string;
   builderDefinition?: string;
   [key: string]: unknown;
+}
+
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**
@@ -68,19 +72,25 @@ export async function validateExtensionPoints(
         if (ext.file) {
           // 2. File Existence
           const filePath = path.join(pluginRoot, ext.file);
-          if (!fs.existsSync(filePath)) {
-            errors.push(
-              `File "${ext.file}" not found for extension "${ext.name}"`,
-            );
-          } else {
+          try {
+            await fs.access(filePath); // Async check for existence
+
             // 3. Function Exports
             if (ext.builderDefinition) {
               try {
-                const fileContent = fs.readFileSync(filePath, 'utf-8');
-                // Robust regex to check for named exports
-                // Handles: export const foo = ..., export function foo ..., export { foo }
+                const fileContent = await fs.readFile(filePath, 'utf-8');
+                const safeDef = escapeRegExp(ext.builderDefinition);
+
+                // Robust regex to check for various export styles:
+                // 1. Named: export const/function/class/type name ...
+                // 2. Default: export default function name ...
+                // 3. Re-export: export { name } from ...
+                // 4. In-block: export { name }
                 const exportRegex = new RegExp(
-                  `export\\s+(const|function|async\\s+function|class)\\s+${ext.builderDefinition}\\b|export\\s*{[^}]*\\b${ext.builderDefinition}\\b[^}]*}`,
+                  `export\\s+(const|function|async\\s+function|class|type)\\s+${safeDef}\\b|` +
+                    `export\\s+default\\s+(function|class|async\\s+function)\\s+${safeDef}\\b|` +
+                    `export\\s*{[^}]*\\b${safeDef}\\b[^}]*}`,
+                  'm',
                 );
 
                 if (!exportRegex.test(fileContent)) {
@@ -89,9 +99,15 @@ export async function validateExtensionPoints(
                   );
                 }
               } catch (e) {
-                errors.push(`Error reading file "${ext.file}": ${e}`);
+                errors.push(
+                  `Error reading file "${ext.file}" for export check: ${e}`,
+                );
               }
             }
+          } catch {
+            errors.push(
+              `File "${ext.file}" not found for extension "${ext.name}"`,
+            );
           }
         } else if (pointId === 'api:graphql' || pointId === 'api:rest') {
           // File is required for code-based extensions

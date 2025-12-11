@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { validateManifest } from '../utils/validateManifest';
-import type { PluginManifest } from '../utils/types';
+import { validateManifest } from '../../scripts/utils/validateManifest';
+import type { PluginManifest } from '../../scripts/utils/types';
 import { validManifest, validExtensionPointManifest } from '../utils/fixtures';
 
 describe('Manifest Schema Validation', () => {

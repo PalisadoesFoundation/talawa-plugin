@@ -5,7 +5,7 @@ slug: /developer-resources/testing/shared-utilities
 sidebar_position: 19
 ---
 
-The plugin system provides a set of shared utilities to simplify testing and reduce code duplication. These utilities are located in `test/utils/` and include mocks, fixtures, and validation helpers.
+The plugin system provides a set of shared utilities to simplify testing and reduce code duplication. These utilities are located in `test/utils/` and `scripts/utils/`.
 
 ## Mock Context
 
@@ -75,13 +75,13 @@ const manifest = {
 
 ## Extension Point Validation
 
-`test/utils/validateExtensionPoints.ts` ensures that plugin extension points are correctly defined and point to existing files and exports.
+`scripts/utils/validateExtensionPoints.ts` ensures that plugin extension points are correctly defined and point to existing files and exports.
 
 ### Usage
 
 ```typescript
-import { validateExtensionPoints } from '../utils/validateExtensionPoints';
-import { validManifest } from '../utils/fixtures';
+import { validateExtensionPoints } from '../../scripts/utils/validateExtensionPoints';
+import { validManifest } from '../../test/utils/fixtures';
 
 const result = await validateExtensionPoints(validManifest, '/path/to/plugin/root');
 
@@ -93,5 +93,5 @@ if (!result.valid) {
 This utility performs the following checks:
 1.  **Schema**: Validates the structure of the extension point entry.
 2.  **File Existence**: Checks if `file` paths exist relative to the plugin root.
-3.  **Exports**: Verifies that the specified `builderDefinition` or expected function is exported from the file.
+3.  **Exports**: Verifies that the specified `builderDefinition`, named export, or default export is available in the file.
 4.  **Name Collisions**: Ensures all extension point names are unique within the plugin.
