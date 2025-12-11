@@ -23,9 +23,6 @@ export function createAPISkeleton(
   pluginName: string,
   pluginsRoot = 'plugins',
 ): void {
-  const s = spinner();
-  s.start('Creating API skeleton…');
-
   if (!pluginName || pluginName.trim() === '') {
     throw new Error('Plugin name cannot be empty');
   }
@@ -35,6 +32,9 @@ export function createAPISkeleton(
       'Plugin name can only contain letters, numbers, hyphens, and underscores',
     );
   }
+
+  const s = spinner();
+  s.start('Creating API skeleton…');
 
   const apiRoot = join(pluginsRoot, pluginName, 'api');
   const dbDir = join(apiRoot, 'database');

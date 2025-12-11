@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import {
   existsSync,
   mkdtempSync,
@@ -176,9 +176,16 @@ describe('Plugin Generator', () => {
   });
 
   describe('Error Handling', () => {
-    const tempDir = mkdtempSync(join(tmpdir(), 'plugin-test-error-'));
+    let tempDir: string;
+
+    beforeEach(() => {
+      tempDir = mkdtempSync(join(tmpdir(), 'plugin-test-error-'));
+    });
 
     afterEach(() => {
+      if (existsSync(tempDir)) {
+        rmSync(tempDir, { recursive: true, force: true });
+      }
       vi.restoreAllMocks();
     });
 

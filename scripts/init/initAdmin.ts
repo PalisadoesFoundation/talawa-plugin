@@ -23,9 +23,6 @@ export function createAdminSkeleton(
   pluginName: string,
   pluginsRoot = 'plugins',
 ): void {
-  const s = spinner();
-  s.start('Creating Admin skeleton…');
-
   if (!pluginName || pluginName.trim() === '') {
     throw new Error('Plugin name cannot be empty');
   }
@@ -35,6 +32,9 @@ export function createAdminSkeleton(
       'Plugin name can only contain letters, numbers, hyphens, and underscores',
     );
   }
+
+  const s = spinner();
+  s.start('Creating Admin skeleton…');
 
   const adminRoot = join(pluginsRoot, pluginName, 'admin');
   const pagesDir = join(adminRoot, 'pages');
