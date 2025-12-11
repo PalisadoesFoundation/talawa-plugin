@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { promises as fs } from 'fs';
 import { validateExtensionPoints } from '../../scripts/utils/validateExtensionPoints';
 import { PluginManifest } from '../../scripts/utils/types';

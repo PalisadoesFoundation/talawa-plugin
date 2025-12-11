@@ -67,7 +67,7 @@ export async function validateExtensionPoints(
           !['query', 'mutation', 'subscription', 'type'].includes(ext.type)
         ) {
           errors.push(
-            `Invalid graphql type "${ext.type}" for extension "${ext.name}". local type must be one of: query, mutation, subscription, type`,
+            `Invalid graphql type "${ext.type}" for extension "${ext.name ?? ext.id ?? `index ${i}`}". local type must be one of: query, mutation, subscription, type`,
           );
         }
 
@@ -117,13 +117,15 @@ export async function validateExtensionPoints(
               const errorMessage =
                 err instanceof Error ? err.message : String(err);
               errors.push(
-                `File "${ext.file}" not found for extension "${ext.name}": ${errorMessage}`,
+                `File "${ext.file}" not found for extension "${ext.name ?? ext.id ?? `index ${i}`}": ${errorMessage}`,
               );
             }
           }
         } else if (pointId === 'api:graphql' || pointId === 'api:rest') {
           // File is required for code-based extensions
-          errors.push(`Missing "file" for extension "${ext.name}"`);
+          errors.push(
+            `Missing "file" for extension "${ext.name ?? ext.id ?? `index ${i}`}"`,
+          );
         }
       }
     }
