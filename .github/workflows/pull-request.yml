@@ -462,20 +462,21 @@ jobs:
         run: pnpm install
 
       - name: Run tests
-        run: pnpm test -- --run
+        run: pnpm run test:coverage
 
-      # #######################################################################
-      # # DO NOT DELETE ANY references to env.CODECOV_UNIQUE_NAME in this
-      # # section. They are required for accurate calculations
-      # #######################################################################
-      # - name: Present and upload coverage to Codecov as ${{env.CODECOV_UNIQUE_NAME}}
-      #   uses: codecov/codecov-action@v5
-      #   with:
-      #     name: "${{env.CODECOV_UNIQUE_NAME}}"
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     fail_ci_if_error: false
-      #     verbose: true
-      #     exclude: 'docs/'
+      #######################################################################
+      # DO NOT DELETE ANY references to env.CODECOV_UNIQUE_NAME in this
+      # section. They are required for accurate calculations
+      #######################################################################
+      - name: Present and upload coverage to Codecov as ${{env.CODECOV_UNIQUE_NAME}}
+        uses: codecov/codecov-action@v5
+        with:
+          name: "${{env.CODECOV_UNIQUE_NAME}}"
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+          verbose: true
+          exclude: 'docs/'
+          files: ./coverage/vitest/lcov.info
 
       # - name: Test acceptable level of code coverage
       #   uses: VeryGoodOpenSource/very_good_coverage@v3
