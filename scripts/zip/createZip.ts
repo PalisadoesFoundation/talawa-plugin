@@ -7,8 +7,10 @@ import {
   statSync,
   readdirSync,
 } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { join, relative, sep, dirname } from 'node:path';
 import archiver from 'archiver';
+import { validateManifest } from '../utils/validateManifest';
+import { validateExtensionPoints } from '../utils/validateExtensionPoints';
 
 interface PluginInfo {
   name: string;
@@ -121,6 +123,54 @@ export async function createZip(
       mkdirSync(zipOutputDir, { recursive: true });
     }
     const zipPath = join(zipOutputDir, zipFileName);
+
+    // Validate Manifest and Extension Points
+    const manifestPaths = [
+      join(plugin.path, 'manifest.json'),
+      join(plugin.path, 'admin', 'manifest.json'),
+      join(plugin.path, 'api', 'manifest.json'),
+    ];
+
+    let manifestFound = false;
+
+    for (const manifestPath of manifestPaths) {
+      if (existsSync(manifestPath)) {
+        manifestFound = true;
+        try {
+          const content = readFileSync(manifestPath, 'utf-8');
+          const manifest = JSON.parse(content);
+
+          console.log(`Validating manifest: ${manifestPath}`);
+
+          // 1. Basic Manifest Validation
+          const manifestResult = validateManifest(manifest);
+          if (!manifestResult.valid) {
+            throw new Error(
+              `Manifest validation failed for ${manifestPath}:\n${manifestResult.errors.join('\n')}`,
+            );
+          }
+
+          // 2. Extension Point Validation
+          const extensionResult = await validateExtensionPoints(
+            manifest,
+            dirname(manifestPath),
+          );
+          if (!extensionResult.valid) {
+            throw new Error(
+              `Extension point validation failed for ${manifestPath}:\n${extensionResult.errors.join('\n')}`,
+            );
+          }
+        } catch (e) {
+          return reject(e);
+        }
+      }
+    }
+
+    if (!manifestFound) {
+      console.warn(
+        `Warning: No manifest.json found in ${plugin.path} (checked root, admin, api)`,
+      );
+    }
 
     // Prepare list of files deterministically
     const files: Array<{

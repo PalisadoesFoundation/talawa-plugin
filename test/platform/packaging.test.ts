@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   existsSync,
   statSync,
@@ -6,11 +6,42 @@ import {
   mkdirSync,
   writeFileSync,
   mkdtempSync,
+  createWriteStream,
 } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createZip } from '../../scripts/zip/createZip';
 import AdmZip from 'adm-zip';
+import { validManifest } from '../utils/fixtures';
+
+// Mock archiver for error injection
+let mockArchiverError: Error | null = null;
+let mockArchiverWarning: any | null = null;
+
+vi.mock('archiver', async () => {
+  const actual = await vi.importActual<any>('archiver');
+  return {
+    default: (format: string, options: any) => {
+      const archive = actual.default(format, options);
+      // Hook into finalize to trigger errors if set
+      const originalFinalize = archive.finalize.bind(archive);
+      archive.finalize = async () => {
+        if (mockArchiverError) {
+          archive.emit('error', mockArchiverError);
+          // Return a promise that resolves (void) to prevent unhandled rejection.
+          // The error emitted above will be handled by the 'error' listener in createZip
+          // which will reject the main promise.
+          return Promise.resolve();
+        }
+        if (mockArchiverWarning) {
+          archive.emit('warning', mockArchiverWarning);
+        }
+        return originalFinalize();
+      };
+      return archive;
+    },
+  };
+});
 
 describe('Plugin Packager', () => {
   const testOutputDir = join(process.cwd(), 'plugin-zips');
@@ -33,11 +64,9 @@ describe('Plugin Packager', () => {
     writeFileSync(
       join(adminDir, 'manifest.json'),
       JSON.stringify({
-        name: 'Test Plugin',
-        pluginId: 'test-plugin',
-        version: '1.0.0',
+        ...validManifest,
+        extensionPoints: {},
         description: 'Test plugin for packaging',
-        author: 'Test Author',
       }),
     );
 
@@ -51,13 +80,15 @@ describe('Plugin Packager', () => {
     writeFileSync(
       join(apiDir, 'manifest.json'),
       JSON.stringify({
+        ...validManifest,
+        extensionPoints: {},
         name: 'Test Plugin API',
-        pluginId: 'test-plugin',
-        version: '1.0.0',
         description: 'Test plugin API for packaging',
-        author: 'Test Author',
       }),
     );
+    // Reset mocks
+    mockArchiverError = null;
+    mockArchiverWarning = null;
   });
 
   afterEach(() => {
@@ -460,6 +491,73 @@ describe('Plugin Packager', () => {
       } finally {
         rmSync(emptyDir, { recursive: true, force: true });
       }
+    });
+
+    it('should handle archiver errors', async () => {
+      mockArchiverError = new Error('Simulated archiver error');
+      const pluginInfo = {
+        name: 'test-plugin',
+        path: testPluginDir,
+        hasAdmin: true,
+        hasApi: true,
+      };
+      await expect(createZip(pluginInfo, true)).rejects.toThrow(
+        'Simulated archiver error',
+      );
+    });
+
+    it('should handle archiver warnings (non-ENOENT)', async () => {
+      // Warnings usually don't throw, but log.
+      // However, the code at 161 (archive.on('warning', ...)) seems to rejectClose if not ENOENT.
+      // So checking if it rejects.
+      mockArchiverWarning = {
+        code: 'OTHER_WARNING',
+        message: 'Something warn',
+      };
+      const pluginInfo = {
+        name: 'test-plugin',
+        path: testPluginDir,
+        hasAdmin: true,
+        hasApi: true,
+      };
+      await expect(createZip(pluginInfo, true)).rejects.toHaveProperty(
+        'code',
+        'OTHER_WARNING',
+      );
+    });
+
+    it('should ignore archiver ENOENT warnings', async () => {
+      mockArchiverWarning = { code: 'ENOENT', message: 'Missing file ignored' };
+      const pluginInfo = {
+        name: 'test-plugin',
+        path: testPluginDir,
+        hasAdmin: true,
+        hasApi: true,
+      };
+      // Should succeed despite warning
+      await expect(createZip(pluginInfo, true)).resolves.not.toThrow();
+    });
+  });
+
+  describe('Plugin ID Resolution', () => {
+    it('should fallback to directory name for pluginId when manifests are missing', async () => {
+      rmSync(join(testPluginDir, 'admin/manifest.json'));
+      rmSync(join(testPluginDir, 'api/manifest.json'));
+
+      const pluginInfo = {
+        name: 'test-plugin',
+        path: testPluginDir,
+        hasAdmin: true,
+        hasApi: true,
+      };
+
+      await createZip(pluginInfo, true);
+      // Check for zip with folder name
+      // folder is `test-plugin-temp`
+      const expectedZip = join(testOutputDir, 'test-plugin-temp-dev.zip');
+      expect(existsSync(expectedZip)).toBe(true);
+      // Clean up this specific file
+      rmSync(expectedZip, { force: true });
     });
   });
 });
