@@ -35,7 +35,11 @@ describe('mockClients utilities', () => {
       expect(client.query).toBeDefined();
       expect(client.mutate).toBeDefined();
 
-      await expect(client.query()).resolves.toEqual({ data: {} });
+      const result = await client.query('query { test }');
+      expect(result).toEqual({ data: {} });
+
+      const mutationResult = await client.mutate('mutation { update }');
+      expect(mutationResult).toEqual({ data: {} });
     });
   });
 
@@ -43,9 +47,20 @@ describe('mockClients utilities', () => {
     it('should create a gateway with mocked methods', async () => {
       const gateway = createMockPaymentGateway();
       expect(gateway.processPayment).toBeDefined();
+      expect(gateway.createRefund).toBeDefined();
+      expect(gateway.verifyWebhook).toBeDefined();
 
-      const result = await gateway.processPayment();
-      expect(result.success).toBe(true);
+      const result = await gateway.processPayment({
+        amount: 100,
+        currency: 'USD',
+      });
+      expect(result).toEqual({ success: true, id: 'pay-123' });
+
+      const refundResult = await gateway.createRefund('test-txn', 50);
+      expect(refundResult).toEqual({ success: true, id: 'ref-123' });
+
+      const webhookResult = gateway.verifyWebhook({}, 'signature');
+      expect(webhookResult).toBe(true);
     });
   });
 });

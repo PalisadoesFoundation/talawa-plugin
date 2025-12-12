@@ -58,5 +58,17 @@ describe('mockContext utilities', () => {
       expect(context.userId).toBe('u1');
       expect(context.organizationId).toBe('o1');
     });
+
+    it('should prioritize user.id over conflicting userId in overrides', () => {
+      const customUser = createMockUser({ id: 'u1' });
+      const context = createMockContext({
+        user: customUser,
+        userId: 'conflicting-u2', // Should be ignored
+      });
+
+      expect(context.user).toBe(customUser);
+      expect(context.userId).toBe('u1');
+      expect(context.userId).not.toBe('conflicting-u2');
+    });
   });
 });

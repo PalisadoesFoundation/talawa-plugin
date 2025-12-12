@@ -66,12 +66,13 @@ export const createMockContext = (
   const organization = overrides.organization || createMockOrganization();
 
   return {
-    userId: user.id,
-    user,
-    organizationId: organization.id,
-    organization,
     isAdmin: false,
     token: 'mock-jwt-token',
     ...overrides,
+    // Enforce consistency: ID properties must match the objects
+    user,
+    userId: user.id,
+    organization,
+    organizationId: organization.id,
   };
 };
