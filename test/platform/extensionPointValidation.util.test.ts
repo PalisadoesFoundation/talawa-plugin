@@ -212,4 +212,172 @@ describe('validateExtensionPoints - Utilities & General', () => {
       ]),
     );
   });
+
+  describe('Validation Logic Refinements', () => {
+    it('should ignore non-string titles for admin:menu extension name inference', async () => {
+      const manifest = {
+        extensionPoints: {
+          'admin:menu': [
+            {
+              // No name
+              title: 12345, // Non-string title
+              path: '/some/path',
+            },
+          ] as any,
+        },
+      } as unknown as PluginManifest;
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(
+        'Missing "name" (or "title") in extension point "admin:menu"',
+      );
+    });
+
+    it('should use string title for admin:menu extension name inference', async () => {
+      const manifest: PluginManifest = {
+        ...validManifest,
+        extensionPoints: {
+          'admin:menu': [
+            {
+              // No name, but valid title
+              title: 'My Menu',
+              path: '/some/path',
+              icon: 'icon',
+            },
+          ],
+        },
+      };
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should fail if file is not a string', async () => {
+      const manifest = {
+        extensionPoints: {
+          'api:rest': [
+            {
+              name: 'my-api',
+              type: 'query',
+              file: 123, // Invalid
+            },
+          ] as any,
+        },
+      } as unknown as PluginManifest;
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some((e) => e.includes('Invalid type for "file"')))
+        .toBe(true);
+    });
+
+    it('should fail if builderDefinition is not a string', async () => {
+      const manifest = {
+        extensionPoints: {
+          'api:rest': [
+            {
+              name: 'my-api',
+              type: 'query',
+              file: 'api.ts',
+              builderDefinition: 123, // Invalid
+            },
+          ] as any,
+        },
+      } as unknown as PluginManifest;
+
+      // Mock valid file read to isolate builderDefinition check
+      vi.mocked(fs.readFile).mockResolvedValue(
+        'export const 123 = () => {}',
+      );
+      vi.mocked(fs.access).mockResolvedValue(undefined);
+
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors.some((e) =>
+          e.includes('Invalid type for "builderDefinition"'),
+        ),
+      ).toBe(true);
+    });
+
+    it('should NOT match "export type" in builderDefinition regex', async () => {
+      const manifest: PluginManifest = {
+        ...validManifest,
+        extensionPoints: {
+          'api:rest': [
+            {
+              name: 'my-api',
+              type: 'query',
+              file: 'api.ts',
+              builderDefinition: 'MyType',
+            },
+          ],
+        },
+      };
+
+      // Mock file content with ONLY export type
+      vi.mocked(fs.readFile).mockResolvedValue('export type MyType = {};');
+      vi.mocked(fs.access).mockResolvedValue(undefined);
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(
+        'Function "MyType" is not exported from "api.ts"',
+      );
+    });
+
+    it('should match "export const" in builderDefinition regex', async () => {
+      const manifest: PluginManifest = {
+        ...validManifest,
+        extensionPoints: {
+          'api:rest': [
+            {
+              name: 'my-api',
+              type: 'query',
+              file: 'api.ts',
+              builderDefinition: 'myFunc',
+            },
+          ],
+        },
+      };
+
+      vi.mocked(fs.readFile).mockResolvedValue(
+        'export const myFunc = () => {};',
+      );
+      vi.mocked(fs.access).mockResolvedValue(undefined);
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should not match partial identifiers with strict boundary', async () => {
+      const manifest: PluginManifest = {
+        ...validManifest,
+        extensionPoints: {
+          'api:rest': [
+            {
+              name: 'my-api',
+              type: 'query',
+              file: 'api.ts',
+              builderDefinition: 'myFunc',
+            },
+          ],
+        },
+      };
+
+      // 'myFunc$' should NOT match 'myFunc' with strict boundary check
+      vi.mocked(fs.readFile).mockResolvedValue(
+        'export const myFunc$ = () => {};',
+      );
+      vi.mocked(fs.access).mockResolvedValue(undefined);
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(
+        'Function "myFunc" is not exported from "api.ts"',
+      );
+    });
+  });
 });
