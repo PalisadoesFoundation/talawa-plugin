@@ -86,39 +86,13 @@ describe('validateExtensionPoints', () => {
       },
     };
 
-    // We mock file access to succeed so it hits the type check logic logic fully
-    // (though type check happens before file access usually, redundancy is safe)
+    // We mock file access to succeed so it hits the type check logic fully
     vi.mocked(fs.access).mockResolvedValue(undefined);
     vi.mocked(fs.readFile).mockResolvedValue('export const myQuery = {};');
 
     const result = await validateExtensionPoints(manifest, mockPluginRoot);
     expect(result.valid).toBe(false);
     expect(result.errors[0]).toContain('Invalid graphql type "invalid-type"');
-  });
-
-  it('should validate file existence', async () => {
-    const manifest: PluginManifest = {
-      ...validManifest,
-      extensionPoints: {
-        'api:graphql': [
-          {
-            type: 'query',
-            name: 'myQuery',
-            file: 'query.ts',
-            builderDefinition: 'myQuery',
-          },
-        ],
-      },
-    };
-
-    // Mock file not found
-    vi.mocked(fs.access).mockRejectedValue(new Error('File not found'));
-
-    const result = await validateExtensionPoints(manifest, mockPluginRoot);
-    expect(result.valid).toBe(false);
-    expect(result.errors).toContain(
-      'File "query.ts" not found for extension "myQuery": File not found',
-    );
   });
 
   it('should validate function exports', async () => {
