@@ -43,6 +43,14 @@ export async function validateExtensionPoints(
    */
   const registeredExtensions = new Map<string, string>();
 
+  // Defensive check: ensure extensionPoints is an object and not an array
+  if (typeof extensionPoints !== 'object' || Array.isArray(extensionPoints)) {
+    return {
+      valid: false,
+      errors: ['"extensionPoints" must be an object'],
+    };
+  }
+
   // Helper for file validation to reuse across api and admin extensions
   const validateExtensionFile = async (
     file: string,
@@ -189,22 +197,47 @@ export async function validateExtensionPoints(
             );
           }
         } else if (pointId === 'admin:widget' || pointId === 'admin:routes') {
-          // Admin Validation: Enforce file or component presence
           if (!ext.file && !ext.component) {
             errors.push(
               `Missing "file" or "component" for extension "${extIdent}" in "${pointId}"`,
             );
-          } else {
-            const filePath = ext.file || ext.component;
-            if (typeof filePath === 'string') {
-              // Only check exports if builderDefinition is provided, otherwise just existence
-              await validateExtensionFile(
-                filePath,
-                ext.builderDefinition,
-                extIdent,
-                !!ext.builderDefinition,
-              );
-            }
+          }
+
+          // Validate type of ext.file if present
+          if (ext.file !== undefined && typeof ext.file !== 'string') {
+            errors.push(
+              `Invalid type for "file" in extension "${extIdent}" in "${pointId}" (must be string)`,
+            );
+          }
+
+          // Validate type of ext.component if present
+          if (
+            ext.component !== undefined &&
+            typeof ext.component !== 'string'
+          ) {
+            errors.push(
+              `Invalid type for "component" in extension "${extIdent}" in "${pointId}" (must be string)`,
+            );
+          }
+
+          // Proceed with file validation if we have a valid string path
+          const filePath = ext.file || ext.component;
+          if (typeof filePath === 'string') {
+            await validateExtensionFile(
+              filePath,
+              ext.builderDefinition,
+              extIdent,
+              !!ext.builderDefinition,
+            );
+          }
+        }
+
+        // validation for admin:routes path
+        if (pointId === 'admin:routes') {
+          if (!ext.path || typeof ext.path !== 'string') {
+            errors.push(
+              `Missing or invalid "path" in extension point "${pointId}" (entry: ${extIdent})`,
+            );
           }
         }
       }
