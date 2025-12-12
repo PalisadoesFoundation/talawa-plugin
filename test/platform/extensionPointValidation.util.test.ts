@@ -268,8 +268,9 @@ describe('validateExtensionPoints - Utilities & General', () => {
 
       const result = await validateExtensionPoints(manifest, mockPluginRoot);
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes('Invalid type for "file"')))
-        .toBe(true);
+      expect(
+        result.errors.some((e) => e.includes('Invalid type for "file"')),
+      ).toBe(true);
     });
 
     it('should fail if builderDefinition is not a string', async () => {
@@ -287,11 +288,8 @@ describe('validateExtensionPoints - Utilities & General', () => {
       } as unknown as PluginManifest;
 
       // Mock valid file read to isolate builderDefinition check
-      vi.mocked(fs.readFile).mockResolvedValue(
-        'export const 123 = () => {}',
-      );
+      vi.mocked(fs.readFile).mockResolvedValue('export const 123 = () => {}');
       vi.mocked(fs.access).mockResolvedValue(undefined);
-
 
       const result = await validateExtensionPoints(manifest, mockPluginRoot);
       expect(result.valid).toBe(false);

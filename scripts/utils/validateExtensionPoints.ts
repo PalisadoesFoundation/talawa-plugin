@@ -95,9 +95,9 @@ export async function validateExtensionPoints(
           // NOTE: avoid `export type` (erased at runtime). Also avoid `\b` since `$` isn't a `\w` char.
           const exportRegex = new RegExp(
             `export\\s+(const|function|async\\s+function|class)\\s+${safeDef}(?![\\w$])|` +
-            `export\\s+default\\s+(function|class|async\\s+function)\\s+${safeDef}(?![\\w$])|` +
-            `export\\s+default\\s+${safeDef}(?![\\w$])|` +
-            `export\\s*{[^}]*\\b(?:\\w+\\s+as\\s+)?${safeDef}\\b[^}]*}`,
+              `export\\s+default\\s+(function|class|async\\s+function)\\s+${safeDef}(?![\\w$])|` +
+              `export\\s+default\\s+${safeDef}(?![\\w$])|` +
+              `export\\s*{[^}]*\\b(?:\\w+\\s+as\\s+)?${safeDef}\\b[^}]*}`,
             'm',
           );
 
