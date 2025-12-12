@@ -1,20 +1,35 @@
-
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as path from 'path';
-import * as fs from 'fs/promises';
-import { validateExtensionPoints } from '../../scripts/utils/validateExtensionPoints';
+// Start Mocking
+const valMocks = vi.hoisted(() => {
+    return {
+        access: vi.fn(),
+        realpath: vi.fn(),
+        readFile: vi.fn(),
+    };
+});
 
-// Mocks
-vi.mock('fs/promises');
+vi.mock('fs', async () => {
+    return {
+        promises: {
+            access: valMocks.access,
+            realpath: valMocks.realpath,
+            readFile: valMocks.readFile,
+        },
+    };
+});
+
+import { validateExtensionPoints } from '../../scripts/utils/validateExtensionPoints';
 
 describe('Extension Point Validation Refinements', () => {
     const mockPluginRoot = '/mock/plugin/root';
 
     beforeEach(() => {
         vi.resetAllMocks();
-        (fs.resolve as any) = (p: string) => p; // Simple resolve mock
-        (fs.realpath as any) = vi.fn((p) => Promise.resolve(p));
-        (fs.access as any) = vi.fn(() => Promise.resolve());
+        valMocks.access.mockResolvedValue(undefined);
+        valMocks.realpath.mockImplementation((p: any) => Promise.resolve(p));
+        // Default read file behavior (can be unchecked) or override in tests
+        valMocks.readFile.mockResolvedValue('');
     });
 
     describe('admin:menu validation', () => {
@@ -90,7 +105,7 @@ describe('Extension Point Validation Refinements', () => {
             };
 
             // Mock file access for the 'valid' file part
-            (fs.readFile as any) = vi.fn(() => Promise.resolve('export const 123 = () => {}'));
+            valMocks.readFile.mockResolvedValue('export const 123 = () => {}');
 
 
             const result = await validateExtensionPoints(manifest as any, mockPluginRoot);
@@ -115,7 +130,7 @@ describe('Extension Point Validation Refinements', () => {
             };
 
             // Mock file content with ONLY export type
-            (fs.readFile as any) = vi.fn(() => Promise.resolve('export type MyType = {};'));
+            valMocks.readFile.mockResolvedValue('export type MyType = {};');
 
             const result = await validateExtensionPoints(manifest as any, mockPluginRoot);
             // It should be invalid because "export type" is no longer allowed/matched
@@ -137,7 +152,7 @@ describe('Extension Point Validation Refinements', () => {
                 },
             };
 
-            (fs.readFile as any) = vi.fn(() => Promise.resolve('export const myFunc = () => {};'));
+            valMocks.readFile.mockResolvedValue('export const myFunc = () => {};');
 
             const result = await validateExtensionPoints(manifest as any, mockPluginRoot);
             expect(result.valid).toBe(true);
@@ -158,7 +173,7 @@ describe('Extension Point Validation Refinements', () => {
             };
 
             // 'myFunc$' should NOT match 'myFunc' with strict boundary check
-            (fs.readFile as any) = vi.fn(() => Promise.resolve('export const myFunc$ = () => {};'));
+            valMocks.readFile.mockResolvedValue('export const myFunc$ = () => {};');
 
             const result = await validateExtensionPoints(manifest as any, mockPluginRoot);
             expect(result.valid).toBe(false);
