@@ -13,6 +13,7 @@ vi.mock('fs', async () => {
       ...actual.promises,
       access: vi.fn(),
       readFile: vi.fn(),
+      realpath: vi.fn((path) => Promise.resolve(path)),
     },
   };
 });
@@ -64,11 +65,18 @@ describe('validateExtensionPoints', () => {
       },
     };
 
-    // Explicitly mock fs.access to resolve (file exists) so validation proceeds to schema checks if order changes
+    // Explicitly mock fs.access to resolve (file exists)
     vi.mocked(fs.access).mockResolvedValue(undefined);
+    // Mock readFile to prevent incidental errors
+    vi.mocked(fs.readFile).mockResolvedValue('export const myQuery = {};');
+
     const result = await validateExtensionPoints(manifest, mockPluginRoot);
     expect(result.valid).toBe(false);
-    expect(result.errors[0]).toContain('Missing "type" in extension point');
+    expect(result.errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('Missing "type" in extension point'),
+      ]),
+    );
   });
 
   it('should invalidate invalid graphql type', async () => {
@@ -92,7 +100,11 @@ describe('validateExtensionPoints', () => {
 
     const result = await validateExtensionPoints(manifest, mockPluginRoot);
     expect(result.valid).toBe(false);
-    expect(result.errors[0]).toContain('Invalid graphql type "invalid-type"');
+    expect(result.errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('Invalid graphql type "invalid-type"'),
+      ]),
+    );
   });
 
   it('should validate function exports', async () => {
@@ -271,5 +283,65 @@ describe('validateExtensionPoints', () => {
     const result = await validateExtensionPoints(manifest, mockPluginRoot);
     expect(result.valid).toBe(false);
     expect(result.errors[0]).toContain('Missing "file" for extension');
+  });
+
+  it('should validate admin:widget extension', async () => {
+    const manifest: PluginManifest = {
+      ...validManifest,
+      extensionPoints: {
+        'admin:widget': [
+          {
+            name: 'myWidget',
+            file: 'widget.tsx', // Using file
+            builderDefinition: 'MyWidget',
+          },
+        ],
+      },
+    };
+
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(fs.readFile).mockResolvedValue(
+      'export const MyWidget = () => {};',
+    );
+    const result = await validateExtensionPoints(manifest, mockPluginRoot);
+    expect(result.valid).toBe(true);
+  });
+
+  it('should invalidate admin:widget without file or component', async () => {
+    const manifest: PluginManifest = {
+      ...validManifest,
+      extensionPoints: {
+        'admin:widget': [
+          {
+            name: 'myWidget',
+            // Missing file/component
+          },
+        ],
+      },
+    };
+
+    const result = await validateExtensionPoints(manifest, mockPluginRoot);
+    expect(result.valid).toBe(false);
+    expect(result.errors[0]).toContain('Missing "file" or "component"');
+  });
+
+  it('should validate admin:routes extension', async () => {
+    const manifest: PluginManifest = {
+      ...validManifest,
+      extensionPoints: {
+        'admin:routes': [
+          {
+            name: 'myRoute',
+            component: 'RouteComponent.tsx', // Using component
+            path: '/my-route',
+          },
+        ],
+      },
+    };
+
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    // No builderDefinition, so no export check, just existence
+    const result = await validateExtensionPoints(manifest, mockPluginRoot);
+    expect(result.valid).toBe(true);
   });
 });
