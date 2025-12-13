@@ -377,5 +377,48 @@ describe('validateExtensionPoints - Utilities & General', () => {
         'Function "myFunc" is not exported from "api.ts"',
       );
     });
+
+    it('should fail for falsy non-string file value (e.g., 0)', async () => {
+      const manifest = {
+        extensionPoints: {
+          'api:rest': [
+            {
+              name: 'my-api',
+              type: 'query',
+              file: 0, // Falsy non-string
+            },
+          ] as any,
+        },
+      } as unknown as PluginManifest;
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors.some((e) => e.includes('Invalid type for "file"')),
+      ).toBe(true);
+    });
+
+    it('should match builderDefinition with trailing $ in named export', async () => {
+      const manifest: PluginManifest = {
+        ...validManifest,
+        extensionPoints: {
+          'api:rest': [
+            {
+              name: 'my-api',
+              type: 'query',
+              file: 'api.ts',
+              builderDefinition: 'myFunc$',
+            },
+          ],
+        },
+      };
+
+      // Mock file content with named export containing $
+      vi.mocked(fs.readFile).mockResolvedValue('export { myFunc$ };');
+      vi.mocked(fs.access).mockResolvedValue(undefined);
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(true);
+    });
   });
 });

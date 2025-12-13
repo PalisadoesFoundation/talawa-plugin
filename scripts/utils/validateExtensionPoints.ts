@@ -97,7 +97,7 @@ export async function validateExtensionPoints(
             `export\\s+(const|function|async\\s+function|class)\\s+${safeDef}(?![\\w$])|` +
               `export\\s+default\\s+(function|class|async\\s+function)\\s+${safeDef}(?![\\w$])|` +
               `export\\s+default\\s+${safeDef}(?![\\w$])|` +
-              `export\\s*{[^}]*\\b(?:\\w+\\s+as\\s+)?${safeDef}\\b[^}]*}`,
+              `export\\s*{[^}]*\\b(?:\\w+\\s+as\\s+)?${safeDef}(?![\\w$])[^}]*}`,
             'm',
           );
 
@@ -175,7 +175,7 @@ export async function validateExtensionPoints(
           );
         }
 
-        if (ext.file) {
+        if (ext.file !== undefined) {
           if (typeof ext.file !== 'string') {
             errors.push(
               `Invalid type for "file" in extension "${extIdent}" (must be string)`,

@@ -33,23 +33,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      # - name: Cache node modules
-      #   id: cache-npm
-      #   uses: actions/cache@v4
-      #   env:
-      #     cache-name: cache-node-modules
-      #   with:
-      #     path: |
-      #       ~/.npm
-      #       node_modules
-      #     key: ${{ runner.os }}-code-coverage-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-code-coverage-${{ env.cache-name }}-
-      #       ${{ runner.os }}-code-coverage-
-      #       ${{ runner.os }}-
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
-      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-        name: List the state of node modules
+      - name: Install dependencies
         run: pnpm install
 
       - name: Run Vitest Tests
