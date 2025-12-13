@@ -19,7 +19,7 @@ reviews:
       - develop
       - main
   path_filters:
-    - '!**/docs/docs/**'
+    - '!**/docs/**'
     - '!*.html'
     - '!*.md'
     - '!*.svg'

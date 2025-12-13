@@ -1,0 +1,10 @@
+{
+  "name": "Test Plugin API",
+  "pluginId": "test-plugin",
+  "version": "1.0.0",
+  "description": "Test plugin API for packaging",
+  "author": "Test Author",
+  "main": "index.ts",
+  "icon": "icon.png",
+  "extensionPoints": {}
+}
