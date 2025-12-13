@@ -2,11 +2,6 @@ import { cpus } from 'node:os';
 import path from 'path';
 import { defineConfig } from 'vitest/config';
 
-// ... (lines 4-53 skipped in replace tool, I need to match exact lines)
-// I will target the imports separately from alias block.
-// Wait, I can only update one block at a time? replace_file_content targets one block.
-// I will split.
-
 const isCI = !!process.env.CI;
 const cpuCount = cpus().length;
 
@@ -15,12 +10,12 @@ const MAX_LOCAL_THREADS = 16;
 
 // Calculate optimal threads based on environment
 // CI: Cap at 12 threads, use 85% of available CPUs (min 4) to avoid over-subscription
-// Local: Cap at 16 threads, use 100% of available CPUs (min 4) for maximum speed
 const ciThreads = Math.min(
   MAX_CI_THREADS,
   Math.max(4, Math.floor(cpuCount * 0.85)),
 );
 
+// Local: Cap at 16 threads, use 100% of available CPUs (min 4) for maximum speed
 const localThreads = Math.min(MAX_LOCAL_THREADS, Math.max(4, cpuCount));
 
 export default defineConfig({
