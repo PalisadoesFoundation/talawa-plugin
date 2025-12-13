@@ -479,11 +479,11 @@ jobs:
           exclude: 'docs/'
           files: ./coverage/vitest/lcov.info
 
-      # - name: Test acceptable level of code coverage
-      #   uses: VeryGoodOpenSource/very_good_coverage@v3
-      #   with:
-      #     path: "./coverage/vitest/lcov.info"
-      #     min_coverage: 86.6
+      - name: Test acceptable level of code coverage
+        uses: VeryGoodOpenSource/very_good_coverage@v3
+        with:
+          path: './coverage/vitest/lcov.info'
+          min_coverage: 60
 
   Test-Docusaurus-Deployment:
     name: Test Deployment to https://docs-plugin.talawa.io

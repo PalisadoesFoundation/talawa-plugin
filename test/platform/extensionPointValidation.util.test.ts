@@ -420,5 +420,47 @@ describe('validateExtensionPoints - Utilities & General', () => {
       const result = await validateExtensionPoints(manifest, mockPluginRoot);
       expect(result.valid).toBe(true);
     });
+
+    it('should handle non-Error exceptions during file access', async () => {
+      const manifest: PluginManifest = {
+        ...validManifest,
+        extensionPoints: {
+          'api:rest': [
+            {
+              name: 'my-api',
+              type: 'query',
+              file: 'api.ts',
+              builderDefinition: 'myFunc',
+            },
+          ],
+        },
+      };
+
+      // Mock fs.access to reject with a string instead of Error object
+      vi.mocked(fs.access).mockRejectedValue('Permission denied string');
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0]).toContain('Permission denied string');
+    });
+
+    it('should invalidate api:rest with undefined file', async () => {
+      const manifest: PluginManifest = {
+        ...validManifest,
+        extensionPoints: {
+          'api:rest': [
+            {
+              name: 'my-api',
+              type: 'query',
+              // file is undefined (not present)
+            },
+          ],
+        },
+      };
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Missing "file" for extension "my-api"');
+    });
   });
 });
