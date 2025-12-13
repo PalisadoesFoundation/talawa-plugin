@@ -6,11 +6,17 @@ import {
   getOrganizationTransactionStatsResolver,
   getUserTransactionStatsResolver,
 } from '../../../plugins/Razorpay/api/graphql/queries';
+import { expectTransaction, expectConfig } from './graphql.queries.helpers';
 import {
   createMockRazorpayContext,
+  createMockRazorpayInstance,
   createMockConfig,
+  createMockOrder,
   createMockTransaction,
 } from './utils/mockRazorpay';
+
+// Mock the Razorpay module
+vi.mock('razorpay');
 import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
 
 describe('Razorpay GraphQL Queries', () => {
@@ -21,34 +27,28 @@ describe('Razorpay GraphQL Queries', () => {
       isAdmin: true,
       user: {
         id: 'user-123',
-        email: 'admin@example.com',
-        firstName: 'Admin',
-        lastName: 'User',
-        roles: ['admin'],
-        permissions: [],
-        isSuperAdmin: true,
+        // We rely on the default robust mock from createMockRazorpayContext
       },
     });
 
-    mockContext.drizzleClient = {
-      select: vi.fn().mockReturnThis(),
-      from: vi.fn().mockReturnThis(),
-      where: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      offset: vi.fn().mockReturnThis(),
-      orderBy: vi.fn().mockReturnThis(),
-      execute: vi.fn(),
+    // Mock log functions
+    mockContext.log = {
+      info: vi.fn(),
+      error: vi.fn(),
+      warn: vi.fn(),
+      debug: vi.fn(),
     };
   });
 
   describe('getRazorpayConfigResolver', () => {
     it('should return config for super admin', async () => {
+      mockContext.user.isSuperAdmin = true;
       const mockConfig = createMockConfig();
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
       const result = await getRazorpayConfigResolver({}, {}, mockContext);
 
-      expect(result).toEqual(mockConfig);
+      expect(result).toEqual(expectConfig(mockConfig));
       expect(mockContext.drizzleClient.select).toHaveBeenCalled();
     });
 
@@ -69,7 +69,7 @@ describe('Razorpay GraphQL Queries', () => {
     });
 
     it('should throw error when user is not authenticated', async () => {
-      mockContext.user = null;
+      mockContext.currentClient.isAuthenticated = false;
 
       await expect(
         getRazorpayConfigResolver({}, {}, mockContext),
@@ -100,7 +100,7 @@ describe('Razorpay GraphQL Queries', () => {
         mockContext,
       );
 
-      expect(result).toEqual(mockTransactions);
+      expect(result).toEqual(mockTransactions.map(expectTransaction));
     });
 
     it('should filter by status', async () => {
@@ -114,7 +114,7 @@ describe('Razorpay GraphQL Queries', () => {
       );
 
       expect(mockContext.drizzleClient.where).toHaveBeenCalled();
-      expect(result).toEqual(mockTransactions);
+      expect(result).toEqual(mockTransactions.map(expectTransaction));
     });
 
     it('should filter by date range', async () => {
@@ -131,7 +131,7 @@ describe('Razorpay GraphQL Queries', () => {
         mockContext,
       );
 
-      expect(result).toEqual(mockTransactions);
+      expect(result).toEqual(mockTransactions.map(expectTransaction));
     });
 
     it('should apply pagination', async () => {
@@ -157,7 +157,7 @@ describe('Razorpay GraphQL Queries', () => {
     });
 
     it('should throw error for unauthenticated user', async () => {
-      mockContext.user = null;
+      mockContext.currentClient.isAuthenticated = false;
 
       await expect(
         getOrganizationTransactionsResolver({}, args, mockContext),
@@ -194,7 +194,7 @@ describe('Razorpay GraphQL Queries', () => {
 
       const result = await getUserTransactionsResolver({}, args, mockContext);
 
-      expect(result).toEqual(mockTransactions);
+      expect(result).toEqual(mockTransactions.map(expectTransaction));
     });
 
     it('should allow admin to view any user transactions', async () => {
@@ -209,7 +209,7 @@ describe('Razorpay GraphQL Queries', () => {
         mockContext,
       );
 
-      expect(result).toEqual(mockTransactions);
+      expect(result).toEqual(mockTransactions.map(expectTransaction));
     });
 
     it('should throw error when non-admin tries to view other user transactions', async () => {
@@ -234,7 +234,7 @@ describe('Razorpay GraphQL Queries', () => {
         mockContext,
       );
 
-      expect(result).toEqual(mockTransactions);
+      expect(result).toEqual(mockTransactions.map(expectTransaction));
     });
 
     it('should filter by status and date range', async () => {
@@ -252,11 +252,11 @@ describe('Razorpay GraphQL Queries', () => {
         mockContext,
       );
 
-      expect(result).toEqual(mockTransactions);
+      expect(result).toEqual(mockTransactions.map(expectTransaction));
     });
 
     it('should throw error for unauthenticated user', async () => {
-      mockContext.user = null;
+      mockContext.currentClient.isAuthenticated = false;
 
       await expect(
         getUserTransactionsResolver({}, args, mockContext),
@@ -441,7 +441,7 @@ describe('Razorpay GraphQL Queries', () => {
     });
 
     it('should throw error for unauthenticated user', async () => {
-      mockContext.user = null;
+      mockContext.currentClient.isAuthenticated = false;
 
       await expect(
         getUserTransactionStatsResolver({}, args, mockContext),

@@ -1,5 +1,11 @@
 import { cpus } from 'node:os';
+import path from 'path';
 import { defineConfig } from 'vitest/config';
+
+// ... (lines 4-53 skipped in replace tool, I need to match exact lines)
+// I will target the imports separately from alias block.
+// Wait, I can only update one block at a time? replace_file_content targets one block.
+// I will split.
 
 const isCI = !!process.env.CI;
 const cpuCount = cpus().length;
@@ -26,14 +32,16 @@ export default defineConfig({
       'plugins/**/test/**/*.{test,spec}.{js,jsx,ts,tsx}',
     ],
     exclude: [
-      'node_modules/**',
+      '**/node_modules/**',
       'dist/**',
       'coverage/**',
       'docs/**',
       '**/*.d.ts',
       'plugin-zips/**',
     ],
+    setupFiles: ['test/setup/globalMocks.ts'],
     pool: 'threads',
+    // @ts-expect-error - poolOptions exists in Vitest config but types might be lagging
     poolOptions: {
       threads: {
         singleThread: false,
@@ -47,6 +55,9 @@ export default defineConfig({
     sequence: {
       shuffle: false,
       concurrent: false,
+    },
+    alias: {
+      razorpay: path.resolve(__dirname, './__mocks__/razorpay.ts'),
     },
     coverage: {
       provider: 'v8',

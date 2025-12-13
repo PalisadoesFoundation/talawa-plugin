@@ -6,7 +6,7 @@
 
 > **onActivate**(`_context`): `Promise`\<`void`\>
 
-Defined in: [SummarizeT5/api/index.ts:9](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeT5/api/index.ts#L9)
+Defined in: [plugins/SummarizeT5/api/index.ts:9](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeT5/api/index.ts#L9)
 
 ## Parameters
 

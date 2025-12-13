@@ -4,9 +4,19 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import Loader from '../../../../components/Loader/Loader';
-import useLocalStorage from 'utils/useLocalstorage';
 
 // GraphQL operations
+const GET_CURRENT_USER = gql`
+  query GetCurrentUser {
+    me {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+`;
+
 const GET_ORGANIZATION_INFO = gql`
   query GetOrganizationInfo($orgId: String!) {
     organization(input: { id: $orgId }) {
@@ -110,8 +120,6 @@ interface PaymentResult {
 const DonationForm: React.FC = () => {
   const { orgId } = useParams<{ orgId: string }>();
   const navigate = useNavigate();
-  const { getItem } = useLocalStorage();
-  const userId = getItem('id') as string | null;
 
   // Load Razorpay script on component mount
   useEffect(() => {
@@ -146,6 +154,8 @@ const DonationForm: React.FC = () => {
   >('form');
 
   // GraphQL operations
+  const { data: currentUserData } = useQuery(GET_CURRENT_USER);
+
   const {
     data: orgData,
     loading: orgLoading,
@@ -165,16 +175,18 @@ const DonationForm: React.FC = () => {
   const [verifyPayment] = useMutation(VERIFY_PAYMENT);
 
   useEffect(() => {
-    // Load user data if available
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user.firstName && user.lastName) {
-      setFormData((prev) => ({
-        ...prev,
-        donorName: `${user.firstName} ${user.lastName}`,
-        donorEmail: user.email || '',
-      }));
+    // Load user data from GraphQL query
+    if (currentUserData?.me) {
+      const user = currentUserData.me;
+      if (user.firstName && user.lastName) {
+        setFormData((prev) => ({
+          ...prev,
+          donorName: `${user.firstName} ${user.lastName}`,
+          donorEmail: user.email || '',
+        }));
+      }
     }
-  }, []);
+  }, [currentUserData]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({
@@ -223,7 +235,7 @@ const DonationForm: React.FC = () => {
         variables: {
           input: {
             organizationId: orgId,
-            userId: userId,
+            userId: currentUserData?.me?.id || null,
             amount: parseFloat(formData.amount) * 100, // Convert to paise
             currency: formData.currency,
             description:

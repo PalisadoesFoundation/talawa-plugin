@@ -43,6 +43,13 @@ export async function updateRazorpayConfigResolver(
     });
   }
 
+  // Check for superadmin access
+  if (!ctx.user || !ctx.user.isSuperAdmin) {
+    throw new TalawaGraphQLError({
+      extensions: { code: 'forbidden' },
+    });
+  }
+
   const {
     success,
     data: parsedArgs,
@@ -224,9 +231,13 @@ export async function createPaymentOrderResolver(
       })
       .returning();
 
-    if (!order) {
+    // Check for superadmin access
+    // if (!ctx.user.isSuperAdmin) { ... } // Logic for updateConfig
+
+    // Check authentication for createPaymentOrder
+    if (!ctx.user) {
       throw new TalawaGraphQLError({
-        extensions: { code: 'unexpected' },
+        extensions: { code: 'unauthenticated' },
       });
     }
 
@@ -317,14 +328,28 @@ export async function initiatePaymentResolver(
       });
     }
 
+    if (orderItem.status === 'paid') {
+      throw new TalawaGraphQLError('Order already paid', {
+        extensions: {
+          code: 'invalid_arguments',
+          issues: [
+            {
+              argumentPath: ['input', 'orderId'],
+              message: 'Order already paid',
+            },
+          ],
+        },
+      });
+    }
+
     // Get Razorpay configuration
     const config = await ctx.drizzleClient.select().from(configTable).limit(1);
 
-    if (config.length === 0) {
+    if (config.length === 0 || !config[0].isEnabled) {
       throw new TalawaGraphQLError({
         extensions: {
-          code: 'arguments_associated_resources_not_found',
-          issues: [{ argumentPath: ['input', 'orderId'] }],
+          code: 'precondition_required',
+          message: 'Razorpay is not enabled',
         },
       });
     }
@@ -420,11 +445,6 @@ export async function verifyPaymentResolver(
   }
 
   try {
-    ctx.log?.info('Verifying payment:', {
-      razorpayPaymentId: parsedArgs.input.razorpayPaymentId,
-      razorpayOrderId: parsedArgs.input.razorpayOrderId,
-    });
-
     // Get Razorpay configuration
     const config = await ctx.drizzleClient.select().from(configTable).limit(1);
 
@@ -451,16 +471,6 @@ export async function verifyPaymentResolver(
         `${parsedArgs.input.razorpayOrderId}|${parsedArgs.input.razorpayPaymentId}`,
       )
       .digest('hex');
-
-    ctx.log?.info('Signature verification:', {
-      expected: expectedSignature,
-      received: parsedArgs.input.razorpaySignature,
-      match: expectedSignature === parsedArgs.input.razorpaySignature,
-      keySecretLength: configItem.keySecret?.length || 0,
-      webhookSecretLength: configItem.webhookSecret?.length || 0,
-      orderId: parsedArgs.input.razorpayOrderId,
-      paymentId: parsedArgs.input.razorpayPaymentId,
-    });
 
     if (expectedSignature !== parsedArgs.input.razorpaySignature) {
       ctx.log?.error('Signature verification failed');
@@ -564,6 +574,13 @@ export async function testRazorpaySetupResolver(
     });
   }
 
+  // Check for admin access
+  if (!ctx.isAdmin) {
+    throw new TalawaGraphQLError({
+      extensions: { code: 'forbidden' },
+    });
+  }
+
   try {
     // Get current configuration
     const config = await ctx.drizzleClient.select().from(configTable).limit(1);
@@ -577,6 +594,8 @@ export async function testRazorpaySetupResolver(
     }
 
     const configItem = config[0];
+
+    console.log('DEBUG Setup Config:', configItem); // Log config
 
     if (!configItem.keyId || !configItem.keySecret) {
       return {
@@ -622,6 +641,7 @@ export async function testRazorpaySetupResolver(
       message: `Setup verified! Test order created: ${testOrder.id} (₹1.00). Your Razorpay configuration is working correctly.`,
     };
   } catch (error) {
+    console.error('DEBUG Setup Error:', error);
     ctx.log?.error('Error testing Razorpay setup:', error);
 
     if (error instanceof Error) {

@@ -4,9 +4,9 @@
 
 # Function: summarizeTextResolver()
 
-> **summarizeTextResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `originalLength`: `any`; `postId`: `any`; `summary`: `string`; `summaryLength`: `number`; \}\>
+> **summarizeTextResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `originalLength`: `number`; `postId`: `string`; `summary`: `string`; `summaryLength`: `number`; \}\>
 
-Defined in: [SummarizeAPI/api/graphql/mutations.ts:137](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeAPI/api/graphql/mutations.ts#L137)
+Defined in: [plugins/SummarizeAPI/api/graphql/mutations.ts:137](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeAPI/api/graphql/mutations.ts#L137)
 
 ## Parameters
 
@@ -16,7 +16,17 @@ Defined in: [SummarizeAPI/api/graphql/mutations.ts:137](https://github.com/Palis
 
 ### args
 
-`infer`\<`any`\>
+#### input
+
+\{ `postId?`: `string`; `text`: `string`; \} = `summarizeAPIInputSchema`
+
+#### input.postId?
+
+`string` = `...`
+
+#### input.text
+
+`string` = `...`
 
 ### ctx
 
@@ -24,4 +34,4 @@ Defined in: [SummarizeAPI/api/graphql/mutations.ts:137](https://github.com/Palis
 
 ## Returns
 
-`Promise`\<\{ `originalLength`: `any`; `postId`: `any`; `summary`: `string`; `summaryLength`: `number`; \}\>
+`Promise`\<\{ `originalLength`: `number`; `postId`: `string`; `summary`: `string`; `summaryLength`: `number`; \}\>

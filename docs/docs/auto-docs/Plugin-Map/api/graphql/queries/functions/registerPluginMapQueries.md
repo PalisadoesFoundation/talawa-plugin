@@ -6,7 +6,7 @@
 
 > **registerPluginMapQueries**(`builderInstance`): `void`
 
-Defined in: [Plugin Map/api/graphql/queries.ts:267](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/graphql/queries.ts#L267)
+Defined in: [plugins/Plugin Map/api/graphql/queries.ts:267](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/graphql/queries.ts#L267)
 
 ## Parameters
 

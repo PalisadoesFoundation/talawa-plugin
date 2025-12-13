@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { RazorpayService } from '../../../plugins/Razorpay/api/services/razorpayService';
 import {
   updateRazorpayConfigResolver,
@@ -11,20 +11,36 @@ import {
 } from './utils/mockRazorpay';
 import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
 
-// Mock Razorpay SDK
-vi.mock('razorpay', () => ({
-  default: vi.fn(),
-}));
+import { mockOrders, mockPayments } from '../../../__mocks__/razorpay';
+
+// Use global mock
+vi.mock('razorpay');
 
 describe('Razorpay Error Handling', () => {
   let mockContext: any;
-  let mockRazorpayInstance: any;
+  // mockOrdersplaced by direct imports
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockContext = createMockRazorpayContext();
-    mockRazorpayInstance = createMockRazorpayInstance();
+    vi.clearAllMocks();
 
-    mockContext.drizzleClient = {
+    const RazorpayConstructor = (await import('razorpay')).default;
+    (vi.mocked(RazorpayConstructor) as any).mockImplementation(function () {
+      return {
+        orders: mockOrders,
+        payments: mockPayments,
+      } as any;
+    });
+
+    // Set default mock values
+    const { createMockRazorpayOrder } = await import('./utils/mockRazorpay');
+    mockOrders.create.mockResolvedValue(createMockRazorpayOrder());
+    mockPayments.fetch.mockResolvedValue({ status: 'captured' } as any);
+
+    const mockDbString = 'mock-db-client'; // For debugging identification
+
+    // Create a circular mock that always returns itself for chaining
+    const mockDb: any = {
       select: vi.fn().mockReturnThis(),
       from: vi.fn().mockReturnThis(),
       where: vi.fn().mockReturnThis(),
@@ -33,9 +49,18 @@ describe('Razorpay Error Handling', () => {
       values: vi.fn().mockReturnThis(),
       update: vi.fn().mockReturnThis(),
       set: vi.fn().mockReturnThis(),
-      returning: vi.fn(),
+      returning: vi.fn().mockReturnThis(),
       execute: vi.fn(),
     };
+
+    // Ensure all methods return the same mockDb object
+    Object.keys(mockDb).forEach((key) => {
+      if (typeof mockDb[key] === 'function' && key !== 'execute') {
+        mockDb[key].mockReturnValue(mockDb);
+      }
+    });
+
+    mockContext.drizzleClient = mockDb;
 
     mockContext.log = {
       info: vi.fn(),
@@ -54,7 +79,7 @@ describe('Razorpay Error Handling', () => {
 
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      const RazorpayConstructor = vi.mocked(await import('razorpay')).default;
+      const RazorpayConstructor = (await import('razorpay')).default as any;
       const timeoutInstance = {
         orders: {
           create: vi
@@ -62,7 +87,9 @@ describe('Razorpay Error Handling', () => {
             .mockRejectedValue(new Error('ETIMEDOUT: Request timeout')),
         },
       };
-      RazorpayConstructor.mockImplementation(() => timeoutInstance as any);
+      RazorpayConstructor.mockImplementation(function () {
+        return timeoutInstance as any;
+      });
 
       await expect(
         service.createOrder({
@@ -79,13 +106,15 @@ describe('Razorpay Error Handling', () => {
 
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      const RazorpayConstructor = vi.mocked(await import('razorpay')).default;
+      const RazorpayConstructor = (await import('razorpay')).default as any;
       const networkErrorInstance = {
         orders: {
           create: vi.fn().mockRejectedValue(new Error('ECONNREFUSED')),
         },
       };
-      RazorpayConstructor.mockImplementation(() => networkErrorInstance as any);
+      RazorpayConstructor.mockImplementation(function () {
+        return networkErrorInstance as any;
+      });
 
       await expect(
         service.createOrder({
@@ -132,7 +161,7 @@ describe('Razorpay Error Handling', () => {
 
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      const RazorpayConstructor = vi.mocked(await import('razorpay')).default;
+      const RazorpayConstructor = (await import('razorpay')).default as any;
       const authErrorInstance = {
         orders: {
           create: vi
@@ -140,7 +169,9 @@ describe('Razorpay Error Handling', () => {
             .mockRejectedValue(new Error('401 Unauthorized: Invalid API key')),
         },
       };
-      RazorpayConstructor.mockImplementation(() => authErrorInstance as any);
+      RazorpayConstructor.mockImplementation(function () {
+        return authErrorInstance as any;
+      });
 
       await expect(
         service.createOrder({
@@ -172,11 +203,13 @@ describe('Razorpay Error Handling', () => {
   describe('edge cases', () => {
     it('should handle duplicate payment IDs', async () => {
       // This would typically be handled by database unique constraints
-      mockContext.drizzleClient.insert = vi
-        .fn()
-        .mockRejectedValue(
-          new Error('duplicate key value violates unique constraint'),
-        );
+      mockContext.drizzleClient.insert = vi.fn().mockReturnValue({
+        values: vi
+          .fn()
+          .mockRejectedValue(
+            new Error('duplicate key value violates unique constraint'),
+          ),
+      });
 
       // Verify that the error propagates correctly
       await expect(
@@ -190,8 +223,10 @@ describe('Razorpay Error Handling', () => {
 
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      const RazorpayConstructor = vi.mocked(await import('razorpay')).default;
-      RazorpayConstructor.mockImplementation(() => mockRazorpayInstance as any);
+      const RazorpayConstructor = (await import('razorpay')).default as any;
+      RazorpayConstructor.mockImplementation(function () {
+        return { orders: mockOrders, payments: mockPayments } as any;
+      });
 
       // Order with minimal data (some fields undefined)
       await expect(
@@ -210,8 +245,10 @@ describe('Razorpay Error Handling', () => {
 
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      const RazorpayConstructor = vi.mocked(await import('razorpay')).default;
-      RazorpayConstructor.mockImplementation(() => mockRazorpayInstance as any);
+      const RazorpayConstructor = (await import('razorpay')).default as any;
+      RazorpayConstructor.mockImplementation(function () {
+        return { orders: mockOrders, payments: mockPayments } as any;
+      });
 
       const largeAmount = Number.MAX_SAFE_INTEGER;
 
@@ -230,7 +267,7 @@ describe('Razorpay Error Handling', () => {
 
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      const RazorpayConstructor = vi.mocked(await import('razorpay')).default;
+      const RazorpayConstructor = (await import('razorpay')).default as any;
       const currencyErrorInstance = {
         orders: {
           create: vi
@@ -240,9 +277,9 @@ describe('Razorpay Error Handling', () => {
             ),
         },
       };
-      RazorpayConstructor.mockImplementation(
-        () => currencyErrorInstance as any,
-      );
+      RazorpayConstructor.mockImplementation(function () {
+        return currencyErrorInstance as any;
+      });
 
       await expect(
         service.createOrder({
@@ -259,8 +296,10 @@ describe('Razorpay Error Handling', () => {
 
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      const RazorpayConstructor = vi.mocked(await import('razorpay')).default;
-      RazorpayConstructor.mockImplementation(() => mockRazorpayInstance as any);
+      const RazorpayConstructor = (await import('razorpay')).default as any;
+      RazorpayConstructor.mockImplementation(function () {
+        return { orders: mockOrders, payments: mockPayments } as any;
+      });
 
       // Razorpay may reject zero amounts
       await expect(
@@ -278,7 +317,7 @@ describe('Razorpay Error Handling', () => {
 
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      const RazorpayConstructor = vi.mocked(await import('razorpay')).default;
+      const RazorpayConstructor = (await import('razorpay')).default as any;
       const negativeErrorInstance = {
         orders: {
           create: vi
@@ -286,9 +325,9 @@ describe('Razorpay Error Handling', () => {
             .mockRejectedValue(new Error('BAD_REQUEST_ERROR: Invalid amount')),
         },
       };
-      RazorpayConstructor.mockImplementation(
-        () => negativeErrorInstance as any,
-      );
+      RazorpayConstructor.mockImplementation(function () {
+        return negativeErrorInstance as any;
+      });
 
       await expect(
         service.createOrder({
@@ -307,8 +346,10 @@ describe('Razorpay Error Handling', () => {
 
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      const RazorpayConstructor = vi.mocked(await import('razorpay')).default;
-      RazorpayConstructor.mockImplementation(() => mockRazorpayInstance as any);
+      const RazorpayConstructor = (await import('razorpay')).default as any;
+      RazorpayConstructor.mockImplementation(function () {
+        return { orders: mockOrders, payments: mockPayments } as any;
+      });
 
       const promises = Array.from({ length: 10 }, (_, i) =>
         service.createOrder({
@@ -339,6 +380,7 @@ describe('Razorpay Error Handling', () => {
 
       const results = await Promise.allSettled(promises);
 
+      // All should fail with same error
       // All should fail with same error
       results.forEach((result) => {
         expect(result.status).toBe('fulfilled');
@@ -391,9 +433,13 @@ describe('Razorpay Error Handling', () => {
 
   describe('database transaction failures', () => {
     it('should handle database connection errors', async () => {
-      mockContext.drizzleClient.select = vi
-        .fn()
-        .mockRejectedValue(new Error('Connection timeout'));
+      // Create a mock chain where the final await/execute fails
+      const mockChain = {
+        from: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockRejectedValue(new Error('Connection timeout')),
+      };
+
+      mockContext.drizzleClient.select = vi.fn().mockReturnValue(mockChain);
 
       const service = new RazorpayService(mockContext);
 
@@ -401,9 +447,10 @@ describe('Razorpay Error Handling', () => {
     });
 
     it('should handle transaction rollback scenarios', async () => {
-      mockContext.drizzleClient.insert = vi
-        .fn()
-        .mockRejectedValue(new Error('Transaction aborted'));
+      // Mock insert() to return an object with values() that rejects
+      mockContext.drizzleClient.insert = vi.fn().mockReturnValue({
+        values: vi.fn().mockRejectedValue(new Error('Transaction aborted')),
+      });
 
       await expect(
         mockContext.drizzleClient.insert().values({}),
@@ -411,9 +458,10 @@ describe('Razorpay Error Handling', () => {
     });
 
     it('should handle deadlock errors', async () => {
-      mockContext.drizzleClient.update = vi
-        .fn()
-        .mockRejectedValue(new Error('Deadlock detected'));
+      // Mock update() to return an object with set() that rejects
+      mockContext.drizzleClient.update = vi.fn().mockReturnValue({
+        set: vi.fn().mockRejectedValue(new Error('Deadlock detected')),
+      });
 
       await expect(mockContext.drizzleClient.update().set({})).rejects.toThrow(
         'Deadlock detected',

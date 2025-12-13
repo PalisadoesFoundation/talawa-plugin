@@ -53,8 +53,10 @@ export const createMockRazorpayInstance = () => {
       all: vi.fn().mockResolvedValue({ items: [], count: 0 }),
     },
     payments: {
+      create: vi.fn().mockResolvedValue(createMockRazorpayPayment()),
       fetch: vi.fn().mockResolvedValue(createMockRazorpayPayment()),
       capture: vi.fn().mockResolvedValue(createMockRazorpayPayment()),
+      refund: vi.fn().mockResolvedValue(createMockRazorpayRefund()),
       all: vi.fn().mockResolvedValue({ items: [], count: 0 }),
     },
     refunds: {
@@ -204,21 +206,39 @@ export const createMockTransaction = (overrides: Record<string, any> = {}) => {
  * Mock database client for testing
  */
 export const createMockDatabaseClient = () => {
-  return {
-    select: vi.fn().mockReturnThis(),
-    from: vi.fn().mockReturnThis(),
-    where: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
-    offset: vi.fn().mockReturnThis(),
-    orderBy: vi.fn().mockReturnThis(),
-    execute: vi.fn().mockResolvedValue([]),
-    insert: vi.fn().mockReturnThis(),
-    values: vi.fn().mockReturnThis(),
-    returning: vi.fn().mockResolvedValue([createMockConfig()]),
-    update: vi.fn().mockReturnThis(),
-    set: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
+  const mockDb: any = {
+    // Delegate 'then' to 'execute' so that await checks receive the result of execute()
+    then: (resolve: any, reject: any) => mockDb.execute().then(resolve, reject),
   };
+
+  const methods = [
+    'groupBy',
+    'select',
+    'from',
+    'where',
+    'limit',
+    'offset',
+    'orderBy',
+    'insert',
+    'values',
+    'update',
+    'set',
+    'delete',
+    'leftJoin',
+  ];
+
+  methods.forEach((method) => {
+    mockDb[method] = vi.fn(() => mockDb);
+  });
+
+  // Special handling for execute and returning
+  mockDb.execute = vi.fn().mockResolvedValue([]);
+  mockDb.returning = vi.fn().mockResolvedValue([createMockConfig()]);
+
+  // Mock transaction method
+  mockDb.transaction = vi.fn((callback) => callback(mockDb));
+
+  return mockDb;
 };
 
 /**
@@ -229,7 +249,7 @@ export const createMockRazorpayContext = (
 ): GraphQLContext => {
   const mockDb = createMockDatabaseClient();
 
-  return {
+  const ctx = {
     userId: 'user-123',
     user: {
       id: 'user-123',
@@ -250,8 +270,20 @@ export const createMockRazorpayContext = (
     isAdmin: true,
     token: 'mock-jwt-token',
     db: mockDb as any,
+    currentClient: {
+      isAuthenticated: true,
+      scopes: ['api:access'],
+    },
+    drizzleClient: mockDb as any,
+    log: {
+      info: vi.fn(),
+      error: vi.fn((...args) => console.error('MOCKED_LOG_ERROR:', ...args)),
+      warn: vi.fn(),
+      debug: vi.fn(),
+    },
     ...overrides,
   } as GraphQLContext;
+  return ctx;
 };
 
 /**
@@ -296,9 +328,10 @@ export const createValidSignature = (
   paymentId: string,
   secret: string = 'webhook_secret_123',
 ): string => {
-  // This would normally use crypto.createHmac
-  // For testing, we'll return a predictable mock signature
-  return `mock_signature_${orderId}_${paymentId}`;
+  // Use actual crypto to create valid signatures for testing
+  const crypto = require('crypto');
+  const payload = `${orderId}|${paymentId}`;
+  return crypto.createHmac('sha256', secret).update(payload).digest('hex');
 };
 
 /**

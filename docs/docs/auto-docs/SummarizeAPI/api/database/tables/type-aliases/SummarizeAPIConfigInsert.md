@@ -6,4 +6,4 @@
 
 > **SummarizeAPIConfigInsert** = *typeof* `configTable.$inferInsert`
 
-Defined in: [SummarizeAPI/api/database/tables.ts:17](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeAPI/api/database/tables.ts#L17)
+Defined in: [plugins/SummarizeAPI/api/database/tables.ts:17](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeAPI/api/database/tables.ts#L17)
