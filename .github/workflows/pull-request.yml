@@ -469,7 +469,7 @@ jobs:
       # section. They are required for accurate calculations
       #######################################################################
       - name: Present and upload coverage to Codecov as ${{env.CODECOV_UNIQUE_NAME}}
-        if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: codecov/codecov-action@v5
         with:
           name: '${{env.CODECOV_UNIQUE_NAME}}'
