@@ -33,38 +33,27 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      # - name: Cache node modules
-      #   id: cache-npm
-      #   uses: actions/cache@v4
-      #   env:
-      #     cache-name: cache-node-modules
-      #   with:
-      #     path: |
-      #       ~/.npm
-      #       node_modules
-      #     key: ${{ runner.os }}-code-coverage-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-code-coverage-${{ env.cache-name }}-
-      #       ${{ runner.os }}-code-coverage-
-      #       ${{ runner.os }}-
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
-      # - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-      #   name: List the state of node modules
-      #   run: npm install
+      - name: Install dependencies
+        run: pnpm install
 
-      # - name: Run Vitest Tests
-      #   env:
-      #     NODE_V8_COVERAGE: './coverage/vitest'
-      #   run: |
-      #     npm run test:coverage
+      - name: Run Vitest Tests
+        env:
+          NODE_V8_COVERAGE: './coverage/vitest'
+        run: |
+          pnpm run test:coverage
 
-      # - name: Present and upload coverage to Codecov as ${{env.CODECOV_UNIQUE_NAME}}
-      #   uses: codecov/codecov-action@v5
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     verbose: true
-      #     exclude: 'docs/'
-      #     gcov_ignore: 'docs/'
-      #     files: ./coverage/vitest/lcov.info
-      #     fail_ci_if_error: false
-      #     name: '${{env.CODECOV_UNIQUE_NAME}}'
+      - name: Present and upload coverage to Codecov as ${{env.CODECOV_UNIQUE_NAME}}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+          exclude: 'docs/'
+          gcov_ignore: 'docs/'
+          files: ./coverage/vitest/lcov.info
+          fail_ci_if_error: false
+          name: '${{env.CODECOV_UNIQUE_NAME}}'

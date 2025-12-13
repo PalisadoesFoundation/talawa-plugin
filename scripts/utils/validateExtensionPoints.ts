@@ -92,11 +92,12 @@ export async function validateExtensionPoints(
           const fileContent = await fs.readFile(realResolvedPath, 'utf-8');
           const safeDef = escapeRegExp(builderDef);
 
+          // NOTE: avoid `export type` (erased at runtime). Also avoid `\b` since `$` isn't a `\w` char.
           const exportRegex = new RegExp(
-            `export\\s+(const|function|async\\s+function|class|type)\\s+${safeDef}\\b|` +
-              `export\\s+default\\s+(function|class|async\\s+function)\\s+${safeDef}\\b|` +
-              `export\\s+default\\s+${safeDef}\\b|` +
-              `export\\s*{[^}]*\\b(?:\\w+\\s+as\\s+)?${safeDef}\\b[^}]*}`,
+            `export\\s+(const|function|async\\s+function|class)\\s+${safeDef}(?![\\w$])|` +
+              `export\\s+default\\s+(function|class|async\\s+function)\\s+${safeDef}(?![\\w$])|` +
+              `export\\s+default\\s+${safeDef}(?![\\w$])|` +
+              `export\\s*{[^}]*\\b(?:\\w+\\s+as\\s+)?${safeDef}(?![\\w$])[^}]*}`,
             'm',
           );
 
@@ -128,8 +129,13 @@ export async function validateExtensionPoints(
       let extName = ext.name;
 
       // Special handling for admin:menu which uses 'title' as identifier if name is missing
-      if (!extName && pointId === 'admin:menu' && ext.title) {
-        extName = ext.title as string;
+      if (
+        !extName &&
+        pointId === 'admin:menu' &&
+        ext.title &&
+        typeof ext.title === 'string'
+      ) {
+        extName = ext.title;
       }
 
       const extIdent = extName ?? ext.id ?? `index ${i}`;
@@ -169,13 +175,26 @@ export async function validateExtensionPoints(
           );
         }
 
-        if (ext.file) {
-          await validateExtensionFile(
-            ext.file,
-            ext.builderDefinition,
-            extIdent,
-            true,
-          );
+        if (ext.file !== undefined) {
+          if (typeof ext.file !== 'string') {
+            errors.push(
+              `Invalid type for "file" in extension "${extIdent}" (must be string)`,
+            );
+          } else if (
+            ext.builderDefinition !== undefined &&
+            typeof ext.builderDefinition !== 'string'
+          ) {
+            errors.push(
+              `Invalid type for "builderDefinition" in extension "${extIdent}" (must be string)`,
+            );
+          } else {
+            await validateExtensionFile(
+              ext.file,
+              ext.builderDefinition,
+              extIdent,
+              true,
+            );
+          }
         } else if (pointId === 'api:graphql' || pointId === 'api:rest') {
           errors.push(`Missing "file" for extension "${extIdent}"`);
         }
