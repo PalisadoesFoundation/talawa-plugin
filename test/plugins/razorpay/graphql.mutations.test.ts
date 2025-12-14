@@ -185,28 +185,6 @@ describe('Razorpay GraphQL Mutations', () => {
       ).rejects.toThrow(TalawaGraphQLError);
     });
 
-    // TODO: Fix mock scoping mechanism - currently returning success despite disabled config mock
-    // it('should throw error if Razorpay is not enabled', async () => {
-    //   const disabledConfig = createMockConfig({ isEnabled: false });
-    //   // Override default config with disabled config
-    //   mockContext.drizzleClient.limit.mockResolvedValue([disabledConfig]);
-    //
-    //   await expect(
-    //     createPaymentOrderResolver({}, { input }, mockContext),
-    //   ).rejects.toThrow();
-    // });
-
-    // TODO: Fix mock scoping mechanism
-    // it('should throw error if amount is invalid', async () => {
-    //   mockContext.drizzleClient.limit.mockResolvedValue([createMockConfig()]);
-    //
-    //   const invalidInput = { ...input, amount: -100 };
-    //
-    //   await expect(
-    //     createPaymentOrderResolver({}, { input: invalidInput }, mockContext),
-    //   ).rejects.toThrow();
-    // });
-
     it('should handle anonymous donations (no userId)', async () => {
       const mockConfig = createMockConfig();
       const mockOrder = createMockOrder({ userId: null });
@@ -389,26 +367,6 @@ describe('Razorpay GraphQL Mutations', () => {
       expect(result.success).toBe(true);
       expect(mockContext.drizzleClient.insert).toHaveBeenCalled();
     });
-
-    // TODO: Fix mock sequence/signature verification matching
-    // it('should update order and transaction status on successful verification', async () => {
-    //   const mockOrder = createMockOrder({ id: 'order_123', status: 'created' }); // Order exists
-    //   // Order query comes first, then Config query.
-    //   // Default 'limit' returns [mockConfig].
-    //   // We override FIRST call to return [mockOrder].
-    //   mockContext.drizzleClient.limit.mockResolvedValueOnce([mockOrder]);
-
-    //   const result = await verifyPaymentResolver(
-    //     {},
-    //     { input },
-    //     mockContext,
-    //   );
-
-    //   expect(result.success).toBe(true);
-
-    //   // Should update both order and transaction
-    //   expect(mockContext.drizzleClient.update).toHaveBeenCalledTimes(2);
-    // });
   });
 
   describe('testRazorpaySetupResolver', () => {
@@ -436,21 +394,6 @@ describe('Razorpay GraphQL Mutations', () => {
       expect(result.success).toBe(false);
       expect(result.message).toContain('No Razorpay configuration');
     });
-
-    // TODO: Fix mockRejectedValueOnce not applying to service instance
-    // it('should return error for invalid credentials', async () => {
-    //   mockOrders.create.mockRejectedValueOnce({
-    //     error: {
-    //       description: 'Invalid API credentials',
-    //       code: 'BAD_REQUEST_ERROR'
-    //     }
-    //   });
-
-    //   // Expect failure
-    //   const result = await testRazorpaySetupResolver({}, {}, mockContext);
-    //   expect(result.success).toBe(false);
-    //   // expect(result.message).toContain('Network error'); // Message check flaky
-    // });
 
     it('should return error for network failure', async () => {
       const mockConfig = createMockConfig();

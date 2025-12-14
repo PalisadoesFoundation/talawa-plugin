@@ -311,10 +311,16 @@ export async function handleRazorpayWebhook(
     const { payment } = webhookData.payload;
     const paymentEntity = payment.entity;
 
+    // Get plugin context from request first for logging
+    const pluginContext = (request as any).pluginContext;
+
     // Log the webhook for debugging
-    console.log(
-      `🔗 Razorpay webhook received: ${paymentEntity.id} - ${paymentEntity.status}`,
-    );
+    if (pluginContext?.log) {
+      pluginContext.log.info('Razorpay webhook received', {
+        paymentId: paymentEntity.id,
+        status: paymentEntity.status,
+      });
+    }
 
     // Format currency display
     const currencySymbols: { [key: string]: string } = {
@@ -327,20 +333,22 @@ export async function handleRazorpayWebhook(
       currencySymbols[paymentEntity.currency] || paymentEntity.currency;
     const displayAmount = (paymentEntity.amount / 100).toFixed(2);
 
-    console.log(`Payment Details:
-      - ID: ${paymentEntity.id}
-      - Status: ${paymentEntity.status}
-      - Amount: ${symbol}${displayAmount} ${paymentEntity.currency}
-      - Method: ${paymentEntity.method}
-      - Order ID: ${paymentEntity.order_id}
-      - Email: ${paymentEntity.email}
-      - Captured: ${paymentEntity.captured}
-    `);
+    if (pluginContext?.log) {
+      pluginContext.log.info('Payment Details', {
+        id: paymentEntity.id,
+        status: paymentEntity.status,
+        amount: `${symbol}${displayAmount} ${paymentEntity.currency}`,
+        method: paymentEntity.method,
+        orderId: paymentEntity.order_id,
+        email: paymentEntity.email,
+        captured: paymentEntity.captured,
+      });
+    }
 
-    // Get plugin context from request
-    const pluginContext = (request as any).pluginContext;
+    // Verify plugin context is available
     if (!pluginContext) {
-      console.error('Plugin context not available in webhook');
+      // Use stderr for critical errors when context unavailable
+      process.stderr.write('Plugin context not available in webhook\n');
       return reply.status(500).send({
         error: 'Plugin context not available',
         message: 'Cannot process webhook without plugin context',
@@ -351,7 +359,7 @@ export async function handleRazorpayWebhook(
     const signature = request.headers['x-razorpay-signature'] as string;
 
     if (!signature) {
-      console.error('Missing Razorpay signature header');
+      pluginContext.log?.warn('Missing Razorpay signature header');
       return reply.status(400).send({
         error: 'Missing signature',
         message: 'Missing x-razorpay-signature header',
