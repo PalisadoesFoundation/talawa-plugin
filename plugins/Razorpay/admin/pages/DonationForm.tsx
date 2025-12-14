@@ -363,7 +363,7 @@ const DonationForm: React.FC = () => {
     return symbols[currency] || currency;
   };
 
-  if (orgLoading || configLoading) {
+  if (orgLoading || configLoading || userLoading) {
     return <Loader />;
   }
 

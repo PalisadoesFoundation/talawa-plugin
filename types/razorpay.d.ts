@@ -10,6 +10,10 @@ declare module 'razorpay' {
     currency: string;
     receipt?: string;
     notes?: Record<string, string>;
+    /**
+     * @deprecated This field is deprecated. Use Dashboard capture settings or
+     * the Payments Capture API instead. See: https://razorpay.com/docs/api/payments/capture/
+     */
     payment_capture?: 0 | 1;
     [key: string]: any;
   }
