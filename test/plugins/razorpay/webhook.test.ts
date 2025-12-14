@@ -544,13 +544,11 @@ describe('Razorpay Webhook Handler', () => {
         mockContext.drizzleClient.insert = vi
           .fn()
           .mockReturnValue({ values: vi.fn().mockResolvedValue({}) });
-        mockContext.drizzleClient.update = vi
-          .fn()
-          .mockReturnValue({
-            set: vi
-              .fn()
-              .mockReturnValue({ where: vi.fn().mockResolvedValue({}) }),
-          });
+        mockContext.drizzleClient.update = vi.fn().mockReturnValue({
+          set: vi
+            .fn()
+            .mockReturnValue({ where: vi.fn().mockResolvedValue({}) }),
+        });
 
         await Promise.all([
           handleRazorpayWebhook(mockRequest1, mockReply1),
