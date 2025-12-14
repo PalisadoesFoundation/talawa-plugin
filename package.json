@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "archiver": "^7.0.1",
+    "drizzle-orm": "^0.44.1",
     "prettier": "^3.6.2",
     "razorpay": "^2.9.6",
     "zod": "^4.1.13"
