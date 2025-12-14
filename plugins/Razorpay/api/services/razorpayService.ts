@@ -202,9 +202,14 @@ export class RazorpayService {
         .update(paymentData)
         .digest('hex');
 
-      // Validate hex strings
+      // Validate hex strings (must be even length)
       const hexRegex = /^[0-9a-fA-F]+$/;
-      if (!hexRegex.test(expectedSignature) || !hexRegex.test(signature)) {
+      if (
+        !hexRegex.test(expectedSignature) ||
+        !hexRegex.test(signature) ||
+        expectedSignature.length % 2 !== 0 ||
+        signature.length % 2 !== 0
+      ) {
         return false;
       }
 
@@ -244,9 +249,14 @@ export class RazorpayService {
       .update(`${orderId}|${paymentId}`)
       .digest('hex');
 
-    // Validate hex strings
+    // Validate hex strings (must be even length)
     const hexRegex = /^[0-9a-fA-F]+$/;
-    if (!hexRegex.test(generatedSignature) || !hexRegex.test(signature)) {
+    if (
+      !hexRegex.test(generatedSignature) ||
+      !hexRegex.test(signature) ||
+      generatedSignature.length % 2 !== 0 ||
+      signature.length % 2 !== 0
+    ) {
       return false;
     }
 

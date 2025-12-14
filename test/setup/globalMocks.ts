@@ -30,13 +30,16 @@ export class MockTalawaGraphQLError extends Error {
     [key: string]: any;
   };
 
-  constructor(opts: {
-    message?: string;
-    extensions: { code: string; [key: string]: any };
-  }) {
-    super(opts.message ?? '');
+  constructor(
+    public error: {
+      message?: string;
+      extensions: { code: string;[key: string]: any };
+    },
+  ) {
+    super(error.message || 'An error occurred');
     this.name = 'TalawaGraphQLError';
-    this.extensions = opts.extensions;
+    this.message = error.message || 'An error occurred';
+    this.extensions = error.extensions;
   }
 }
 
@@ -88,6 +91,7 @@ export const createMockGraphQLContext = (overrides: any = {}) => {
       values: vi.fn(), // Keep this for direct calls if any
       update: updateMock,
       set: vi.fn(), // Keep this for direct calls if any
+      returning: vi.fn(),
       ...overrides.drizzleClient,
     },
     log: {

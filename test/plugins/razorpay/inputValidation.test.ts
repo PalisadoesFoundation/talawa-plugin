@@ -171,6 +171,18 @@ describe('Razorpay Input Validation', () => {
       expect(result.success).toBe(false);
     });
 
+    it('should reject non-integer (decimal) amounts', () => {
+      const input = {
+        organizationId: 'org-123',
+        userId: 'user-123',
+        amount: 100.5,
+        currency: 'INR',
+      };
+
+      const result = razorpayOrderInputSchema.safeParse(input);
+      expect(result.success).toBe(false);
+    });
+
     it('should accept optional donor fields as null', () => {
       const input = {
         organizationId: 'org-123',

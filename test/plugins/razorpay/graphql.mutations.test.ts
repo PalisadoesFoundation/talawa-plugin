@@ -19,7 +19,6 @@ import {
   // Use local mock primitives instead of importing 'razorpay'
   mockCryptoFunctions,
 } from './utils/mockRazorpay';
-import { z } from 'zod';
 import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
 
 // Mock values from the manual mock file if needed, but preferably use the create functions.
@@ -33,15 +32,25 @@ describe('Razorpay GraphQL Mutations', () => {
   let mockContext: any;
 
   beforeEach(() => {
+    // Reset mocks and create a fresh context for each test
+    vi.clearAllMocks();
     mockContext = createMockRazorpayContext({
-      drizzleClient: createMockDatabaseClient(), // Fresh mocks
+      drizzleClient: createMockDatabaseClient(), // Fresh mocks for each test
     });
-    // Add missing properties mock like request
+    // Ensure request object exists
     (mockContext as any).request = {
       headers: {},
     };
+    global.fetch = vi.fn(); // Mock fetch globally
 
-    global.fetch = vi.fn();
+    // Set default mock implementations for Razorpay API calls
+    mockOrders.create.mockResolvedValue(createMockRazorpayOrder());
+    // @ts-ignore
+    mockPayments.fetch.mockResolvedValue(createMockRazorpayPayment());
+
+    // Default config exists for most tests
+    const mockConfig = createMockConfig();
+    mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
   });
 
   it('should use mocked razorpay', async () => {
@@ -176,44 +185,26 @@ describe('Razorpay GraphQL Mutations', () => {
       ).rejects.toThrow(TalawaGraphQLError);
     });
 
-    // TODO: Fix mock scoping mechanism - currently returning success despite disabled config mock
-    // it('should throw error if Razorpay is not enabled', async () => {
-    //   const disabledConfig = createMockConfig({ isEnabled: false });
-    //   // Override default config with disabled config
-    //   mockContext.drizzleClient.limit.mockResolvedValue([disabledConfig]);
+    it.skip('should throw error if Razorpay is not enabled', async () => {
+      const disabledConfig = createMockConfig({ isEnabled: false });
+      // Override default config with disabled config
+      mockContext.drizzleClient.limit.mockResolvedValue([disabledConfig]);
 
-    //   await expect(
-    //     createPaymentOrderResolver({}, { input }, mockContext),
-    //   ).rejects.toThrow();
-    // });
-
-    // TODO: Fix mock scoping mechanism
-    // it('should validate amount is positive', async () => {
-    //   mockContext.drizzleClient.limit.mockResolvedValue([createMockConfig()]);
-
-    //   const invalidInput = { ...input, amount: -100 };
-
-    //   await expect(
-    //     createPaymentOrderResolver({}, { input: invalidInput }, mockContext),
-    //   ).rejects.toThrow();
-    // });
-
-    beforeEach(() => {
-      vi.clearAllMocks();
-      mockContext = createMockRazorpayContext();
-
-      // Set default mock implementations
-      mockOrders.create.mockResolvedValue(createMockRazorpayOrder());
-      // @ts-ignore
-      mockPayments.fetch.mockResolvedValue(createMockRazorpayPayment());
-
-      // Default config exists
-      const mockConfig = createMockConfig();
-      mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
-
-      // Ensure fetch is mocked globally for any other calls
-      global.fetch = vi.fn();
+      await expect(
+        createPaymentOrderResolver({}, { input }, mockContext),
+      ).rejects.toThrow();
     });
+
+    it.skip('should throw error if amount is invalid', async () => {
+      mockContext.drizzleClient.limit.mockResolvedValue([createMockConfig()]);
+
+      const invalidInput = { ...input, amount: -100 };
+
+      await expect(
+        createPaymentOrderResolver({}, { input: invalidInput }, mockContext),
+      ).rejects.toThrow();
+    });
+
     it('should handle anonymous donations (no userId)', async () => {
       const mockConfig = createMockConfig();
       const mockOrder = createMockOrder({ userId: null });

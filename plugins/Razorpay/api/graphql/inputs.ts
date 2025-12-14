@@ -46,7 +46,7 @@ export const RazorpayOrderInput = builder
     fields: (t) => ({
       organizationId: t.string({ required: false }),
       userId: t.string({ required: false }),
-      amount: t.float({ required: true }),
+      amount: t.int({ required: true }),
       currency: t.string({ required: true }),
       donorName: t.string({ required: false }),
       donorEmail: t.string({ required: false }),
