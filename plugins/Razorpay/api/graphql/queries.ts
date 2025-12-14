@@ -14,8 +14,10 @@ import {
   RazorpayTransactionStatsRef,
 } from './types';
 
-// Get Razorpay configuration resolver
-// Force doc update
+/**
+ * Resolver for fetching Razorpay configuration.
+ * Requires authentication and superadmin privileges.
+ */
 export async function getRazorpayConfigResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
@@ -79,7 +81,10 @@ export async function getRazorpayConfigResolver(
   }
 }
 
-// Get organization transactions resolver
+/**
+ * Resolver for fetching transactions for an organization.
+ * Supports pagination and filtering.
+ */
 const getOrganizationTransactionsArgumentsSchema = z.object({
   orgId: z.string(),
   limit: z.number().nullable().optional(),
@@ -212,7 +217,10 @@ export async function getOrganizationTransactionsResolver(
   }
 }
 
-// Get user transactions resolver
+/**
+ * Resolver for fetching transactions for a specific user.
+ * Supports pagination.
+ */
 const getUserTransactionsArgumentsSchema = z.object({
   userId: z.string(),
   orgId: z.string().nullable().optional(),
@@ -353,7 +361,10 @@ export async function getUserTransactionsResolver(
   }
 }
 
-// Get organization transaction stats resolver
+/**
+ * Resolver for fetching transaction statistics for an organization.
+ * Returns aggregation of transactions by date.
+ */
 const getOrganizationTransactionStatsArgumentsSchema = z.object({
   orgId: z.string(),
   dateFrom: z.string().nullable().optional(),
@@ -457,6 +468,10 @@ const getUserTransactionStatsArgumentsSchema = z.object({
   dateTo: z.string().nullable().optional(),
 });
 
+/**
+ * Resolver for fetching transaction statistics for a specific user.
+ * Returns aggregation of user transactions.
+ */
 export async function getUserTransactionStatsResolver(
   _parent: unknown,
   args: z.infer<typeof getUserTransactionStatsArgumentsSchema>,
