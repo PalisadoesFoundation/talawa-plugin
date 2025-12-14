@@ -6,7 +6,7 @@
 
 > **onPluginActivated**(`context`): `Promise`\<`void`\>
 
-Defined in: [Plugin Map/api/index.ts:58](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/index.ts#L58)
+Defined in: [plugins/Plugin Map/api/index.ts:58](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/index.ts#L58)
 
 ## Parameters
 

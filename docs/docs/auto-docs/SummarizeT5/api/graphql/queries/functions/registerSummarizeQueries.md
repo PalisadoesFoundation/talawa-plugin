@@ -6,7 +6,7 @@
 
 > **registerSummarizeQueries**(`builderInstance`): `void`
 
-Defined in: [SummarizeT5/api/graphql/queries.ts:9](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeT5/api/graphql/queries.ts#L9)
+Defined in: [plugins/SummarizeT5/api/graphql/queries.ts:9](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/SummarizeT5/api/graphql/queries.ts#L9)
 
 ## Parameters
 

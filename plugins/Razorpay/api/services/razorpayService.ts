@@ -62,8 +62,11 @@ export class RazorpayService {
   private razorpay: Razorpay | null = null;
   private context: GraphQLContext;
 
-  constructor(context: GraphQLContext) {
+  constructor(context: GraphQLContext, razorpayInstance?: Razorpay) {
     this.context = context;
+    if (razorpayInstance) {
+      this.razorpay = razorpayInstance;
+    }
   }
 
   async initialize(): Promise<void> {
@@ -199,10 +202,25 @@ export class RazorpayService {
         .update(paymentData)
         .digest('hex');
 
-      const isValid = crypto.timingSafeEqual(
-        Buffer.from(expectedSignature, 'hex'),
-        Buffer.from(signature, 'hex'),
-      );
+      // Validate hex strings (must be even length)
+      const hexRegex = /^[0-9a-fA-F]+$/;
+      if (
+        !hexRegex.test(expectedSignature) ||
+        !hexRegex.test(signature) ||
+        expectedSignature.length % 2 !== 0 ||
+        signature.length % 2 !== 0
+      ) {
+        return false;
+      }
+
+      const expectedBuffer = Buffer.from(expectedSignature, 'hex');
+      const signatureBuffer = Buffer.from(signature, 'hex');
+
+      if (expectedBuffer.length !== signatureBuffer.length) {
+        return false;
+      }
+
+      const isValid = crypto.timingSafeEqual(expectedBuffer, signatureBuffer);
 
       this.context.log?.info(`Payment verification result: ${isValid}`);
       return isValid;
@@ -210,6 +228,46 @@ export class RazorpayService {
       this.context.log?.error('Failed to verify payment:', error);
       throw error;
     }
+  }
+
+  async verifyPaymentSignature(
+    orderId: string,
+    paymentId: string,
+    signature: string,
+  ): Promise<boolean> {
+    const config = await this.context.drizzleClient
+      .select()
+      .from(configTable)
+      .limit(1);
+
+    if (config.length === 0 || !config[0]?.keySecret) {
+      throw new Error('Razorpay Key Secret not configured');
+    }
+
+    const generatedSignature = crypto
+      .createHmac('sha256', config[0].keySecret)
+      .update(`${orderId}|${paymentId}`)
+      .digest('hex');
+
+    // Validate hex strings (must be even length)
+    const hexRegex = /^[0-9a-fA-F]+$/;
+    if (
+      !hexRegex.test(generatedSignature) ||
+      !hexRegex.test(signature) ||
+      generatedSignature.length % 2 !== 0 ||
+      signature.length % 2 !== 0
+    ) {
+      return false;
+    }
+
+    const generatedBuffer = Buffer.from(generatedSignature, 'hex');
+    const signatureBuffer = Buffer.from(signature, 'hex');
+
+    if (generatedBuffer.length !== signatureBuffer.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(generatedBuffer, signatureBuffer);
   }
 
   async verifyWebhookSignature(

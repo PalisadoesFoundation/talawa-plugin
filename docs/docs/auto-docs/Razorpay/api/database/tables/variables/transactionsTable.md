@@ -4,6 +4,6 @@
 
 # Variable: transactionsTable
 
-> `const` **transactionsTable**: `any`
+> `const` **transactionsTable**: `PgTableWithColumns`\<\{ \}\>
 
-Defined in: [Razorpay/api/database/tables.ts:43](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/database/tables.ts#L43)
+Defined in: [plugins/Razorpay/api/database/tables.ts:43](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/database/tables.ts#L43)

@@ -6,4 +6,4 @@
 
 > `const` **RazorpayOrderRef**: `any`
 
-Defined in: [Razorpay/api/graphql/types.ts:99](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/types.ts#L99)
+Defined in: [plugins/Razorpay/api/graphql/types.ts:99](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/graphql/types.ts#L99)

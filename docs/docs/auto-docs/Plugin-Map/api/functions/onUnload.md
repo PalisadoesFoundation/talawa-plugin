@@ -6,7 +6,7 @@
 
 > **onUnload**(`context`): `Promise`\<`void`\>
 
-Defined in: [Plugin Map/api/index.ts:51](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/index.ts#L51)
+Defined in: [plugins/Plugin Map/api/index.ts:51](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/index.ts#L51)
 
 ## Parameters
 

@@ -6,7 +6,7 @@
 
 > **getConfigResolver**(`_parent`, `_args`, `ctx`): `Promise`\<\{ `apiEndpoint`: `any`; `apiKey`: `any`; `isEnabled`: `any`; `maxLength`: `any`; `timeoutSeconds`: `any`; \}\>
 
-Defined in: [SummarizeAPI/api/graphql/queries.ts:8](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeAPI/api/graphql/queries.ts#L8)
+Defined in: [plugins/SummarizeAPI/api/graphql/queries.ts:8](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/SummarizeAPI/api/graphql/queries.ts#L8)
 
 ## Parameters
 

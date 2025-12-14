@@ -4,6 +4,6 @@
 
 # Variable: pollsTable
 
-> `const` **pollsTable**: `any`
+> `const` **pollsTable**: `PgTableWithColumns`\<\{ \}\>
 
-Defined in: [Plugin Map/api/database/tables.ts:4](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/database/tables.ts#L4)
+Defined in: [plugins/Plugin Map/api/database/tables.ts:4](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/database/tables.ts#L4)

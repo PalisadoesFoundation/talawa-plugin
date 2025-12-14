@@ -6,7 +6,7 @@
 
 > **onUnload**(`_context`): `Promise`\<`void`\>
 
-Defined in: [SummarizeT5/api/index.ts:11](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeT5/api/index.ts#L11)
+Defined in: [plugins/SummarizeT5/api/index.ts:11](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/SummarizeT5/api/index.ts#L11)
 
 ## Parameters
 

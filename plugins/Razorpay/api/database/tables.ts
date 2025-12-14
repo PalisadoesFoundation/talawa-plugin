@@ -65,12 +65,3 @@ export const transactionsTable = pgTable('razorpay_transactions', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
-
-// Debug exports to help with module loading
-export const __debug = {
-  tables: {
-    configTable,
-    ordersTable,
-    transactionsTable,
-  },
-};

@@ -6,4 +6,4 @@
 
 > `const` **ExtensionPointsOverviewRef**: `any`
 
-Defined in: [Plugin Map/api/graphql/types.ts:25](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/graphql/types.ts#L25)
+Defined in: [plugins/Plugin Map/api/graphql/types.ts:25](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/types.ts#L25)

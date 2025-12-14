@@ -15,10 +15,6 @@
     "@vitest/coverage-v8": "^4.0.15",
     "@vitest/ui": "^4.0.15",
     "adm-zip": "^0.5.16",
-    "vite": "^6.3.6",
-    "vite-plugin-istanbul": "^7.1.0",
-    "vite-plugin-svgr": "^4.3.0",
-    "vitest": "^4.0.15",
     "chalk": "^5.6.2",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.0.2",
@@ -31,19 +27,26 @@
     "husky": "^9.1.7",
     "knip": "^5.67.0",
     "tsx": "^4.21.0",
-    "typedoc-plugin-markdown": "^4.5.0",
     "typedoc": "^0.28.1",
-    "typescript": "^5.9.3"
+    "typedoc-plugin-markdown": "^4.5.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.3.6",
+    "vite-plugin-istanbul": "^7.1.0",
+    "vite-plugin-svgr": "^4.3.0",
+    "vitest": "^4.0.15",
+    "prettier": "^3.6.2"
   },
   "lint-staged": {
-    "**/*.{ts, tsx, json, scss, css}": [
+    "**/*.{ts,tsx,json,scss,css}": [
       "prettier --write"
     ],
-    "**/*.{ts, tsx, json}": "eslint --fix"
+    "**/*.{ts,tsx}": "eslint --fix"
   },
   "dependencies": {
     "archiver": "^7.0.1",
-    "prettier": "^3.6.2"
+    "drizzle-orm": "^0.44.1",
+    "razorpay": "^2.9.6",
+    "zod": "^4.1.13"
   },
   "homepage": "https://github.com/PalisadoesFoundation/talawa-plugin#readme",
   "license": "GNU General Public License v3.0",

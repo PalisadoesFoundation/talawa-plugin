@@ -6,7 +6,7 @@
 
 > **getPluginMapRequestsResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `hasMore`: `boolean`; `requests`: `any`; `totalCount`: `any`; \}\>
 
-Defined in: [Plugin Map/api/graphql/queries.ts:88](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/graphql/queries.ts#L88)
+Defined in: [plugins/Plugin Map/api/graphql/queries.ts:88](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/queries.ts#L88)
 
 ## Parameters
 

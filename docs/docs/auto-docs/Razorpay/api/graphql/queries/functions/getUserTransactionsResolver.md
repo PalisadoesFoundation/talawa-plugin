@@ -6,7 +6,7 @@
 
 > **getUserTransactionsResolver**(`_parent`, `args`, `ctx`): `Promise`\<`any`\>
 
-Defined in: [Razorpay/api/graphql/queries.ts:200](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/queries.ts#L200)
+Defined in: [plugins/Razorpay/api/graphql/queries.ts:234](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/graphql/queries.ts#L234)
 
 ## Parameters
 
@@ -16,7 +16,33 @@ Defined in: [Razorpay/api/graphql/queries.ts:200](https://github.com/PalisadoesF
 
 ### args
 
-`infer`\<`any`\>
+#### dateFrom?
+
+`string` = `...`
+
+#### dateTo?
+
+`string` = `...`
+
+#### limit?
+
+`number` = `...`
+
+#### offset?
+
+`number` = `...`
+
+#### orgId?
+
+`string` = `...`
+
+#### status?
+
+`string` = `...`
+
+#### userId
+
+`string` = `...`
 
 ### ctx
 

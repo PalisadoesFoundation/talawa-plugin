@@ -6,7 +6,7 @@
 
 > **testSetupResolver**(`_parent`, `_args`, `ctx`): `Promise`\<\{ `message`: `string`; `success`: `boolean`; \}\>
 
-Defined in: [SummarizeAPI/api/graphql/mutations.ts:232](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeAPI/api/graphql/mutations.ts#L232)
+Defined in: [plugins/SummarizeAPI/api/graphql/mutations.ts:232](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/SummarizeAPI/api/graphql/mutations.ts#L232)
 
 ## Parameters
 

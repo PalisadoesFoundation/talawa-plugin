@@ -6,4 +6,4 @@
 
 > `const` **SummarizeInput**: `any`
 
-Defined in: [SummarizeT5/api/graphql/inputs.ts:9](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeT5/api/graphql/inputs.ts#L9)
+Defined in: [plugins/SummarizeT5/api/graphql/inputs.ts:9](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/SummarizeT5/api/graphql/inputs.ts#L9)

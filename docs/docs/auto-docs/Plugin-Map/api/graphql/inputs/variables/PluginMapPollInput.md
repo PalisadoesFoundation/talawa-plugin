@@ -6,4 +6,4 @@
 
 > `const` **PluginMapPollInput**: `any`
 
-Defined in: [Plugin Map/api/graphql/inputs.ts:12](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/graphql/inputs.ts#L12)
+Defined in: [plugins/Plugin Map/api/graphql/inputs.ts:12](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/inputs.ts#L12)

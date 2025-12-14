@@ -6,7 +6,7 @@
 
 > **initiatePaymentResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `amount`: `any`; `currency`: `any`; `message`: `string`; `orderId`: `any`; `paymentId`: `string`; `success`: `boolean`; `transaction`: \{ `amount`: `any`; `currency`: `any`; `paymentId`: `string`; `status`: `string`; \}; \} \| \{ `amount?`: `undefined`; `currency?`: `undefined`; `message`: `string`; `orderId?`: `undefined`; `paymentId?`: `undefined`; `success`: `boolean`; `transaction`: `any`; \}\>
 
-Defined in: [Razorpay/api/graphql/mutations.ts:267](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/mutations.ts#L267)
+Defined in: [plugins/Razorpay/api/graphql/mutations.ts:275](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/graphql/mutations.ts#L275)
 
 ## Parameters
 
@@ -16,7 +16,33 @@ Defined in: [Razorpay/api/graphql/mutations.ts:267](https://github.com/Palisadoe
 
 ### args
 
-`infer`\<`any`\>
+#### input
+
+\{ `customerDetails?`: \{ `contact`: `string`; `email`: `string`; `name`: `string`; \}; `orderId`: `string`; `paymentMethod`: `string`; \} = `razorpayPaymentInputSchema`
+
+#### input.customerDetails?
+
+\{ `contact`: `string`; `email`: `string`; `name`: `string`; \} = `...`
+
+#### input.customerDetails.contact
+
+`string` = `...`
+
+#### input.customerDetails.email
+
+`string` = `...`
+
+#### input.customerDetails.name
+
+`string` = `...`
+
+#### input.orderId
+
+`string` = `...`
+
+#### input.paymentMethod
+
+`string` = `...`
 
 ### ctx
 

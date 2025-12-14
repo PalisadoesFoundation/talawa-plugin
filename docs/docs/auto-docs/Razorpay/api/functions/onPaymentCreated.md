@@ -6,7 +6,7 @@
 
 > **onPaymentCreated**(`data`, `context`): `Promise`\<`void`\>
 
-Defined in: [Razorpay/api/index.ts:135](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/index.ts#L135)
+Defined in: [plugins/Razorpay/api/index.ts:141](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/index.ts#L141)
 
 ## Parameters
 

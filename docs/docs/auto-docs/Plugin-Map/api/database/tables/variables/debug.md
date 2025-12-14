@@ -6,7 +6,7 @@
 
 > `const` **\_\_debug**: `object`
 
-Defined in: [Plugin Map/api/database/tables.ts:15](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/database/tables.ts#L15)
+Defined in: [plugins/Plugin Map/api/database/tables.ts:15](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/database/tables.ts#L15)
 
 ## Type Declaration
 
@@ -16,4 +16,4 @@ Defined in: [Plugin Map/api/database/tables.ts:15](https://github.com/Palisadoes
 
 #### tables.pollsTable
 
-> **pollsTable**: `any`
+> **pollsTable**: `PgTableWithColumns`\<\{ \}\>

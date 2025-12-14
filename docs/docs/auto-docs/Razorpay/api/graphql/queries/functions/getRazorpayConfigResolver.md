@@ -6,7 +6,10 @@
 
 > **getRazorpayConfigResolver**(`_parent`, `_args`, `ctx`): `Promise`\<\{ `currency`: `any`; `description`: `any`; `isEnabled`: `any`; `keyId`: `any`; `keySecret`: `any`; `testMode`: `any`; `webhookSecret`: `any`; \}\>
 
-Defined in: [Razorpay/api/graphql/queries.ts:18](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/queries.ts#L18)
+Defined in: [plugins/Razorpay/api/graphql/queries.ts:21](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/graphql/queries.ts#L21)
+
+Resolver for fetching Razorpay configuration.
+Requires authentication and superadmin privileges.
 
 ## Parameters
 

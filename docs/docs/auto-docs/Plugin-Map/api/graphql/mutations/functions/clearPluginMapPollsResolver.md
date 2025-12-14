@@ -6,7 +6,7 @@
 
 > **clearPluginMapPollsResolver**(`_parent`, `_args`, `ctx`): `Promise`\<\{ `clearedCount`: `any`; `message`: `string`; `success`: `boolean`; \}\>
 
-Defined in: [Plugin Map/api/graphql/mutations.ts:185](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/graphql/mutations.ts#L185)
+Defined in: [plugins/Plugin Map/api/graphql/mutations.ts:185](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/mutations.ts#L185)
 
 ## Parameters
 

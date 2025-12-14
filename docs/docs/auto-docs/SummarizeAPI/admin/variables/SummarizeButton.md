@@ -6,7 +6,7 @@
 
 > `const` **SummarizeButton**: `React.FC`\<`SummarizeButtonProps`\>
 
-Defined in: [SummarizeAPI/admin/injector/SummarizeButton.tsx:27](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeAPI/admin/injector/SummarizeButton.tsx#L27)
+Defined in: [plugins/SummarizeAPI/admin/injector/SummarizeButton.tsx:27](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/SummarizeAPI/admin/injector/SummarizeButton.tsx#L27)
 
 SummarizeAPI Plugin - Admin Components
 

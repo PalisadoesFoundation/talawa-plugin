@@ -6,7 +6,7 @@
 
 > **onDeactivate**(`_context`): `Promise`\<`void`\>
 
-Defined in: [SummarizeAPI/api/index.ts:10](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeAPI/api/index.ts#L10)
+Defined in: [plugins/SummarizeAPI/api/index.ts:10](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/SummarizeAPI/api/index.ts#L10)
 
 ## Parameters
 

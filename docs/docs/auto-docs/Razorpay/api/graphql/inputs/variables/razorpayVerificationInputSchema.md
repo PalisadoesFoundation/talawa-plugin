@@ -4,6 +4,6 @@
 
 # Variable: razorpayVerificationInputSchema
 
-> `const` **razorpayVerificationInputSchema**: `any`
+> `const` **razorpayVerificationInputSchema**: `ZodObject`\<\{ `paymentData`: `ZodString`; `razorpayOrderId`: `ZodString`; `razorpayPaymentId`: `ZodString`; `razorpaySignature`: `ZodString`; \}, `$strip`\>
 
-Defined in: [Razorpay/api/graphql/inputs.ts:93](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/inputs.ts#L93)
+Defined in: [plugins/Razorpay/api/graphql/inputs.ts:93](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/graphql/inputs.ts#L93)
