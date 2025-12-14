@@ -65,5 +65,3 @@ export const transactionsTable = pgTable('razorpay_transactions', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
-
-
