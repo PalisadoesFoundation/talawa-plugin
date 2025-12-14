@@ -16,4 +16,4 @@ Defined in: [plugins/Plugin Map/api/database/tables.ts:15](https://github.com/Pa
 
 #### tables.pollsTable
 
-> **pollsTable**: `any`
+> **pollsTable**: `PgTableWithColumns`\<\{ \}\>

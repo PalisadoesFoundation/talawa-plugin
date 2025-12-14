@@ -4,7 +4,7 @@
 
 # Variable: configTable
 
-> `const` **configTable**: `any`
+> `const` **configTable**: `PgTableWithColumns`\<\{ \}\>
 
 Defined in: [plugins/SummarizeAPI/api/database/tables.ts:7](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/SummarizeAPI/api/database/tables.ts#L7)
 
