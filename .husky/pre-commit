@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+pnpm run generate-docs
+
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx)$' || true)
 
 if [ -n "$STAGED_FILES" ]; then
