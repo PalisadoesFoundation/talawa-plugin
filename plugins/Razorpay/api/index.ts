@@ -126,8 +126,14 @@ export async function onDeactivate(context: IPluginContext): Promise<void> {
 }
 
 export async function onUnload(context: IPluginContext): Promise<void> {
-  if (context.logger?.info) {
-    context.logger.info('Razorpay Plugin unloaded');
+  try {
+    if (context.logger?.info) {
+      context.logger.info('Razorpay Plugin unloaded');
+    }
+  } catch (error) {
+    if (context.logger?.error) {
+      context.logger.error('Error during Razorpay plugin unload:', error);
+    }
   }
 }
 
@@ -373,6 +379,18 @@ export async function handleRazorpayWebhook(
       .update(webhookBody)
       .digest('hex');
 
+    // Validate that both signatures are valid hex strings of even length
+    const isValidHex = (str: string) =>
+      /^[0-9a-fA-F]+$/.test(str) && str.length % 2 === 0;
+
+    if (!isValidHex(signature) || !isValidHex(expectedSignature)) {
+      console.error('Invalid signature format: not a valid hex string');
+      return reply.status(400).send({
+        error: 'Invalid signature',
+        message: 'Webhook signature verification failed',
+      });
+    }
+
     const expectedBuffer = Buffer.from(expectedSignature, 'hex');
     const signatureBuffer = Buffer.from(signature, 'hex');
 
@@ -380,15 +398,8 @@ export async function handleRazorpayWebhook(
       expectedBuffer.length === signatureBuffer.length &&
       crypto.timingSafeEqual(expectedBuffer, signatureBuffer);
 
-    console.error('DEBUG_SIGNATURE_VALUES:', {
-      header: signature,
-      expected: expectedSignature,
-      headerLen: signature.length,
-      expectedLen: expectedSignature.length,
-    });
-
     if (!isValidSignature) {
-      console.error('Invalid webhook signature');
+      console.error('Webhook signature validation failed');
       return reply.status(400).send({
         error: 'Invalid signature',
         message: 'Webhook signature verification failed',

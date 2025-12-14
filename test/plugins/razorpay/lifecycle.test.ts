@@ -78,13 +78,20 @@ describe('Razorpay Plugin Lifecycle', () => {
 
     it('should handle errors during unload', async () => {
       const error = new Error('Unload failed');
+      const errorSpy = vi.fn();
+      mockContext.logger.error = errorSpy;
       mockContext.logger.info = vi.fn().mockImplementation(() => {
         throw error;
       });
 
-      expect(RazorpayPlugin.onActivate).toBe(onActivate);
-      expect(RazorpayPlugin.onDeactivate).toBe(onDeactivate);
-      expect(RazorpayPlugin.onUnload).toBe(onUnload);
+      // Unload should not reject even if logging fails
+      await expect(onUnload(mockContext)).resolves.toBeUndefined();
+
+      // Error should be logged with proper message
+      expect(errorSpy).toHaveBeenCalledWith(
+        'Error during Razorpay plugin unload:',
+        error,
+      );
     });
 
     it('should have correct interface structure', () => {
@@ -99,11 +106,10 @@ describe('Razorpay Plugin Lifecycle', () => {
     it('should execute full lifecycle in correct order', async () => {
       const callOrder: string[] = [];
       mockContext.logger.info = vi.fn((msg: string) => {
-        if (msg === 'Razorpay Plugin loaded successfully')
-          callOrder.push('load');
-        if (msg === 'Razorpay Plugin activated') callOrder.push('activate');
-        if (msg === 'Razorpay Plugin deactivated') callOrder.push('deactivate');
-        if (msg === 'Razorpay Plugin unloaded') callOrder.push('unload');
+        if (msg.includes('loaded successfully')) callOrder.push('load');
+        else if (msg.includes('activated') && !msg.includes('de')) callOrder.push('activate');
+        else if (msg.includes('deactivated')) callOrder.push('deactivate');
+        else if (msg.includes('unloaded')) callOrder.push('unload');
       });
 
       await onLoad(mockContext);

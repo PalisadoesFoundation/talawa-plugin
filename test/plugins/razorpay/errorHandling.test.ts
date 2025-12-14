@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { RazorpayService } from '../../../plugins/Razorpay/api/services/razorpayService';
-import {
-  updateRazorpayConfigResolver,
-  createPaymentOrderResolver,
-} from '../../../plugins/Razorpay/api/graphql/mutations';
+// Removed unused imports: updateRazorpayConfigResolver, createPaymentOrderResolver
 import {
   createMockRazorpayContext,
   createMockConfig,
@@ -18,7 +15,7 @@ vi.mock('razorpay');
 
 describe('Razorpay Error Handling', () => {
   let mockContext: any;
-  // mockOrdersplaced by direct imports
+  // mockOrders placed by direct imports
 
   beforeEach(async () => {
     mockContext = createMockRazorpayContext();
@@ -380,7 +377,6 @@ describe('Razorpay Error Handling', () => {
 
       const results = await Promise.allSettled(promises);
 
-      // All should fail with same error
       // All should fail with same error
       results.forEach((result) => {
         expect(result.status).toBe('fulfilled');

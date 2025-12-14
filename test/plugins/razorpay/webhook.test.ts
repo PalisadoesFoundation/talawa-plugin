@@ -2,13 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { handleRazorpayWebhook } from '../../../plugins/Razorpay/api/index';
 import {
   createMockRazorpayContext,
-  createMockRazorpayInstance,
   createMockConfig,
   createMockOrder,
-  createMockRazorpayOrder,
   createMockTransaction,
   createMockWebhookData,
-  createValidSignature,
 } from './utils/mockRazorpay';
 import {
   configTable,
@@ -255,10 +252,6 @@ describe('Razorpay Webhook Handler', () => {
       const webhookData = createMockWebhookData('payment.captured');
       const mockConfig = createMockConfig({ webhookSecret: secret });
       const mockOrder = createMockOrder();
-      // Spy on console.error to see why tests are failing
-      vi.spyOn(console, 'error').mockImplementation((...args) =>
-        console.log('DEBUG_ERROR:', ...args),
-      );
       const mockTransaction = createMockTransaction();
 
       const webhookBody = JSON.stringify(webhookData);

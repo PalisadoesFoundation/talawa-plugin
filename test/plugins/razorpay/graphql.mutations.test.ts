@@ -309,16 +309,20 @@ describe('Razorpay GraphQL Mutations', () => {
     });
 
     it('should throw error for unauthenticated user', async () => {
-      mockContext.user = null;
+      const unauthContext = createMockRazorpayContext({
+        isAdmin: false,
+        user: null,
+      });
+      unauthContext.currentClient.isAuthenticated = false;
 
-      const result = await initiatePaymentResolver({}, { input }, mockContext);
-      expect(result.success).toBe(false);
-      expect(result.message).toBeDefined();
+      await expect(
+        initiatePaymentResolver({}, { input }, unauthContext),
+      ).rejects.toThrow(TalawaGraphQLError);
     });
   });
 
   describe('verifyPaymentResolver', () => {
-    const input = {
+    const input = { // eslint-disable-line @typescript-eslint/no-unused-vars
       razorpayPaymentId: 'pay_test123',
       razorpayOrderId: 'order_test123',
       razorpaySignature: '',
@@ -416,18 +420,6 @@ describe('Razorpay GraphQL Mutations', () => {
     //   // Should update both order and transaction
     //   expect(mockContext.drizzleClient.update).toHaveBeenCalledTimes(2);
     // });
-
-    it('should throw error for unauthenticated user', async () => {
-      const unauthContext = createMockRazorpayContext({
-        isAdmin: false,
-        user: null,
-      });
-      unauthContext.currentClient.isAuthenticated = false;
-
-      await expect(
-        initiatePaymentResolver({}, { input: input as any }, unauthContext),
-      ).rejects.toThrow(TalawaGraphQLError);
-    });
   });
 
   describe('testRazorpaySetupResolver', () => {

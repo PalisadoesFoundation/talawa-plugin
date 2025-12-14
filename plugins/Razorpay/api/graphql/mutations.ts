@@ -211,6 +211,13 @@ export async function createPaymentOrderResolver(
       throw new Error('Failed to create Razorpay order.');
     }
 
+    // Check authentication before database insert
+    if (!ctx.user) {
+      throw new TalawaGraphQLError({
+        extensions: { code: 'unauthenticated' },
+      });
+    }
+
     // Step 3: Save the REAL order details to your database
     const [order] = await ctx.drizzleClient
       .insert(ordersTable)
@@ -230,16 +237,6 @@ export async function createPaymentOrderResolver(
         updatedAt: new Date(),
       })
       .returning();
-
-    // Check for superadmin access
-    // if (!ctx.user.isSuperAdmin) { ... } // Logic for updateConfig
-
-    // Check authentication for createPaymentOrder
-    if (!ctx.user) {
-      throw new TalawaGraphQLError({
-        extensions: { code: 'unauthenticated' },
-      });
-    }
 
     // Return the correct data to the frontend
     return {
@@ -595,7 +592,11 @@ export async function testRazorpaySetupResolver(
 
     const configItem = config[0];
 
-    console.log('DEBUG Setup Config:', configItem); // Log config
+    ctx.log?.info('Testing Razorpay setup configuration', {
+      keyId: configItem.keyId?.substring(0, 8) + '...',
+      isEnabled: configItem.isEnabled,
+      testMode: configItem.testMode,
+    });
 
     if (!configItem.keyId || !configItem.keySecret) {
       return {
@@ -641,8 +642,10 @@ export async function testRazorpaySetupResolver(
       message: `Setup verified! Test order created: ${testOrder.id} (₹1.00). Your Razorpay configuration is working correctly.`,
     };
   } catch (error) {
-    console.error('DEBUG Setup Error:', error);
-    ctx.log?.error('Error testing Razorpay setup:', error);
+    ctx.log?.error('Error testing Razorpay setup', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
 
     if (error instanceof Error) {
       if (error.message.includes('Invalid API credentials')) {

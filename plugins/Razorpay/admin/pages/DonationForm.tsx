@@ -154,7 +154,11 @@ const DonationForm: React.FC = () => {
   >('form');
 
   // GraphQL operations
-  const { data: currentUserData } = useQuery(GET_CURRENT_USER);
+  const {
+    data: currentUserData,
+    loading: userLoading,
+    error: userError,
+  } = useQuery(GET_CURRENT_USER);
 
   const {
     data: orgData,
@@ -178,15 +182,22 @@ const DonationForm: React.FC = () => {
     // Load user data from GraphQL query
     if (currentUserData?.me) {
       const user = currentUserData.me;
-      if (user.firstName && user.lastName) {
-        setFormData((prev) => ({
-          ...prev,
-          donorName: `${user.firstName} ${user.lastName}`,
-          donorEmail: user.email || '',
-        }));
-      }
+      const nameParts = [user.firstName, user.lastName].filter(Boolean);
+      const donorName = nameParts.join(' ').trim();
+
+      setFormData((prev) => ({
+        ...prev,
+        ...(donorName && { donorName }),
+        ...(user.email && { donorEmail: user.email }),
+      }));
     }
   }, [currentUserData]);
+
+  useEffect(() => {
+    if (userError) {
+      console.error('Error loading user data:', userError);
+    }
+  }, [userError]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({
@@ -305,7 +316,7 @@ const DonationForm: React.FC = () => {
               } else {
                 toast.error(
                   verificationData?.razorpay_verifyPayment?.message ||
-                    'Payment verification failed',
+                  'Payment verification failed',
                 );
                 setIsProcessing(false);
               }

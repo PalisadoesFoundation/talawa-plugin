@@ -27,7 +27,7 @@ export async function getRazorpayConfigResolver(
   }
 
   // Check for superadmin access (strict)
-  if (!ctx.user.isSuperAdmin) {
+  if (!ctx.user || !ctx.user.isSuperAdmin) {
     throw new TalawaGraphQLError({
       extensions: { code: 'forbidden' },
     });
@@ -467,17 +467,19 @@ export async function getUserTransactionStatsResolver(
     });
   }
 
-  const {
-    success,
-    data: parsedArgs,
-    error,
-  } = getUserTransactionStatsArgumentsSchema.safeParse(args);
+  const inputSchema = z.object({
+    userId: z.string(),
+    dateFrom: z.string().optional(),
+    dateTo: z.string().optional(),
+  });
 
-  if (!success) {
+  const parsedArgs = inputSchema.safeParse(args);
+
+  if (!parsedArgs.success) {
     throw new TalawaGraphQLError({
       extensions: {
         code: 'invalid_arguments',
-        issues: error.issues.map((issue) => ({
+        issues: parsedArgs.error.issues.map((issue) => ({
           argumentPath: issue.path,
           message: issue.message,
         })),
@@ -485,15 +487,16 @@ export async function getUserTransactionStatsResolver(
     });
   }
 
-  try {
-    const { userId, dateFrom, dateTo } = parsedArgs;
+  // Users can only view their own stats unless they are admin
+  // Check this before the try block so forbidden errors are thrown directly
+  if (parsedArgs.data.userId !== ctx.userId && !ctx.isAdmin) {
+    throw new TalawaGraphQLError({
+      extensions: { code: 'forbidden' },
+    });
+  }
 
-    // Users can only view their own stats unless they are admin
-    if (userId !== ctx.userId && !ctx.isAdmin) {
-      throw new TalawaGraphQLError({
-        extensions: { code: 'forbidden' },
-      });
-    }
+  try {
+    const { userId, dateFrom, dateTo } = parsedArgs.data;
 
     const whereConditions = [eq(transactionsTable.userId, userId)];
 

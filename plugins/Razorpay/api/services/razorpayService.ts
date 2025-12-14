@@ -62,7 +62,7 @@ export class RazorpayService {
   private razorpay: Razorpay | null = null;
   private context: GraphQLContext;
 
-  constructor(context: GraphQLContext, razorpayInstance?: any) {
+  constructor(context: GraphQLContext, razorpayInstance?: Razorpay) {
     this.context = context;
     if (razorpayInstance) {
       this.razorpay = razorpayInstance;

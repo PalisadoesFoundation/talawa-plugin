@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 import type { GraphQLContext } from '~/src/graphql/context';
+import crypto from 'node:crypto';
 
 /**
  * Mock Razorpay SDK
@@ -207,7 +208,10 @@ export const createMockTransaction = (overrides: Record<string, any> = {}) => {
  */
 export const createMockDatabaseClient = () => {
   const mockDb: any = {
-    // Delegate 'then' to 'execute' so that await checks receive the result of execute()
+    // The "then" method is required to make the mock object "thenable" (Promise-like),
+    // allowing it to be awaited directly in the application code (e.g. await db.select()...).
+    // Without this, "await" would return the object itself instead of the query result.
+    // eslint-disable-next-line no-prototype-builtins
     then: (resolve: any, reject: any) => mockDb.execute().then(resolve, reject),
   };
 
@@ -277,7 +281,7 @@ export const createMockRazorpayContext = (
     drizzleClient: mockDb as any,
     log: {
       info: vi.fn(),
-      error: vi.fn((...args) => console.error('MOCKED_LOG_ERROR:', ...args)),
+      error: vi.fn(),
       warn: vi.fn(),
       debug: vi.fn(),
     },
@@ -329,7 +333,6 @@ export const createValidSignature = (
   secret: string = 'webhook_secret_123',
 ): string => {
   // Use actual crypto to create valid signatures for testing
-  const crypto = require('crypto');
   const payload = `${orderId}|${paymentId}`;
   return crypto.createHmac('sha256', secret).update(payload).digest('hex');
 };
