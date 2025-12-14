@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
 <title data-rh="true">createPaymentOrderResolver | Talawa-Plugin Documentation</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://docs-plugin.talawa.io/docs/auto-docs/Razorpay/api/graphql/mutations/functions/createPaymentOrderResolver"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="createPaymentOrderResolver | Talawa-Plugin Documentation"><meta data-rh="true" name="description" content="Plugin Docs"><meta data-rh="true" property="og:description" content="Plugin Docs"><link data-rh="true" rel="icon" href="/img/icons/favicon_palisadoes.ico"><link data-rh="true" rel="canonical" href="https://docs-plugin.talawa.io/docs/auto-docs/Razorpay/api/graphql/mutations/functions/createPaymentOrderResolver"><link data-rh="true" rel="alternate" href="https://docs-plugin.talawa.io/docs/auto-docs/Razorpay/api/graphql/mutations/functions/createPaymentOrderResolver" hreflang="en"><link data-rh="true" rel="alternate" href="https://docs-plugin.talawa.io/docs/auto-docs/Razorpay/api/graphql/mutations/functions/createPaymentOrderResolver" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"createPaymentOrderResolver","item":"https://docs-plugin.talawa.io/docs/auto-docs/Razorpay/api/graphql/mutations/functions/createPaymentOrderResolver"}]}</script><link rel="stylesheet" href="https://docs.talawa.io/css/styles-latest.css"><link rel="stylesheet" href="/assets/css/styles.bc713d0d.css">
-<script src="/assets/js/runtime~main.dc62d671.js" defer="defer"></script>
-<script src="/assets/js/main.c2ab0928.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.f9d58210.js" defer="defer"></script>
+<script src="/assets/js/main.63a8580b.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
 <svg style="display: none;"><defs>
@@ -17,12 +17,29 @@
 <blockquote>
 <p><strong>createPaymentOrderResolver</strong>(<code>_parent</code>, <code>args</code>, <code>ctx</code>): <code>Promise</code>&lt;{ <code>amount</code>: <code>any</code>; <code>anonymous</code>: <code>any</code>; <code>createdAt</code>: <code>any</code>; <code>currency</code>: <code>any</code>; <code>description</code>: <code>any</code>; <code>donorEmail</code>: <code>any</code>; <code>donorName</code>: <code>any</code>; <code>donorPhone</code>: <code>any</code>; <code>id</code>: <code>any</code>; <code>organizationId</code>: <code>any</code>; <code>razorpayOrderId</code>: <code>any</code>; <code>status</code>: <code>any</code>; <code>updatedAt</code>: <code>any</code>; <code>userId</code>: <code>any</code>; }&gt;</p>
 </blockquote>
-<p>Defined in: <a href="https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/mutations.ts#L156" target="_blank" rel="noopener noreferrer" class="">Razorpay/api/graphql/mutations.ts:156</a></p>
+<p>Defined in: <a href="https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/graphql/mutations.ts#L163" target="_blank" rel="noopener noreferrer" class="">plugins/Razorpay/api/graphql/mutations.ts:163</a></p>
 <h2 class="anchor anchorTargetStickyNavbar_RaSr" id="parameters">Parameters<a href="#parameters" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h2>
 <h3 class="anchor anchorTargetStickyNavbar_RaSr" id="_parent">_parent<a href="#_parent" class="hash-link" aria-label="Direct link to _parent" title="Direct link to _parent" translate="no">​</a></h3>
 <p><code>unknown</code></p>
 <h3 class="anchor anchorTargetStickyNavbar_RaSr" id="args">args<a href="#args" class="hash-link" aria-label="Direct link to args" title="Direct link to args" translate="no">​</a></h3>
-<p><code>infer</code>&lt;<code>any</code>&gt;</p>
+<h4 class="anchor anchorTargetStickyNavbar_RaSr" id="input">input<a href="#input" class="hash-link" aria-label="Direct link to input" title="Direct link to input" translate="no">​</a></h4>
+<p>{ <code>amount</code>: <code>number</code>; <code>currency</code>: <code>string</code>; <code>description?</code>: <code>string</code>; <code>donorEmail?</code>: <code>string</code>; <code>donorName?</code>: <code>string</code>; <code>donorPhone?</code>: <code>string</code>; <code>organizationId?</code>: <code>string</code>; <code>userId?</code>: <code>string</code>; } = <code>razorpayOrderInputSchema</code></p>
+<h4 class="anchor anchorTargetStickyNavbar_RaSr" id="inputamount">input.amount<a href="#inputamount" class="hash-link" aria-label="Direct link to input.amount" title="Direct link to input.amount" translate="no">​</a></h4>
+<p><code>number</code> = <code>...</code></p>
+<h4 class="anchor anchorTargetStickyNavbar_RaSr" id="inputcurrency">input.currency<a href="#inputcurrency" class="hash-link" aria-label="Direct link to input.currency" title="Direct link to input.currency" translate="no">​</a></h4>
+<p><code>string</code> = <code>...</code></p>
+<h4 class="anchor anchorTargetStickyNavbar_RaSr" id="inputdescription">input.description?<a href="#inputdescription" class="hash-link" aria-label="Direct link to input.description?" title="Direct link to input.description?" translate="no">​</a></h4>
+<p><code>string</code> = <code>...</code></p>
+<h4 class="anchor anchorTargetStickyNavbar_RaSr" id="inputdonoremail">input.donorEmail?<a href="#inputdonoremail" class="hash-link" aria-label="Direct link to input.donorEmail?" title="Direct link to input.donorEmail?" translate="no">​</a></h4>
+<p><code>string</code> = <code>...</code></p>
+<h4 class="anchor anchorTargetStickyNavbar_RaSr" id="inputdonorname">input.donorName?<a href="#inputdonorname" class="hash-link" aria-label="Direct link to input.donorName?" title="Direct link to input.donorName?" translate="no">​</a></h4>
+<p><code>string</code> = <code>...</code></p>
+<h4 class="anchor anchorTargetStickyNavbar_RaSr" id="inputdonorphone">input.donorPhone?<a href="#inputdonorphone" class="hash-link" aria-label="Direct link to input.donorPhone?" title="Direct link to input.donorPhone?" translate="no">​</a></h4>
+<p><code>string</code> = <code>...</code></p>
+<h4 class="anchor anchorTargetStickyNavbar_RaSr" id="inputorganizationid">input.organizationId?<a href="#inputorganizationid" class="hash-link" aria-label="Direct link to input.organizationId?" title="Direct link to input.organizationId?" translate="no">​</a></h4>
+<p><code>string</code> = <code>...</code></p>
+<h4 class="anchor anchorTargetStickyNavbar_RaSr" id="inputuserid">input.userId?<a href="#inputuserid" class="hash-link" aria-label="Direct link to input.userId?" title="Direct link to input.userId?" translate="no">​</a></h4>
+<p><code>string</code> = <code>...</code></p>
 <h3 class="anchor anchorTargetStickyNavbar_RaSr" id="ctx">ctx<a href="#ctx" class="hash-link" aria-label="Direct link to ctx" title="Direct link to ctx" translate="no">​</a></h3>
 <p><code>GraphQLContext</code></p>
 <h2 class="anchor anchorTargetStickyNavbar_RaSr" id="returns">Returns<a href="#returns" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h2>
