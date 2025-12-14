@@ -6,7 +6,7 @@
 
 > **handleRazorpayWebhook**(`request`, `reply`): `Promise`\<`void`\>
 
-Defined in: [plugins/Razorpay/api/index.ts:290](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/index.ts#L290)
+Defined in: [plugins/Razorpay/api/index.ts:296](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/index.ts#L296)
 
 ## Parameters
 

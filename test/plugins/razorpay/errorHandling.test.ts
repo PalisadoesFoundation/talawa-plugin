@@ -5,6 +5,7 @@ import {
   createMockRazorpayContext,
   createMockConfig,
   createMockRazorpayInstance,
+  createMockRazorpayOrder,
 } from './utils/mockRazorpay';
 import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
 
@@ -34,7 +35,7 @@ describe('Razorpay Error Handling', () => {
     mockOrders.create.mockResolvedValue(createMockRazorpayOrder());
     mockPayments.fetch.mockResolvedValue({ status: 'captured' } as any);
 
-    const mockDbString = 'mock-db-client'; // For debugging identification
+
 
     // Create a circular mock that always returns itself for chaining
     const mockDb: any = {
@@ -287,7 +288,7 @@ describe('Razorpay Error Handling', () => {
       ).rejects.toThrow();
     });
 
-    it('should handle zero amount correctly', async () => {
+    it('should reject zero amount (simulating Razorpay behavior)', async () => {
       const service = new RazorpayService(mockContext);
       const mockConfig = createMockConfig();
 
@@ -295,17 +296,27 @@ describe('Razorpay Error Handling', () => {
 
       const RazorpayConstructor = (await import('razorpay')).default as any;
       RazorpayConstructor.mockImplementation(function () {
-        return { orders: mockOrders, payments: mockPayments } as any;
+        return {
+          orders: {
+            create: vi.fn().mockImplementation((params) => {
+              if (params.amount <= 0) {
+                return Promise.reject(new Error('Amount must be at least 100 paise'));
+              }
+              return Promise.resolve(createMockRazorpayOrder());
+            }),
+          },
+          payments: mockPayments,
+        } as any;
       });
 
-      // Razorpay may reject zero amounts
+      // Razorpay rejects zero amounts
       await expect(
         service.createOrder({
           amount: 0,
           currency: 'INR',
           receipt: 'receipt_zero',
         }),
-      ).resolves.toBeDefined();
+      ).rejects.toThrow();
     });
 
     it('should handle negative amounts correctly', async () => {

@@ -19,6 +19,11 @@ const ciThreads = Math.min(
 const localThreads = Math.min(MAX_LOCAL_THREADS, Math.max(4, cpuCount));
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      razorpay: path.resolve(__dirname, './__mocks__/razorpay.ts'),
+    },
+  },
   test: {
     globals: true,
     environment: 'node',
@@ -50,9 +55,6 @@ export default defineConfig({
     sequence: {
       shuffle: false,
       concurrent: false,
-    },
-    alias: {
-      razorpay: path.resolve(__dirname, './__mocks__/razorpay.ts'),
     },
     coverage: {
       provider: 'v8',

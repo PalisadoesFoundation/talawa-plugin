@@ -467,13 +467,7 @@ export async function getUserTransactionStatsResolver(
     });
   }
 
-  const inputSchema = z.object({
-    userId: z.string(),
-    dateFrom: z.string().optional(),
-    dateTo: z.string().optional(),
-  });
-
-  const parsedArgs = inputSchema.safeParse(args);
+  const parsedArgs = getUserTransactionStatsArgumentsSchema.safeParse(args);
 
   if (!parsedArgs.success) {
     throw new TalawaGraphQLError({

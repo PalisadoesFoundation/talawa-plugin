@@ -1,7 +1,7 @@
 // These mocks allow plugin tests to run standalone in talawa-plugin repo
 import { vi } from 'vitest';
 
-console.log('Global mocks loaded'); // Debug log
+// Debug log removed
 
 // Mock GraphQL Builder
 export const mockBuilder = {
@@ -31,10 +31,10 @@ export class MockTalawaGraphQLError extends Error {
   };
 
   constructor(opts: {
-    message: string;
-    extensions: { code: string; [key: string]: any };
+    message?: string;
+    extensions: { code: string;[key: string]: any };
   }) {
-    super(opts.message);
+    super(opts.message ?? '');
     this.name = 'TalawaGraphQLError';
     this.extensions = opts.extensions;
   }
@@ -68,6 +68,11 @@ export const createMockGraphQLContext = (overrides: any = {}) => {
       lastName: 'User',
       isSuperAdmin: false,
       ...overrides.user,
+    },
+    userId: overrides.userId || 'user-123',
+    currentClient: {
+      isAuthenticated: true,
+      ...overrides.currentClient,
     },
     organization: {
       id: 'org-123',

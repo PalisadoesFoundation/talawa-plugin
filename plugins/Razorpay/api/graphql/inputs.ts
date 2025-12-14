@@ -31,7 +31,7 @@ export const RazorpayConfigInput = builder
 export const razorpayOrderInputSchema = z.object({
   organizationId: z.string().nullable().optional(),
   userId: z.string().nullable().optional(),
-  amount: z.number(),
+  amount: z.number().int().positive(),
   currency: z.string(),
   donorName: z.string().nullable().optional(),
   donorEmail: z.string().nullable().optional(),
@@ -91,10 +91,10 @@ export const RazorpayPaymentInput = builder
 
 // Razorpay Verification Input
 export const razorpayVerificationInputSchema = z.object({
-  razorpayPaymentId: z.string(),
-  razorpayOrderId: z.string(),
-  razorpaySignature: z.string(),
-  paymentData: z.string(),
+  razorpayPaymentId: z.string().min(1),
+  razorpayOrderId: z.string().min(1),
+  razorpaySignature: z.string().min(1),
+  paymentData: z.string().min(1),
 });
 
 export const RazorpayVerificationInput = builder

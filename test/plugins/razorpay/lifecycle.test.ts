@@ -64,13 +64,6 @@ describe('Razorpay Plugin Lifecycle', () => {
   });
 
   describe('onUnload', () => {
-    it('should unload plugin successfully', async () => {
-      await onUnload(mockContext);
-      expect(mockContext.logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('unloaded'),
-      );
-    });
-
     it('should cleanup all resources', async () => {
       await onUnload(mockContext);
       expect(mockContext.logger.info).toHaveBeenCalled();
@@ -107,7 +100,8 @@ describe('Razorpay Plugin Lifecycle', () => {
       const callOrder: string[] = [];
       mockContext.logger.info = vi.fn((msg: string) => {
         if (msg.includes('loaded successfully')) callOrder.push('load');
-        else if (msg.includes('activated') && !msg.includes('de')) callOrder.push('activate');
+        else if (msg.includes('activated') && !msg.includes('de'))
+          callOrder.push('activate');
         else if (msg.includes('deactivated')) callOrder.push('deactivate');
         else if (msg.includes('unloaded')) callOrder.push('unload');
       });

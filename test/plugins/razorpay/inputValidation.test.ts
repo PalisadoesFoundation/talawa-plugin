@@ -147,7 +147,7 @@ describe('Razorpay Input Validation', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should accept zero amount', () => {
+    it('should reject zero amount', () => {
       const input = {
         organizationId: 'org-123',
         userId: 'user-123',
@@ -156,10 +156,10 @@ describe('Razorpay Input Validation', () => {
       };
 
       const result = razorpayOrderInputSchema.safeParse(input);
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
     });
 
-    it('should accept negative amount (validation handled elsewhere)', () => {
+    it('should reject negative amount', () => {
       const input = {
         organizationId: 'org-123',
         userId: 'user-123',
@@ -168,7 +168,7 @@ describe('Razorpay Input Validation', () => {
       };
 
       const result = razorpayOrderInputSchema.safeParse(input);
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
     });
 
     it('should accept optional donor fields as null', () => {
@@ -356,7 +356,7 @@ describe('Razorpay Input Validation', () => {
   });
 
   describe('edge cases', () => {
-    it('should handle empty strings appropriately', () => {
+    it('should reject empty strings where required', () => {
       const input = {
         razorpayPaymentId: '',
         razorpayOrderId: '',
@@ -365,8 +365,7 @@ describe('Razorpay Input Validation', () => {
       };
 
       const result = razorpayVerificationInputSchema.safeParse(input);
-      // Empty strings are valid strings
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
     });
 
     it('should handle very long strings', () => {

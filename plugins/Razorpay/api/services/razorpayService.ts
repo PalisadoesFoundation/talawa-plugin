@@ -202,6 +202,15 @@ export class RazorpayService {
         .update(paymentData)
         .digest('hex');
 
+      // Validate hex strings
+      const hexRegex = /^[0-9a-fA-F]+$/;
+      if (
+        !hexRegex.test(expectedSignature) ||
+        !hexRegex.test(signature)
+      ) {
+        return false;
+      }
+
       const expectedBuffer = Buffer.from(expectedSignature, 'hex');
       const signatureBuffer = Buffer.from(signature, 'hex');
 
@@ -238,7 +247,23 @@ export class RazorpayService {
       .update(`${orderId}|${paymentId}`)
       .digest('hex');
 
-    return generatedSignature === signature;
+    // Validate hex strings
+    const hexRegex = /^[0-9a-fA-F]+$/;
+    if (
+      !hexRegex.test(generatedSignature) ||
+      !hexRegex.test(signature)
+    ) {
+      return false;
+    }
+
+    const generatedBuffer = Buffer.from(generatedSignature, 'hex');
+    const signatureBuffer = Buffer.from(signature, 'hex');
+
+    if (generatedBuffer.length !== signatureBuffer.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(generatedBuffer, signatureBuffer);
   }
 
   async verifyWebhookSignature(

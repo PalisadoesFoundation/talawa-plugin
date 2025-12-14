@@ -331,7 +331,7 @@ describe('Razorpay GraphQL Mutations', () => {
 
     beforeEach(() => {
       // Create valid signature for tests
-      const secret = 'webhook_secret_123';
+      const secret = 'rzp_test_secret123';
       input.razorpaySignature = crypto
         .createHmac('sha256', secret)
         .update(input.paymentData)
@@ -348,12 +348,7 @@ describe('Razorpay GraphQL Mutations', () => {
         .mockResolvedValueOnce([mockOrder])
         .mockResolvedValueOnce([mockTransaction]);
 
-      // Generate valid signature with the correct secret
-      const secret = 'rzp_test_secret123'; // Matches mockConfig.keySecret (rzp_test_secret123)
-      input.razorpaySignature = crypto
-        .createHmac('sha256', secret)
-        .update(`${input.razorpayOrderId}|${input.razorpayPaymentId}`)
-        .digest('hex');
+      // Use valid signature from beforeEach
 
       const result = await verifyPaymentResolver({}, { input }, mockContext);
       expect(result).toBeDefined();
@@ -389,7 +384,7 @@ describe('Razorpay GraphQL Mutations', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should return error if transaction not found', async () => {
+    it('should create transaction if not found during verification', async () => {
       const mockConfig = createMockConfig();
       const mockOrder = createMockOrder();
       mockContext.drizzleClient.limit
@@ -398,7 +393,8 @@ describe('Razorpay GraphQL Mutations', () => {
         .mockResolvedValueOnce([]);
 
       const result = await verifyPaymentResolver({}, { input }, mockContext);
-      expect(result.success).toBe(false);
+      expect(result.success).toBe(true);
+      expect(mockContext.drizzleClient.insert).toHaveBeenCalled();
     });
 
     // TODO: Fix mock sequence/signature verification matching

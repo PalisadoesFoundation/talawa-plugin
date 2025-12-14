@@ -338,6 +338,13 @@ export const createValidSignature = (
 };
 
 /**
+ * Create a valid HMAC signature for webhook payload
+ */
+export const createWebhookSignature = (body: string, secret: string): string => {
+  return crypto.createHmac('sha256', secret).update(body).digest('hex');
+};
+
+/**
  * Mock crypto functions for signature verification
  */
 export const mockCryptoFunctions = () => {

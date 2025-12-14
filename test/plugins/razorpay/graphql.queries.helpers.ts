@@ -1,5 +1,5 @@
 import { expect } from 'vitest';
-import type { GraphQLContext } from '~/src/graphql/context';
+
 
 // Helper to sanitize transaction for GraphQL response expectation
 export const expectTransaction = (t: {

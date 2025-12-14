@@ -6,6 +6,7 @@ import {
   createMockOrder,
   createMockTransaction,
   createMockWebhookData,
+  createWebhookSignature,
 } from './utils/mockRazorpay';
 import {
   configTable,
@@ -13,10 +14,12 @@ import {
   transactionsTable,
 } from '../../../plugins/Razorpay/api/database/tables';
 
-// Mock the Razorpay module including static methods
-vi.mock('razorpay');
-
-import crypto from 'node:crypto';
+// Mock the table objects before tests run to avoid DB connection issues
+vi.mock('~/src/plugins/Razorpay/api/database/tables', () => ({
+  configTable: { id: 'config' },
+  ordersTable: { id: 'orders' },
+  transactionsTable: { id: 'transactions' },
+}));
 import type {
   MockFastifyRequest,
   MockFastifyReply,
@@ -48,10 +51,7 @@ describe('Razorpay Webhook Handler', () => {
       const mockOrder = createMockOrder();
 
       // Generate signatures dynamically based on the exact body content
-      const signature1 = crypto
-        .createHmac('sha256', secret)
-        .update(JSON.stringify(webhookData)) // webhookData is used for mockRequest body
-        .digest('hex');
+      const signature1 = createWebhookSignature(JSON.stringify(webhookData), secret);
 
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature1 };
@@ -114,10 +114,7 @@ describe('Razorpay Webhook Handler', () => {
     beforeEach(() => {
       const webhookData = createMockWebhookData('payment.captured');
       const webhookBody = JSON.stringify(webhookData);
-      validSignature = crypto
-        .createHmac('sha256', secret)
-        .update(webhookBody)
-        .digest('hex');
+      validSignature = createWebhookSignature(webhookBody, secret);
     });
 
     it('should process payment.captured event', async () => {
@@ -150,10 +147,7 @@ describe('Razorpay Webhook Handler', () => {
       const mockOrder = createMockOrder();
 
       const webhookBody = JSON.stringify(webhookData);
-      const signature = crypto
-        .createHmac('sha256', secret)
-        .update(webhookBody)
-        .digest('hex');
+      const signature = createWebhookSignature(webhookBody, secret);
 
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
@@ -177,10 +171,7 @@ describe('Razorpay Webhook Handler', () => {
       const mockOrder = createMockOrder();
 
       const webhookBody = JSON.stringify(webhookData);
-      const signature = crypto
-        .createHmac('sha256', secret)
-        .update(webhookBody)
-        .digest('hex');
+      const signature = createWebhookSignature(webhookBody, secret);
 
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
@@ -201,10 +192,7 @@ describe('Razorpay Webhook Handler', () => {
       const mockOrder = createMockOrder();
 
       const webhookBody = JSON.stringify(webhookData);
-      const signature = crypto
-        .createHmac('sha256', secret)
-        .update(webhookBody)
-        .digest('hex');
+      const signature = createWebhookSignature(webhookBody, secret);
 
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
@@ -230,10 +218,7 @@ describe('Razorpay Webhook Handler', () => {
       const mockOrder = createMockOrder();
 
       const webhookBody = JSON.stringify(webhookData);
-      const signature = crypto
-        .createHmac('sha256', secret)
-        .update(webhookBody)
-        .digest('hex');
+      const signature = createWebhookSignature(webhookBody, secret);
 
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
@@ -255,10 +240,7 @@ describe('Razorpay Webhook Handler', () => {
       const mockTransaction = createMockTransaction();
 
       const webhookBody = JSON.stringify(webhookData);
-      const signature = crypto
-        .createHmac('sha256', secret)
-        .update(webhookBody)
-        .digest('hex');
+      const signature = createWebhookSignature(webhookBody, secret);
 
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
@@ -279,10 +261,7 @@ describe('Razorpay Webhook Handler', () => {
       const mockOrder = createMockOrder();
 
       const webhookBody = JSON.stringify(webhookData);
-      const signature = crypto
-        .createHmac('sha256', secret)
-        .update(webhookBody)
-        .digest('hex');
+      const signature = createWebhookSignature(webhookBody, secret);
 
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
@@ -303,10 +282,7 @@ describe('Razorpay Webhook Handler', () => {
       const mockConfig = createMockConfig({ webhookSecret: secret });
 
       const webhookBody = JSON.stringify(webhookData);
-      const signature = crypto
-        .createHmac('sha256', secret)
-        .update(webhookBody)
-        .digest('hex');
+      const signature = createWebhookSignature(webhookBody, secret);
 
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
@@ -338,10 +314,7 @@ describe('Razorpay Webhook Handler', () => {
       const mockConfig = createMockConfig({ webhookSecret: secret });
 
       const webhookBody = JSON.stringify(webhookData);
-      const signature = crypto
-        .createHmac('sha256', secret)
-        .update(webhookBody)
-        .digest('hex');
+      const signature = createWebhookSignature(webhookBody, secret);
 
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
@@ -361,10 +334,7 @@ describe('Razorpay Webhook Handler', () => {
       const mockConfig = createMockConfig({ webhookSecret: secret });
 
       const webhookBody = JSON.stringify(webhookData);
-      const signature = crypto
-        .createHmac('sha256', secret)
-        .update(webhookBody)
-        .digest('hex');
+      const signature = createWebhookSignature(webhookBody, secret);
 
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
@@ -380,13 +350,10 @@ describe('Razorpay Webhook Handler', () => {
 
     // Verify database calls (tables are imported at top level or mocked via utils)
     // Here we rely on standard mocks returning success
-    vi.mock('~/src/plugins/Razorpay/api/database/tables', () => ({
-      configTable: { id: 'config' },
-      ordersTable: { id: 'orders' },
-      transactionsTable: { id: 'transactions' },
-    }));
+    // Verify database calls (tables are imported at top level or mocked via utils)
+    // Here we rely on standard mocks returning success
 
-    describe('error handling', () => {
+    describe('concurrent error handling', () => {
       // ...
       it('should handle concurrent webhook processing', async () => {
         const secret = 'webhook_secret_123';
@@ -395,10 +362,7 @@ describe('Razorpay Webhook Handler', () => {
         const mockOrder = createMockOrder();
 
         const webhookBody = JSON.stringify(webhookData);
-        const signature = crypto
-          .createHmac('sha256', secret)
-          .update(webhookBody)
-          .digest('hex');
+        const signature = createWebhookSignature(webhookBody, secret);
 
         mockRequest.body = webhookData;
         mockRequest.headers = { 'x-razorpay-signature': signature };
@@ -421,10 +385,7 @@ describe('Razorpay Webhook Handler', () => {
             },
           },
         };
-        const signature1 = crypto
-          .createHmac('sha256', secret)
-          .update(JSON.stringify(payload1))
-          .digest('hex');
+        const signature1 = createWebhookSignature(JSON.stringify(payload1), secret);
 
         const payload2 = {
           payload: {
@@ -439,10 +400,7 @@ describe('Razorpay Webhook Handler', () => {
             },
           },
         };
-        const signature2 = crypto
-          .createHmac('sha256', secret)
-          .update(JSON.stringify(payload2))
-          .digest('hex');
+        const signature2 = createWebhookSignature(JSON.stringify(payload2), secret);
 
         const mockRequest1 = {
           pluginContext: mockContext,

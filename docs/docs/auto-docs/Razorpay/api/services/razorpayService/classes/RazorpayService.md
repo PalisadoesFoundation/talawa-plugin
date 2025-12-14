@@ -22,7 +22,7 @@ Defined in: [plugins/Razorpay/api/services/razorpayService.ts:65](https://github
 
 ##### razorpayInstance?
 
-`any`
+`Razorpay`
 
 #### Returns
 
