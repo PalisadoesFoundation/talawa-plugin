@@ -6,7 +6,7 @@
 
 > **getUserTransactionStatsResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `currency`: `any`; `failedCount`: `any`; `pendingCount`: `any`; `successCount`: `any`; `totalAmount`: `any`; `totalTransactions`: `any`; \}\>
 
-Defined in: [Razorpay/api/graphql/queries.ts:409](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/queries.ts#L409)
+Defined in: [plugins/Razorpay/api/graphql/queries.ts:459](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/queries.ts#L459)
 
 ## Parameters
 
@@ -16,7 +16,17 @@ Defined in: [Razorpay/api/graphql/queries.ts:409](https://github.com/PalisadoesF
 
 ### args
 
-`infer`\<`any`\>
+#### dateFrom?
+
+`string` = `...`
+
+#### dateTo?
+
+`string` = `...`
+
+#### userId?
+
+`string` = `...`
 
 ### ctx
 

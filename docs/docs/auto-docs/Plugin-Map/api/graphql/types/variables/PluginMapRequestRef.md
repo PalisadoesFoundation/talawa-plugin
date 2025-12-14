@@ -6,4 +6,4 @@
 
 > `const` **PluginMapRequestRef**: `any`
 
-Defined in: [Plugin Map/api/graphql/types.ts:50](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/graphql/types.ts#L50)
+Defined in: [plugins/Plugin Map/api/graphql/types.ts:50](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/graphql/types.ts#L50)

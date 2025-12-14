@@ -4,21 +4,25 @@
 
 # Class: RazorpayService
 
-Defined in: [Razorpay/api/services/razorpayService.ts:61](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L61)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:61](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L61)
 
 ## Constructors
 
 ### Constructor
 
-> **new RazorpayService**(`context`): `RazorpayService`
+> **new RazorpayService**(`context`, `razorpayInstance?`): `RazorpayService`
 
-Defined in: [Razorpay/api/services/razorpayService.ts:65](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L65)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:65](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L65)
 
 #### Parameters
 
 ##### context
 
 `GraphQLContext`
+
+##### razorpayInstance?
+
+`any`
 
 #### Returns
 
@@ -30,7 +34,7 @@ Defined in: [Razorpay/api/services/razorpayService.ts:65](https://github.com/Pal
 
 > **createOrder**(`orderData`): `Promise`\<`any`\>
 
-Defined in: [Razorpay/api/services/razorpayService.ts:93](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L93)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:96](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L96)
 
 #### Parameters
 
@@ -48,7 +52,7 @@ Defined in: [Razorpay/api/services/razorpayService.ts:93](https://github.com/Pal
 
 > **createPayment**(`paymentData`): `Promise`\<`any`\>
 
-Defined in: [Razorpay/api/services/razorpayService.ts:159](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L159)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:162](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L162)
 
 #### Parameters
 
@@ -66,7 +70,7 @@ Defined in: [Razorpay/api/services/razorpayService.ts:159](https://github.com/Pa
 
 > **getPaymentDetails**(`paymentId`): `Promise`\<`any`\>
 
-Defined in: [Razorpay/api/services/razorpayService.ts:349](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L349)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:378](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L378)
 
 #### Parameters
 
@@ -84,7 +88,7 @@ Defined in: [Razorpay/api/services/razorpayService.ts:349](https://github.com/Pa
 
 > **initialize**(): `Promise`\<`void`\>
 
-Defined in: [Razorpay/api/services/razorpayService.ts:69](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L69)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:72](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L72)
 
 #### Returns
 
@@ -96,7 +100,7 @@ Defined in: [Razorpay/api/services/razorpayService.ts:69](https://github.com/Pal
 
 > **processWebhook**(`webhookData`): `Promise`\<`void`\>
 
-Defined in: [Razorpay/api/services/razorpayService.ts:249](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L249)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:278](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L278)
 
 #### Parameters
 
@@ -114,7 +118,7 @@ Defined in: [Razorpay/api/services/razorpayService.ts:249](https://github.com/Pa
 
 > **refundPayment**(`paymentId`, `amount?`): `Promise`\<`any`\>
 
-Defined in: [Razorpay/api/services/razorpayService.ts:364](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L364)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:393](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L393)
 
 #### Parameters
 
@@ -136,7 +140,7 @@ Defined in: [Razorpay/api/services/razorpayService.ts:364](https://github.com/Pa
 
 > **testConnection**(): `Promise`\<\{ `message`: `string`; `success`: `boolean`; \}\>
 
-Defined in: [Razorpay/api/services/razorpayService.ts:382](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L382)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:411](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L411)
 
 #### Returns
 
@@ -148,7 +152,7 @@ Defined in: [Razorpay/api/services/razorpayService.ts:382](https://github.com/Pa
 
 > **verifyPayment**(`paymentId`, `orderId`, `signature`, `paymentData`): `Promise`\<`boolean`\>
 
-Defined in: [Razorpay/api/services/razorpayService.ts:181](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L181)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:184](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L184)
 
 #### Parameters
 
@@ -174,11 +178,37 @@ Defined in: [Razorpay/api/services/razorpayService.ts:181](https://github.com/Pa
 
 ***
 
+### verifyPaymentSignature()
+
+> **verifyPaymentSignature**(`orderId`, `paymentId`, `signature`): `Promise`\<`boolean`\>
+
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:222](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L222)
+
+#### Parameters
+
+##### orderId
+
+`string`
+
+##### paymentId
+
+`string`
+
+##### signature
+
+`string`
+
+#### Returns
+
+`Promise`\<`boolean`\>
+
+***
+
 ### verifyWebhookSignature()
 
 > **verifyWebhookSignature**(`webhookBody`, `signature`): `Promise`\<`boolean`\>
 
-Defined in: [Razorpay/api/services/razorpayService.ts:215](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L215)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:244](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L244)
 
 #### Parameters
 

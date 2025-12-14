@@ -4,9 +4,9 @@
 
 # Function: summarizeTextResolver()
 
-> **summarizeTextResolver**(`_parent`, `args`, `_ctx`): `Promise`\<\{ `originalLength`: `any`; `postId`: `any`; `summary`: `string`; `summaryLength`: `number`; \}\>
+> **summarizeTextResolver**(`_parent`, `args`, `_ctx`): `Promise`\<\{ `originalLength`: `number`; `postId`: `string`; `summary`: `string`; `summaryLength`: `number`; \}\>
 
-Defined in: [SummarizeT5/api/graphql/mutations.ts:11](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeT5/api/graphql/mutations.ts#L11)
+Defined in: [plugins/SummarizeT5/api/graphql/mutations.ts:11](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeT5/api/graphql/mutations.ts#L11)
 
 ## Parameters
 
@@ -16,7 +16,17 @@ Defined in: [SummarizeT5/api/graphql/mutations.ts:11](https://github.com/Palisad
 
 ### args
 
-`infer`\<`any`\>
+#### input
+
+\{ `postId?`: `string`; `text`: `string`; \} = `summarizeInputSchema`
+
+#### input.postId?
+
+`string` = `...`
+
+#### input.text
+
+`string` = `...`
 
 ### \_ctx
 
@@ -24,4 +34,4 @@ Defined in: [SummarizeT5/api/graphql/mutations.ts:11](https://github.com/Palisad
 
 ## Returns
 
-`Promise`\<\{ `originalLength`: `any`; `postId`: `any`; `summary`: `string`; `summaryLength`: `number`; \}\>
+`Promise`\<\{ `originalLength`: `number`; `postId`: `string`; `summary`: `string`; `summaryLength`: `number`; \}\>

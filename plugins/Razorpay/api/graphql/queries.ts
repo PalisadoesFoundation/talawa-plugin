@@ -26,6 +26,13 @@ export async function getRazorpayConfigResolver(
     });
   }
 
+  // Check for superadmin access (strict)
+  if (!ctx.user.isSuperAdmin) {
+    throw new TalawaGraphQLError({
+      extensions: { code: 'forbidden' },
+    });
+  }
+
   try {
     const config = await ctx.drizzleClient.select().from(configTable).limit(1);
 
@@ -92,6 +99,12 @@ export async function getOrganizationTransactionsResolver(
     });
   }
 
+  if (!ctx.isAdmin) {
+    throw new TalawaGraphQLError({
+      extensions: { code: 'forbidden' },
+    });
+  }
+
   const {
     success,
     data: parsedArgs,
@@ -143,6 +156,18 @@ export async function getOrganizationTransactionsResolver(
         amount: transactionsTable.amount,
         currency: transactionsTable.currency,
         status: transactionsTable.status,
+        method: transactionsTable.method,
+        bank: transactionsTable.bank,
+        wallet: transactionsTable.wallet,
+        vpa: transactionsTable.vpa,
+        email: transactionsTable.email,
+        contact: transactionsTable.contact,
+        fee: transactionsTable.fee,
+        tax: transactionsTable.tax,
+        errorCode: transactionsTable.errorCode,
+        errorDescription: transactionsTable.errorDescription,
+        refundStatus: transactionsTable.refundStatus,
+        capturedAt: transactionsTable.capturedAt,
         donorName: ordersTable.donorName,
         donorEmail: ordersTable.donorEmail,
         createdAt: transactionsTable.createdAt,
@@ -157,24 +182,24 @@ export async function getOrganizationTransactionsResolver(
 
     return transactions.map((transaction) => ({
       id: transaction.id,
-      paymentId: transaction.paymentId || undefined,
-      amount: transaction.amount || undefined,
+      paymentId: transaction.paymentId,
+      amount: transaction.amount,
       currency: transaction.currency || 'INR',
       status: transaction.status || 'pending',
-      donorName: transaction.donorName || undefined,
-      donorEmail: transaction.donorEmail || undefined,
-      method: undefined,
-      bank: undefined,
-      wallet: undefined,
-      vpa: undefined,
-      email: undefined,
-      contact: undefined,
-      fee: undefined,
-      tax: undefined,
-      errorCode: undefined,
-      errorDescription: undefined,
-      refundStatus: undefined,
-      capturedAt: undefined,
+      donorName: transaction.donorName,
+      donorEmail: transaction.donorEmail,
+      method: transaction.method,
+      bank: transaction.bank,
+      wallet: transaction.wallet,
+      vpa: transaction.vpa,
+      email: transaction.email,
+      contact: transaction.contact,
+      fee: transaction.fee,
+      tax: transaction.tax,
+      errorCode: transaction.errorCode,
+      errorDescription: transaction.errorDescription,
+      refundStatus: transaction.refundStatus,
+      capturedAt: transaction.capturedAt,
       createdAt: transaction.createdAt || new Date(),
       updatedAt: transaction.updatedAt || new Date(),
     }));
@@ -237,6 +262,13 @@ export async function getUserTransactionsResolver(
       dateTo,
     } = parsedArgs;
 
+    // Users can only view their own transactions unless they are admin
+    if (userId !== ctx.userId && !ctx.isAdmin) {
+      throw new TalawaGraphQLError({
+        extensions: { code: 'forbidden' },
+      });
+    }
+
     const whereConditions = [eq(transactionsTable.userId, userId)];
 
     // Filter by organization if provided
@@ -265,6 +297,18 @@ export async function getUserTransactionsResolver(
         amount: transactionsTable.amount,
         currency: transactionsTable.currency,
         status: transactionsTable.status,
+        method: transactionsTable.method,
+        bank: transactionsTable.bank,
+        wallet: transactionsTable.wallet,
+        vpa: transactionsTable.vpa,
+        email: transactionsTable.email,
+        contact: transactionsTable.contact,
+        fee: transactionsTable.fee,
+        tax: transactionsTable.tax,
+        errorCode: transactionsTable.errorCode,
+        errorDescription: transactionsTable.errorDescription,
+        refundStatus: transactionsTable.refundStatus,
+        capturedAt: transactionsTable.capturedAt,
         donorName: ordersTable.donorName,
         donorEmail: ordersTable.donorEmail,
         createdAt: transactionsTable.createdAt,
@@ -279,24 +323,24 @@ export async function getUserTransactionsResolver(
 
     return transactions.map((transaction) => ({
       id: transaction.id,
-      paymentId: transaction.paymentId || undefined,
-      amount: transaction.amount || undefined,
+      paymentId: transaction.paymentId,
+      amount: transaction.amount,
       currency: transaction.currency || 'INR',
       status: transaction.status || 'pending',
-      donorName: transaction.donorName || undefined,
-      donorEmail: transaction.donorEmail || undefined,
-      method: undefined,
-      bank: undefined,
-      wallet: undefined,
-      vpa: undefined,
-      email: undefined,
-      contact: undefined,
-      fee: undefined,
-      tax: undefined,
-      errorCode: undefined,
-      errorDescription: undefined,
-      refundStatus: undefined,
-      capturedAt: undefined,
+      donorName: transaction.donorName,
+      donorEmail: transaction.donorEmail,
+      method: transaction.method,
+      bank: transaction.bank,
+      wallet: transaction.wallet,
+      vpa: transaction.vpa,
+      email: transaction.email,
+      contact: transaction.contact,
+      fee: transaction.fee,
+      tax: transaction.tax,
+      errorCode: transaction.errorCode,
+      errorDescription: transaction.errorDescription,
+      refundStatus: transaction.refundStatus,
+      capturedAt: transaction.capturedAt,
       createdAt: transaction.createdAt || new Date(),
       updatedAt: transaction.updatedAt || new Date(),
     }));
@@ -323,6 +367,12 @@ export async function getOrganizationTransactionStatsResolver(
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
       extensions: { code: 'unauthenticated' },
+    });
+  }
+
+  if (!ctx.isAdmin) {
+    throw new TalawaGraphQLError({
+      extensions: { code: 'forbidden' },
     });
   }
 
@@ -437,6 +487,13 @@ export async function getUserTransactionStatsResolver(
 
   try {
     const { userId, dateFrom, dateTo } = parsedArgs;
+
+    // Users can only view their own stats unless they are admin
+    if (userId !== ctx.userId && !ctx.isAdmin) {
+      throw new TalawaGraphQLError({
+        extensions: { code: 'forbidden' },
+      });
+    }
 
     const whereConditions = [eq(transactionsTable.userId, userId)];
 

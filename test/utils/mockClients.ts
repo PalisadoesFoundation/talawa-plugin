@@ -15,6 +15,7 @@ export interface MockFastifyRequest {
 
 export interface MockFastifyReply {
   code: (statusCode: number) => MockFastifyReply;
+  status: (statusCode: number) => MockFastifyReply;
   send: (payload?: any) => MockFastifyReply;
   header: (key: string, value: string) => MockFastifyReply;
   redirect: (url: string) => void;
@@ -59,8 +60,10 @@ export const createMockFastifyRequest = (
  * Creates a mock Fastify reply.
  */
 export const createMockFastifyReply = (): MockFastifyReply => {
+  const codeMock = vi.fn().mockReturnThis();
   const reply: MockFastifyReply = {
-    code: vi.fn().mockReturnThis(),
+    code: codeMock,
+    status: codeMock,
     send: vi.fn().mockReturnThis(),
     header: vi.fn().mockReturnThis(),
     redirect: vi.fn(),

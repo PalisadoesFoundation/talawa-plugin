@@ -6,7 +6,7 @@
 
 > `const` **\_\_debug**: `object`
 
-Defined in: [Razorpay/api/database/tables.ts:70](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/database/tables.ts#L70)
+Defined in: [plugins/Razorpay/api/database/tables.ts:70](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/database/tables.ts#L70)
 
 ## Type Declaration
 
@@ -16,12 +16,12 @@ Defined in: [Razorpay/api/database/tables.ts:70](https://github.com/PalisadoesFo
 
 #### tables.configTable
 
-> **configTable**: `any`
+> **configTable**: `PgTableWithColumns`\<\{ \}\>
 
 #### tables.ordersTable
 
-> **ordersTable**: `any`
+> **ordersTable**: `PgTableWithColumns`\<\{ \}\>
 
 #### tables.transactionsTable
 
-> **transactionsTable**: `any`
+> **transactionsTable**: `PgTableWithColumns`\<\{ \}\>

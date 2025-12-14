@@ -1,4 +1,5 @@
 import { cpus } from 'node:os';
+import path from 'path';
 import { defineConfig } from 'vitest/config';
 
 const isCI = !!process.env.CI;
@@ -9,12 +10,12 @@ const MAX_LOCAL_THREADS = 16;
 
 // Calculate optimal threads based on environment
 // CI: Cap at 12 threads, use 85% of available CPUs (min 4) to avoid over-subscription
-// Local: Cap at 16 threads, use 100% of available CPUs (min 4) for maximum speed
 const ciThreads = Math.min(
   MAX_CI_THREADS,
   Math.max(4, Math.floor(cpuCount * 0.85)),
 );
 
+// Local: Cap at 16 threads, use 100% of available CPUs (min 4) for maximum speed
 const localThreads = Math.min(MAX_LOCAL_THREADS, Math.max(4, cpuCount));
 
 export default defineConfig({
@@ -26,14 +27,16 @@ export default defineConfig({
       'plugins/**/test/**/*.{test,spec}.{js,jsx,ts,tsx}',
     ],
     exclude: [
-      'node_modules/**',
+      '**/node_modules/**',
       'dist/**',
       'coverage/**',
       'docs/**',
       '**/*.d.ts',
       'plugin-zips/**',
     ],
+    setupFiles: ['test/setup/globalMocks.ts'],
     pool: 'threads',
+    // @ts-expect-error - poolOptions exists in Vitest config but types might be lagging
     poolOptions: {
       threads: {
         singleThread: false,
@@ -47,6 +50,9 @@ export default defineConfig({
     sequence: {
       shuffle: false,
       concurrent: false,
+    },
+    alias: {
+      razorpay: path.resolve(__dirname, './__mocks__/razorpay.ts'),
     },
     coverage: {
       provider: 'v8',

@@ -4,9 +4,9 @@
 
 # Function: verifyPaymentResolver()
 
-> **verifyPaymentResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `message`: `string`; `success`: `boolean`; `transaction`: \{ `amount`: `any`; `currency`: `any`; `paymentId`: `any`; `status`: `string`; \}; \}\>
+> **verifyPaymentResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `message`: `string`; `success`: `boolean`; `transaction`: \{ `amount`: `any`; `currency`: `any`; `paymentId`: `string`; `status`: `string`; \}; \}\>
 
-Defined in: [Razorpay/api/graphql/mutations.ts:393](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/mutations.ts#L393)
+Defined in: [plugins/Razorpay/api/graphql/mutations.ts:418](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/mutations.ts#L418)
 
 ## Parameters
 
@@ -16,7 +16,25 @@ Defined in: [Razorpay/api/graphql/mutations.ts:393](https://github.com/Palisadoe
 
 ### args
 
-`infer`\<`any`\>
+#### input?
+
+\{ `paymentData?`: `string`; `razorpayOrderId?`: `string`; `razorpayPaymentId?`: `string`; `razorpaySignature?`: `string`; \} = `razorpayVerificationInputSchema`
+
+#### input.paymentData?
+
+`string` = `...`
+
+#### input.razorpayOrderId?
+
+`string` = `...`
+
+#### input.razorpayPaymentId?
+
+`string` = `...`
+
+#### input.razorpaySignature?
+
+`string` = `...`
 
 ### ctx
 
@@ -24,4 +42,4 @@ Defined in: [Razorpay/api/graphql/mutations.ts:393](https://github.com/Palisadoe
 
 ## Returns
 
-`Promise`\<\{ `message`: `string`; `success`: `boolean`; `transaction`: \{ `amount`: `any`; `currency`: `any`; `paymentId`: `any`; `status`: `string`; \}; \}\>
+`Promise`\<\{ `message`: `string`; `success`: `boolean`; `transaction`: \{ `amount`: `any`; `currency`: `any`; `paymentId`: `string`; `status`: `string`; \}; \}\>

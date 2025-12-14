@@ -6,7 +6,7 @@
 
 > **logPluginMapPollResolver**(`_parent`, `args`, `ctx`): `Promise`\<`any`\>
 
-Defined in: [Plugin Map/api/graphql/mutations.ts:117](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/graphql/mutations.ts#L117)
+Defined in: [plugins/Plugin Map/api/graphql/mutations.ts:117](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/graphql/mutations.ts#L117)
 
 ## Parameters
 

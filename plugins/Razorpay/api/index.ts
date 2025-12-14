@@ -343,6 +343,15 @@ export async function handleRazorpayWebhook(
 
     // Verify webhook signature manually
     const signature = request.headers['x-razorpay-signature'] as string;
+
+    if (!signature) {
+      console.error('Missing Razorpay signature header');
+      return reply.status(400).send({
+        error: 'Missing signature',
+        message: 'Missing x-razorpay-signature header',
+      });
+    }
+
     const webhookBody = JSON.stringify(webhookData);
 
     // Get webhook secret from config
@@ -364,10 +373,19 @@ export async function handleRazorpayWebhook(
       .update(webhookBody)
       .digest('hex');
 
-    const isValidSignature = crypto.timingSafeEqual(
-      Buffer.from(expectedSignature, 'hex'),
-      Buffer.from(signature, 'hex'),
-    );
+    const expectedBuffer = Buffer.from(expectedSignature, 'hex');
+    const signatureBuffer = Buffer.from(signature, 'hex');
+
+    const isValidSignature =
+      expectedBuffer.length === signatureBuffer.length &&
+      crypto.timingSafeEqual(expectedBuffer, signatureBuffer);
+
+    console.error('DEBUG_SIGNATURE_VALUES:', {
+      header: signature,
+      expected: expectedSignature,
+      headerLen: signature.length,
+      expectedLen: expectedSignature.length,
+    });
 
     if (!isValidSignature) {
       console.error('Invalid webhook signature');

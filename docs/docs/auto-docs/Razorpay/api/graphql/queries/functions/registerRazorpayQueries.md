@@ -6,7 +6,7 @@
 
 > **registerRazorpayQueries**(`builderInstance`): `void`
 
-Defined in: [Razorpay/api/graphql/queries.ts:494](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/queries.ts#L494)
+Defined in: [plugins/Razorpay/api/graphql/queries.ts:551](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/queries.ts#L551)
 
 ## Parameters
 
