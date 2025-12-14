@@ -16,7 +16,7 @@ function replaceRepoUrl(dir) {
 
       // Replace any repository URL before the "src" directory with the main repository URL
       content = content.replace(
-        /https:\/\/github\.com\/[^/]+\/[^/]+\/blob\/[^/]+\//g,
+        /https:\/\/github\.com\/[^/]+\/[^/]+\/(blob|tree)\/[^/]+\//g,
         mainRepoUrl,
       );
 
