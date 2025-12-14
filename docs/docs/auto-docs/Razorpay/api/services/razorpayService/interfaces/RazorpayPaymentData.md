@@ -4,7 +4,7 @@
 
 # Interface: RazorpayPaymentData
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:18](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L18)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:18](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L18)
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: [plugins/Razorpay/api/services/razorpayService.ts:18](https://github
 
 > **amount**: `number`
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:19](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L19)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:19](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L19)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: [plugins/Razorpay/api/services/razorpayService.ts:19](https://github
 
 > **currency**: `string`
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:20](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L20)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:20](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L20)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [plugins/Razorpay/api/services/razorpayService.ts:20](https://github
 
 > `optional` **notes**: `Record`\<`string`, `string`\>
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:23](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L23)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:23](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L23)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: [plugins/Razorpay/api/services/razorpayService.ts:23](https://github
 
 > **payment\_capture**: `number`
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:22](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L22)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:22](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L22)
 
 ***
 
@@ -44,4 +44,4 @@ Defined in: [plugins/Razorpay/api/services/razorpayService.ts:22](https://github
 
 > **receipt**: `string`
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:21](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L21)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:21](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L21)

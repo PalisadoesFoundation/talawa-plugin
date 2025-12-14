@@ -6,7 +6,7 @@
 
 > **summarizeTextResolver**(`_parent`, `args`, `_ctx`): `Promise`\<\{ `originalLength`: `number`; `postId`: `string`; `summary`: `string`; `summaryLength`: `number`; \}\>
 
-Defined in: [plugins/SummarizeT5/api/graphql/mutations.ts:11](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeT5/api/graphql/mutations.ts#L11)
+Defined in: [plugins/SummarizeT5/api/graphql/mutations.ts:11](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/SummarizeT5/api/graphql/mutations.ts#L11)
 
 ## Parameters
 

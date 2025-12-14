@@ -6,7 +6,7 @@
 
 > **updateConfigResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `apiEndpoint`: `any`; `apiKey`: `any`; `isEnabled`: `any`; `maxLength`: `any`; `timeoutSeconds`: `any`; \}\>
 
-Defined in: [plugins/SummarizeAPI/api/graphql/mutations.ts:167](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeAPI/api/graphql/mutations.ts#L167)
+Defined in: [plugins/SummarizeAPI/api/graphql/mutations.ts:167](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/SummarizeAPI/api/graphql/mutations.ts#L167)
 
 ## Parameters
 

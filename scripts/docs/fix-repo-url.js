@@ -3,7 +3,7 @@ import path from 'path';
 
 const docsDir = path.resolve('./docs/docs/auto-docs');
 const mainRepoUrl =
-  'https://github.com/PalisadoesFoundation/talawa-plugin/tree/main';
+  'https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/';
 
 function replaceRepoUrl(dir) {
   const files = fs.readdirSync(dir);

@@ -1,6 +1,8 @@
 {
   "out": "docs/docs/auto-docs",
-  "plugin": ["typedoc-plugin-markdown"],
+  "plugin": [
+    "typedoc-plugin-markdown"
+  ],
   "theme": "markdown",
   "tsconfig": "tsconfig.docs.json",
   "excludePrivate": true,
@@ -9,7 +11,9 @@
   "hideGenerator": true,
   "categorizeByGroup": true,
   "entryPointStrategy": "expand",
-  "entryPoints": ["plugins"],
+  "entryPoints": [
+    "plugins"
+  ],
   "exclude": [
     "src/vite-env.d.ts",
     "**/*.spec.{ts,tsx}",
@@ -23,5 +27,6 @@
   "cleanOutputDir": true,
   "skipErrorChecking": true,
   "logLevel": "Warn",
+  "gitRevision": "main",
   "hideBreadcrumbs": true
 }

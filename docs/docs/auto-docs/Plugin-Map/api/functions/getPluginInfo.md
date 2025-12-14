@@ -6,7 +6,7 @@
 
 > **getPluginInfo**(): `object`
 
-Defined in: [plugins/Plugin Map/api/index.ts:75](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Plugin Map/api/index.ts#L75)
+Defined in: [plugins/Plugin Map/api/index.ts:75](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/index.ts#L75)
 
 ## Returns
 

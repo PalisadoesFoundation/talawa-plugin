@@ -6,4 +6,4 @@
 
 > `const` **summarizeAPIInputSchema**: `ZodObject`\<\{ `postId`: `ZodNullable`\<`ZodOptional`\<`ZodString`\>\>; `text`: `ZodString`; \}, `$strip`\>
 
-Defined in: [plugins/SummarizeAPI/api/graphql/inputs.ts:4](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeAPI/api/graphql/inputs.ts#L4)
+Defined in: [plugins/SummarizeAPI/api/graphql/inputs.ts:4](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/SummarizeAPI/api/graphql/inputs.ts#L4)

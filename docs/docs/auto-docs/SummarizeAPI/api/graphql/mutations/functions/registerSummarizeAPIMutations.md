@@ -6,7 +6,7 @@
 
 > **registerSummarizeAPIMutations**(`b`): `void`
 
-Defined in: [plugins/SummarizeAPI/api/graphql/mutations.ts:267](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeAPI/api/graphql/mutations.ts#L267)
+Defined in: [plugins/SummarizeAPI/api/graphql/mutations.ts:267](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/SummarizeAPI/api/graphql/mutations.ts#L267)
 
 ## Parameters
 

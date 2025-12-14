@@ -6,7 +6,7 @@
 
 > **createPaymentOrderResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `amount`: `any`; `anonymous`: `any`; `createdAt`: `any`; `currency`: `any`; `description`: `any`; `donorEmail`: `any`; `donorName`: `any`; `donorPhone`: `any`; `id`: `any`; `organizationId`: `any`; `razorpayOrderId`: `any`; `status`: `any`; `updatedAt`: `any`; `userId`: `any`; \}\>
 
-Defined in: [plugins/Razorpay/api/graphql/mutations.ts:163](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/mutations.ts#L163)
+Defined in: [plugins/Razorpay/api/graphql/mutations.ts:163](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/graphql/mutations.ts#L163)
 
 ## Parameters
 

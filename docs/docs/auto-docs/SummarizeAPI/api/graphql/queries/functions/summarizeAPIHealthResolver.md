@@ -6,7 +6,7 @@
 
 > **summarizeAPIHealthResolver**(): `Promise`\<`string`\>
 
-Defined in: [plugins/SummarizeAPI/api/graphql/queries.ts:67](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/SummarizeAPI/api/graphql/queries.ts#L67)
+Defined in: [plugins/SummarizeAPI/api/graphql/queries.ts:67](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/SummarizeAPI/api/graphql/queries.ts#L67)
 
 ## Returns
 

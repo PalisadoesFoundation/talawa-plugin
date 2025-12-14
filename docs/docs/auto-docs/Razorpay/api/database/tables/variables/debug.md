@@ -6,7 +6,7 @@
 
 > `const` **\_\_debug**: `object`
 
-Defined in: [plugins/Razorpay/api/database/tables.ts:70](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/database/tables.ts#L70)
+Defined in: [plugins/Razorpay/api/database/tables.ts:70](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/database/tables.ts#L70)
 
 ## Type Declaration
 
