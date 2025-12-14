@@ -33,7 +33,7 @@ export class MockTalawaGraphQLError extends Error {
   constructor(
     public error: {
       message?: string;
-      extensions: { code: string;[key: string]: any };
+      extensions: { code: string; [key: string]: any };
     },
   ) {
     super(error.message || 'An error occurred');

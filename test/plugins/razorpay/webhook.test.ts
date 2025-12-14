@@ -301,8 +301,6 @@ describe('Razorpay Webhook Handler', () => {
     });
   });
 
-
-
   it('should handle missing order gracefully', async () => {
     const webhookData = createMockWebhookData('payment.captured');
     const mockConfig = createMockConfig({ webhookSecret: secret });
@@ -366,10 +364,7 @@ describe('Razorpay Webhook Handler', () => {
         },
       },
     };
-    const signature1 = createWebhookSignature(
-      JSON.stringify(payload1),
-      secret,
-    );
+    const signature1 = createWebhookSignature(JSON.stringify(payload1), secret);
 
     const payload2 = {
       payload: {
@@ -384,10 +379,7 @@ describe('Razorpay Webhook Handler', () => {
         },
       },
     };
-    const signature2 = createWebhookSignature(
-      JSON.stringify(payload2),
-      secret,
-    );
+    const signature2 = createWebhookSignature(JSON.stringify(payload2), secret);
 
     const mockRequest1 = {
       pluginContext: mockContext,
@@ -471,9 +463,7 @@ describe('Razorpay Webhook Handler', () => {
       .fn()
       .mockReturnValue({ values: vi.fn().mockResolvedValue({}) });
     mockContext.drizzleClient.update = vi.fn().mockReturnValue({
-      set: vi
-        .fn()
-        .mockReturnValue({ where: vi.fn().mockResolvedValue({}) }),
+      set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue({}) }),
     });
 
     await Promise.all([
@@ -495,4 +485,3 @@ describe('Razorpay Webhook Handler', () => {
     });
   });
 });
-

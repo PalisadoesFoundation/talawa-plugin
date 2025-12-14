@@ -6,7 +6,7 @@
 
 > **createRazorpayService**(`context`): [`RazorpayService`](../classes/RazorpayService.md)
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:551](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L551)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:561](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/services/razorpayService.ts#L561)
 
 ## Parameters
 
