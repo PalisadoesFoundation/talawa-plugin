@@ -316,7 +316,7 @@ const DonationForm: React.FC = () => {
               } else {
                 toast.error(
                   verificationData?.razorpay_verifyPayment?.message ||
-                  'Payment verification failed',
+                    'Payment verification failed',
                 );
                 setIsProcessing(false);
               }

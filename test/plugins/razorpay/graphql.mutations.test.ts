@@ -322,7 +322,7 @@ describe('Razorpay GraphQL Mutations', () => {
   });
 
   describe('verifyPaymentResolver', () => {
-    const input = { // eslint-disable-line @typescript-eslint/no-unused-vars
+    const input = {
       razorpayPaymentId: 'pay_test123',
       razorpayOrderId: 'order_test123',
       razorpaySignature: '',

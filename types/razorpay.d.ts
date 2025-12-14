@@ -58,7 +58,11 @@ declare module 'razorpay' {
 
   export interface Payments {
     fetch(paymentId: string): Promise<PaymentResponse>;
-    capture(paymentId: string, amount: number, currency: string): Promise<PaymentResponse>;
+    capture(
+      paymentId: string,
+      amount: number,
+      currency: string,
+    ): Promise<PaymentResponse>;
     refund(paymentId: string, params?: RefundParams): Promise<RefundResponse>;
   }
 

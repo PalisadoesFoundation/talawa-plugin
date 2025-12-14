@@ -211,7 +211,6 @@ export const createMockDatabaseClient = () => {
     // The "then" method is required to make the mock object "thenable" (Promise-like),
     // allowing it to be awaited directly in the application code (e.g. await db.select()...).
     // Without this, "await" would return the object itself instead of the query result.
-    // eslint-disable-next-line no-prototype-builtins
     then: (resolve: any, reject: any) => mockDb.execute().then(resolve, reject),
   };
 
@@ -340,7 +339,10 @@ export const createValidSignature = (
 /**
  * Create a valid HMAC signature for webhook payload
  */
-export const createWebhookSignature = (body: string, secret: string): string => {
+export const createWebhookSignature = (
+  body: string,
+  secret: string,
+): string => {
   return crypto.createHmac('sha256', secret).update(body).digest('hex');
 };
 

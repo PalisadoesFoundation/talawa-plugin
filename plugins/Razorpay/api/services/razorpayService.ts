@@ -204,10 +204,7 @@ export class RazorpayService {
 
       // Validate hex strings
       const hexRegex = /^[0-9a-fA-F]+$/;
-      if (
-        !hexRegex.test(expectedSignature) ||
-        !hexRegex.test(signature)
-      ) {
+      if (!hexRegex.test(expectedSignature) || !hexRegex.test(signature)) {
         return false;
       }
 
@@ -249,10 +246,7 @@ export class RazorpayService {
 
     // Validate hex strings
     const hexRegex = /^[0-9a-fA-F]+$/;
-    if (
-      !hexRegex.test(generatedSignature) ||
-      !hexRegex.test(signature)
-    ) {
+    if (!hexRegex.test(generatedSignature) || !hexRegex.test(signature)) {
       return false;
     }
 

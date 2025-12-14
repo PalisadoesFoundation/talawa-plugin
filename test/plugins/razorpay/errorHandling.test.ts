@@ -35,8 +35,6 @@ describe('Razorpay Error Handling', () => {
     mockOrders.create.mockResolvedValue(createMockRazorpayOrder());
     mockPayments.fetch.mockResolvedValue({ status: 'captured' } as any);
 
-
-
     // Create a circular mock that always returns itself for chaining
     const mockDb: any = {
       select: vi.fn().mockReturnThis(),
@@ -300,7 +298,9 @@ describe('Razorpay Error Handling', () => {
           orders: {
             create: vi.fn().mockImplementation((params) => {
               if (params.amount <= 0) {
-                return Promise.reject(new Error('Amount must be at least 100 paise'));
+                return Promise.reject(
+                  new Error('Amount must be at least 100 paise'),
+                );
               }
               return Promise.resolve(createMockRazorpayOrder());
             }),

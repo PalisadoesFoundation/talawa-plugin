@@ -1,6 +1,5 @@
 import { expect } from 'vitest';
 
-
 // Helper to sanitize transaction for GraphQL response expectation
 export const expectTransaction = (t: {
   id: string;

@@ -51,7 +51,10 @@ describe('Razorpay Webhook Handler', () => {
       const mockOrder = createMockOrder();
 
       // Generate signatures dynamically based on the exact body content
-      const signature1 = createWebhookSignature(JSON.stringify(webhookData), secret);
+      const signature1 = createWebhookSignature(
+        JSON.stringify(webhookData),
+        secret,
+      );
 
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature1 };
@@ -385,7 +388,10 @@ describe('Razorpay Webhook Handler', () => {
             },
           },
         };
-        const signature1 = createWebhookSignature(JSON.stringify(payload1), secret);
+        const signature1 = createWebhookSignature(
+          JSON.stringify(payload1),
+          secret,
+        );
 
         const payload2 = {
           payload: {
@@ -400,7 +406,10 @@ describe('Razorpay Webhook Handler', () => {
             },
           },
         };
-        const signature2 = createWebhookSignature(JSON.stringify(payload2), secret);
+        const signature2 = createWebhookSignature(
+          JSON.stringify(payload2),
+          secret,
+        );
 
         const mockRequest1 = {
           pluginContext: mockContext,
