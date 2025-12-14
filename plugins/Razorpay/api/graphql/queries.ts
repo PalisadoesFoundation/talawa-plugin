@@ -15,6 +15,7 @@ import {
 } from './types';
 
 // Get Razorpay configuration resolver
+// Force doc update
 export async function getRazorpayConfigResolver(
   _parent: unknown,
   _args: Record<string, unknown>,

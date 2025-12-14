@@ -6,7 +6,7 @@
 
 > **getOrganizationTransactionsResolver**(`_parent`, `args`, `ctx`): `Promise`\<`any`\>
 
-Defined in: [plugins/Razorpay/api/graphql/queries.ts:91](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/queries.ts#L91)
+Defined in: [plugins/Razorpay/api/graphql/queries.ts:92](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/queries.ts#L92)
 
 ## Parameters
 
