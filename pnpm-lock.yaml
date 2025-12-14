@@ -14,9 +14,6 @@ importers:
       drizzle-orm:
         specifier: ^0.44.1
         version: 0.44.7
-      prettier:
-        specifier: ^3.6.2
-        version: 3.6.2
       razorpay:
         specifier: ^2.9.6
         version: 2.9.6
@@ -84,6 +81,9 @@ importers:
       knip:
         specifier: ^5.67.0
         version: 5.68.0(@types/node@24.7.0)(typescript@5.9.3)
+      prettier:
+        specifier: ^3.6.2
+        version: 3.6.2
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
