@@ -40,7 +40,7 @@ Defined in: [plugins/Razorpay/api/graphql/queries.ts:234](https://github.com/Pal
 
 `string` = `...`
 
-#### userId?
+#### userId
 
 `string` = `...`
 

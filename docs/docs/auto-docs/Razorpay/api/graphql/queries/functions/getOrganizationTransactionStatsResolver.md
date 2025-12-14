@@ -24,7 +24,7 @@ Defined in: [plugins/Razorpay/api/graphql/queries.ts:374](https://github.com/Pal
 
 `string` = `...`
 
-#### orgId?
+#### orgId
 
 `string` = `...`
 

@@ -16,23 +16,23 @@ Defined in: [plugins/Razorpay/api/graphql/mutations.ts:415](https://github.com/P
 
 ### args
 
-#### input?
+#### input
 
-\{ `paymentData?`: `string`; `razorpayOrderId?`: `string`; `razorpayPaymentId?`: `string`; `razorpaySignature?`: `string`; \} = `razorpayVerificationInputSchema`
+\{ `paymentData`: `string`; `razorpayOrderId`: `string`; `razorpayPaymentId`: `string`; `razorpaySignature`: `string`; \} = `razorpayVerificationInputSchema`
 
-#### input.paymentData?
-
-`string` = `...`
-
-#### input.razorpayOrderId?
+#### input.paymentData
 
 `string` = `...`
 
-#### input.razorpayPaymentId?
+#### input.razorpayOrderId
 
 `string` = `...`
 
-#### input.razorpaySignature?
+#### input.razorpayPaymentId
+
+`string` = `...`
+
+#### input.razorpaySignature
 
 `string` = `...`
 

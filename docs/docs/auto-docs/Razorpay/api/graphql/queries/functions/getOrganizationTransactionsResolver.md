@@ -32,7 +32,7 @@ Defined in: [plugins/Razorpay/api/graphql/queries.ts:97](https://github.com/Pali
 
 `number` = `...`
 
-#### orgId?
+#### orgId
 
 `string` = `...`
 

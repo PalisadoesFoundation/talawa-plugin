@@ -16,31 +16,31 @@ Defined in: [plugins/Razorpay/api/graphql/mutations.ts:275](https://github.com/P
 
 ### args
 
-#### input?
+#### input
 
-\{ `customerDetails?`: \{ `contact?`: `string`; `email?`: `string`; `name?`: `string`; \}; `orderId?`: `string`; `paymentMethod?`: `string`; \} = `razorpayPaymentInputSchema`
+\{ `customerDetails?`: \{ `contact`: `string`; `email`: `string`; `name`: `string`; \}; `orderId`: `string`; `paymentMethod`: `string`; \} = `razorpayPaymentInputSchema`
 
 #### input.customerDetails?
 
-\{ `contact?`: `string`; `email?`: `string`; `name?`: `string`; \} = `...`
+\{ `contact`: `string`; `email`: `string`; `name`: `string`; \} = `...`
 
-#### input.customerDetails.contact?
-
-`string` = `...`
-
-#### input.customerDetails.email?
+#### input.customerDetails.contact
 
 `string` = `...`
 
-#### input.customerDetails.name?
+#### input.customerDetails.email
 
 `string` = `...`
 
-#### input.orderId?
+#### input.customerDetails.name
 
 `string` = `...`
 
-#### input.paymentMethod?
+#### input.orderId
+
+`string` = `...`
+
+#### input.paymentMethod
 
 `string` = `...`
 

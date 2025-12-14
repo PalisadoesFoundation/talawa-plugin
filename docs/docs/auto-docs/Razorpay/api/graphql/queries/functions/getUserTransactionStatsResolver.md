@@ -27,7 +27,7 @@ Returns aggregation of user transactions.
 
 `string` = `...`
 
-#### userId?
+#### userId
 
 `string` = `...`
 

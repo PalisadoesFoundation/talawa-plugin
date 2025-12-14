@@ -16,15 +16,15 @@ Defined in: [plugins/Razorpay/api/graphql/mutations.ts:163](https://github.com/P
 
 ### args
 
-#### input?
+#### input
 
-\{ `amount?`: `number`; `currency?`: `string`; `description?`: `string`; `donorEmail?`: `string`; `donorName?`: `string`; `donorPhone?`: `string`; `organizationId?`: `string`; `userId?`: `string`; \} = `razorpayOrderInputSchema`
+\{ `amount`: `number`; `currency`: `string`; `description?`: `string`; `donorEmail?`: `string`; `donorName?`: `string`; `donorPhone?`: `string`; `organizationId?`: `string`; `userId?`: `string`; \} = `razorpayOrderInputSchema`
 
-#### input.amount?
+#### input.amount
 
 `number` = `...`
 
-#### input.currency?
+#### input.currency
 
 `string` = `...`
 

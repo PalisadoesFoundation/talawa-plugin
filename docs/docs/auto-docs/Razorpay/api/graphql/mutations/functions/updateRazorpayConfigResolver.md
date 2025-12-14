@@ -16,19 +16,19 @@ Defined in: [plugins/Razorpay/api/graphql/mutations.ts:35](https://github.com/Pa
 
 ### args
 
-#### input?
+#### input
 
-\{ `currency?`: `string`; `description?`: `string`; `isEnabled?`: `boolean`; `keyId?`: `string`; `keySecret?`: `string`; `testMode?`: `boolean`; `webhookSecret?`: `string`; \} = `razorpayConfigInputSchema`
+\{ `currency`: `string`; `description`: `string`; `isEnabled`: `boolean`; `keyId?`: `string`; `keySecret?`: `string`; `testMode`: `boolean`; `webhookSecret?`: `string`; \} = `razorpayConfigInputSchema`
 
-#### input.currency?
-
-`string` = `...`
-
-#### input.description?
+#### input.currency
 
 `string` = `...`
 
-#### input.isEnabled?
+#### input.description
+
+`string` = `...`
+
+#### input.isEnabled
 
 `boolean` = `...`
 
@@ -40,7 +40,7 @@ Defined in: [plugins/Razorpay/api/graphql/mutations.ts:35](https://github.com/Pa
 
 `string` = `...`
 
-#### input.testMode?
+#### input.testMode
 
 `boolean` = `...`
 
