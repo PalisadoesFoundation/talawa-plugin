@@ -11,50 +11,45 @@ import { gql, InMemoryCache } from '@apollo/client';
  * Test wrapper that provides Apollo MockedProvider and MemoryRouter
  */
 const TestWrapper: React.FC<{
-    children: ReactNode;
-    mocks: MockedResponse[];
-    initialEntries?: string[];
-    path?: string;
-}> = ({
-    children,
-    mocks,
-    initialEntries = ['/'],
-    path = '/',
-}) => {
-        // Disable addTypename to prevent mismatch with mocks that don't have it
-        const cache = new InMemoryCache({ addTypename: false } as any);
+  children: ReactNode;
+  mocks: MockedResponse[];
+  initialEntries?: string[];
+  path?: string;
+}> = ({ children, mocks, initialEntries = ['/'], path = '/' }) => {
+  // Disable addTypename to prevent mismatch with mocks that don't have it
+  const cache = new InMemoryCache({ addTypename: false } as any);
 
-        return (
-            <MockedProvider mocks={mocks} cache={cache}>
-                <MemoryRouter initialEntries={initialEntries}>
-                    <Routes>
-                        <Route path={path} element={children} />
-                    </Routes>
-                </MemoryRouter>
-            </MockedProvider>
-        );
-    };
+  return (
+    <MockedProvider mocks={mocks} cache={cache}>
+      <MemoryRouter initialEntries={initialEntries}>
+        <Routes>
+          <Route path={path} element={children} />
+        </Routes>
+      </MemoryRouter>
+    </MockedProvider>
+  );
+};
 
 /**
  * Custom render function that wraps components with test providers
  */
 export const renderWithProviders = (
-    ui: React.ReactElement,
-    options: {
-        mocks?: MockedResponse[];
-        initialEntries?: string[];
-        path?: string;
-    } & Omit<RenderOptions, 'wrapper'> = {},
+  ui: React.ReactElement,
+  options: {
+    mocks?: MockedResponse[];
+    initialEntries?: string[];
+    path?: string;
+  } & Omit<RenderOptions, 'wrapper'> = {},
 ) => {
-    const { mocks = [], initialEntries, path, ...renderOptions } = options;
+  const { mocks = [], initialEntries, path, ...renderOptions } = options;
 
-    const Wrapper = ({ children }: { children: ReactNode }) => (
-        <TestWrapper mocks={mocks} initialEntries={initialEntries} path={path}>
-            {children}
-        </TestWrapper>
-    );
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <TestWrapper mocks={mocks} initialEntries={initialEntries} path={path}>
+      {children}
+    </TestWrapper>
+  );
 
-    return render(ui, { wrapper: Wrapper, ...renderOptions });
+  return render(ui, { wrapper: Wrapper, ...renderOptions });
 };
 
 // GraphQL Query Definitions (matching the actual components)
@@ -107,20 +102,20 @@ export const GET_RAZORPAY_CONFIG_PUBLIC = gql`
 `;
 
 export const createRazorpayConfigPublicQueryMock = (
-    config = createMockRazorpayConfig(),
+  config = createMockRazorpayConfig(),
 ) => ({
-    request: {
-        query: GET_RAZORPAY_CONFIG_PUBLIC,
-        variables: {},
+  request: {
+    query: GET_RAZORPAY_CONFIG_PUBLIC,
+    variables: {},
+  },
+  result: {
+    data: {
+      razorpay_getRazorpayConfig: {
+        ...config,
+        __typename: 'RazorpayConfig',
+      },
     },
-    result: {
-        data: {
-            razorpay_getRazorpayConfig: {
-                ...config,
-                __typename: 'RazorpayConfig'
-            },
-        },
-    },
+  },
 });
 
 export const CREATE_PAYMENT_ORDER = gql`
@@ -287,300 +282,300 @@ export const GET_ORG_TRANSACTION_STATS = gql`
 
 // Mock Data Factories
 export const createMockUser = (overrides = {}) => ({
-    id: 'user-123',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    ...overrides,
+  id: 'user-123',
+  firstName: 'John',
+  lastName: 'Doe',
+  email: 'john.doe@example.com',
+  ...overrides,
 });
 
 export const createMockOrganization = (overrides = {}) => ({
-    id: 'org-123',
-    name: 'Test Organization',
-    description: 'A test organization for donations',
-    avatarURL: 'https://example.com/avatar.png',
-    ...overrides,
+  id: 'org-123',
+  name: 'Test Organization',
+  description: 'A test organization for donations',
+  avatarURL: 'https://example.com/avatar.png',
+  ...overrides,
 });
 
 export const createMockRazorpayConfig = (overrides = {}) => ({
-    keyId: 'rzp_test_abc123',
-    keySecret: 'secret123',
-    webhookSecret: 'webhook_secret_123',
-    isEnabled: true,
-    testMode: true,
-    currency: 'INR',
-    description: 'Donation to organization',
-    ...overrides,
+  keyId: 'rzp_test_abc123',
+  keySecret: 'secret123',
+  webhookSecret: 'webhook_secret_123',
+  isEnabled: true,
+  testMode: true,
+  currency: 'INR',
+  description: 'Donation to organization',
+  ...overrides,
 });
 
 export const createMockPaymentOrder = (overrides = {}) => ({
-    id: 'order-123',
-    razorpayOrderId: 'order_abc123',
-    organizationId: 'org-123',
-    userId: 'user-123',
-    amount: 10000, // 100 INR in paise
-    currency: 'INR',
-    status: 'created',
-    donorName: 'John Doe',
-    donorEmail: 'john.doe@example.com',
-    donorPhone: '+919876543210',
-    description: 'Donation to Test Organization',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    ...overrides,
+  id: 'order-123',
+  razorpayOrderId: 'order_abc123',
+  organizationId: 'org-123',
+  userId: 'user-123',
+  amount: 10000, // 100 INR in paise
+  currency: 'INR',
+  status: 'created',
+  donorName: 'John Doe',
+  donorEmail: 'john.doe@example.com',
+  donorPhone: '+919876543210',
+  description: 'Donation to Test Organization',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  ...overrides,
 });
 
 export const createMockTransaction = (overrides = {}) => ({
-    id: 'txn-123',
-    paymentId: 'pay_abc123',
-    amount: 10000, // 100 INR in paise
-    currency: 'INR',
-    status: 'captured',
-    donorName: 'John Doe',
-    donorEmail: 'john.doe@example.com',
-    method: 'card',
-    bank: null,
-    wallet: null,
-    vpa: null,
-    email: 'john.doe@example.com',
-    contact: '+919876543210',
-    fee: 236,
-    tax: 36,
-    errorCode: null,
-    errorDescription: null,
-    refundStatus: null,
-    capturedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    ...overrides,
+  id: 'txn-123',
+  paymentId: 'pay_abc123',
+  amount: 10000, // 100 INR in paise
+  currency: 'INR',
+  status: 'captured',
+  donorName: 'John Doe',
+  donorEmail: 'john.doe@example.com',
+  method: 'card',
+  bank: null,
+  wallet: null,
+  vpa: null,
+  email: 'john.doe@example.com',
+  contact: '+919876543210',
+  fee: 236,
+  tax: 36,
+  errorCode: null,
+  errorDescription: null,
+  refundStatus: null,
+  capturedAt: new Date().toISOString(),
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  ...overrides,
 });
 
 export const createMockTransactionStats = (overrides = {}) => ({
-    totalTransactions: 10,
-    totalAmount: 100000, // 1000 INR in paise
-    currency: 'INR',
-    successCount: 8,
-    failedCount: 1,
-    pendingCount: 1,
-    ...overrides,
+  totalTransactions: 10,
+  totalAmount: 100000, // 1000 INR in paise
+  currency: 'INR',
+  successCount: 8,
+  failedCount: 1,
+  pendingCount: 1,
+  ...overrides,
 });
 
 // Mock Response Factories for GraphQL
 export const createUserQueryMock = (user = createMockUser()) => ({
-    request: {
-        query: GET_CURRENT_USER,
+  request: {
+    query: GET_CURRENT_USER,
+  },
+  result: {
+    data: {
+      me: user,
     },
-    result: {
-        data: {
-            me: user,
-        },
-    },
+  },
 });
 
 export const createOrganizationQueryMock = (
-    orgId: string,
-    organization = createMockOrganization(),
+  orgId: string,
+  organization = createMockOrganization(),
 ) => ({
-    request: {
-        query: GET_ORGANIZATION_INFO,
-        variables: { orgId },
+  request: {
+    query: GET_ORGANIZATION_INFO,
+    variables: { orgId },
+  },
+  result: {
+    data: {
+      organization,
     },
-    result: {
-        data: {
-            organization,
-        },
-    },
+  },
 });
 
 export const createRazorpayConfigQueryMock = (
-    config = createMockRazorpayConfig(),
+  config = createMockRazorpayConfig(),
 ) => ({
-    request: {
-        query: GET_RAZORPAY_CONFIG,
+  request: {
+    query: GET_RAZORPAY_CONFIG,
+  },
+  result: {
+    data: {
+      razorpay_getRazorpayConfig: config,
     },
-    result: {
-        data: {
-            razorpay_getRazorpayConfig: config,
-        },
-    },
+  },
 });
 
-
-
 export const createPaymentOrderMutationMock = (
-    order = createMockPaymentOrder(),
+  order = createMockPaymentOrder(),
 ) => ({
-    request: {
-        query: CREATE_PAYMENT_ORDER,
-        variables: {
-            input: {
-                organizationId: expect.any(String),
-                userId: expect.any(String),
-                amount: expect.any(Number),
-                currency: expect.any(String),
-                description: expect.any(String),
-                donorName: expect.any(String),
-                donorEmail: expect.any(String),
-                donorPhone: expect.any(String),
-            },
-        },
+  request: {
+    query: CREATE_PAYMENT_ORDER,
+    variables: {
+      input: {
+        organizationId: expect.any(String),
+        userId: expect.any(String),
+        amount: expect.any(Number),
+        currency: expect.any(String),
+        description: expect.any(String),
+        donorName: expect.any(String),
+        donorEmail: expect.any(String),
+        donorPhone: expect.any(String),
+      },
     },
-    result: {
-        data: {
-            razorpay_createPaymentOrder: order,
-        },
+  },
+  result: {
+    data: {
+      razorpay_createPaymentOrder: order,
     },
+  },
 });
 
 export const createVerifyPaymentMutationMock = (success = true) => ({
-    request: {
-        query: VERIFY_PAYMENT,
-        variables: {
-            input: {
-                razorpayPaymentId: expect.any(String),
-                razorpayOrderId: expect.any(String),
-                razorpaySignature: expect.any(String),
-                paymentData: expect.any(String),
-            },
-        },
+  request: {
+    query: VERIFY_PAYMENT,
+    variables: {
+      input: {
+        razorpayPaymentId: expect.any(String),
+        razorpayOrderId: expect.any(String),
+        razorpaySignature: expect.any(String),
+        paymentData: expect.any(String),
+      },
     },
-    result: {
-        data: {
-            razorpay_verifyPayment: {
-                success,
-                message: success ? 'Payment verified successfully' : 'Verification failed',
-                transaction: success
-                    ? {
-                        paymentId: 'pay_abc123',
-                        status: 'captured',
-                        amount: 10000,
-                        currency: 'INR',
-                    }
-                    : null,
-            },
-        },
+  },
+  result: {
+    data: {
+      razorpay_verifyPayment: {
+        success,
+        message: success
+          ? 'Payment verified successfully'
+          : 'Verification failed',
+        transaction: success
+          ? {
+              paymentId: 'pay_abc123',
+              status: 'captured',
+              amount: 10000,
+              currency: 'INR',
+            }
+          : null,
+      },
     },
+  },
 });
 
 export const createUpdateConfigMutationMock = (
-    config = createMockRazorpayConfig(),
+  config = createMockRazorpayConfig(),
 ) => ({
-    request: {
-        query: UPDATE_RAZORPAY_CONFIG,
-        variables: {
-            input: {
-                keyId: expect.any(String),
-                keySecret: expect.any(String),
-                webhookSecret: expect.any(String),
-                isEnabled: expect.any(Boolean),
-                testMode: expect.any(Boolean),
-                currency: expect.any(String),
-                description: expect.any(String),
-            },
-        },
+  request: {
+    query: UPDATE_RAZORPAY_CONFIG,
+    variables: {
+      input: {
+        keyId: expect.any(String),
+        keySecret: expect.any(String),
+        webhookSecret: expect.any(String),
+        isEnabled: expect.any(Boolean),
+        testMode: expect.any(Boolean),
+        currency: expect.any(String),
+        description: expect.any(String),
+      },
     },
-    result: {
-        data: {
-            razorpay_updateRazorpayConfig: config,
-        },
+  },
+  result: {
+    data: {
+      razorpay_updateRazorpayConfig: config,
     },
+  },
 });
 
 export const createTestSetupMutationMock = (success = true) => ({
-    request: {
-        query: TEST_RAZORPAY_SETUP,
+  request: {
+    query: TEST_RAZORPAY_SETUP,
+  },
+  result: {
+    data: {
+      razorpay_testRazorpaySetup: {
+        success,
+        message: success
+          ? 'Setup test successful'
+          : 'Setup test failed: Invalid credentials',
+      },
     },
-    result: {
-        data: {
-            razorpay_testRazorpaySetup: {
-                success,
-                message: success
-                    ? 'Setup test successful'
-                    : 'Setup test failed: Invalid credentials',
-            },
-        },
-    },
+  },
 });
 
 export const createUserTransactionsQueryMock = (
-    userId: string,
-    transactions = [createMockTransaction()],
+  userId: string,
+  transactions = [createMockTransaction()],
 ) => ({
-    request: {
-        query: GET_USER_TRANSACTIONS,
-        variables: {
-            userId,
-            limit: 100,
-        },
+  request: {
+    query: GET_USER_TRANSACTIONS,
+    variables: {
+      userId,
+      limit: 100,
     },
-    result: {
-        data: {
-            razorpay_getUserTransactions: transactions,
-        },
+  },
+  result: {
+    data: {
+      razorpay_getUserTransactions: transactions,
     },
+  },
 });
 
 export const createUserTransactionStatsQueryMock = (
-    userId: string,
-    stats = createMockTransactionStats(),
+  userId: string,
+  stats = createMockTransactionStats(),
 ) => ({
-    request: {
-        query: GET_USER_TRANSACTION_STATS,
-        variables: {
-            userId,
-        },
+  request: {
+    query: GET_USER_TRANSACTION_STATS,
+    variables: {
+      userId,
     },
-    result: {
-        data: {
-            razorpay_getUserTransactionStats: stats,
-        },
+  },
+  result: {
+    data: {
+      razorpay_getUserTransactionStats: stats,
     },
+  },
 });
 
 export const createOrgTransactionsQueryMock = (
-    orgId: string,
-    transactions = [createMockTransaction()],
+  orgId: string,
+  transactions = [createMockTransaction()],
 ) => ({
-    request: {
-        query: GET_ORG_TRANSACTIONS,
-        variables: {
-            orgId,
-            limit: 10,
-        },
+  request: {
+    query: GET_ORG_TRANSACTIONS,
+    variables: {
+      orgId,
+      limit: 10,
     },
-    result: {
-        data: {
-            razorpay_getOrganizationTransactions: transactions,
-        },
+  },
+  result: {
+    data: {
+      razorpay_getOrganizationTransactions: transactions,
     },
+  },
 });
 
 export const createOrgTransactionStatsQueryMock = (
-    orgId: string,
-    stats = createMockTransactionStats(),
+  orgId: string,
+  stats = createMockTransactionStats(),
 ) => ({
-    request: {
-        query: GET_ORG_TRANSACTION_STATS,
-        variables: {
-            orgId,
-        },
+  request: {
+    query: GET_ORG_TRANSACTION_STATS,
+    variables: {
+      orgId,
     },
-    result: {
-        data: {
-            razorpay_getOrganizationTransactionStats: stats,
-        },
+  },
+  result: {
+    data: {
+      razorpay_getOrganizationTransactionStats: stats,
     },
+  },
 });
 
 // Error Mock Factories
 export const createErrorMock = (query: any, errorMessage: string) => ({
-    request: {
-        query,
-    },
-    error: new Error(errorMessage),
+  request: {
+    query,
+  },
+  error: new Error(errorMessage),
 });
 
 // Wait for loading state to resolve
 export const waitForLoadingToFinish = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
+  await new Promise((resolve) => setTimeout(resolve, 0));
 };

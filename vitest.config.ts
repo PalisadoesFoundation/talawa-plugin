@@ -21,20 +21,32 @@ const localThreads = Math.min(MAX_LOCAL_THREADS, Math.max(4, cpuCount));
 export default defineConfig({
   resolve: {
     alias: [
-      { find: 'razorpay', replacement: path.resolve(__dirname, './__mocks__/razorpay.ts') },
-      { find: 'utils/useLocalstorage', replacement: path.resolve(__dirname, './__mocks__/useLocalstorage.ts') },
+      {
+        find: 'razorpay',
+        replacement: path.resolve(__dirname, './__mocks__/razorpay.ts'),
+      },
+      {
+        find: 'utils/useLocalstorage',
+        replacement: path.resolve(__dirname, './__mocks__/useLocalstorage.ts'),
+      },
       {
         find: 'components/Loader/Loader',
-        replacement: path.resolve(__dirname, './__mocks__/Loader.tsx')
+        replacement: path.resolve(__dirname, './__mocks__/Loader.tsx'),
       },
       {
         find: '/home/anant/Desktop/gsoc/talawa-plugin/components/Loader/Loader',
-        replacement: path.resolve(__dirname, './__mocks__/Loader.tsx')
+        replacement: path.resolve(__dirname, './__mocks__/Loader.tsx'),
       },
-      { find: 'components', replacement: path.resolve(__dirname, './__mocks__/components_mock') },
+      {
+        find: 'components',
+        replacement: path.resolve(__dirname, './__mocks__/components_mock'),
+      },
       {
         find: /^@apollo\/client$/,
-        replacement: path.resolve(__dirname, './__mocks__/apollo-client-proxy.ts')
+        replacement: path.resolve(
+          __dirname,
+          './__mocks__/apollo-client-proxy.ts',
+        ),
       },
     ],
   },

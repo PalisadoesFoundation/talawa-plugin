@@ -11,9 +11,9 @@ import userEvent from '@testing-library/user-event';
 import { MockedResponse } from '@apollo/client/testing';
 import UserTransactions from '../../../../plugins/Razorpay/admin/pages/UserTransactions';
 import {
-    renderWithProviders,
-    createMockTransaction,
-    createMockTransactionStats,
+  renderWithProviders,
+  createMockTransaction,
+  createMockTransactionStats,
 } from './testUtils';
 import { gql } from '@apollo/client';
 
@@ -81,161 +81,167 @@ const GET_USER_TRANSACTION_STATS = gql`
 `;
 
 // Mock useLocalStorage to provide user ID
-// Note: This is now handled by the path alias to __mocks__/useLocalstorage.ts, 
+// Note: This is now handled by the path alias to __mocks__/useLocalstorage.ts,
 // but we can override it here if needed for specific tests using vi.mock('utils/useLocalstorage')
 
 const mockTransactions = [
-    createMockTransaction({
-        id: 'txn-1',
-        paymentId: 'pay_abc123',
-        status: 'captured',
-        amount: 10000,
-        donorName: 'John Doe',
-        method: 'card',
-    }),
-    createMockTransaction({
-        id: 'txn-2',
-        paymentId: 'pay_def456',
-        status: 'failed',
-        amount: 5000,
-        donorName: 'Jane Smith',
-        method: 'upi',
-    }),
+  createMockTransaction({
+    id: 'txn-1',
+    paymentId: 'pay_abc123',
+    status: 'captured',
+    amount: 10000,
+    donorName: 'John Doe',
+    method: 'card',
+  }),
+  createMockTransaction({
+    id: 'txn-2',
+    paymentId: 'pay_def456',
+    status: 'failed',
+    amount: 5000,
+    donorName: 'Jane Smith',
+    method: 'upi',
+  }),
 ];
 
 const mockStats = createMockTransactionStats({
-    totalTransactions: 2,
-    totalAmount: 15000,
+  totalTransactions: 2,
+  totalAmount: 15000,
 });
 
 const standardMocks: MockedResponse[] = [
-    {
-        request: {
-            query: GET_USER_TRANSACTIONS,
-            variables: { userId: 'test-user-id', limit: 100 },
-        },
-        result: {
-            data: { razorpay_getUserTransactions: mockTransactions },
-        },
+  {
+    request: {
+      query: GET_USER_TRANSACTIONS,
+      variables: { userId: 'test-user-id', limit: 100 },
     },
-    {
-        request: {
-            query: GET_USER_TRANSACTION_STATS,
-            variables: { userId: 'test-user-id' },
-        },
-        result: {
-            data: { razorpay_getUserTransactionStats: mockStats },
-        },
+    result: {
+      data: { razorpay_getUserTransactions: mockTransactions },
     },
+  },
+  {
+    request: {
+      query: GET_USER_TRANSACTION_STATS,
+      variables: { userId: 'test-user-id' },
+    },
+    result: {
+      data: { razorpay_getUserTransactionStats: mockStats },
+    },
+  },
 ];
 
 describe('UserTransactions', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('Loading State', () => {
+    it('should show loading state while fetching transactions', async () => {
+      renderWithProviders(<UserTransactions />, {
+        mocks: standardMocks,
+        initialEntries: ['/user/razorpay/my-transactions'],
+        path: '/user/razorpay/my-transactions',
+      });
+
+      // The key is to match what the component actually renders.
+      // Verify loading state
+      expect(screen.getByText(/Loading/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Rendering', () => {
+    it('should render transactions page with title', async () => {
+      renderWithProviders(<UserTransactions />, {
+        mocks: standardMocks,
+        initialEntries: ['/user/razorpay/my-transactions'],
+        path: '/user/razorpay/my-transactions',
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('My Razorpay Transactions'),
+        ).toBeInTheDocument();
+      });
     });
 
-    describe('Loading State', () => {
-        it('should show loading state while fetching transactions', async () => {
-            renderWithProviders(<UserTransactions />, {
-                mocks: standardMocks,
-                initialEntries: ['/user/razorpay/my-transactions'],
-                path: '/user/razorpay/my-transactions',
-            });
+    it('should display transaction data correctly', async () => {
+      renderWithProviders(<UserTransactions />, {
+        mocks: standardMocks,
+        initialEntries: ['/user/razorpay/my-transactions'],
+        path: '/user/razorpay/my-transactions',
+      });
 
-            // The key is to match what the component actually renders.
-            // Verify loading state
-            expect(screen.getByText(/Loading/i)).toBeInTheDocument();
-        });
+      await waitFor(() => {
+        expect(screen.getByText('pay_abc123')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('INR 100.00')).toBeInTheDocument();
+      expect(screen.getByText('CAPTURED')).toBeInTheDocument();
     });
+  });
 
-    describe('Rendering', () => {
-        it('should render transactions page with title', async () => {
-            renderWithProviders(<UserTransactions />, {
-                mocks: standardMocks,
-                initialEntries: ['/user/razorpay/my-transactions'],
-                path: '/user/razorpay/my-transactions',
-            });
+  describe('Filter Controls', () => {
+    it('should display search input', async () => {
+      renderWithProviders(<UserTransactions />, {
+        mocks: standardMocks,
+        initialEntries: ['/user/razorpay/my-transactions'],
+        path: '/user/razorpay/my-transactions',
+      });
 
-            await waitFor(() => {
-                expect(screen.getByText('My Razorpay Transactions')).toBeInTheDocument();
-            });
-        });
-
-        it('should display transaction data correctly', async () => {
-            renderWithProviders(<UserTransactions />, {
-                mocks: standardMocks,
-                initialEntries: ['/user/razorpay/my-transactions'],
-                path: '/user/razorpay/my-transactions',
-            });
-
-            await waitFor(() => {
-                expect(screen.getByText('pay_abc123')).toBeInTheDocument();
-            });
-
-            expect(screen.getByText('INR 100.00')).toBeInTheDocument();
-            expect(screen.getByText('CAPTURED')).toBeInTheDocument();
-        });
+      await waitFor(() => {
+        expect(
+          screen.getByPlaceholderText('Search transactions...'),
+        ).toBeInTheDocument();
+      });
     });
+  });
 
-    describe('Filter Controls', () => {
-        it('should display search input', async () => {
-            renderWithProviders(<UserTransactions />, {
-                mocks: standardMocks,
-                initialEntries: ['/user/razorpay/my-transactions'],
-                path: '/user/razorpay/my-transactions',
-            });
+  describe('Action Buttons', () => {
+    it('should render View button for each transaction', async () => {
+      renderWithProviders(<UserTransactions />, {
+        mocks: standardMocks,
+        initialEntries: ['/user/razorpay/my-transactions'],
+        path: '/user/razorpay/my-transactions',
+      });
 
-            await waitFor(() => {
-                expect(screen.getByPlaceholderText('Search transactions...')).toBeInTheDocument();
-            });
-        });
+      await waitFor(() => {
+        expect(screen.getByText('pay_abc123')).toBeInTheDocument();
+      });
+
+      const viewButtons = screen.getAllByText(/View/i);
+      expect(viewButtons.length).toBeGreaterThanOrEqual(2);
     });
+  });
 
-    describe('Action Buttons', () => {
-        it('should render View button for each transaction', async () => {
-            renderWithProviders(<UserTransactions />, {
-                mocks: standardMocks,
-                initialEntries: ['/user/razorpay/my-transactions'],
-                path: '/user/razorpay/my-transactions',
-            });
+  describe('Error Handling', () => {
+    it('should show error message when transactions fail to load', async () => {
+      const errorMocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_USER_TRANSACTIONS,
+            variables: { userId: 'test-user-id', limit: 100 },
+          },
+          error: new Error('Network error'),
+        },
+        {
+          request: {
+            query: GET_USER_TRANSACTION_STATS,
+            variables: { userId: 'test-user-id' },
+          },
+          result: { data: { razorpay_getUserTransactionStats: mockStats } },
+        },
+      ];
 
-            await waitFor(() => {
-                expect(screen.getByText('pay_abc123')).toBeInTheDocument();
-            });
+      renderWithProviders(<UserTransactions />, {
+        mocks: errorMocks,
+        initialEntries: ['/user/razorpay/my-transactions'],
+        path: '/user/razorpay/my-transactions',
+      });
 
-            const viewButtons = screen.getAllByText(/View/i);
-            expect(viewButtons.length).toBeGreaterThanOrEqual(2);
-        });
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Failed to load transaction data/i),
+        ).toBeInTheDocument();
+      });
     });
-
-    describe('Error Handling', () => {
-        it('should show error message when transactions fail to load', async () => {
-            const errorMocks: MockedResponse[] = [
-                {
-                    request: {
-                        query: GET_USER_TRANSACTIONS,
-                        variables: { userId: 'test-user-id', limit: 100 },
-                    },
-                    error: new Error('Network error'),
-                },
-                {
-                    request: {
-                        query: GET_USER_TRANSACTION_STATS,
-                        variables: { userId: 'test-user-id' },
-                    },
-                    result: { data: { razorpay_getUserTransactionStats: mockStats } },
-                }
-            ];
-
-            renderWithProviders(<UserTransactions />, {
-                mocks: errorMocks,
-                initialEntries: ['/user/razorpay/my-transactions'],
-                path: '/user/razorpay/my-transactions',
-            });
-
-            await waitFor(() => {
-                expect(screen.getByText(/Failed to load transaction data/i)).toBeInTheDocument();
-            });
-        });
-    });
+  });
 });

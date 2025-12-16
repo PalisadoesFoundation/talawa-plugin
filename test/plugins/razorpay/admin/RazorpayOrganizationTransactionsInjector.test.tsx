@@ -68,7 +68,9 @@ const standardMocks: MockedResponse[] = [
       query: GET_ORG_TRANSACTIONS,
       variables: { orgId: 'test-org-id', limit: 10 },
     },
-    result: { data: { razorpay_getOrganizationTransactions: mockTransactions } },
+    result: {
+      data: { razorpay_getOrganizationTransactions: mockTransactions },
+    },
   },
   {
     request: {
@@ -92,7 +94,9 @@ describe('RazorpayOrganizationTransactionsInjector', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Razorpay Organization Transactions')).toBeInTheDocument();
+      expect(
+        screen.getByText('Razorpay Organization Transactions'),
+      ).toBeInTheDocument();
     });
 
     expect(screen.getByText('pay_org1')).toBeInTheDocument();

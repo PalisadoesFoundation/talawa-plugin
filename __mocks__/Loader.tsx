@@ -5,7 +5,7 @@
 import React from 'react';
 
 const Loader: React.FC = () => {
-    return React.createElement('div', { 'data-testid': 'loader' }, 'Loading...');
+  return React.createElement('div', { 'data-testid': 'loader' }, 'Loading...');
 };
 
 export default Loader;
