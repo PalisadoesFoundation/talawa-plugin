@@ -464,25 +464,6 @@ jobs:
       - name: Run tests
         run: pnpm run test:coverage
 
-      - name: Fetch base branch for Codecov comparison
-        run: |
-          git fetch origin ${{ github.base_ref }}
-
-      - name: Calculate merge base for Codecov
-        id: get-merge-base
-        run: |
-          # Calculate the merge base
-          MERGE_BASE=$(git merge-base origin/${{ github.base_ref }} HEAD)
-          echo "Merge base commit: $MERGE_BASE"
-          echo "merge_base=$MERGE_BASE" >> $GITHUB_OUTPUT
-
-          # Verify the commit exists
-          git show -s --format=%ci $MERGE_BASE
-
-      #######################################################################
-      # DO NOT DELETE ANY references to env.CODECOV_UNIQUE_NAME in this
-      # section. They are required for accurate calculations
-      #######################################################################
       - name: Present and upload coverage to Codecov as ${{env.CODECOV_UNIQUE_NAME}}
         uses: codecov/codecov-action@v5
         with:
@@ -492,7 +473,6 @@ jobs:
           verbose: true
           exclude: 'docs/'
           files: ./coverage/vitest/lcov.info
-          commit_parent: ${{ steps.get-merge-base.outputs.merge_base }}
 
       - name: Test acceptable level of code coverage
         uses: VeryGoodOpenSource/very_good_coverage@v3
