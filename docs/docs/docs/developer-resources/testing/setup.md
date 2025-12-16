@@ -43,6 +43,7 @@ We use **Vitest** - a fast, modern test framework compatible with Jest API.
 ### Threading Configuration
 
 **Dynamic Thread Allocation:**
+- Configured using `maxWorkers` (Vitest v4+)
 - CI: 12 threads (85% of CPU cores, min 4)
 - Local: 16 threads (100% of CPU cores, min 4)
 - Ensures optimal performance without over-subscription
