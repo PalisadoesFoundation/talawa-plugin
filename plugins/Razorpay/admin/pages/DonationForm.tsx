@@ -242,21 +242,23 @@ const DonationForm: React.FC = () => {
 
     try {
       // Step 1: Create payment order
-      const { data: orderData } = await createOrder({
-        variables: {
-          input: {
-            organizationId: orgId,
-            userId: currentUserData?.me?.id || null,
-            amount: parseFloat(formData.amount) * 100, // Convert to paise
-            currency: formData.currency,
-            description:
-              formData.description ||
-              `Donation to ${orgData?.organization?.name}`,
-            donorName: formData.donorName,
-            donorEmail: formData.donorEmail,
-            donorPhone: formData.donorPhone,
-          },
+      const orderVariables = {
+        input: {
+          organizationId: orgId,
+          userId: currentUserData?.me?.id || null,
+          amount: parseFloat(formData.amount) * 100, // Convert to paise
+          currency: formData.currency,
+          description:
+            formData.description ||
+            `Donation to ${orgData?.organization?.name}`,
+          donorName: formData.donorName,
+          donorEmail: formData.donorEmail,
+          donorPhone: formData.donorPhone,
         },
+      };
+
+      const { data: orderData } = await createOrder({
+        variables: orderVariables,
       });
 
       if (!orderData?.razorpay_createPaymentOrder) {
@@ -316,7 +318,7 @@ const DonationForm: React.FC = () => {
               } else {
                 toast.error(
                   verificationData?.razorpay_verifyPayment?.message ||
-                    'Payment verification failed',
+                  'Payment verification failed',
                 );
                 setIsProcessing(false);
               }

@@ -13,7 +13,10 @@
     "**/*.d.ts",
     "**/pnpm-lock.yaml"
   ],
-  "project": ["**/*.{ts,tsx,js,jsx,json}", "**/*.{md,mdx}"],
+  "project": [
+    "**/*.{ts,tsx,js,jsx,json}",
+    "**/*.{md,mdx}"
+  ],
   "ignoreExportsUsedInFile": true,
   "ignoreDependencies": [
     "@types/react-dom",
@@ -27,6 +30,7 @@
     "eslint-plugin-prettier",
     "eslint-plugin-react",
     "eslint-plugin-tsdoc",
-    "eslint-plugin-vitest"
+    "eslint-plugin-vitest",
+    "tsc-files"
   ]
 }
