@@ -77,8 +77,6 @@ const VERIFY_PAYMENT = gql`
   }
 `;
 
-
-
 interface RazorpaySuccessResponse {
   razorpay_payment_id: string;
   razorpay_order_id: string;
@@ -292,7 +290,7 @@ const DonationForm: React.FC = () => {
               } else {
                 toast.error(
                   verificationData?.razorpay_verifyPayment?.message ||
-                  'Payment verification failed',
+                    'Payment verification failed',
                 );
                 setIsProcessing(false);
               }
