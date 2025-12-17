@@ -60,6 +60,7 @@ export const GET_CURRENT_USER = gql`
       firstName
       lastName
       email
+      __typename
     }
   }
 `;
@@ -71,6 +72,7 @@ export const GET_ORGANIZATION_INFO = gql`
       name
       description
       avatarURL
+      __typename
     }
   }
 `;
@@ -85,6 +87,7 @@ export const GET_RAZORPAY_CONFIG = gql`
       testMode
       currency
       description
+      __typename
     }
   }
 `;
@@ -97,6 +100,7 @@ export const GET_RAZORPAY_CONFIG_PUBLIC = gql`
       testMode
       currency
       description
+      __typename
     }
   }
 `;
@@ -193,6 +197,7 @@ export const GET_USER_TRANSACTIONS = gql`
       capturedAt
       createdAt
       updatedAt
+      __typename
     }
   }
 `;
@@ -213,6 +218,7 @@ export const GET_USER_TRANSACTION_STATS = gql`
       successCount
       failedCount
       pendingCount
+      __typename
     }
   }
 `;
@@ -240,6 +246,7 @@ export const GET_ORG_TRANSACTIONS = gql`
       capturedAt
       createdAt
       updatedAt
+      __typename
     }
   }
 `;
@@ -252,6 +259,7 @@ export const GET_ORG_TRANSACTION_STATS = gql`
       successCount
       failedCount
       pendingCount
+      __typename
     }
   }
 `;

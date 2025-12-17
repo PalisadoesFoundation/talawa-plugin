@@ -13,9 +13,73 @@ import {
   renderWithProviders,
   createMockTransaction,
   createMockTransactionStats,
-  GET_USER_TRANSACTIONS,
-  GET_USER_TRANSACTION_STATS,
 } from './testUtils';
+import { gql } from '@apollo/client';
+
+const GET_USER_TRANSACTIONS = gql`
+  query GetUserTransactions(
+    $userId: String!
+    $limit: Int
+    $offset: Int
+    $status: String
+    $dateFrom: String
+    $dateTo: String
+  ) {
+    razorpay_getUserTransactions(
+      userId: $userId
+      limit: $limit
+      offset: $offset
+      status: $status
+      dateFrom: $dateFrom
+      dateTo: $dateTo
+    ) {
+      id
+      paymentId
+      amount
+      currency
+      status
+      donorName
+      donorEmail
+      method
+      bank
+      wallet
+      vpa
+      email
+      contact
+      fee
+      tax
+      errorCode
+      errorDescription
+      refundStatus
+      capturedAt
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+
+const GET_USER_TRANSACTION_STATS = gql`
+  query GetUserTransactionStats(
+    $userId: String!
+    $dateFrom: String
+    $dateTo: String
+  ) {
+    razorpay_getUserTransactionStats(
+      userId: $userId
+      dateFrom: $dateFrom
+      dateTo: $dateTo
+    ) {
+      totalTransactions
+      totalAmount
+      currency
+      successCount
+      failedCount
+      pendingCount
+      __typename
+    }
+  }
+`;
 
 // Mock useLocalStorage to provide user ID
 // Note: This is now handled by the path alias to __mocks__/useLocalstorage.ts,

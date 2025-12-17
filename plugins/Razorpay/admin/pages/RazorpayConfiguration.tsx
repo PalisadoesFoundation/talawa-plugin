@@ -9,6 +9,7 @@ import {
   UPDATE_RAZORPAY_CONFIG,
   TEST_RAZORPAY_SETUP,
 } from '../graphql/queries';
+import { useTranslation } from 'react-i18next';
 
 interface RazorpayConfig {
   keyId?: string;
@@ -21,6 +22,8 @@ interface RazorpayConfig {
 }
 
 const RazorpayConfiguration: React.FC = () => {
+  const { t } = useTranslation('razorpay');
+  const [validated, setValidated] = useState(false);
   const [config, setConfig] = useState<RazorpayConfig>({
     keyId: undefined,
     keySecret: undefined,
@@ -56,8 +59,15 @@ const RazorpayConfiguration: React.FC = () => {
     }));
   };
 
-  const handleSaveConfig = async (e: React.FormEvent) => {
+  const handleSaveConfig = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const form = e.currentTarget;
+    if (form.checkValidity() === false) {
+      e.stopPropagation();
+      setValidated(true);
+      return;
+    }
+    setValidated(true);
     setIsLoading(true);
     try {
       await updateConfig({
@@ -106,12 +116,11 @@ const RazorpayConfiguration: React.FC = () => {
       const { data: result } = await testSetup();
 
       if (result?.razorpay_testRazorpaySetup?.success) {
-        toast.success(
-          'Setup test successful! Razorpay configuration is working correctly.',
-        );
+        toast.success(t('configuration.success.testSetup'));
       } else {
         const errorMessage =
-          result?.razorpay_testRazorpaySetup?.message || 'Setup test failed';
+          result?.razorpay_testRazorpaySetup?.message ||
+          t('configuration.error.testSetupFailed');
         toast.error(errorMessage);
 
         // Error message already shown via toast above
@@ -120,7 +129,7 @@ const RazorpayConfiguration: React.FC = () => {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       toast.error(
-        `Setup test failed: ${errorMessage}. Please check your configuration.`,
+        `${t('configuration.error.testSetupGeneric')} ${errorMessage}`,
       );
     } finally {
       setIsLoading(false);
@@ -175,93 +184,116 @@ const RazorpayConfiguration: React.FC = () => {
         <Card.Header>
           <Card.Title className="d-flex align-items-center">
             <span className="me-2">⚙️</span>
-            Razorpay Configuration
+            {t('configuration.title')}
           </Card.Title>
         </Card.Header>
         <Card.Body>
-          <Form onSubmit={handleSaveConfig}>
+          <Form noValidate validated={validated} onSubmit={handleSaveConfig}>
             <Row>
               {/* API Keys Section */}
               <Col md={6}>
-                <h5 className="mb-3">🔑 API Credentials</h5>
+                <h5 className="mb-3">
+                  {t('configuration.sections.credentials')}
+                </h5>
 
                 <Form.Group className="mb-3" controlId="keyId">
-                  <Form.Label>Key ID *</Form.Label>
+                  <Form.Label>
+                    {t('configuration.form.keyIdLabel')} *
+                  </Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder="rzp_test_..."
+                    placeholder={t('configuration.form.keyIdPlaceholder')}
                     value={config.keyId || ''}
                     onChange={(e) => handleInputChange('keyId', e.target.value)}
                     required
+                    isInvalid={validated && !config.keyId}
+                    aria-invalid={validated && !config.keyId}
                   />
                   <Form.Text className="text-muted">
-                    Your Razorpay Key ID (starts with rzp_test_ or rzp_live_)
+                    {t('configuration.form.keyIdHelp')}
                   </Form.Text>
+                  <Form.Control.Feedback type="invalid">
+                    {t('configuration.error.invalidKeyId')}
+                  </Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="keySecret">
-                  <Form.Label>Key Secret *</Form.Label>
+                  <Form.Label>
+                    {t('configuration.form.keySecretLabel')} *
+                  </Form.Label>
                   <div className="input-group">
                     <Form.Control
                       type={showSecrets ? 'text' : 'password'}
-                      placeholder="Enter your key secret"
+                      placeholder={t('configuration.form.keySecretPlaceholder')}
                       value={config.keySecret || ''}
                       onChange={(e) =>
                         handleInputChange('keySecret', e.target.value)
                       }
                       required
-                    />
-                    <Button
-                      variant="outline-secondary"
-                      onClick={() => setShowSecrets(!showSecrets)}
-                      aria-label={
-                        showSecrets ? 'Hide key secret' : 'Show key secret'
-                      }
-                    >
-                      {showSecrets ? '👁️' : '👁️‍🗨️'}
-                    </Button>
-                  </div>
-                  <Form.Text className="text-muted">
-                    Your Razorpay Key Secret (keep this secure)
-                  </Form.Text>
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="webhookSecret">
-                  <Form.Label>Webhook Secret *</Form.Label>
-                  <div className="input-group">
-                    <Form.Control
-                      type={showSecrets ? 'text' : 'password'}
-                      placeholder="Enter your webhook secret"
-                      value={config.webhookSecret || ''}
-                      onChange={(e) =>
-                        handleInputChange('webhookSecret', e.target.value)
-                      }
-                      required
+                      isInvalid={validated && !config.keySecret}
+                      aria-invalid={validated && !config.keySecret}
                     />
                     <Button
                       variant="outline-secondary"
                       onClick={() => setShowSecrets(!showSecrets)}
                       aria-label={
                         showSecrets
-                          ? 'Hide webhook secret'
-                          : 'Show webhook secret'
+                          ? t('configuration.actions.hideSecret')
+                          : t('configuration.actions.showSecret')
                       }
                     >
                       {showSecrets ? '👁️' : '👁️‍🗨️'}
                     </Button>
                   </div>
                   <Form.Text className="text-muted">
-                    Webhook secret for signature verification
+                    {t('configuration.form.keySecretHelp')}
+                  </Form.Text>
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="webhookSecret">
+                  <Form.Label>
+                    {t('configuration.form.webhookSecretLabel')} *
+                  </Form.Label>
+                  <div className="input-group">
+                    <Form.Control
+                      type={showSecrets ? 'text' : 'password'}
+                      placeholder={t(
+                        'configuration.form.webhookSecretPlaceholder',
+                      )}
+                      value={config.webhookSecret || ''}
+                      onChange={(e) =>
+                        handleInputChange('webhookSecret', e.target.value)
+                      }
+                      required
+                      isInvalid={validated && !config.webhookSecret}
+                      aria-invalid={validated && !config.webhookSecret}
+                    />
+                    <Button
+                      variant="outline-secondary"
+                      onClick={() => setShowSecrets(!showSecrets)}
+                      aria-label={
+                        showSecrets
+                          ? t('configuration.actions.hideSecret')
+                          : t('configuration.actions.showSecret')
+                      }
+                    >
+                      {showSecrets ? '👁️' : '👁️‍🗨️'}
+                    </Button>
+                  </div>
+                  <Form.Text className="text-muted">
+                    {t('configuration.form.webhookSecretHelp')}
                   </Form.Text>
                 </Form.Group>
               </Col>
 
               {/* Settings Section */}
               <Col md={6}>
-                <h5 className="mb-3">⚙️ Settings</h5>
+                <h5 className="mb-3">{t('configuration.sections.settings')}</h5>
 
                 <Form.Group className="mb-3" controlId="currency">
-                  <Form.Label>Currency</Form.Label>
+                  <Form.Label>
+                    {t('configuration.form.currencyLabel')}
+                  </Form.Label>
                   <Form.Select
                     value={config.currency}
                     onChange={(e) =>
@@ -275,10 +307,12 @@ const RazorpayConfiguration: React.FC = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="description">
-                  <Form.Label>Description</Form.Label>
+                  <Form.Label>
+                    {t('configuration.form.descriptionLabel')}
+                  </Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder="Payment description"
+                    placeholder={t('configuration.form.descriptionPlaceholder')}
                     value={config.description}
                     onChange={(e) =>
                       handleInputChange('description', e.target.value)
@@ -290,14 +324,14 @@ const RazorpayConfiguration: React.FC = () => {
                   <Form.Check
                     type="switch"
                     id="testMode"
-                    label="Test Mode"
+                    label={t('configuration.form.testModeLabel')}
                     checked={config.testMode}
                     onChange={(e) =>
                       handleInputChange('testMode', e.target.checked)
                     }
                   />
                   <Form.Text className="text-muted">
-                    Enable test mode for development and testing
+                    {t('configuration.form.testModeHelp')}
                   </Form.Text>
                 </Form.Group>
 
@@ -305,14 +339,14 @@ const RazorpayConfiguration: React.FC = () => {
                   <Form.Check
                     type="switch"
                     id="isEnabled"
-                    label="Enable Razorpay"
+                    label={t('configuration.form.enabledLabel')}
                     checked={config.isEnabled}
                     onChange={(e) =>
                       handleInputChange('isEnabled', e.target.checked)
                     }
                   />
                   <Form.Text className="text-muted">
-                    Enable Razorpay payment processing
+                    {t('configuration.form.enabledHelp')}
                   </Form.Text>
                 </Form.Group>
               </Col>
@@ -326,18 +360,21 @@ const RazorpayConfiguration: React.FC = () => {
                 onClick={handleTestSetup}
                 disabled={isLoading || !isConfigComplete()}
               >
-                {isLoading ? 'Testing...' : 'Test with Dummy Payment'}
+                {isLoading
+                  ? t('configuration.actions.testing')
+                  : t('configuration.actions.test')}
               </Button>
 
               <Button type="submit" variant="primary" disabled={isLoading}>
-                {isLoading ? 'Saving...' : 'Save Configuration'}
+                {isLoading
+                  ? t('configuration.form.saving')
+                  : t('configuration.form.saveButton')}
               </Button>
             </div>
 
             {!isConfigComplete() && (
               <Alert variant="info" className="mt-3">
-                <strong>Complete the required fields</strong> to enable testing
-                and save your configuration.
+                <strong>{t('configuration.help.completeFields')}</strong>
               </Alert>
             )}
           </Form>
@@ -347,31 +384,31 @@ const RazorpayConfiguration: React.FC = () => {
       {/* Help Section */}
       <Card className="mt-4">
         <Card.Header>
-          <Card.Title>📚 Help & Resources</Card.Title>
+          <Card.Title>{t('configuration.help.title')}</Card.Title>
         </Card.Header>
         <Card.Body>
           <Row>
             <Col md={6}>
-              <h6>Getting Started</h6>
+              <h6>{t('configuration.help.gettingStarted')}</h6>
               <ul className="list-unstyled">
-                <li>• Get your API keys from Razorpay Dashboard</li>
+                <li>{t('configuration.help.step1')}</li>
                 <li>
-                  • Configure webhook URL:{' '}
+                  {t('configuration.help.step2')}{' '}
                   <code>/api/plugins/razorpay/webhook/</code>
                 </li>
-                <li>• Copy webhook secret from Razorpay Dashboard</li>
-                <li>• Test your setup with dummy payment</li>
+                <li>{t('configuration.help.step3')}</li>
+                <li>{t('configuration.help.step4')}</li>
               </ul>
             </Col>
             <Col md={6}>
-              <h6>Useful Links</h6>
+              <h6>{t('configuration.help.usefulLinks')}</h6>
               <p>
                 <a
                   href="https://razorpay.com/docs"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Razorpay Documentation
+                  {t('configuration.help.docsLink')}
                 </a>{' '}
                 •
                 <a
@@ -379,7 +416,7 @@ const RazorpayConfiguration: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Razorpay Dashboard
+                  {t('configuration.help.dashboardLink')}
                 </a>
               </p>
             </Col>

@@ -50,27 +50,66 @@
   "configuration": {
     "title": "Razorpay Configuration",
     "subtitle": "Configure your Razorpay payment gateway settings",
+    "sections": {
+      "credentials": "🔑 API Credentials",
+      "settings": "⚙️ Settings"
+    },
     "form": {
       "keyIdLabel": "Key ID",
       "keyIdPlaceholder": "Enter Razorpay Key ID",
+      "keyIdHelp": "Your Razorpay Key ID (starts with rzp_test_ or rzp_live_)",
       "keySecretLabel": "Key Secret",
-      "keySecretPlaceholder": "Enter Razorpay Key Secret",
+      "keySecretPlaceholder": "Enter your key secret",
+      "keySecretHelp": "Your Razorpay Key Secret (keep this secure)",
       "webhookSecretLabel": "Webhook Secret",
-      "webhookSecretPlaceholder": "Enter Webhook Secret",
+      "webhookSecretPlaceholder": "Enter your webhook secret",
+      "webhookSecretHelp": "Webhook secret for signature verification",
       "enabledLabel": "Enable Razorpay",
+      "enabledHelp": "Enable Razorpay payment processing",
       "testModeLabel": "Test Mode",
+      "testModeHelp": "Enable test mode for development and testing",
       "currencyLabel": "Default Currency",
       "descriptionLabel": "Default Description",
       "descriptionPlaceholder": "Enter default payment description",
       "saveButton": "Save Configuration",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "yes": "Enabled",
+      "no": "Disabled",
+      "testMode": "Test Mode",
+      "liveMode": "Live Mode"
+    },
+    "actions": {
+      "test": "Test with Dummy Payment",
+      "testing": "Testing...",
+      "showSecret": "Show secret",
+      "hideSecret": "Hide secret"
+    },
+    "help": {
+      "title": "📚 Help & Resources",
+      "gettingStarted": "Getting Started",
+      "step1": "• Get your API keys from Razorpay Dashboard",
+      "step2": "• Configure webhook URL:",
+      "step3": "• Copy webhook secret from Razorpay Dashboard",
+      "step4": "• Test your setup with dummy payment",
+      "usefulLinks": "Useful Links",
+      "docsLink": "Razorpay Documentation",
+      "dashboardLink": "Razorpay Dashboard",
+      "completeFields": "Complete the required fields"
+    },
+    "status": {
+      "testing": "Testing Razorpay setup with dummy payment..."
     },
     "success": {
-      "saved": "Configuration saved successfully"
+      "saved": "Razorpay configuration saved successfully!",
+      "testSetup": "Setup test successful! Razorpay configuration is working correctly."
     },
     "error": {
       "loadFailed": "Failed to load configuration",
-      "saveFailed": "Failed to save configuration"
+      "saveFailed": "Failed to save configuration",
+      "missingFields": "Please enter Key ID, Key Secret, and Webhook Secret before testing setup",
+      "invalidKeyId": "Invalid Key ID format. Razorpay Key ID should start with \"rzp_\"",
+      "testSetupFailed": "Setup test failed",
+      "testSetupGeneric": "Setup test failed. Please check your configuration."
     }
   },
   "transactions": {

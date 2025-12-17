@@ -33,6 +33,29 @@ vi.mock('react-toastify', () => ({
   },
 }));
 
+// Mock react-i18next
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'configuration.title': 'Razorpay Configuration',
+        'configuration.form.keyIdPlaceholder': 'Enter Razorpay Key ID',
+        'configuration.form.keySecretPlaceholder': 'Enter your key secret',
+        'configuration.form.yes': 'Enabled',
+        'configuration.actions.showSecret': 'Show secret',
+        'configuration.actions.hideSecret': 'Hide secret',
+        'configuration.form.saveButton': 'Save Configuration',
+        'configuration.success.saved':
+          'Razorpay configuration saved successfully!',
+        'configuration.actions.test': 'Test with Dummy Payment',
+        'configuration.success.testSetup':
+          'Setup test successful! Razorpay configuration is working correctly.',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 // Standard Mocks
 const standardMocks: MockedResponse[] = [
   createRazorpayConfigQueryMock(mockConfig),
@@ -59,7 +82,7 @@ describe('RazorpayConfiguration', () => {
         ).toBeInTheDocument();
       });
 
-      expect(screen.getByPlaceholderText('rzp_test_...')).toHaveValue(
+      expect(screen.getByPlaceholderText('Enter Razorpay Key ID')).toHaveValue(
         mockConfig.keyId,
       );
       expect(screen.getByPlaceholderText('Enter your key secret')).toHaveValue(
@@ -80,9 +103,10 @@ describe('RazorpayConfiguration', () => {
         ).toHaveAttribute('type', 'password');
       });
 
-      const toggleBtn = screen.getByRole('button', {
-        name: /Show key secret/i,
+      const toggleBtns = screen.getAllByRole('button', {
+        name: /Show secret/i,
       });
+      const toggleBtn = toggleBtns[0];
       await user.click(toggleBtn);
 
       await waitFor(() => {
@@ -91,7 +115,11 @@ describe('RazorpayConfiguration', () => {
         ).toHaveAttribute('type', 'text');
       });
 
-      await user.click(toggleBtn);
+      const hideBtns = screen.getAllByRole('button', {
+        name: /Hide secret/i,
+      });
+      const hideBtn = hideBtns[0];
+      await user.click(hideBtn);
       await waitFor(() => {
         expect(
           screen.getByPlaceholderText('Enter your key secret'),
