@@ -4,10 +4,34 @@
 
 # Interface: IPluginContext\<TDb, TConfig\>
 
-Defined in: [plugins/types.ts:25](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L25)
+Defined in: [plugins/types.ts:63](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L63)
 
 Plugin context provided to all lifecycle hooks
 Contains database, logger, and other shared resources
+
+## Property Availability
+
+| Property | Availability | Notes |
+|----------|--------------|-------|
+| `db` | Optional - provided when db access is needed | Guard for undefined; throw PluginError if required but missing |
+| `logger` | Guaranteed in all hooks | Always present; use `context.logger?.info()` for safety |
+| `config` | Guaranteed after onInstall | May be undefined in onInstall; always present in other hooks |
+
+## Recommended Fallbacks
+- If `db` is undefined when required, throw a descriptive error
+- If `logger` is somehow missing, fall back to console (not recommended in production)
+- If `config` is missing, use sensible defaults or throw during onActivate
+
+## Example
+
+```typescript
+onActivate: async (context: IPluginContext<MyDb, MyConfig>) => {
+  if (!context.db) {
+    throw new Error('Database connection required for Razorpay plugin');
+  }
+  context.logger?.info('Razorpay plugin activated');
+}
+```
 
 ## Type Parameters
 
@@ -15,13 +39,13 @@ Contains database, logger, and other shared resources
 
 `TDb` = `unknown`
 
-Type for the database connection
+Type for the database connection (e.g., DrizzleORM instance)
 
 ### TConfig
 
 `TConfig` = [`PluginConfig`](../type-aliases/PluginConfig.md)
 
-Type for plugin configuration
+Type for plugin configuration (defaults to PluginConfig)
 
 ## Properties
 
@@ -29,9 +53,13 @@ Type for plugin configuration
 
 > `optional` **config**: `TConfig`
 
-Defined in: [plugins/types.ts:36](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L36)
+Defined in: [plugins/types.ts:85](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L85)
 
 Plugin configuration from manifest
+
+#### Remarks
+
+Guaranteed after onInstall; may be undefined during initial onInstall call
 
 ***
 
@@ -39,9 +67,27 @@ Plugin configuration from manifest
 
 > `optional` **db**: `TDb`
 
-Defined in: [plugins/types.ts:27](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L27)
+Defined in: [plugins/types.ts:68](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L68)
 
 Database connection for plugin data access
+
+#### Remarks
+
+May be undefined if the host system doesn't provide db access for this hook
+
+***
+
+### isActive?
+
+> `optional` **isActive**: `boolean`
+
+Defined in: [plugins/types.ts:91](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L91)
+
+Current plugin activation state (for idempotency checks)
+
+#### Remarks
+
+Plugins should check this before performing activation-only tasks
 
 ***
 
@@ -49,7 +95,7 @@ Database connection for plugin data access
 
 > `optional` **logger**: `object`
 
-Defined in: [plugins/types.ts:29](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L29)
+Defined in: [plugins/types.ts:74](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L74)
 
 Logger instance for plugin logging (use instead of console.*)
 
@@ -61,7 +107,7 @@ Logger instance for plugin logging (use instead of console.*)
 
 ###### args
 
-...[`LogArg`](../type-aliases/LogArg.md)[]
+...[`JsonValue`](../type-aliases/JsonValue.md)[]
 
 ##### Returns
 
@@ -75,7 +121,7 @@ Logger instance for plugin logging (use instead of console.*)
 
 ###### args
 
-...[`LogArg`](../type-aliases/LogArg.md)[]
+...[`JsonValue`](../type-aliases/JsonValue.md)[]
 
 ##### Returns
 
@@ -89,7 +135,7 @@ Logger instance for plugin logging (use instead of console.*)
 
 ###### args
 
-...[`LogArg`](../type-aliases/LogArg.md)[]
+...[`JsonValue`](../type-aliases/JsonValue.md)[]
 
 ##### Returns
 
@@ -103,8 +149,12 @@ Logger instance for plugin logging (use instead of console.*)
 
 ###### args
 
-...[`LogArg`](../type-aliases/LogArg.md)[]
+...[`JsonValue`](../type-aliases/JsonValue.md)[]
 
 ##### Returns
 
 `void`
+
+#### Remarks
+
+Guaranteed to be present by the plugin host in all lifecycle hooks
