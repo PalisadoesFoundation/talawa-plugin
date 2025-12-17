@@ -158,17 +158,16 @@ const UserTransactions: React.FC = () => {
     fetchPolicy: 'network-only',
   });
 
-  const {
-    data: statsData,
-    loading: statsLoading,
-    error: statsError,
-  } = useQuery(GET_USER_TRANSACTION_STATS, {
-    variables: {
-      userId: userId || '',
+  const { loading: statsLoading, error: statsError } = useQuery(
+    GET_USER_TRANSACTION_STATS,
+    {
+      variables: {
+        userId: userId || '',
+      },
+      skip: !userId,
+      fetchPolicy: 'network-only',
     },
-    skip: !userId,
-    fetchPolicy: 'network-only',
-  });
+  );
 
   const transactions = transactionsData?.razorpay_getUserTransactions || [];
 
