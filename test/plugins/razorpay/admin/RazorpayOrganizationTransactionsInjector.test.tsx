@@ -13,49 +13,11 @@ import {
   renderWithProviders,
   createMockTransaction,
   createMockTransactionStats,
+  GET_ORG_TRANSACTIONS,
+  GET_ORG_TRANSACTION_STATS,
 } from './testUtils';
-import { gql } from '@apollo/client';
 
-const GET_ORG_TRANSACTIONS = gql`
-  query GetOrganizationTransactions($orgId: String!, $limit: Int) {
-    razorpay_getOrganizationTransactions(orgId: $orgId, limit: $limit) {
-      id
-      paymentId
-      amount
-      currency
-      status
-      donorName
-      donorEmail
-      method
-      bank
-      wallet
-      vpa
-      email
-      contact
-      fee
-      tax
-      errorCode
-      errorDescription
-      refundStatus
-      capturedAt
-      createdAt
-      updatedAt
-    }
-  }
-`;
 
-const GET_ORG_TRANSACTION_STATS = gql`
-  query GetOrganizationTransactionStats($orgId: String!) {
-    razorpay_getOrganizationTransactionStats(orgId: $orgId) {
-      totalTransactions
-      totalAmount
-      currency
-      successCount
-      failedCount
-      pendingCount
-    }
-  }
-`;
 
 const mockTransactions = [
   createMockTransaction({ id: '1', paymentId: 'pay_org1' }),
@@ -84,6 +46,46 @@ const standardMocks: MockedResponse[] = [
 describe('RazorpayOrganizationTransactionsInjector', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe('Loading State', () => {
+    it('should show loading state', async () => {
+      renderWithProviders(<RazorpayOrganizationTransactionsInjector />, {
+        mocks: standardMocks,
+        initialEntries: ['/org/test-org-id'],
+        path: '/org/:orgId',
+      });
+
+      expect(
+        screen.getByText(/Loading Razorpay organization transactions/i),
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should handle errors gracefully', async () => {
+      const errorMocks = [
+        {
+          request: {
+            query: GET_ORG_TRANSACTIONS,
+            variables: { orgId: 'test-org-id', limit: 10 },
+          },
+          error: new Error('Failed to fetch'),
+        },
+      ];
+
+      renderWithProviders(<RazorpayOrganizationTransactionsInjector />, {
+        mocks: errorMocks,
+        initialEntries: ['/org/test-org-id'],
+        path: '/org/:orgId',
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Error loading transactions/i),
+        ).toBeInTheDocument();
+      });
+    });
   });
 
   it('should render transactions and stats', async () => {

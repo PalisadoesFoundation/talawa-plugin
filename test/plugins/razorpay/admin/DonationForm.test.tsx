@@ -5,22 +5,16 @@
  * Unit Tests for DonationForm Component
  */
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { MockedResponse } from '@apollo/client/testing';
 import DonationForm from '../../../../plugins/Razorpay/admin/pages/DonationForm';
 import {
   renderWithProviders,
   createMockUser,
-  createMockOrganization,
   createMockRazorpayConfig,
   createMockPaymentOrder,
   createUserQueryMock,
-  createOrganizationQueryMock,
-  createPaymentOrderMutationMock,
-  createVerifyPaymentMutationMock,
-  GET_CURRENT_USER,
 } from './testUtils';
 import { gql } from '@apollo/client';
 
@@ -67,24 +61,28 @@ const CREATE_PAYMENT_ORDER = gql`
   }
 `;
 
-const VERIFY_PAYMENT = gql`
-  mutation VerifyPayment($input: RazorpayVerificationInput!) {
-    razorpay_verifyPayment(input: $input) {
-      success
-      message
-      transaction {
-        paymentId
-        status
-        amount
-        currency
-      }
-    }
-  }
-`;
+
+
+// Minimal interfaces to replace 'any'
+interface Organization {
+  id: string;
+  name: string;
+  description: string;
+  avatarURL: string;
+  [key: string]: unknown;
+}
+
+interface PaymentOrder {
+  id: string;
+  razorpayOrderId: string;
+  amount: number;
+  currency: string;
+  [key: string]: unknown;
+}
 
 const createLocalOrganizationQueryMock = (
   orgId: string,
-  organization: any,
+  organization: Organization,
 ) => ({
   request: {
     query: GET_ORGANIZATION_INFO,
@@ -101,7 +99,7 @@ const createLocalOrganizationQueryMock = (
 });
 
 const mockUser = createMockUser();
-const mockOrg = {
+const mockOrg: Organization = {
   id: 'org-123',
   name: 'Test Organization',
   description: 'A test organization for donations',
@@ -125,7 +123,7 @@ const configMock = {
   },
 };
 
-const createLocalPaymentOrderMutationMock = (order: any) => ({
+const createLocalPaymentOrderMutationMock = (order: PaymentOrder) => ({
   request: {
     query: CREATE_PAYMENT_ORDER,
     variables: {
@@ -169,6 +167,10 @@ const renderDonationForm = (customMocks = standardMocks) => {
 describe('DonationForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   describe('Loading State', () => {
@@ -218,9 +220,7 @@ describe('DonationForm', () => {
     });
 
     it('should enable submit button when form is valid', async () => {
-      renderWithProviders(<DonationForm />, {
-        mocks: standardMocks,
-      });
+      renderDonationForm(standardMocks); // Use helper with correct context
 
       await waitFor(() => {
         expect(screen.getByText('Make a Donation')).toBeInTheDocument();
@@ -297,7 +297,7 @@ describe('DonationForm', () => {
 
       const disabledMocks = [
         createUserQueryMock(mockUser),
-        createOrganizationQueryMock('org-123', mockOrg),
+        createLocalOrganizationQueryMock('org-123', mockOrg),
         disabledConfigMock,
       ];
 

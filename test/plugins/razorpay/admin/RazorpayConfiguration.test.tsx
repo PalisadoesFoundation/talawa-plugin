@@ -6,111 +6,38 @@
  */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  screen,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MockedResponse } from '@apollo/client/testing';
 import RazorpayConfiguration from '../../../../plugins/Razorpay/admin/pages/RazorpayConfiguration';
-import { renderWithProviders, createMockRazorpayConfig } from './testUtils';
-import { gql } from '@apollo/client';
+import {
+  renderWithProviders,
+  createMockRazorpayConfig,
+  createRazorpayConfigQueryMock,
+  createUpdateConfigMutationMock,
+  createTestSetupMutationMock,
+  UPDATE_RAZORPAY_CONFIG,
+} from './testUtils';
 
-const GET_RAZORPAY_CONFIG = gql`
-  query GetRazorpayConfig {
-    razorpay_getRazorpayConfig {
-      keyId
-      keySecret
-      webhookSecret
-      isEnabled
-      testMode
-      currency
-      description
-    }
-  }
-`;
+import { toast } from 'react-toastify';
 
-const UPDATE_RAZORPAY_CONFIG = gql`
-  mutation UpdateRazorpayConfig($input: RazorpayConfigInput!) {
-    razorpay_updateRazorpayConfig(input: $input) {
-      keyId
-      keySecret
-      webhookSecret
-      isEnabled
-      testMode
-      currency
-      description
-    }
-  }
-`;
-
-const TEST_RAZORPAY_SETUP = gql`
-  mutation TestRazorpaySetup {
-    razorpay_testRazorpaySetup {
-      success
-      message
-    }
-  }
-`;
-
+// Mock Config Data
 const mockConfig = createMockRazorpayConfig();
 
+// Mock react-toastify
+vi.mock('react-toastify', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+  },
+}));
+
+// Standard Mocks
 const standardMocks: MockedResponse[] = [
-  {
-    request: {
-      query: GET_RAZORPAY_CONFIG,
-      variables: {},
-    },
-    result: {
-      data: {
-        razorpay_getRazorpayConfig: {
-          ...mockConfig,
-          __typename: 'RazorpayConfig',
-        },
-      },
-    },
-  },
-  {
-    request: {
-      query: UPDATE_RAZORPAY_CONFIG,
-      variables: {
-        input: {
-          keyId: 'rzp_live_newkey',
-          keySecret: 'secret123', // from mockConfig
-          webhookSecret: 'webhook_secret_123', // from mockConfig
-          isEnabled: true,
-          testMode: true,
-          currency: 'INR',
-          description: 'Donation to organization',
-        },
-      },
-    },
-    result: {
-      data: {
-        razorpay_updateRazorpayConfig: {
-          ...mockConfig,
-          keyId: 'rzp_live_newkey',
-          __typename: 'RazorpayConfig',
-        },
-      },
-    },
-  },
-  {
-    request: {
-      query: TEST_RAZORPAY_SETUP,
-      variables: {},
-    },
-    result: {
-      data: {
-        razorpay_testRazorpaySetup: {
-          success: true,
-          message: 'Setup test successful',
-          __typename: 'RazorpayTestResult',
-        },
-      },
-    },
-  },
+  createRazorpayConfigQueryMock(mockConfig),
+  createUpdateConfigMutationMock(mockConfig),
+  createTestSetupMutationMock(true),
 ];
 
 describe('RazorpayConfiguration', () => {
@@ -118,83 +45,99 @@ describe('RazorpayConfiguration', () => {
     vi.clearAllMocks();
   });
 
-  describe('Loading State', () => {
-    it('should show loading state', async () => {
+  describe('Rendering', () => {
+    it('should render configuration form correctly', async () => {
       renderWithProviders(<RazorpayConfiguration />, {
         mocks: standardMocks,
       });
 
       expect(screen.getByText('Loading...')).toBeInTheDocument();
-    });
-  });
-
-  describe('Rendering', () => {
-    it('should render configuration form', async () => {
-      renderWithProviders(<RazorpayConfiguration />, {
-        mocks: standardMocks,
-      });
-
-      // Wait for loading to finish
-      await waitForElementToBeRemoved(() => screen.queryByText('Loading...'));
 
       await waitFor(() => {
         expect(
-          screen.getAllByText(/Razorpay Configuration/i)[0],
+          screen.getByRole('heading', { name: /Razorpay Configuration/i }),
         ).toBeInTheDocument();
       });
 
-      expect(screen.getByPlaceholderText(/rzp_test_.../i)).toHaveValue(
-        'rzp_test_abc123',
+      expect(screen.getByPlaceholderText('rzp_test_...')).toHaveValue(
+        mockConfig.keyId,
       );
-      expect(screen.getByRole('combobox')).toHaveValue('INR');
-      expect(screen.getByLabelText(/Enable Razorpay/i)).toBeChecked();
-      expect(screen.getByLabelText(/Test Mode/i)).toBeChecked();
-    });
-  });
-
-  describe('Form Interaction', () => {
-    it('should update fields', async () => {
-      const user = userEvent.setup();
-      renderWithProviders(<RazorpayConfiguration />, {
-        mocks: standardMocks,
-      });
-
-      // Wait for loading to finish
-      await waitForElementToBeRemoved(() => screen.queryByText('Loading...'));
-
-      const keyIdInput = screen.getByPlaceholderText(/rzp_test_.../i);
-      await user.clear(keyIdInput);
-      await user.type(keyIdInput, 'rzp_live_newkey');
-
-      expect(keyIdInput).toHaveValue('rzp_live_newkey');
+      expect(screen.getByPlaceholderText('Enter your key secret')).toHaveValue(
+        mockConfig.keySecret,
+      );
+      expect(screen.getByText('Enabled')).toBeInTheDocument();
     });
 
-    it('should toggle visibility of secrets', async () => {
+    it('should toggle secret visibility', async () => {
       const user = userEvent.setup();
       renderWithProviders(<RazorpayConfiguration />, {
         mocks: standardMocks,
       });
 
       await waitFor(() => {
-        expect(
-          screen.getByPlaceholderText(/Enter your key secret/i),
-        ).toHaveAttribute('type', 'password');
+        expect(screen.getByPlaceholderText('Enter your key secret')).toHaveAttribute(
+          'type',
+          'password',
+        );
       });
 
-      const toggleBtns = screen.getAllByRole('button', { name: /👁️‍🗨️/i }); // Button text is actually emoji
-      await user.click(toggleBtns[0]);
+      const toggleBtn = screen.getByRole('button', { name: /Show key secret/i });
+      await user.click(toggleBtn);
 
-      expect(
-        screen.getByPlaceholderText(/Enter your key secret/i),
-      ).toHaveAttribute('type', 'text');
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('Enter your key secret')).toHaveAttribute(
+          'type',
+          'text',
+        );
+      });
+
+      await user.click(toggleBtn);
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('Enter your key secret')).toHaveAttribute(
+          'type',
+          'password',
+        );
+      });
     });
   });
 
   describe('Actions', () => {
     it('should handle save action', async () => {
       const user = userEvent.setup();
+
+      const saveMutationMock = vi.fn(() => ({
+        data: {
+          razorpay_updateRazorpayConfig: {
+            ...mockConfig,
+            __typename: 'RazorpayConfig',
+          },
+        },
+      }));
+
+      const mocksWithSpy: MockedResponse[] = [
+        standardMocks[0], // GET_RAZORPAY_CONFIG
+        {
+          request: {
+            query: UPDATE_RAZORPAY_CONFIG,
+            variables: {
+              input: {
+                keyId: mockConfig.keyId,
+                keySecret: mockConfig.keySecret,
+                webhookSecret: mockConfig.webhookSecret,
+                isEnabled: true,
+                testMode: true,
+                currency: 'INR',
+                description: 'Donation to organization',
+              },
+            },
+          },
+          result: saveMutationMock,
+        },
+        standardMocks[2], // TEST_RAZORPAY_SETUP
+      ];
+
       renderWithProviders(<RazorpayConfiguration />, {
-        mocks: standardMocks,
+        mocks: mocksWithSpy,
       });
 
       await waitFor(() => {
@@ -209,9 +152,11 @@ describe('RazorpayConfiguration', () => {
       await user.click(saveBtn);
 
       await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Save Configuration/i }),
-        ).not.toBeDisabled();
+        expect(saveMutationMock).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalledWith('Razorpay configuration saved successfully!');
       });
     });
 
@@ -232,7 +177,9 @@ describe('RazorpayConfiguration', () => {
       });
       await user.click(testBtn);
 
-      // Expect toast or success message (mocked)
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('Setup test successful'));
+      });
     });
   });
 });

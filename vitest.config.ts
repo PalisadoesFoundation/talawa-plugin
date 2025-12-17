@@ -33,10 +33,7 @@ export default defineConfig({
         find: 'components/Loader/Loader',
         replacement: path.resolve(__dirname, './__mocks__/Loader.tsx'),
       },
-      {
-        find: '/home/anant/Desktop/gsoc/talawa-plugin/components/Loader/Loader',
-        replacement: path.resolve(__dirname, './__mocks__/Loader.tsx'),
-      },
+
       {
         find: 'components',
         replacement: path.resolve(__dirname, './__mocks__/components_mock'),
@@ -91,6 +88,10 @@ export default defineConfig({
         'scripts/githooks/**',
         '**/*.config.{js,ts}',
         '**/index.{js,ts}',
+        'test/**',
+        '**/__mocks__/**',
+        '**/testUtils.{ts,tsx}',
+        '**/setupTests.ts',
       ],
       thresholds: {
         lines: 60,

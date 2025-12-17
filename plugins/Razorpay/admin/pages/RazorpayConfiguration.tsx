@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useMutation, useQuery, gql } from '@apollo/client';
+import { gql } from '@apollo/client';
+// @ts-expect-error - Apollo Client v4 types issue
+import { useQuery, useMutation } from '@apollo/client';
 import { toast } from 'react-toastify';
 import { Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import Loader from '../../../../components/Loader/Loader';
@@ -224,7 +226,7 @@ const RazorpayConfiguration: React.FC = () => {
               <Col md={6}>
                 <h5 className="mb-3">🔑 API Credentials</h5>
 
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="keyId">
                   <Form.Label>Key ID *</Form.Label>
                   <Form.Control
                     type="text"
@@ -238,7 +240,7 @@ const RazorpayConfiguration: React.FC = () => {
                   </Form.Text>
                 </Form.Group>
 
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="keySecret">
                   <Form.Label>Key Secret *</Form.Label>
                   <div className="input-group">
                     <Form.Control
@@ -253,6 +255,7 @@ const RazorpayConfiguration: React.FC = () => {
                     <Button
                       variant="outline-secondary"
                       onClick={() => setShowSecrets(!showSecrets)}
+                      aria-label={showSecrets ? "Hide key secret" : "Show key secret"}
                     >
                       {showSecrets ? '👁️' : '👁️‍🗨️'}
                     </Button>
@@ -262,7 +265,7 @@ const RazorpayConfiguration: React.FC = () => {
                   </Form.Text>
                 </Form.Group>
 
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="webhookSecret">
                   <Form.Label>Webhook Secret *</Form.Label>
                   <div className="input-group">
                     <Form.Control
@@ -277,6 +280,7 @@ const RazorpayConfiguration: React.FC = () => {
                     <Button
                       variant="outline-secondary"
                       onClick={() => setShowSecrets(!showSecrets)}
+                      aria-label={showSecrets ? "Hide webhook secret" : "Show webhook secret"}
                     >
                       {showSecrets ? '👁️' : '👁️‍🗨️'}
                     </Button>
@@ -291,7 +295,7 @@ const RazorpayConfiguration: React.FC = () => {
               <Col md={6}>
                 <h5 className="mb-3">⚙️ Settings</h5>
 
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="currency">
                   <Form.Label>Currency</Form.Label>
                   <Form.Select
                     value={config.currency}
@@ -305,7 +309,7 @@ const RazorpayConfiguration: React.FC = () => {
                   </Form.Select>
                 </Form.Group>
 
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="description">
                   <Form.Label>Description</Form.Label>
                   <Form.Control
                     type="text"

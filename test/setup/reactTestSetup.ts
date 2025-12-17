@@ -35,7 +35,7 @@ if (typeof window !== 'undefined') {
   });
 
   // Mock Loader component
-  vi.mock('../../../components/Loader/Loader', () => ({
+  vi.mock('components/Loader/Loader', () => ({
     default: () => 'Loading...',
   }));
 
@@ -67,7 +67,7 @@ if (typeof window !== 'undefined') {
   });
 
   // Razorpay global mock
-  // @ts-ignore
+
   window.Razorpay = vi.fn().mockImplementation(() => ({
     open: vi.fn(),
     on: vi.fn(),
@@ -75,7 +75,6 @@ if (typeof window !== 'undefined') {
 
   // Prevent actual script loading
   const originalCreateElement = document.createElement.bind(document);
-  // @ts-ignore
   document.createElement = (
     tagName: string,
     options?: ElementCreationOptions,

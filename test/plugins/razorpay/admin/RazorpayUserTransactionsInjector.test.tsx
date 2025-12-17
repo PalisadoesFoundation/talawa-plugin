@@ -12,18 +12,10 @@ import RazorpayUserTransactionsInjector from '../../../../plugins/Razorpay/admin
 import {
   renderWithProviders,
   createMockTransaction,
-  GET_USER_TRANSACTIONS,
-  createErrorMock,
 } from './testUtils';
 import { gql } from '@apollo/client';
 
-// Local query definition to match component exactly if export doesn't match
-// The component likely uses a query with orgId as well, which might be slightly different
-// But let's assume it matches GET_USER_TRANSACTIONS for now, or define a local one if needed.
-// Actually, the Injector usually filters by OrgId. Let's check the testUtils export.
-// It seems GET_USER_TRANSACTIONS in testUtils supports status/dates but maybe not orgId if it's the global one.
-// Let's check component source code again if needed, or rely on test utils if they match.
-// For now I'll use a local definition that matches what I saw in the component earlier (it had orgId).
+// Define local GET_USER_TRANSACTIONS with orgId to match component query
 
 const GET_USER_TXN_INJECTOR = gql`
   query GetUserTransactions($userId: String!, $orgId: String!, $limit: Int) {
@@ -154,6 +146,7 @@ describe('RazorpayUserTransactionsInjector', () => {
 
   describe('Error Handling', () => {
     it('should handle errors gracefully', async () => {
+      // Manually constructing mock to include variables as createErrorMock helper doesn't support them yet
       const errorMocks = [
         {
           request: {

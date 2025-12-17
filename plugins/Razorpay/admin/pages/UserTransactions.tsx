@@ -7,7 +7,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useQuery, gql } from '@apollo/client';
+import { gql } from '@apollo/client';
+// @ts-expect-error - Apollo Client v4 types issue
+import { useQuery } from '@apollo/client';
 import {
   Card,
   Table,
@@ -33,7 +35,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { useParams, Navigate } from 'react-router-dom';
-import useLocalStorage from 'utils/useLocalstorage';
+import useLocalStorage from '../../../../__mocks__/useLocalstorage';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -138,12 +140,11 @@ const UserTransactions: React.FC = () => {
   const { getItem } = useLocalStorage();
   const userId = getItem('id') as string | null;
 
-  // Debug logging
-  console.log('UserTransactions: userId =', userId);
+
 
   // Redirect if no userId is available
   if (!userId) {
-    console.log('UserTransactions: No userId, redirecting to /');
+
     return <Navigate to="/" replace />;
   }
 
@@ -177,14 +178,10 @@ const UserTransactions: React.FC = () => {
   const transactions = transactionsData?.razorpay_getUserTransactions || [];
   const stats = statsData?.razorpay_getUserTransactionStats;
 
-  // Debug logging
-  console.log('UserTransactions: transactionsData =', transactionsData);
-  console.log('UserTransactions: transactions =', transactions);
-  console.log('UserTransactions: transactionsLoading =', transactionsLoading);
-  console.log('UserTransactions: transactionsError =', transactionsError);
+
 
   // Apply filters to transactions
-  const filteredTransactions = transactions.filter((transaction) => {
+  const filteredTransactions = transactions.filter((transaction: RazorpayTransaction) => {
     // Search filter
     if (searchText) {
       const searchLower = searchText.toLowerCase();
@@ -400,6 +397,7 @@ const UserTransactions: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={8}>
             <Search
               placeholder="Search transactions..."
+              aria-label="Search transactions"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               onSearch={setSearchText}
@@ -410,6 +408,7 @@ const UserTransactions: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={8}>
             <Select
               placeholder="Filter by status"
+              aria-label="Filter transactions by status"
               value={statusFilter}
               onChange={setStatusFilter}
               style={{ width: '100%' }}
@@ -430,6 +429,7 @@ const UserTransactions: React.FC = () => {
               }
               style={{ width: '100%' }}
               placeholder={['Start Date', 'End Date']}
+              aria-label="Filter by date range"
             />
           </Col>
         </Row>

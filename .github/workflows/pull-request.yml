@@ -1,4 +1,4 @@
-##############################################################################
+
 ##############################################################################
 #
 # NOTE!
@@ -35,6 +35,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         with:
+          version: 10
           run_install: false
 
       - name: Install Node.js
@@ -44,7 +45,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Count number of lines
         run: |
@@ -57,15 +58,32 @@ jobs:
           # Get the base branch ref
           BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
 
+      - name: Get changed TypeScript files
+        id: changed-files
+        run: |
+          # Get the base branch ref
+          BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+
           # Get all changed files
           ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | tr '\n' ' ')
           echo "all_changed_files=${ALL_CHANGED_FILES}" >> $GITHUB_OUTPUT
+
+          # Filter for TS/TSX files
+          TS_CHANGED_FILES=$(echo "$ALL_CHANGED_FILES" | tr ' ' '\n' | grep -E '\.(ts|tsx)$' | tr '\n' ' ')
+          echo "ts_changed_files=${TS_CHANGED_FILES}" >> $GITHUB_OUTPUT
 
           # Count all changed files
           ALL_CHANGED_FILES_COUNT=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | wc -l | tr -d ' ')
           echo "all_changed_files_count=$ALL_CHANGED_FILES_COUNT" >> $GITHUB_OUTPUT
 
-          # Check if any files changed
+          # Check if any TS files changed
+          if [ -n "$TS_CHANGED_FILES" ]; then
+            echo "any_ts_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "any_ts_changed=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check if any files changed (legacy support)
           if [ "$ALL_CHANGED_FILES_COUNT" -gt 0 ]; then
             echo "any_changed=true" >> $GITHUB_OUTPUT
           else
@@ -83,15 +101,17 @@ jobs:
         if: failure()
         run: pnpm run format:fix
 
-      # - name: Check for type errors
-      #   if: steps.changed-files.outputs.only_changed != 'true'
-      #   run: pnpm run typecheck
+      - name: Check for type errors
+        if: steps.changed-files.outputs.any_ts_changed == 'true'
+        env:
+          TS_FILES: ${{ steps.changed-files.outputs.ts_changed_files }}
+        run: pnpm exec tsc-files --noEmit $TS_FILES
 
-      # - name: Check for linting errors in modified files
-      #   if: steps.changed-files.outputs.only_changed != 'true'
-      #   env:
-      #     CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-      #   run: npx eslint ${CHANGED_FILES}
+      - name: Check for linting errors in modified files
+        if: steps.changed-files.outputs.any_ts_changed == 'true'
+        env:
+          TS_FILES: ${{ steps.changed-files.outputs.ts_changed_files }}
+        run: npx eslint $TS_FILES
 
       - name: Check for TSDoc comments
         run: pnpm run check-tsdoc # Run the TSDoc check script
@@ -419,7 +439,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Run Knip for files and exports
         run: pnpm knip --include files,exports
       - name: Run Knip for dependencies
@@ -450,6 +470,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         with:
+          version: 10
           run_install: false
 
       - name: Install Node.js
@@ -459,7 +480,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Run tests
         run: pnpm run test:coverage
