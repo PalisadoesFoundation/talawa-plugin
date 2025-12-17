@@ -52,11 +52,6 @@ jobs:
           chmod +x ./.github/workflows/scripts/countline.py
           ./.github/workflows/scripts/countline.py --lines 600
 
-      - name: Get changed TypeScript files
-        id: changed-files
-        run: |
-          # Get the base branch ref
-          BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
 
       - name: Get changed TypeScript files
         id: changed-files
