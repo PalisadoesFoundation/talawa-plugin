@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// @ts-expect-error - Apollo Client v4 types issue
+// @ts-expect-error - Apollo Client v4 DocumentNode generic inference incompatibility with centralized query exports
 import { useQuery, useMutation } from '@apollo/client';
 import { toast } from 'react-toastify';
 import { Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
