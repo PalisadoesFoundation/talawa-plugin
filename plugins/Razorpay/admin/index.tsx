@@ -75,7 +75,7 @@ const RazorpayLifecycle: IPluginLifecycle = {
     }
   },
 
-  onUpdate: async (fromVersion: string, toVersion: string) => {
+  onUpdate: async () => {
     // Perform version-specific updates
     try {
       // This could include:

@@ -5,16 +5,16 @@ import { vi } from 'vitest';
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  observe() { }
+  unobserve() { }
+  disconnect() { }
 };
 
 // Mock GraphQL Builder
 export const mockBuilder = {
   queryType: vi.fn(() => mockBuilder),
   mutationType: vi.fn(() => mockBuilder),
-  objectRef: vi.fn((name: string) => ({
+  objectRef: vi.fn(() => ({
     implement: vi.fn(() => mockBuilder),
   })),
   objectType: vi.fn(() => mockBuilder),
@@ -40,7 +40,7 @@ export class MockTalawaGraphQLError extends Error {
   constructor(
     public error: {
       message?: string;
-      extensions: { code: string; [key: string]: any };
+      extensions: { code: string;[key: string]: any };
     },
   ) {
     super(error.message || 'An error occurred');

@@ -77,47 +77,7 @@ const VERIFY_PAYMENT = gql`
   }
 `;
 
-interface OrganizationInfo {
-  id: string;
-  name: string;
-  description: string;
-  avatarURL: string;
-}
 
-interface PaymentOrder {
-  id: string;
-  razorpayOrderId?: string;
-  organizationId?: string;
-  userId?: string;
-  amount?: number;
-  currency: string;
-  status: string;
-  donorName?: string;
-  donorEmail?: string;
-  donorPhone?: string;
-  description?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface RazorpayConfig {
-  keyId: string;
-  isEnabled: boolean;
-  testMode: boolean;
-  currency: string;
-  description: string;
-}
-
-interface PaymentResult {
-  success: boolean;
-  message: string;
-  transaction?: {
-    paymentId?: string;
-    status: string;
-    amount?: number;
-    currency: string;
-  };
-}
 
 interface RazorpaySuccessResponse {
   razorpay_payment_id: string;
@@ -332,7 +292,7 @@ const DonationForm: React.FC = () => {
               } else {
                 toast.error(
                   verificationData?.razorpay_verifyPayment?.message ||
-                    'Payment verification failed',
+                  'Payment verification failed',
                 );
                 setIsProcessing(false);
               }

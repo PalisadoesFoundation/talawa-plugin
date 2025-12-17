@@ -6,7 +6,7 @@
  * in one place, regardless of which organization the transactions were made to.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { gql } from '@apollo/client';
 // @ts-expect-error - Apollo Client v4 types issue
 import { useQuery } from '@apollo/client';
@@ -30,11 +30,10 @@ import {
   EyeOutlined,
   DownloadOutlined,
   SearchOutlined,
-  FilterOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import { useParams, Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import useLocalStorage from '../../../../__mocks__/useLocalstorage';
 
 const { Title, Text } = Typography;
@@ -150,7 +149,6 @@ const UserTransactions: React.FC = () => {
     data: transactionsData,
     loading: transactionsLoading,
     error: transactionsError,
-    refetch: refetchTransactions,
   } = useQuery(GET_USER_TRANSACTIONS, {
     variables: {
       userId: userId || '',
@@ -173,7 +171,6 @@ const UserTransactions: React.FC = () => {
   });
 
   const transactions = transactionsData?.razorpay_getUserTransactions || [];
-  const stats = statsData?.razorpay_getUserTransactionStats;
 
   // Apply filters to transactions
   const filteredTransactions = transactions.filter(
