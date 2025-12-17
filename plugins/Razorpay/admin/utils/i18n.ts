@@ -26,7 +26,7 @@ i18n
   .use(LanguageDetector)
   .use(HttpApi)
   .init({
-    ns: ['razorpay', 'common'],
+    ns: ['razorpay'],
     defaultNS: 'razorpay',
     fallbackLng: 'en',
     supportedLngs: supportedLanguages,

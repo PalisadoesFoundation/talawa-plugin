@@ -613,7 +613,7 @@ describe('DonationForm', () => {
         ).toBeInTheDocument();
       });
 
-      // Fill form
+      // Fill form with valid data
       const amountInput = screen.getByPlaceholderText('0.00');
       fireEvent.change(amountInput, { target: { value: '100' } });
 
@@ -623,12 +623,19 @@ describe('DonationForm', () => {
         ).toBeInTheDocument();
       });
 
-      // Press Enter on button
-      const button = screen.getByRole('button', { name: /Donate ₹100.00/i });
-      fireEvent.keyDown(button, { key: 'Enter', code: 'Enter' });
+      // Submit form via button click (simulates Enter key native behavior)
+      const form = screen
+        .getByRole('button', { name: /Donate ₹100.00/i })
+        .closest('form');
+      fireEvent.submit(form!);
 
-      // Button should trigger form submission via native behavior
-      expect(button).toBeInTheDocument();
+      // Verify Razorpay was initialized and opened
+      await waitFor(
+        () => {
+          expect(RazorpayMock).toHaveBeenCalled();
+        },
+        { timeout: 5000 },
+      );
     });
   });
 });
