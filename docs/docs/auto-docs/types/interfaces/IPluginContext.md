@@ -4,7 +4,7 @@
 
 # Interface: IPluginContext\<TDb, TConfig\>
 
-Defined in: [plugins/types.ts:63](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L63)
+Defined in: [plugins/types.ts:62](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L62)
 
 Plugin context provided to all lifecycle hooks
 Contains database, logger, and other shared resources
@@ -14,12 +14,11 @@ Contains database, logger, and other shared resources
 | Property | Availability | Notes |
 |----------|--------------|-------|
 | `db` | Optional - provided when db access is needed | Guard for undefined; throw PluginError if required but missing |
-| `logger` | Guaranteed in all hooks | Always present; use `context.logger?.info()` for safety |
+| `logger` | **Required** - guaranteed in all hooks | Always present; use `context.logger.info()` |
 | `config` | Guaranteed after onInstall | May be undefined in onInstall; always present in other hooks |
 
 ## Recommended Fallbacks
 - If `db` is undefined when required, throw a descriptive error
-- If `logger` is somehow missing, fall back to console (not recommended in production)
 - If `config` is missing, use sensible defaults or throw during onActivate
 
 ## Example
@@ -29,7 +28,7 @@ onActivate: async (context: IPluginContext<MyDb, MyConfig>) => {
   if (!context.db) {
     throw new Error('Database connection required for Razorpay plugin');
   }
-  context.logger?.info('Razorpay plugin activated');
+  context.logger.info('Razorpay plugin activated');
 }
 ```
 
@@ -67,7 +66,7 @@ Guaranteed after onInstall; may be undefined during initial onInstall call
 
 > `optional` **db**: `TDb`
 
-Defined in: [plugins/types.ts:68](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L68)
+Defined in: [plugins/types.ts:67](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L67)
 
 Database connection for plugin data access
 
@@ -91,9 +90,9 @@ Plugins should check this before performing activation-only tasks
 
 ***
 
-### logger?
+### logger
 
-> `optional` **logger**: `object`
+> **logger**: `object`
 
 Defined in: [plugins/types.ts:74](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L74)
 
@@ -157,4 +156,5 @@ Logger instance for plugin logging (use instead of console.*)
 
 #### Remarks
 
-Guaranteed to be present by the plugin host in all lifecycle hooks
+Guaranteed to be present by the plugin host in all lifecycle hooks.
+This property is required and always available.

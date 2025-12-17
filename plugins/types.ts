@@ -39,12 +39,11 @@ export type PluginConfig = Record<string, JsonValue>;
  * | Property | Availability | Notes |
  * |----------|--------------|-------|
  * | `db` | Optional - provided when db access is needed | Guard for undefined; throw PluginError if required but missing |
- * | `logger` | Guaranteed in all hooks | Always present; use `context.logger?.info()` for safety |
+ * | `logger` | **Required** - guaranteed in all hooks | Always present; use `context.logger.info()` |
  * | `config` | Guaranteed after onInstall | May be undefined in onInstall; always present in other hooks |
  *
  * ## Recommended Fallbacks
  * - If `db` is undefined when required, throw a descriptive error
- * - If `logger` is somehow missing, fall back to console (not recommended in production)
  * - If `config` is missing, use sensible defaults or throw during onActivate
  *
  * @template TDb - Type for the database connection (e.g., DrizzleORM instance)
@@ -56,7 +55,7 @@ export type PluginConfig = Record<string, JsonValue>;
  *   if (!context.db) {
  *     throw new Error('Database connection required for Razorpay plugin');
  *   }
- *   context.logger?.info('Razorpay plugin activated');
+ *   context.logger.info('Razorpay plugin activated');
  * }
  * ```
  */
@@ -69,9 +68,10 @@ export interface IPluginContext<TDb = unknown, TConfig = PluginConfig> {
 
   /**
    * Logger instance for plugin logging (use instead of console.*)
-   * @remarks Guaranteed to be present by the plugin host in all lifecycle hooks
+   * @remarks Guaranteed to be present by the plugin host in all lifecycle hooks.
+   * This property is required and always available.
    */
-  logger?: {
+  logger: {
     info: (...args: LogArg[]) => void;
     warn: (...args: LogArg[]) => void;
     error: (...args: LogArg[]) => void;
