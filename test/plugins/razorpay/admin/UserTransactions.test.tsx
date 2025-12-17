@@ -17,7 +17,6 @@ import {
   GET_USER_TRANSACTION_STATS,
 } from './testUtils';
 
-
 // Mock useLocalStorage to provide user ID
 // Note: This is now handled by the path alias to __mocks__/useLocalstorage.ts,
 // but we can override it here if needed for specific tests using vi.mock('utils/useLocalstorage')

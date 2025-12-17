@@ -75,28 +75,27 @@ describe('RazorpayConfiguration', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByPlaceholderText('Enter your key secret')).toHaveAttribute(
-          'type',
-          'password',
-        );
+        expect(
+          screen.getByPlaceholderText('Enter your key secret'),
+        ).toHaveAttribute('type', 'password');
       });
 
-      const toggleBtn = screen.getByRole('button', { name: /Show key secret/i });
+      const toggleBtn = screen.getByRole('button', {
+        name: /Show key secret/i,
+      });
       await user.click(toggleBtn);
 
       await waitFor(() => {
-        expect(screen.getByPlaceholderText('Enter your key secret')).toHaveAttribute(
-          'type',
-          'text',
-        );
+        expect(
+          screen.getByPlaceholderText('Enter your key secret'),
+        ).toHaveAttribute('type', 'text');
       });
 
       await user.click(toggleBtn);
       await waitFor(() => {
-        expect(screen.getByPlaceholderText('Enter your key secret')).toHaveAttribute(
-          'type',
-          'password',
-        );
+        expect(
+          screen.getByPlaceholderText('Enter your key secret'),
+        ).toHaveAttribute('type', 'password');
       });
     });
   });
@@ -156,7 +155,9 @@ describe('RazorpayConfiguration', () => {
       });
 
       await waitFor(() => {
-        expect(toast.success).toHaveBeenCalledWith('Razorpay configuration saved successfully!');
+        expect(toast.success).toHaveBeenCalledWith(
+          'Razorpay configuration saved successfully!',
+        );
       });
     });
 
@@ -178,7 +179,9 @@ describe('RazorpayConfiguration', () => {
       await user.click(testBtn);
 
       await waitFor(() => {
-        expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('Setup test successful'));
+        expect(toast.success).toHaveBeenCalledWith(
+          expect.stringContaining('Setup test successful'),
+        );
       });
     });
   });

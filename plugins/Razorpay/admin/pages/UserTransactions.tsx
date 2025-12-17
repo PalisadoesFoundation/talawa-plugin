@@ -140,11 +140,8 @@ const UserTransactions: React.FC = () => {
   const { getItem } = useLocalStorage();
   const userId = getItem('id') as string | null;
 
-
-
   // Redirect if no userId is available
   if (!userId) {
-
     return <Navigate to="/" replace />;
   }
 
@@ -178,40 +175,40 @@ const UserTransactions: React.FC = () => {
   const transactions = transactionsData?.razorpay_getUserTransactions || [];
   const stats = statsData?.razorpay_getUserTransactionStats;
 
-
-
   // Apply filters to transactions
-  const filteredTransactions = transactions.filter((transaction: RazorpayTransaction) => {
-    // Search filter
-    if (searchText) {
-      const searchLower = searchText.toLowerCase();
-      const matchesSearch =
-        transaction.paymentId?.toLowerCase().includes(searchLower) ||
-        transaction.donorName?.toLowerCase().includes(searchLower) ||
-        transaction.donorEmail?.toLowerCase().includes(searchLower) ||
-        transaction.id.toLowerCase().includes(searchLower);
+  const filteredTransactions = transactions.filter(
+    (transaction: RazorpayTransaction) => {
+      // Search filter
+      if (searchText) {
+        const searchLower = searchText.toLowerCase();
+        const matchesSearch =
+          transaction.paymentId?.toLowerCase().includes(searchLower) ||
+          transaction.donorName?.toLowerCase().includes(searchLower) ||
+          transaction.donorEmail?.toLowerCase().includes(searchLower) ||
+          transaction.id.toLowerCase().includes(searchLower);
 
-      if (!matchesSearch) return false;
-    }
-
-    // Status filter
-    if (statusFilter !== 'all') {
-      if (transaction.status !== statusFilter) return false;
-    }
-
-    // Date range filter
-    if (dateRange && dateRange[0] && dateRange[1]) {
-      const transactionDate = dayjs(transaction.createdAt);
-      if (
-        !transactionDate.isAfter(dateRange[0]) ||
-        !transactionDate.isBefore(dateRange[1])
-      ) {
-        return false;
+        if (!matchesSearch) return false;
       }
-    }
 
-    return true;
-  });
+      // Status filter
+      if (statusFilter !== 'all') {
+        if (transaction.status !== statusFilter) return false;
+      }
+
+      // Date range filter
+      if (dateRange && dateRange[0] && dateRange[1]) {
+        const transactionDate = dayjs(transaction.createdAt);
+        if (
+          !transactionDate.isAfter(dateRange[0]) ||
+          !transactionDate.isBefore(dateRange[1])
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    },
+  );
 
   const getStatusColor = (status: string) => {
     switch (status) {

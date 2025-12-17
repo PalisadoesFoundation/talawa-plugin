@@ -255,7 +255,9 @@ const RazorpayConfiguration: React.FC = () => {
                     <Button
                       variant="outline-secondary"
                       onClick={() => setShowSecrets(!showSecrets)}
-                      aria-label={showSecrets ? "Hide key secret" : "Show key secret"}
+                      aria-label={
+                        showSecrets ? 'Hide key secret' : 'Show key secret'
+                      }
                     >
                       {showSecrets ? '👁️' : '👁️‍🗨️'}
                     </Button>
@@ -280,7 +282,11 @@ const RazorpayConfiguration: React.FC = () => {
                     <Button
                       variant="outline-secondary"
                       onClick={() => setShowSecrets(!showSecrets)}
-                      aria-label={showSecrets ? "Hide webhook secret" : "Show webhook secret"}
+                      aria-label={
+                        showSecrets
+                          ? 'Hide webhook secret'
+                          : 'Show webhook secret'
+                      }
                     >
                       {showSecrets ? '👁️' : '👁️‍🗨️'}
                     </Button>

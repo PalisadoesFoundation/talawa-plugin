@@ -17,8 +17,6 @@ import {
   GET_ORG_TRANSACTION_STATS,
 } from './testUtils';
 
-
-
 const mockTransactions = [
   createMockTransaction({ id: '1', paymentId: 'pay_org1' }),
 ];

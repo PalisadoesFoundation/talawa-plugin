@@ -61,8 +61,6 @@ const CREATE_PAYMENT_ORDER = gql`
   }
 `;
 
-
-
 // Minimal interfaces to replace 'any'
 interface Organization {
   id: string;
