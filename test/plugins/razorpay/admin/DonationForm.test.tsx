@@ -39,6 +39,8 @@ vi.mock('react-i18next', () => ({
         'donation.validation.amountRequired': 'Please enter a valid amount',
         'donation.validation.nameRequired': 'Please enter your name',
         'donation.validation.emailRequired': 'Please enter your email',
+        'donation.success.thankYou':
+          'Thank you for your generous contribution!',
         'donation.error.loadUserFailed':
           'Failed to load user data. Please refresh the page.',
         'donation.error.loadOrgFailed':

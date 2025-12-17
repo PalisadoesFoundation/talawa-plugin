@@ -340,14 +340,12 @@ const DonationForm: React.FC = () => {
               ({ data: verificationData }: { data: VerifyPaymentResponse }) => {
                 if (verificationData?.razorpay_verifyPayment?.success) {
                   setCurrentStep('success');
-                  toast.success(
-                    'Payment successful! Thank you for your donation.',
-                  );
+                  toast.success(t('donation.success.thankYou'));
                   setIsProcessing(false);
                 } else {
                   toast.error(
                     verificationData?.razorpay_verifyPayment?.message ||
-                      'Payment verification failed',
+                      t('donation.error.verificationFailed'),
                   );
                   setIsProcessing(false);
                 }
