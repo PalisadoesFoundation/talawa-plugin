@@ -19,61 +19,94 @@ import UserTransactions from './pages/UserTransactions';
 import RazorpayUserTransactionsInjector from './injector/RazorpayUserTransactionsInjector';
 import RazorpayOrganizationTransactionsInjector from './injector/RazorpayOrganizationTransactionsInjector';
 
-// Production lifecycle hooks implementation
-// See: https://github.com/PalisadoesFoundation/talawa-plugin/issues
-// These lifecycle methods provide scaffolding for the plugin system.
-// Actual production-ready implementations should:
-// - Connect to real Razorpay SDK
-// - Interact with database through proper ORM
-// - Use Strapi's logging system (strapi.log.*)
-
-// Plugin lifecycle implementation
+/**
+ * Razorpay plugin lifecycle implementation
+ *
+ * Provides hooks for the plugin system to manage Razorpay plugin lifecycle.
+ * Current implementations are no-op placeholders; actual logic tracked in issues #141-145.
+ *
+ * @see {@link IPluginLifecycle}
+ */
 const RazorpayLifecycle: IPluginLifecycle = {
-  onActivate: async (context: IPluginContext): Promise<void> => {
-    // TODO(#141): Implement Razorpay activation
-    // - Validate API key and secret in environment/config
-    // - Initialize Razorpay SDK or verify connection
-    void context; // Placeholder until implementation uses context.logger
+  /**
+   * Called when the Razorpay plugin is activated.
+   *
+   * TODO(#141): Implement activation logic:
+   * - Validate API key and secret in environment/config
+   * - Initialize Razorpay SDK or verify connection
+   *
+   * @param _context - Plugin context with db, logger, and config
+   * @returns Promise that resolves when activation is complete
+   */
+  onActivate: async (_context: IPluginContext): Promise<void> => {
+    // No-op placeholder - see TODO(#141) above
   },
 
-  onDeactivate: async (context: IPluginContext): Promise<void> => {
-    // TODO(#142): Implement Razorpay deactivation
-    // - Cancel any in-flight payment operations
-    // - Remove event listeners if any were registered
-    // - Clear intervals/timeouts
-    // - Release SDK resources
-    void context; // Placeholder until implementation uses context
+  /**
+   * Called when the Razorpay plugin is deactivated.
+   *
+   * TODO(#142): Implement deactivation logic:
+   * - Cancel any in-flight payment operations
+   * - Remove event listeners if any were registered
+   * - Clear intervals/timeouts
+   * - Release SDK resources
+   *
+   * @param _context - Plugin context with db, logger, and config
+   * @returns Promise that resolves when deactivation is complete
+   */
+  onDeactivate: async (_context: IPluginContext): Promise<void> => {
+    // No-op placeholder - see TODO(#142) above
   },
 
-  onInstall: async (context: IPluginContext): Promise<void> => {
-    // TODO(#143): Implement Razorpay installation
-    // - Insert default plugin config into database using context.db
-    // - Register webhook endpoints with Razorpay
-    // - Set up initial payment gateway settings
-    void context; // Placeholder until implementation uses context.db
+  /**
+   * Called when the Razorpay plugin is first installed.
+   *
+   * TODO(#143): Implement installation logic:
+   * - Insert default plugin config into database using context.db
+   * - Register webhook endpoints with Razorpay
+   * - Set up initial payment gateway settings
+   *
+   * @param _context - Plugin context with db, logger, and config
+   * @returns Promise that resolves when installation is complete
+   */
+  onInstall: async (_context: IPluginContext): Promise<void> => {
+    // No-op placeholder - see TODO(#143) above
   },
 
-  onUninstall: async (context: IPluginContext): Promise<void> => {
-    // TODO(#144): Implement Razorpay uninstallation
-    // - Remove configuration from database using context.db
-    // - Unregister webhooks from Razorpay
-    // - Archive or delete transaction records as per policy
-    void context; // Placeholder until implementation uses context.db
+  /**
+   * Called when the Razorpay plugin is uninstalled.
+   *
+   * TODO(#144): Implement uninstallation logic:
+   * - Remove configuration from database using context.db
+   * - Unregister webhooks from Razorpay
+   * - Archive or delete transaction records as per policy
+   *
+   * @param _context - Plugin context with db, logger, and config
+   * @returns Promise that resolves when uninstallation is complete
+   */
+  onUninstall: async (_context: IPluginContext): Promise<void> => {
+    // No-op placeholder - see TODO(#144) above
   },
 
+  /**
+   * Called when the Razorpay plugin is updated from one version to another.
+   *
+   * TODO(#145): Implement version-specific migrations:
+   * - Example: if (fromVersion < '2.0.0' && toVersion >= '2.0.0') {
+   *     // Migrate config schema from v1 to v2 using context.db
+   *   }
+   *
+   * @param _fromVersion - Previous plugin version
+   * @param _toVersion - New plugin version
+   * @param _context - Plugin context with db, logger, and config
+   * @returns Promise that resolves when update is complete
+   */
   onUpdate: async (
-    fromVersion: string,
-    toVersion: string,
-    context: IPluginContext,
+    _fromVersion: string,
+    _toVersion: string,
+    _context: IPluginContext,
   ): Promise<void> => {
-    // TODO(#145): Implement Razorpay version migrations
-    // Example migration logic:
-    // if (fromVersion < '2.0.0' && toVersion >= '2.0.0') {
-    //   // Migrate config schema from v1 to v2 using context.db
-    // }
-    void fromVersion;
-    void toVersion;
-    void context; // Placeholder until implementation uses parameters
+    // No-op placeholder - see TODO(#145) above
   },
 };
 

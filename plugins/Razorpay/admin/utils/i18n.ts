@@ -4,6 +4,29 @@
  * This module configures i18next for the Razorpay plugin following
  * the same patterns as talawa-admin.
  *
+ * **IMPORTANT**: This module uses `useSuspense: true` which requires all consuming
+ * components to be wrapped in a `<React.Suspense>` boundary. Without this, runtime
+ * errors will occur when translations are loading.
+ *
+ * @example
+ * ```tsx
+ * // In your app entry point:
+ * import './utils/i18n';
+ *
+ * // In components:
+ * import { useTranslation } from 'react-i18next';
+ *
+ * function MyComponent() {
+ *   const { t } = useTranslation('razorpay');
+ *   return <h1>{t('donation.title')}</h1>;
+ * }
+ *
+ * // Wrap with Suspense:
+ * <Suspense fallback={<Loading />}>
+ *   <MyComponent />
+ * </Suspense>
+ * ```
+ *
  * @module i18n
  */
 
@@ -41,8 +64,25 @@ i18n
       escapeValue: false, // React already escapes values
     },
     react: {
+      // IMPORTANT: Requires consuming components to be wrapped in <React.Suspense>
+      // See module-level JSDoc for usage example
       useSuspense: true,
     },
   });
 
+/**
+ * Configured i18next instance for the Razorpay plugin.
+ *
+ * @example
+ * ```tsx
+ * // Import to initialize i18n (typically in your app entry point)
+ * import './utils/i18n';
+ *
+ * // Then use in components with react-i18next hooks:
+ * import { useTranslation } from 'react-i18next';
+ *
+ * const { t } = useTranslation('razorpay');
+ * t('donation.form.amountLabel'); // "Amount"
+ * ```
+ */
 export default i18n;

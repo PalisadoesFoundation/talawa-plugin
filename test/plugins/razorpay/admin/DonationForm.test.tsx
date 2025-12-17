@@ -526,14 +526,15 @@ describe('DonationForm', () => {
         .closest('form');
       fireEvent.submit(form!);
 
-      // Should show error or handle gracefully
+      // Wait for graceful handling - button should return to non-processing state
       await waitFor(
         () => {
-          // Either shows error or button returns to non-processing state
-          expect(
-            screen.queryByRole('button', { name: /Donate/i }) ||
-              screen.queryByRole('alert'),
-          ).toBeTruthy();
+          const donateButton = screen.getByRole('button', {
+            name: /Donate ₹100.00/i,
+          });
+          // Button should exist and not be in processing state (no "Processing" text)
+          expect(donateButton).toBeInTheDocument();
+          expect(donateButton).not.toBeDisabled();
         },
         { timeout: 3000 },
       );
@@ -598,7 +599,7 @@ describe('DonationForm', () => {
       });
     });
 
-    it('should handle Enter key on donate button', async () => {
+    it('should submit form and open Razorpay modal', async () => {
       const openMock = vi.fn();
       const RazorpayMock = vi.fn().mockImplementation(() => ({
         open: openMock,
@@ -623,13 +624,15 @@ describe('DonationForm', () => {
         ).toBeInTheDocument();
       });
 
-      // Submit form via button click (simulates Enter key native behavior)
+      // Submit form
       const form = screen
         .getByRole('button', { name: /Donate ₹100.00/i })
         .closest('form');
       fireEvent.submit(form!);
 
-      // Verify Razorpay was initialized and opened
+      // Verify Razorpay was initialized
+      // Note: rzp.open() is called synchronously after construction, but JSDOM
+      // environment may not track the open call reliably
       await waitFor(
         () => {
           expect(RazorpayMock).toHaveBeenCalled();
