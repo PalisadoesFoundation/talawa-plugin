@@ -1,0 +1,107 @@
+{
+  "donation": {
+    "title": "Make a Donation",
+    "subtitle": "Support {{orgName}} with your contribution",
+    "form": {
+      "amountLabel": "Donation Amount",
+      "amountPlaceholder": "0.00",
+      "currencyLabel": "Currency",
+      "quickAmounts": "Quick Amounts",
+      "donorInfoTitle": "Your Information",
+      "fullNameLabel": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "fullNameRequired": "Full Name *",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "Enter your email",
+      "emailRequired": "Email Address *",
+      "phoneLabel": "Phone Number",
+      "phonePlaceholder": "Enter your phone number",
+      "phoneOptional": "Phone Number (Optional)",
+      "descriptionLabel": "Message",
+      "descriptionPlaceholder": "Add a message (optional)",
+      "descriptionOptional": "Message (Optional)",
+      "submitButton": "Donate {{amount}}",
+      "submitButtonDefault": "Donate",
+      "processing": "Processing..."
+    },
+    "validation": {
+      "amountRequired": "Please enter a valid amount",
+      "amountMinimum": "Amount must be at least {{min}}",
+      "nameRequired": "Please enter your name",
+      "emailRequired": "Please enter your email",
+      "emailInvalid": "Please enter a valid email address"
+    },
+    "success": {
+      "title": "Payment Successful!",
+      "message": "Thank you for your donation of {{amount}} to {{orgName}}.",
+      "thankYou": "Thank you for your generous contribution!",
+      "backButton": "Back to Organization"
+    },
+    "error": {
+      "paymentFailed": "Payment failed",
+      "verificationFailed": "Payment verification failed. Please contact support.",
+      "orderFailed": "Failed to create payment order",
+      "configNotEnabled": "Razorpay is not configured or enabled. Please contact the administrator.",
+      "loadUserFailed": "Failed to load user data. Please refresh the page.",
+      "loadOrgFailed": "Failed to load organization information",
+      "systemUnavailable": "Payment System Not Available"
+    }
+  },
+  "configuration": {
+    "title": "Razorpay Configuration",
+    "subtitle": "Configure your Razorpay payment gateway settings",
+    "form": {
+      "keyIdLabel": "Key ID",
+      "keyIdPlaceholder": "Enter Razorpay Key ID",
+      "keySecretLabel": "Key Secret",
+      "keySecretPlaceholder": "Enter Razorpay Key Secret",
+      "webhookSecretLabel": "Webhook Secret",
+      "webhookSecretPlaceholder": "Enter Webhook Secret",
+      "enabledLabel": "Enable Razorpay",
+      "testModeLabel": "Test Mode",
+      "currencyLabel": "Default Currency",
+      "descriptionLabel": "Default Description",
+      "descriptionPlaceholder": "Enter default payment description",
+      "saveButton": "Save Configuration",
+      "saving": "Saving..."
+    },
+    "success": {
+      "saved": "Configuration saved successfully"
+    },
+    "error": {
+      "loadFailed": "Failed to load configuration",
+      "saveFailed": "Failed to save configuration"
+    }
+  },
+  "transactions": {
+    "title": "Transaction History",
+    "subtitle": "View your payment transaction history",
+    "table": {
+      "id": "Transaction ID",
+      "date": "Date",
+      "amount": "Amount",
+      "status": "Status",
+      "organization": "Organization",
+      "actions": "Actions"
+    },
+    "status": {
+      "success": "Success",
+      "failed": "Failed",
+      "pending": "Pending",
+      "refunded": "Refunded"
+    },
+    "empty": "No transactions found",
+    "search": "Search transactions...",
+    "viewButton": "View"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "back": "Back",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete"
+  }
+}

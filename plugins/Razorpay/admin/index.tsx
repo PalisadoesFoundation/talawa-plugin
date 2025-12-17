@@ -10,7 +10,7 @@
  * - RU2: Global user transactions page showing all transactions across organizations
  */
 
-import { IPluginLifecycle } from '../../types';
+import { IPluginLifecycle, IPluginContext } from '../../types';
 
 // Import all components
 import RazorpayConfiguration from './pages/RazorpayConfiguration';
@@ -27,73 +27,52 @@ import RazorpayOrganizationTransactionsInjector from './injector/RazorpayOrganiz
 // - Use Strapi's logging system (strapi.log.*)
 
 // Plugin lifecycle implementation
+// Note: Parameters are unused in placeholder implementations but required by interface
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const RazorpayLifecycle: IPluginLifecycle = {
-  onActivate: async () => {
+  onActivate: async (_context: IPluginContext): Promise<void> => {
     // TODO(#TBD): Validate required Razorpay configuration
     // - Check for API key and secret in environment/config
     // - Initialize Razorpay SDK or verify connection
     // - Log clear error if config is missing/invalid
-
-    // Placeholder: Log activation (replace with strapi.log in production)
-    if (typeof window !== 'undefined' && window.console) {
-      // Browser environment - admin panel
-      console.debug('[Razorpay] Plugin activated');
-    }
-
-    // Validate that Razorpay script can be loaded (browser only)
-    if (typeof window !== 'undefined' && !window.Razorpay) {
-      // Razorpay SDK not yet loaded - this is expected, loaded on demand
-    }
+    // Use context.logger for logging when available
   },
 
-  onDeactivate: async () => {
+  onDeactivate: async (_context: IPluginContext): Promise<void> => {
     // TODO(#TBD): Cancel pending operations and cleanup
     // - Cancel any in-flight payment operations
     // - Remove event listeners if any were registered
     // - Clear intervals/timeouts
     // - Release SDK resources
-
-    if (typeof window !== 'undefined' && window.console) {
-      console.debug('[Razorpay] Plugin deactivated');
-    }
   },
 
-  onInstall: async () => {
+  onInstall: async (_context: IPluginContext): Promise<void> => {
     // TODO(#TBD): Create default configuration
     // - Insert default plugin config into database
     // - Register webhook endpoints with Razorpay
     // - Set up initial payment gateway settings
-
-    if (typeof window !== 'undefined' && window.console) {
-      console.debug('[Razorpay] Plugin installed');
-    }
   },
 
-  onUninstall: async () => {
+  onUninstall: async (_context: IPluginContext): Promise<void> => {
     // TODO(#TBD): Clean up all plugin data
     // - Remove configuration from database
     // - Unregister webhooks from Razorpay
     // - Archive or delete transaction records as per policy
-
-    if (typeof window !== 'undefined' && window.console) {
-      console.debug('[Razorpay] Plugin uninstalled');
-    }
   },
 
-  onUpdate: async (fromVersion: string, toVersion: string) => {
+  onUpdate: async (
+    _fromVersion: string,
+    _toVersion: string,
+    _context: IPluginContext,
+  ): Promise<void> => {
     // TODO(#TBD): Run version-specific migrations
     // Example migration logic:
     // if (fromVersion < '2.0.0' && toVersion >= '2.0.0') {
     //   // Migrate config schema from v1 to v2
     // }
-
-    if (typeof window !== 'undefined' && window.console) {
-      console.debug(
-        `[Razorpay] Plugin updated from ${fromVersion} to ${toVersion}`,
-      );
-    }
   },
 };
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 // Export the lifecycle as default
 export default RazorpayLifecycle;

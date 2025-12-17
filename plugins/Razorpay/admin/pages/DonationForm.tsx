@@ -1,4 +1,14 @@
+/**
+ * DonationForm Component
+ *
+ * A comprehensive donation form that integrates with Razorpay payment gateway.
+ * Allows users to make donations to organizations with real-time payment processing.
+ *
+ * @module DonationForm
+ */
+
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { gql } from '@apollo/client';
 // @ts-expect-error - Apollo Client v4 types issue
 import { useQuery, useMutation } from '@apollo/client';
@@ -117,7 +127,13 @@ declare global {
   }
 }
 
+/**
+ * DonationForm component for processing donations via Razorpay
+ *
+ * @returns {React.ReactElement} The donation form UI
+ */
 const DonationForm: React.FC = () => {
+  const { t } = useTranslation('razorpay');
   const { orgId } = useParams<{ orgId: string }>();
   const navigate = useNavigate();
 
@@ -195,34 +211,48 @@ const DonationForm: React.FC = () => {
 
   useEffect(() => {
     if (userError) {
-      console.error('Error loading user data:', userError);
+      toast.error(t('donation.error.loadUserFailed'));
     }
-  }, [userError]);
+  }, [userError, t]);
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  /**
+   * Handles form input changes and updates form state
+   * @param field - The form field name to update
+   * @param value - The new value for the field
+   */
+  const handleInputChange = (field: string, value: string | boolean): void => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const validateForm = () => {
+  /**
+   * Validates the donation form fields
+   * @returns {boolean} True if form is valid, false otherwise
+   */
+  const validateForm = (): boolean => {
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
-      toast.error('Please enter a valid amount');
+      toast.error(t('donation.validation.amountRequired'));
       return false;
     }
     if (!formData.donorName.trim()) {
-      toast.error('Please enter your name');
+      toast.error(t('donation.validation.nameRequired'));
       return false;
     }
     if (!formData.donorEmail.trim()) {
-      toast.error('Please enter your email');
+      toast.error(t('donation.validation.emailRequired'));
       return false;
     }
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  /**
+   * Handles form submission and initiates Razorpay payment flow
+   * @param e - Form submit event
+   * @throws {Error} When payment order creation fails
+   */
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
     if (!validateForm()) return;
@@ -232,9 +262,7 @@ const DonationForm: React.FC = () => {
       !razorpayConfig?.razorpay_getRazorpayConfig?.keyId ||
       !razorpayConfig?.razorpay_getRazorpayConfig?.isEnabled
     ) {
-      toast.error(
-        'Razorpay is not configured or enabled. Please contact the administrator.',
-      );
+      toast.error(t('donation.error.configNotEnabled'));
       return;
     }
 
@@ -325,11 +353,8 @@ const DonationForm: React.FC = () => {
                 }
               },
             )
-            .catch((error: unknown) => {
-              console.error('Payment verification error:', error);
-              toast.error(
-                'Payment verification failed. Please contact support.',
-              );
+            .catch(() => {
+              toast.error(t('donation.error.verificationFailed'));
               setIsProcessing(false);
             });
         },
@@ -344,20 +369,34 @@ const DonationForm: React.FC = () => {
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error) {
-      console.error('Payment error:', error);
-      toast.error(error instanceof Error ? error.message : 'Payment failed');
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : t('donation.error.paymentFailed'),
+      );
       setIsProcessing(false);
     }
   };
 
-  const formatCurrency = (amount: number, currency: string) => {
+  /**
+   * Formats currency amount according to locale
+   * @param amount - Numeric amount to format
+   * @param currency - ISO currency code (e.g., 'INR', 'USD')
+   * @returns Formatted currency string
+   */
+  const formatCurrency = (amount: number, currency: string): string => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: currency || 'INR',
     }).format(amount);
   };
 
-  const getCurrencySymbol = (currency: string) => {
+  /**
+   * Gets the currency symbol for a given currency code
+   * @param currency - ISO currency code
+   * @returns Currency symbol or the code if symbol not found
+   */
+  const getCurrencySymbol = (currency: string): string => {
     const symbols: { [key: string]: string } = {
       INR: '₹',
       USD: '$',
@@ -373,16 +412,16 @@ const DonationForm: React.FC = () => {
 
   if (orgError) {
     return (
-      <Alert variant="danger">
-        Failed to load organization information: {orgError.message}
+      <Alert variant="danger" role="alert" aria-live="polite">
+        {t('donation.error.loadOrgFailed')}: {orgError.message}
       </Alert>
     );
   }
 
   if (configError) {
     return (
-      <Alert variant="danger">
-        Failed to load Razorpay configuration: {configError.message}
+      <Alert variant="danger" role="alert" aria-live="polite">
+        {t('configuration.error.loadFailed')}: {configError.message}
       </Alert>
     );
   }
@@ -495,22 +534,27 @@ const DonationForm: React.FC = () => {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Amount</Form.Label>
+                      <Form.Label htmlFor="donation-amount">
+                        {t('donation.form.amountLabel')}
+                      </Form.Label>
                       <div className="position-relative">
                         <span className="position-absolute top-50 start-0 translate-middle-y ms-2 text-muted">
                           {getCurrencySymbol(formData.currency)}
                         </span>
                         <Form.Control
+                          id="donation-amount"
                           type="number"
                           value={formData.amount}
                           onChange={(e) =>
                             handleInputChange('amount', e.target.value)
                           }
-                          placeholder="0.00"
+                          placeholder={t('donation.form.amountPlaceholder')}
                           min="1"
                           step="0.01"
                           className="ps-4"
                           required
+                          aria-required="true"
+                          aria-label={t('donation.form.amountLabel')}
                         />
                       </div>
                     </Form.Group>
@@ -557,35 +601,47 @@ const DonationForm: React.FC = () => {
 
               {/* Donor Information */}
               <div className="mb-4">
-                <h3 className="text-lg font-semibold mb-3">Your Information</h3>
+                <h3 className="text-lg font-semibold mb-3">
+                  {t('donation.form.donorInfoTitle')}
+                </h3>
 
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Full Name *</Form.Label>
+                      <Form.Label htmlFor="donor-name">
+                        {t('donation.form.fullNameRequired')}
+                      </Form.Label>
                       <Form.Control
+                        id="donor-name"
                         type="text"
                         value={formData.donorName}
                         onChange={(e) =>
                           handleInputChange('donorName', e.target.value)
                         }
-                        placeholder="Enter your full name"
+                        placeholder={t('donation.form.fullNamePlaceholder')}
                         required
+                        aria-required="true"
+                        aria-label={t('donation.form.fullNameLabel')}
                       />
                     </Form.Group>
                   </Col>
 
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Email Address *</Form.Label>
+                      <Form.Label htmlFor="donor-email">
+                        {t('donation.form.emailRequired')}
+                      </Form.Label>
                       <Form.Control
+                        id="donor-email"
                         type="email"
                         value={formData.donorEmail}
                         onChange={(e) =>
                           handleInputChange('donorEmail', e.target.value)
                         }
-                        placeholder="Enter your email"
+                        placeholder={t('donation.form.emailPlaceholder')}
                         required
+                        aria-required="true"
+                        aria-label={t('donation.form.emailLabel')}
                       />
                     </Form.Group>
                   </Col>

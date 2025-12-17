@@ -6,21 +6,32 @@
  */
 
 /**
- * Plugin context provided to lifecycle hooks
- * Contains database, logger, and other shared resources
+ * Allowed types for logger arguments
  */
-export interface IPluginContext {
+export type LogArg = string | number | boolean | null | undefined | object;
+
+/**
+ * Plugin context provided to all lifecycle hooks
+ * Contains database, logger, and other shared resources
+ *
+ * @template TDb - Type for the database connection (default: unknown)
+ * @template TConfig - Type for plugin configuration (default: Record<string, unknown>)
+ */
+export interface IPluginContext<
+  TDb = unknown,
+  TConfig = Record<string, unknown>,
+> {
   /** Database connection for plugin data access */
-  db?: unknown;
-  /** Logger instance for plugin logging */
+  db?: TDb;
+  /** Logger instance for plugin logging (use instead of console.*) */
   logger?: {
-    info?: (...args: unknown[]) => void;
-    warn?: (...args: unknown[]) => void;
-    error?: (...args: unknown[]) => void;
-    debug?: (...args: unknown[]) => void;
+    info: (...args: LogArg[]) => void;
+    warn: (...args: LogArg[]) => void;
+    error: (...args: LogArg[]) => void;
+    debug: (...args: LogArg[]) => void;
   };
   /** Plugin configuration from manifest */
-  config?: Record<string, unknown>;
+  config?: TConfig;
 }
 
 /**
@@ -28,49 +39,64 @@ export interface IPluginContext {
  *
  * Defines the contract for plugin lifecycle hooks that must be implemented
  * by all plugins to ensure proper initialization, activation, and cleanup.
+ * All hooks receive a context object for accessing shared resources.
  */
-export interface IPluginLifecycle {
+export interface IPluginLifecycle<
+  TDb = unknown,
+  TConfig = Record<string, unknown>,
+> {
   /**
    * Called when plugin is loaded into memory
    * Use for initial setup and resource allocation
+   * @param context - Plugin context with db, logger, and config
    */
-  onLoad?: (context: IPluginContext) => Promise<void>;
+  onLoad?: (context: IPluginContext<TDb, TConfig>) => Promise<void>;
 
   /**
    * Called when plugin is activated
    * Use for validation, SDK initialization, and resource setup
+   * @param context - Plugin context with db, logger, and config
    */
-  onActivate?: (context?: IPluginContext) => Promise<void>;
+  onActivate?: (context: IPluginContext<TDb, TConfig>) => Promise<void>;
 
   /**
    * Called when plugin is deactivated
    * Use for cleanup, canceling operations, and releasing resources
+   * @param context - Plugin context with db, logger, and config
    */
-  onDeactivate?: (context?: IPluginContext) => Promise<void>;
+  onDeactivate?: (context: IPluginContext<TDb, TConfig>) => Promise<void>;
 
   /**
    * Called when plugin is unloaded from memory
    * Use for final cleanup and resource release
+   * @param context - Plugin context with db, logger, and config
    */
-  onUnload?: (context: IPluginContext) => Promise<void>;
+  onUnload?: (context: IPluginContext<TDb, TConfig>) => Promise<void>;
 
   /**
    * Called when plugin is first installed
    * Use for creating default configuration, database records, webhooks
+   * @param context - Plugin context with db, logger, and config
    */
-  onInstall?: (context?: IPluginContext) => Promise<void>;
+  onInstall?: (context: IPluginContext<TDb, TConfig>) => Promise<void>;
 
   /**
    * Called when plugin is uninstalled
    * Use for removing configuration, cleaning up data, unregistering webhooks
+   * @param context - Plugin context with db, logger, and config
    */
-  onUninstall?: (context?: IPluginContext) => Promise<void>;
+  onUninstall?: (context: IPluginContext<TDb, TConfig>) => Promise<void>;
 
   /**
    * Called when plugin is updated from one version to another
    * Use for database migrations, configuration transformations
    * @param fromVersion - Previous plugin version
    * @param toVersion - New plugin version
+   * @param context - Plugin context with db, logger, and config
    */
-  onUpdate?: (fromVersion: string, toVersion: string) => Promise<void>;
+  onUpdate?: (
+    fromVersion: string,
+    toVersion: string,
+    context: IPluginContext<TDb, TConfig>,
+  ) => Promise<void>;
 }

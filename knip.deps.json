@@ -28,6 +28,8 @@
     "eslint-plugin-react",
     "eslint-plugin-tsdoc",
     "eslint-plugin-vitest",
-    "tsc-files"
+    "tsc-files",
+    "i18next-browser-languagedetector",
+    "i18next-http-backend"
   ]
 }

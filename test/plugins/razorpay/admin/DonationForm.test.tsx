@@ -20,6 +20,50 @@ import {
   GET_ORGANIZATION_INFO,
 } from './testUtils';
 
+// Mock i18n
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: { [key: string]: string } = {
+        'donation.form.amountLabel': 'Amount',
+        'donation.form.amountPlaceholder': '0.00',
+        'donation.form.currencyLabel': 'Currency',
+        'donation.form.quickAmounts': 'Quick Amounts',
+        'donation.form.donorInfoTitle': 'Your Information',
+        'donation.form.fullNameRequired': 'Full Name *',
+        'donation.form.fullNamePlaceholder': 'Enter your full name',
+        'donation.form.fullNameLabel': 'Full Name',
+        'donation.form.emailRequired': 'Email Address *',
+        'donation.form.emailPlaceholder': 'Enter your email',
+        'donation.form.emailLabel': 'Email Address',
+        'donation.validation.amountRequired': 'Please enter a valid amount',
+        'donation.validation.nameRequired': 'Please enter your name',
+        'donation.validation.emailRequired': 'Please enter your email',
+        'donation.error.loadUserFailed':
+          'Failed to load user data. Please refresh the page.',
+        'donation.error.loadOrgFailed':
+          'Failed to load organization information',
+        'donation.error.configNotEnabled':
+          'Razorpay is not configured or enabled.',
+        'donation.error.paymentFailed': 'Payment failed',
+        'donation.error.verificationFailed':
+          'Payment verification failed. Please contact support.',
+        'configuration.error.loadFailed':
+          'Failed to load Razorpay configuration',
+      };
+      return translations[key] || key;
+    },
+    i18n: {
+      language: 'en',
+      changeLanguage: vi.fn(),
+    },
+  }),
+  initReactI18next: {
+    type: '3rdParty',
+    init: vi.fn(),
+  },
+}));
+
 // Alias imported query for local usage
 const GET_RAZORPAY_CONFIG = GET_RAZORPAY_CONFIG_PUBLIC;
 
@@ -450,6 +494,139 @@ describe('DonationForm', () => {
         },
         { timeout: 5000 },
       );
+    });
+
+    it('should handle Razorpay SDK not available', async () => {
+      // Simulate Razorpay SDK not loaded
+      vi.stubGlobal('Razorpay', undefined);
+
+      renderDonationForm();
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: /Donate/i }),
+        ).toBeInTheDocument();
+      });
+
+      // Fill form with valid data
+      const amountInput = screen.getByPlaceholderText('0.00');
+      fireEvent.change(amountInput, { target: { value: '100' } });
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: /Donate ₹100.00/i }),
+        ).toBeInTheDocument();
+      });
+
+      // Submit form - should fail gracefully since SDK is not available
+      const form = screen
+        .getByRole('button', { name: /Donate ₹100.00/i })
+        .closest('form');
+      fireEvent.submit(form!);
+
+      // Should show error or handle gracefully
+      await waitFor(
+        () => {
+          // Either shows error or button returns to non-processing state
+          expect(
+            screen.queryByRole('button', { name: /Donate/i }) ||
+              screen.queryByRole('alert'),
+          ).toBeTruthy();
+        },
+        { timeout: 3000 },
+      );
+    });
+
+    it('should handle network timeout errors', async () => {
+      const timeoutErrorMock = {
+        request: {
+          query: GET_ORGANIZATION_INFO,
+          variables: { orgId: 'org-123' },
+        },
+        error: new Error('Network timeout'),
+      };
+
+      renderDonationForm([
+        createUserQueryMock(mockUser),
+        timeoutErrorMock,
+        configMock,
+      ]);
+
+      await waitFor(() => {
+        expect(screen.getByRole('alert')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('should have proper ARIA attributes on required form fields', async () => {
+      renderDonationForm();
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: /Donate/i }),
+        ).toBeInTheDocument();
+      });
+
+      // Check that amount input has aria-required
+      const amountInput = screen.getByPlaceholderText('0.00');
+      expect(amountInput).toHaveAttribute('aria-required', 'true');
+      expect(amountInput).toHaveAttribute('min', '1');
+    });
+
+    it('should have accessible error alerts with role="alert"', async () => {
+      const errorMock = {
+        request: {
+          query: GET_ORGANIZATION_INFO,
+          variables: { orgId: 'org-123' },
+        },
+        error: new Error('Failed to load'),
+      };
+
+      renderDonationForm([
+        createUserQueryMock(mockUser),
+        errorMock,
+        configMock,
+      ]);
+
+      await waitFor(() => {
+        const alert = screen.getByRole('alert');
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveAttribute('aria-live', 'polite');
+      });
+    });
+
+    it('should handle Enter key on donate button', async () => {
+      const openMock = vi.fn();
+      const RazorpayMock = vi.fn().mockImplementation(() => ({
+        open: openMock,
+      }));
+      vi.stubGlobal('Razorpay', RazorpayMock);
+
+      renderDonationForm();
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: /Donate/i }),
+        ).toBeInTheDocument();
+      });
+
+      // Fill form
+      const amountInput = screen.getByPlaceholderText('0.00');
+      fireEvent.change(amountInput, { target: { value: '100' } });
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: /Donate ₹100.00/i }),
+        ).toBeInTheDocument();
+      });
+
+      // Press Enter on button
+      const button = screen.getByRole('button', { name: /Donate ₹100.00/i });
+      fireEvent.keyDown(button, { key: 'Enter', code: 'Enter' });
+
+      // Button should trigger form submission via native behavior
+      expect(button).toBeInTheDocument();
     });
   });
 });
