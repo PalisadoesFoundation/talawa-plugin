@@ -6,6 +6,6 @@
 
 > `const` **GET\_ORG\_TRANSACTION\_STATS**: `DocumentNode`
 
-Defined in: [plugins/Razorpay/admin/graphql/queries.ts:246](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/admin/graphql/queries.ts#L246)
+Defined in: [plugins/Razorpay/admin/graphql/queries.ts:257](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/admin/graphql/queries.ts#L257)
 
 Get organization transaction statistics

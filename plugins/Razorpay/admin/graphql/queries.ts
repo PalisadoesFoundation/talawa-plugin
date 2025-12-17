@@ -182,11 +182,22 @@ export const GET_USER_TRANSACTIONS = gql`
       amount
       currency
       status
+      donorName
+      donorEmail
       method
+      bank
+      wallet
+      vpa
       email
       contact
-      createdAt
+      fee
+      tax
+      errorCode
+      errorDescription
+      refundStatus
       capturedAt
+      createdAt
+      updatedAt
     }
   }
 `;

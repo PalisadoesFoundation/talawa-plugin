@@ -423,7 +423,7 @@ export async function handleRazorpayWebhook(
     const paymentEntity = payment.entity;
 
     // Get plugin context from request first for logging
-    const pluginContext = (request as PluginRequest).pluginContext;
+    const pluginContext = request.pluginContext;
 
     // Log the webhook for debugging
     if (pluginContext?.log) {
@@ -483,8 +483,12 @@ export async function handleRazorpayWebhook(
     const { configTable } = await import('./database/tables');
     const config = await pluginContext.db.select().from(configTable).limit(1);
 
-    if (config.length === 0 || !config[0]?.webhookSecret) {
-      pluginContext.log?.error('Webhook secret not configured');
+    if (config.length === 0 || !(config[0] as any)?.webhookSecret) {
+      if (pluginContext.log?.error) {
+        pluginContext.log.error('Webhook secret not configured');
+      } else {
+        console.error('Razorpay Webhook Error: Webhook secret not configured');
+      }
       return reply.status(500).send({
         error: 'Webhook secret not configured',
         message: 'Cannot verify webhook signature without webhook secret',
@@ -494,7 +498,7 @@ export async function handleRazorpayWebhook(
     // Verify signature
     const crypto = await import('node:crypto');
     const expectedSignature = crypto
-      .createHmac('sha256', config[0].webhookSecret)
+      .createHmac('sha256', (config[0] as any).webhookSecret)
       .update(webhookBody)
       .digest('hex');
 
@@ -503,9 +507,15 @@ export async function handleRazorpayWebhook(
       /^[0-9a-fA-F]+$/.test(str) && str.length % 2 === 0;
 
     if (!isValidHex(signature) || !isValidHex(expectedSignature)) {
-      pluginContext.log?.error(
-        'Invalid signature format: not a valid hex string',
-      );
+      if (pluginContext.log?.error) {
+        pluginContext.log.error(
+          'Invalid signature format: not a valid hex string',
+        );
+      } else {
+        console.error(
+          'Razorpay Webhook Error: Invalid signature format - not a valid hex string',
+        );
+      }
       return reply.status(400).send({
         error: 'Invalid signature',
         message: 'Webhook signature verification failed',
@@ -520,7 +530,13 @@ export async function handleRazorpayWebhook(
       crypto.timingSafeEqual(expectedBuffer, signatureBuffer);
 
     if (!isValidSignature) {
-      pluginContext.log?.error('Webhook signature validation failed');
+      if (pluginContext.log?.error) {
+        pluginContext.log.error('Webhook signature validation failed');
+      } else {
+        console.error(
+          'Razorpay Webhook Error: Webhook signature validation failed',
+        );
+      }
       return reply.status(400).send({
         error: 'Invalid signature',
         message: 'Webhook signature verification failed',
@@ -541,9 +557,15 @@ export async function handleRazorpayWebhook(
       .limit(1);
 
     if (orderDetails.length === 0) {
-      pluginContext.log?.error(
-        `Order not found for payment: ${paymentEntity.id}`,
-      );
+      if (pluginContext.log?.error) {
+        pluginContext.log.error(
+          `Order not found for payment: ${paymentEntity.id}`,
+        );
+      } else {
+        console.error(
+          `Razorpay Webhook Error: Order not found for payment: ${paymentEntity.id}`,
+        );
+      }
       return reply.status(400).send({
         error: 'Order not found',
         message: `Order not found for payment: ${paymentEntity.id}`,
@@ -563,11 +585,11 @@ export async function handleRazorpayWebhook(
       // Create new transaction with userId from order
       await pluginContext.db.insert(transactionsTable).values({
         paymentId: paymentEntity.id,
-        orderId: order.id,
-        organizationId: order.organizationId,
-        userId: order.userId, // Use userId from order
-        amount: order.amount,
-        currency: order.currency,
+        orderId: (order as any).id,
+        organizationId: (order as any).organizationId,
+        userId: (order as any).userId, // Use userId from order
+        amount: (order as any).amount,
+        currency: (order as any).currency,
         status: paymentEntity.status,
         method: paymentEntity.method,
         bank: paymentEntity.bank || undefined,
