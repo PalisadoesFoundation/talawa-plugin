@@ -12,7 +12,7 @@ Defined in: [plugins/Razorpay/api/index.ts:110](https://github.com/PalisadoesFou
 
 ### context
 
-`IPluginContext`
+[`IPluginContext`](../../../types/interfaces/IPluginContext.md)
 
 ## Returns
 
