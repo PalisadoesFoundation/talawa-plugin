@@ -1,6 +1,108 @@
 import type { IPluginContext, IPluginLifecycle } from '../../types';
 import { eq } from 'drizzle-orm';
 
+/**
+ * DrizzleDB interface for type-safe database operations
+ * Represents the subset of Drizzle ORM methods used by this plugin
+ */
+interface DrizzleDB {
+  select(): {
+    from(table: unknown): {
+      where(condition: unknown): { limit(n: number): Promise<unknown[]> };
+      limit(n: number): Promise<unknown[]>;
+    };
+  };
+  insert(table: unknown): {
+    values(data: unknown): Promise<unknown>;
+  };
+  update(table: unknown): {
+    set(data: unknown): {
+      where(condition: unknown): Promise<unknown>;
+    };
+  };
+  delete(table: unknown): {
+    where(condition: unknown): Promise<unknown>;
+  };
+}
+
+/**
+ * PubSub interface for event publishing
+ */
+interface PubSub {
+  publish(channel: string, message: unknown): void;
+}
+
+/**
+ * Payment event data structure
+ */
+interface PaymentEventData {
+  paymentId: string;
+  organizationId: string;
+  amount: number;
+  currency?: string;
+  status?: string;
+}
+
+/**
+ * Razorpay payment entity from webhook
+ */
+interface RazorpayPaymentEntity {
+  id: string;
+  order_id: string;
+  status: string;
+  method: string;
+  amount: number;
+  currency: string;
+  email: string;
+  contact: string;
+  bank?: string;
+  wallet?: string;
+  vpa?: string;
+  fee?: number;
+  tax?: number;
+  error_code?: string;
+  error_description?: string;
+  refund_status?: string;
+  captured: boolean;
+  created_at: number;
+}
+
+/**
+ * Razorpay webhook payload structure
+ */
+interface RazorpayWebhookPayload {
+  payload?: {
+    payment?: {
+      entity: RazorpayPaymentEntity;
+    };
+  };
+}
+
+/**
+ * Plugin request with context
+ */
+interface PluginRequest {
+  body: RazorpayWebhookPayload;
+  headers: Record<string, string | string[] | undefined>;
+  pluginContext?: {
+    db: DrizzleDB;
+    log?: {
+      info(message: string, data?: unknown): void;
+      warn(message: string, data?: unknown): void;
+      error(message: string, data?: unknown): void;
+    };
+  };
+}
+
+/**
+ * Plugin reply interface
+ */
+interface PluginReply {
+  status(code: number): {
+    send(data: unknown): void;
+  };
+}
+
 // Export database tables and GraphQL resolvers
 export * from './database/tables';
 export * from './graphql/queries';
@@ -27,7 +129,7 @@ export async function onLoad(context: IPluginContext): Promise<void> {
       typeof context.db === 'object' &&
       'select' in context.db
     ) {
-      const db = context.db as any;
+      const db = context.db as DrizzleDB;
       await db.select().from(configTable).limit(1);
       await db.select().from(transactionsTable).limit(1);
       await db.select().from(ordersTable).limit(1);
@@ -58,7 +160,7 @@ export async function onActivate(context: IPluginContext): Promise<void> {
       typeof context.db === 'object' &&
       'select' in context.db
     ) {
-      const db = context.db as any;
+      const db = context.db as DrizzleDB;
       const existingConfig = await db.select().from(configTable).limit(1);
 
       if (existingConfig.length === 0) {
@@ -139,7 +241,7 @@ export async function onUnload(context: IPluginContext): Promise<void> {
 
 // Event handlers
 export async function onPaymentCreated(
-  data: any,
+  data: PaymentEventData,
   context: IPluginContext,
 ): Promise<void> {
   try {
@@ -149,7 +251,7 @@ export async function onPaymentCreated(
 
     // Notify via pubsub if available
     if (context.pubsub) {
-      (context.pubsub as any).publish('payment:notification', {
+      (context.pubsub as PubSub).publish('payment:notification', {
         type: 'payment_created',
         paymentId: data.paymentId,
         organizationId: data.organizationId,
@@ -166,7 +268,7 @@ export async function onPaymentCreated(
 }
 
 export async function onPaymentCompleted(
-  data: any,
+  data: PaymentEventData,
   context: IPluginContext,
 ): Promise<void> {
   try {
@@ -182,7 +284,7 @@ export async function onPaymentCompleted(
       typeof context.db === 'object' &&
       'update' in context.db
     ) {
-      const db = context.db as any;
+      const db = context.db as DrizzleDB;
       await db
         .update(transactionsTable)
         .set({
@@ -194,7 +296,7 @@ export async function onPaymentCompleted(
 
     // Notify via pubsub if available
     if (context.pubsub) {
-      (context.pubsub as any).publish('payment:notification', {
+      (context.pubsub as PubSub).publish('payment:notification', {
         type: 'payment_completed',
         paymentId: data.paymentId,
         organizationId: data.organizationId,
@@ -211,7 +313,7 @@ export async function onPaymentCompleted(
 }
 
 export async function onPaymentFailed(
-  data: any,
+  data: PaymentEventData,
   context: IPluginContext,
 ): Promise<void> {
   try {
@@ -227,7 +329,7 @@ export async function onPaymentFailed(
       typeof context.db === 'object' &&
       'update' in context.db
     ) {
-      const db = context.db as any;
+      const db = context.db as DrizzleDB;
       await db
         .update(transactionsTable)
         .set({
@@ -239,7 +341,7 @@ export async function onPaymentFailed(
 
     // Notify via pubsub if available
     if (context.pubsub) {
-      (context.pubsub as any).publish('payment:notification', {
+      (context.pubsub as PubSub).publish('payment:notification', {
         type: 'payment_failed',
         paymentId: data.paymentId,
         organizationId: data.organizationId,
@@ -256,7 +358,7 @@ export async function onPaymentFailed(
 }
 
 // Utility functions for the plugin
-export async function getPluginInfo(context: IPluginContext) {
+export async function getPluginInfo(_context: IPluginContext) {
   return {
     name: 'Razorpay Payment Gateway',
     version: '1.0.0',
@@ -294,8 +396,8 @@ export async function getPluginInfo(context: IPluginContext) {
 
 // Webhook handler for Razorpay - Standard implementation per Razorpay docs
 export async function handleRazorpayWebhook(
-  request: any,
-  reply: any,
+  request: PluginRequest,
+  reply: PluginReply,
 ): Promise<void> {
   try {
     const webhookData = request.body;
@@ -312,7 +414,7 @@ export async function handleRazorpayWebhook(
     const paymentEntity = payment.entity;
 
     // Get plugin context from request first for logging
-    const pluginContext = (request as any).pluginContext;
+    const pluginContext = (request as PluginRequest).pluginContext;
 
     // Log the webhook for debugging
     if (pluginContext?.log) {
@@ -373,7 +475,7 @@ export async function handleRazorpayWebhook(
     const config = await pluginContext.db.select().from(configTable).limit(1);
 
     if (config.length === 0 || !config[0]?.webhookSecret) {
-      console.error('Webhook secret not configured');
+      pluginContext.log?.error('Webhook secret not configured');
       return reply.status(500).send({
         error: 'Webhook secret not configured',
         message: 'Cannot verify webhook signature without webhook secret',
@@ -392,7 +494,9 @@ export async function handleRazorpayWebhook(
       /^[0-9a-fA-F]+$/.test(str) && str.length % 2 === 0;
 
     if (!isValidHex(signature) || !isValidHex(expectedSignature)) {
-      console.error('Invalid signature format: not a valid hex string');
+      pluginContext.log?.error(
+        'Invalid signature format: not a valid hex string',
+      );
       return reply.status(400).send({
         error: 'Invalid signature',
         message: 'Webhook signature verification failed',
@@ -407,7 +511,7 @@ export async function handleRazorpayWebhook(
       crypto.timingSafeEqual(expectedBuffer, signatureBuffer);
 
     if (!isValidSignature) {
-      console.error('Webhook signature validation failed');
+      pluginContext.log?.error('Webhook signature validation failed');
       return reply.status(400).send({
         error: 'Invalid signature',
         message: 'Webhook signature verification failed',
@@ -428,7 +532,9 @@ export async function handleRazorpayWebhook(
       .limit(1);
 
     if (orderDetails.length === 0) {
-      console.error(`Order not found for payment: ${paymentEntity.id}`);
+      pluginContext.log?.error(
+        `Order not found for payment: ${paymentEntity.id}`,
+      );
       return reply.status(400).send({
         error: 'Order not found',
         message: `Order not found for payment: ${paymentEntity.id}`,
@@ -513,7 +619,10 @@ export async function handleRazorpayWebhook(
       message: 'Webhook processed successfully',
     });
   } catch (error) {
-    console.error('Razorpay webhook error:', error);
+    // Use process.stderr since pluginContext may not be available in catch
+    process.stderr.write(
+      `Razorpay webhook error: ${error instanceof Error ? error.message : 'Unknown error'}\n`,
+    );
     reply.status(500).send({
       error: 'Webhook processing failed',
       message: error instanceof Error ? error.message : 'Unknown error',

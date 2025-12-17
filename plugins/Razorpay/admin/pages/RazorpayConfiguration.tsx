@@ -1,48 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { gql } from '@apollo/client';
 // @ts-expect-error - Apollo Client v4 types issue
 import { useQuery, useMutation } from '@apollo/client';
 import { toast } from 'react-toastify';
 import { Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import Loader from '../../../../components/Loader/Loader';
-
-// GraphQL operations
-const GET_RAZORPAY_CONFIG = gql`
-  query GetRazorpayConfig {
-    razorpay_getRazorpayConfig {
-      keyId
-      keySecret
-      webhookSecret
-      isEnabled
-      testMode
-      currency
-      description
-    }
-  }
-`;
-
-const UPDATE_RAZORPAY_CONFIG = gql`
-  mutation UpdateRazorpayConfig($input: RazorpayConfigInput!) {
-    razorpay_updateRazorpayConfig(input: $input) {
-      keyId
-      keySecret
-      webhookSecret
-      isEnabled
-      testMode
-      currency
-      description
-    }
-  }
-`;
-
-const TEST_RAZORPAY_SETUP = gql`
-  mutation TestRazorpaySetup {
-    razorpay_testRazorpaySetup {
-      success
-      message
-    }
-  }
-`;
+import {
+  GET_RAZORPAY_CONFIG,
+  UPDATE_RAZORPAY_CONFIG,
+  TEST_RAZORPAY_SETUP,
+} from '../graphql/queries';
 
 interface RazorpayConfig {
   keyId?: string;
@@ -109,8 +75,7 @@ const RazorpayConfiguration: React.FC = () => {
       });
       toast.success('Razorpay configuration saved successfully!');
       refetch();
-    } catch (error) {
-      console.error('Error saving Razorpay configuration:', error);
+    } catch {
       toast.error('Failed to save Razorpay configuration');
     } finally {
       setIsLoading(false);
@@ -147,19 +112,9 @@ const RazorpayConfiguration: React.FC = () => {
           result?.razorpay_testRazorpaySetup?.message || 'Setup test failed';
         toast.error(errorMessage);
 
-        // Log the error for debugging
-        console.error('Razorpay setup test failed:', {
-          error: errorMessage,
-          config: {
-            keyId: config.keyId?.substring(0, 8) + '...',
-            hasKeySecret: !!config.keySecret,
-            hasWebhookSecret: !!config.webhookSecret,
-            testMode: config.testMode,
-          },
-        });
+        // Error message already shown via toast above
       }
-    } catch (error) {
-      console.error('Error testing Razorpay setup:', error);
+    } catch {
       toast.error(
         'Setup test failed. Please check your configuration and try again.',
       );

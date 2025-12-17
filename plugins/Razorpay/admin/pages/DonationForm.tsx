@@ -9,83 +9,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { gql } from '@apollo/client';
 // @ts-expect-error - Apollo Client v4 types issue
 import { useQuery, useMutation } from '@apollo/client';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import Loader from '../../../../components/Loader/Loader';
-
-// GraphQL operations
-const GET_CURRENT_USER = gql`
-  query GetCurrentUser {
-    me {
-      id
-      firstName
-      lastName
-      email
-    }
-  }
-`;
-
-const GET_ORGANIZATION_INFO = gql`
-  query GetOrganizationInfo($orgId: String!) {
-    organization(input: { id: $orgId }) {
-      id
-      name
-      description
-      avatarURL
-    }
-  }
-`;
-
-const GET_RAZORPAY_CONFIG = gql`
-  query GetRazorpayConfig {
-    razorpay_getRazorpayConfig {
-      keyId
-      isEnabled
-      testMode
-      currency
-      description
-    }
-  }
-`;
-
-const CREATE_PAYMENT_ORDER = gql`
-  mutation CreatePaymentOrder($input: RazorpayOrderInput!) {
-    razorpay_createPaymentOrder(input: $input) {
-      id
-      razorpayOrderId
-      organizationId
-      userId
-      amount
-      currency
-      status
-      donorName
-      donorEmail
-      donorPhone
-      description
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-const VERIFY_PAYMENT = gql`
-  mutation VerifyPayment($input: RazorpayVerificationInput!) {
-    razorpay_verifyPayment(input: $input) {
-      success
-      message
-      transaction {
-        paymentId
-        status
-        amount
-        currency
-      }
-    }
-  }
-`;
+import {
+  GET_CURRENT_USER,
+  GET_ORGANIZATION_INFO,
+  GET_RAZORPAY_CONFIG_PUBLIC as GET_RAZORPAY_CONFIG,
+  CREATE_PAYMENT_ORDER,
+  VERIFY_PAYMENT,
+} from '../graphql/queries';
 
 interface RazorpaySuccessResponse {
   razorpay_payment_id: string;
