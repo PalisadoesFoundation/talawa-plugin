@@ -4,7 +4,7 @@
 
 # Interface: IPluginLifecycle\<TDb, TConfig\>
 
-Defined in: [plugins/types.ts:44](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L44)
+Defined in: [plugins/types.ts:46](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L46)
 
 Plugin lifecycle interface
 
@@ -20,7 +20,7 @@ All hooks receive a context object for accessing shared resources.
 
 ### TConfig
 
-`TConfig` = `Record`\<`string`, `unknown`\>
+`TConfig` = [`PluginConfig`](../type-aliases/PluginConfig.md)
 
 ## Properties
 
@@ -28,7 +28,7 @@ All hooks receive a context object for accessing shared resources.
 
 > `optional` **onActivate**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:60](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L60)
+Defined in: [plugins/types.ts:59](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L59)
 
 Called when plugin is activated
 Use for validation, SDK initialization, and resource setup
@@ -51,7 +51,7 @@ Plugin context with db, logger, and config
 
 > `optional` **onDeactivate**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:67](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L67)
+Defined in: [plugins/types.ts:66](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L66)
 
 Called when plugin is deactivated
 Use for cleanup, canceling operations, and releasing resources
@@ -74,7 +74,7 @@ Plugin context with db, logger, and config
 
 > `optional` **onInstall**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:81](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L81)
+Defined in: [plugins/types.ts:80](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L80)
 
 Called when plugin is first installed
 Use for creating default configuration, database records, webhooks
@@ -97,7 +97,7 @@ Plugin context with db, logger, and config
 
 > `optional` **onLoad**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:53](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L53)
+Defined in: [plugins/types.ts:52](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L52)
 
 Called when plugin is loaded into memory
 Use for initial setup and resource allocation
@@ -120,7 +120,7 @@ Plugin context with db, logger, and config
 
 > `optional` **onUninstall**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:88](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L88)
+Defined in: [plugins/types.ts:87](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L87)
 
 Called when plugin is uninstalled
 Use for removing configuration, cleaning up data, unregistering webhooks
@@ -143,7 +143,7 @@ Plugin context with db, logger, and config
 
 > `optional` **onUnload**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:74](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L74)
+Defined in: [plugins/types.ts:73](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L73)
 
 Called when plugin is unloaded from memory
 Use for final cleanup and resource release
@@ -166,7 +166,7 @@ Plugin context with db, logger, and config
 
 > `optional` **onUpdate**: (`fromVersion`, `toVersion`, `context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:97](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L97)
+Defined in: [plugins/types.ts:96](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L96)
 
 Called when plugin is updated from one version to another
 Use for database migrations, configuration transformations

@@ -37,9 +37,10 @@ import HttpApi from 'i18next-http-backend';
 
 /**
  * Supported languages for the Razorpay plugin
+ * @readonly
  * TODO: Add additional languages (hi, es, fr, de) when translations are available
  */
-export const supportedLanguages = ['en'];
+export const supportedLanguages = ['en'] as const;
 
 /**
  * Initialize i18next with React bindings and language detection

@@ -4,7 +4,7 @@
 
 # Interface: IPluginContext\<TDb, TConfig\>
 
-Defined in: [plugins/types.ts:20](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L20)
+Defined in: [plugins/types.ts:25](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L25)
 
 Plugin context provided to all lifecycle hooks
 Contains database, logger, and other shared resources
@@ -15,13 +15,13 @@ Contains database, logger, and other shared resources
 
 `TDb` = `unknown`
 
-Type for the database connection (default: unknown)
+Type for the database connection
 
 ### TConfig
 
-`TConfig` = `Record`\<`string`, `unknown`\>
+`TConfig` = [`PluginConfig`](../type-aliases/PluginConfig.md)
 
-Type for plugin configuration (default: Record<string, unknown>)
+Type for plugin configuration
 
 ## Properties
 
@@ -29,7 +29,7 @@ Type for plugin configuration (default: Record<string, unknown>)
 
 > `optional` **config**: `TConfig`
 
-Defined in: [plugins/types.ts:34](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L34)
+Defined in: [plugins/types.ts:36](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L36)
 
 Plugin configuration from manifest
 
@@ -39,7 +39,7 @@ Plugin configuration from manifest
 
 > `optional` **db**: `TDb`
 
-Defined in: [plugins/types.ts:25](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L25)
+Defined in: [plugins/types.ts:27](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L27)
 
 Database connection for plugin data access
 
@@ -49,7 +49,7 @@ Database connection for plugin data access
 
 > `optional` **logger**: `object`
 
-Defined in: [plugins/types.ts:27](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L27)
+Defined in: [plugins/types.ts:29](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L29)
 
 Logger instance for plugin logging (use instead of console.*)
 

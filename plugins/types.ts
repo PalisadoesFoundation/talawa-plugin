@@ -11,16 +11,18 @@
 export type LogArg = string | number | boolean | null | undefined | object;
 
 /**
+ * Default plugin configuration type
+ */
+export type PluginConfig = Record<string, unknown>;
+
+/**
  * Plugin context provided to all lifecycle hooks
  * Contains database, logger, and other shared resources
  *
- * @template TDb - Type for the database connection (default: unknown)
- * @template TConfig - Type for plugin configuration (default: Record<string, unknown>)
+ * @template TDb - Type for the database connection
+ * @template TConfig - Type for plugin configuration
  */
-export interface IPluginContext<
-  TDb = unknown,
-  TConfig = Record<string, unknown>,
-> {
+export interface IPluginContext<TDb = unknown, TConfig = PluginConfig> {
   /** Database connection for plugin data access */
   db?: TDb;
   /** Logger instance for plugin logging (use instead of console.*) */
@@ -41,10 +43,7 @@ export interface IPluginContext<
  * by all plugins to ensure proper initialization, activation, and cleanup.
  * All hooks receive a context object for accessing shared resources.
  */
-export interface IPluginLifecycle<
-  TDb = unknown,
-  TConfig = Record<string, unknown>,
-> {
+export interface IPluginLifecycle<TDb = unknown, TConfig = PluginConfig> {
   /**
    * Called when plugin is loaded into memory
    * Use for initial setup and resource allocation
