@@ -76,10 +76,9 @@ const RazorpayConfiguration: React.FC = () => {
       toast.success('Razorpay configuration saved successfully!');
       refetch();
     } catch (error) {
-      // Log error details for debugging
-
-      console.error('Failed to save Razorpay configuration:', error);
-      toast.error('Failed to save Razorpay configuration');
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to save Razorpay configuration: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -118,11 +117,10 @@ const RazorpayConfiguration: React.FC = () => {
         // Error message already shown via toast above
       }
     } catch (error) {
-      // Log error details for debugging
-
-      console.error('Error testing Razorpay setup:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       toast.error(
-        'Setup test failed. Please check your configuration and try again.',
+        `Setup test failed: ${errorMessage}. Please check your configuration.`,
       );
     } finally {
       setIsLoading(false);

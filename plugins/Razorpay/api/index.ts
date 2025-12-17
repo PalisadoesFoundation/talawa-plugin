@@ -366,6 +366,7 @@ export async function onPaymentFailed(
 }
 
 // Utility functions for the plugin
+// _context kept for API compatibility - may be used in future for logging/config
 export async function getPluginInfo(_context: IPluginContext) {
   return {
     name: 'Razorpay Payment Gateway',

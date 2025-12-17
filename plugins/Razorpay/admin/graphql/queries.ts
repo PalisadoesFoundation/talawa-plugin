@@ -211,14 +211,14 @@ export const GET_USER_TRANSACTION_STATS = gql`
  */
 export const GET_ORG_TRANSACTIONS = gql`
   query GetOrganizationTransactions(
-    $organizationId: String!
+    $orgId: String!
     $limit: Int
     $offset: Int
     $dateFrom: String
     $dateTo: String
   ) {
     razorpay_getOrganizationTransactions(
-      organizationId: $organizationId
+      organizationId: $orgId
       limit: $limit
       offset: $offset
       dateFrom: $dateFrom
@@ -244,8 +244,8 @@ export const GET_ORG_TRANSACTIONS = gql`
  * Get organization transaction statistics
  */
 export const GET_ORG_TRANSACTION_STATS = gql`
-  query GetOrganizationTransactionStats($organizationId: String!) {
-    razorpay_getOrganizationTransactionStats(organizationId: $organizationId) {
+  query GetOrganizationTransactionStats($orgId: String!) {
+    razorpay_getOrganizationTransactionStats(organizationId: $orgId) {
       totalTransactions
       totalAmount
       successfulTransactions
