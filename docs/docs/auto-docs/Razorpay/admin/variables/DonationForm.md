@@ -6,4 +6,4 @@
 
 > `const` **DonationForm**: `React.FC`
 
-Defined in: [plugins/Razorpay/admin/pages/DonationForm.tsx:94](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/admin/pages/DonationForm.tsx#L94)
+Defined in: [plugins/Razorpay/admin/pages/DonationForm.tsx:92](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/admin/pages/DonationForm.tsx#L92)

@@ -96,6 +96,7 @@
     "test:coverage": "vitest --coverage",
     "test:ui": "vitest --ui",
     "test:watch": "vitest --watch",
+    "lint-staged": "lint-staged --concurrent false",
     "prepare": "husky"
   },
   "keywords": []
