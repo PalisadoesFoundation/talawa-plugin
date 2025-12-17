@@ -16,9 +16,8 @@ const TestWrapper: React.FC<{
   initialEntries?: string[];
   path?: string;
 }> = ({ children, mocks, initialEntries = ['/'], path = '/' }) => {
-  // Disable addTypename to prevent mismatch with mocks that don't have it
-  // @ts-expect-error - addTypename is valid but not exposed in v4 types
-  const cache = new InMemoryCache({ addTypename: false });
+  // Apollo v4 always adds __typename; mocks must include __typename fields
+  const cache = new InMemoryCache();
 
   return (
     <MockedProvider mocks={mocks} cache={cache}>
@@ -261,6 +260,7 @@ export const createMockUser = (overrides = {}) => ({
   firstName: 'John',
   lastName: 'Doe',
   email: 'john.doe@example.com',
+  __typename: 'User',
   ...overrides,
 });
 export const createMockOrganization = (overrides = {}) => ({
@@ -268,6 +268,7 @@ export const createMockOrganization = (overrides = {}) => ({
   name: 'Test Organization',
   description: 'A test organization for donations',
   avatarURL: 'https://example.com/avatar.png',
+  __typename: 'Organization',
   ...overrides,
 });
 export const createMockRazorpayConfig = (overrides = {}) => ({
@@ -278,6 +279,7 @@ export const createMockRazorpayConfig = (overrides = {}) => ({
   testMode: true,
   currency: 'INR',
   description: 'Donation to organization',
+  __typename: 'RazorpayConfig',
   ...overrides,
 });
 export const createMockPaymentOrder = (overrides = {}) => ({
@@ -294,6 +296,7 @@ export const createMockPaymentOrder = (overrides = {}) => ({
   description: 'Donation to Test Organization',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
+  __typename: 'RazorpayOrder',
   ...overrides,
 });
 export const createMockTransaction = (overrides = {}) => ({
@@ -318,6 +321,7 @@ export const createMockTransaction = (overrides = {}) => ({
   capturedAt: new Date().toISOString(),
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
+  __typename: 'RazorpayTransaction',
   ...overrides,
 });
 export const createMockTransactionStats = (overrides = {}) => ({
@@ -327,6 +331,7 @@ export const createMockTransactionStats = (overrides = {}) => ({
   successCount: 8,
   failedCount: 1,
   pendingCount: 1,
+  __typename: 'RazorpayTransactionStats',
   ...overrides,
 }); // Mock Response Factories for GraphQL
 export const createUserQueryMock = (user = createMockUser()) => ({

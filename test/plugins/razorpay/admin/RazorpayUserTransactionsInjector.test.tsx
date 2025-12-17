@@ -171,4 +171,169 @@ describe('RazorpayUserTransactionsInjector', () => {
       });
     });
   });
+
+  describe('Edge Cases', () => {
+    it('should show empty state when transaction list is empty', async () => {
+      const emptyMocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_USER_TXN_INJECTOR,
+            variables: {
+              userId: 'test-user-id',
+              orgId: 'test-org-id',
+              limit: 10,
+            },
+          },
+          result: {
+            data: { razorpay_getUserTransactions: [] },
+          },
+        },
+        {
+          request: {
+            query: GET_USER_TRANSACTIONS_STATS,
+            variables: { userId: 'test-user-id' },
+          },
+          result: {
+            data: {
+              razorpay_getUserTransactionStats: {
+                totalTransactions: 0,
+                totalAmount: 0,
+                currency: 'INR',
+                successCount: 0,
+                failedCount: 0,
+                pendingCount: 0,
+                __typename: 'RazorpayTransactionStats',
+              },
+            },
+          },
+        },
+      ];
+
+      renderWithProviders(<RazorpayUserTransactionsInjector />, {
+        mocks: emptyMocks,
+        initialEntries: ['/org/test-org-id/user/test-user-id'],
+        path: '/org/:orgId/user/:userId',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Razorpay Transactions')).toBeInTheDocument();
+      });
+
+      // Should show empty state or no transaction rows
+      expect(screen.queryByText('pay_inj123')).not.toBeInTheDocument();
+    });
+
+    it('should render gracefully with missing optional fields', async () => {
+      const minimalTransaction = {
+        id: 'txn-minimal',
+        paymentId: 'pay_minimal',
+        amount: 5000,
+        currency: 'INR',
+        status: 'captured',
+        donorName: null,
+        donorEmail: null,
+        method: null,
+        bank: null,
+        wallet: null,
+        vpa: null,
+        email: null,
+        contact: null,
+        fee: null,
+        tax: null,
+        errorCode: null,
+        errorDescription: null,
+        refundStatus: null,
+        capturedAt: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        __typename: 'RazorpayTransaction',
+      };
+
+      const minimalMocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_USER_TXN_INJECTOR,
+            variables: {
+              userId: 'test-user-id',
+              orgId: 'test-org-id',
+              limit: 10,
+            },
+          },
+          result: {
+            data: { razorpay_getUserTransactions: [minimalTransaction] },
+          },
+        },
+        {
+          request: {
+            query: GET_USER_TRANSACTIONS_STATS,
+            variables: { userId: 'test-user-id' },
+          },
+          result: {
+            data: {
+              razorpay_getUserTransactionStats: {
+                totalTransactions: 1,
+                totalAmount: 5000,
+                currency: 'INR',
+                successCount: 1,
+                failedCount: 0,
+                pendingCount: 0,
+                __typename: 'RazorpayTransactionStats',
+              },
+            },
+          },
+        },
+      ];
+
+      renderWithProviders(<RazorpayUserTransactionsInjector />, {
+        mocks: minimalMocks,
+        initialEntries: ['/org/test-org-id/user/test-user-id'],
+        path: '/org/:orgId/user/:userId',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Razorpay Transactions')).toBeInTheDocument();
+      });
+
+      // Should display payment ID even with missing fields
+      expect(screen.getByText('pay_minimal')).toBeInTheDocument();
+    });
+
+    it('should render transactions when stats query fails', async () => {
+      const transactionsOnlyMocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_USER_TXN_INJECTOR,
+            variables: {
+              userId: 'test-user-id',
+              orgId: 'test-org-id',
+              limit: 10,
+            },
+          },
+          result: {
+            data: { razorpay_getUserTransactions: mockTransactions },
+          },
+        },
+        {
+          request: {
+            query: GET_USER_TRANSACTIONS_STATS,
+            variables: { userId: 'test-user-id' },
+          },
+          error: new Error('Stats failed'),
+        },
+      ];
+
+      renderWithProviders(<RazorpayUserTransactionsInjector />, {
+        mocks: transactionsOnlyMocks,
+        initialEntries: ['/org/test-org-id/user/test-user-id'],
+        path: '/org/:orgId/user/:userId',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Razorpay Transactions')).toBeInTheDocument();
+      });
+
+      // Transactions should still render even if stats fail
+      expect(screen.getByText('pay_inj123')).toBeInTheDocument();
+    });
+  });
 });
