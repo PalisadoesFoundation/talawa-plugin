@@ -234,11 +234,11 @@ describe('DonationForm', () => {
 
   describe('Payment Flow', () => {
     it('should initiate payment on submit', async () => {
-      // Mock Razorpay
+      // Mock Razorpay as a class (required for 'new' keyword)
       const openMock = vi.fn();
-      const RazorpayMock = vi.fn(() => ({
-        open: openMock,
-      }));
+      class RazorpayMock {
+        open = openMock;
+      }
       vi.stubGlobal('Razorpay', RazorpayMock);
 
       renderDonationForm();

@@ -235,7 +235,12 @@ export class RazorpayService {
     }
 
     try {
-      const payment = await (this.razorpay!.payments as any).create({
+      // Type assertion needed as Razorpay SDK types don't expose payments.create
+      const payment = await (
+        this.razorpay!.payments as unknown as {
+          create: (data: RazorpayPaymentData) => Promise<RazorpayPayment>;
+        }
+      ).create({
         amount: paymentData.amount,
         currency: paymentData.currency,
         receipt: paymentData.receipt,
@@ -608,6 +613,7 @@ export class RazorpayService {
       );
 
       if (response.ok) {
+        // Parse JSON to validate the response format; result is intentionally discarded
         await response.json();
         this.context.log?.info('Razorpay API test successful');
         return {

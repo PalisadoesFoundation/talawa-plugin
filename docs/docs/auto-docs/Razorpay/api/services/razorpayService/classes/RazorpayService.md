@@ -89,7 +89,7 @@ The created payment object.
 
 > **getPaymentDetails**(`paymentId`): `Promise`\<[`RazorpayPayment`](../interfaces/RazorpayPayment.md)\>
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:508](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L508)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:513](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L513)
 
 Fetches details of a specific payment from Razorpay.
 
@@ -132,7 +132,7 @@ Error if configuration is missing or incomplete.
 
 > **processWebhook**(`webhookData`): `Promise`\<`void`\>
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:403](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L403)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:408](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L408)
 
 Processes a verified webhook event from Razorpay.
 Updates order and transaction status based on the event payload.
@@ -155,7 +155,7 @@ The parsed webhook data.
 
 > **refundPayment**(`paymentId`, `amount?`): `Promise`\<[`RazorpayRefund`](../interfaces/RazorpayRefund.md)\>
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:529](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L529)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:534](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L534)
 
 Initiates a refund for a specific payment.
 
@@ -185,7 +185,7 @@ The refund object.
 
 > **testConnection**(): `Promise`\<\{ `message`: `string`; `success`: `boolean`; \}\>
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:554](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L554)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:559](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L559)
 
 Tests the connection to Razorpay API using current configuration.
 
@@ -201,7 +201,7 @@ Object containing success status and message.
 
 > **verifyPayment**(`paymentId`, `orderId`, `signature`, `paymentData`): `Promise`\<`boolean`\>
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:262](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L262)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:267](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L267)
 
 Verifies a payment signature using the webhook secret.
 
@@ -243,7 +243,7 @@ Boolean indicating if the signature is valid.
 
 > **verifyPaymentSignature**(`orderId`, `paymentId`, `signature`): `Promise`\<`boolean`\>
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:318](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L318)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:323](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L323)
 
 Verifies the signature of a payment associated with an order using the Key Secret.
 
@@ -279,7 +279,7 @@ Boolean indicating if the signature is valid.
 
 > **verifyWebhookSignature**(`webhookBody`, `signature`): `Promise`\<`boolean`\>
 
-Defined in: [plugins/Razorpay/api/services/razorpayService.ts:364](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L364)
+Defined in: [plugins/Razorpay/api/services/razorpayService.ts:369](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/services/razorpayService.ts#L369)
 
 Verifies the signature of a webhook payload.
 

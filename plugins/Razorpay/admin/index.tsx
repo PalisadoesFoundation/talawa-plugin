@@ -23,14 +23,10 @@ import RazorpayOrganizationTransactionsInjector from './injector/RazorpayOrganiz
 const RazorpayLifecycle: IPluginLifecycle = {
   onActivate: async () => {
     // Initialize plugin-specific data
-    try {
-      // Set up Razorpay configuration
-      // Initialize payment gateway
-      // Set up transaction tracking
-      // Razorpay plugin initialization completed
-    } catch (error) {
-      console.error('Razorpay plugin initialization failed:', error);
-    }
+    // Set up Razorpay configuration
+    // Initialize payment gateway
+    // Set up transaction tracking
+    // Razorpay plugin initialization completed
   },
 
   onDeactivate: async () => {
