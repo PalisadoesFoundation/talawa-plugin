@@ -53,7 +53,7 @@ All hooks MUST be safe to run multiple times (idempotent):
 const MyPlugin: IPluginLifecycle = {
   onActivate: async (context) => {
     if (context.isActive) {
-      context.logger?.warn('Plugin already active, skipping activation');
+      context.logger.warn('Plugin already active, skipping activation');
       return;
     }
     // Perform activation...

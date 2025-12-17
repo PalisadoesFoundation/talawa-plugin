@@ -3,7 +3,15 @@ import { eq } from 'drizzle-orm';
 
 /**
  * DrizzleDB interface for type-safe database operations
- * Represents the subset of Drizzle ORM methods used by this plugin
+ *
+ * This custom interface represents the subset of Drizzle ORM methods used by this plugin.
+ * We intentionally avoid importing `PostgresJsDatabase` from `drizzle-orm/postgres-js` because:
+ * 1. The plugin should be database-agnostic (may run on PostgreSQL, MySQL, SQLite, etc.)
+ * 2. The host application provides the database instance with its own configuration
+ * 3. This minimal interface covers all operations needed by the plugin
+ *
+ * If you need database-specific features like `.returning()` or `.execute()`,
+ * extend this interface or cast to the appropriate Drizzle database type.
  */
 interface DrizzleDB {
   select(): {

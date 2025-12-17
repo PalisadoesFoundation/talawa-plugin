@@ -9,7 +9,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-// @ts-expect-error - Apollo Client v4 types issue
+/**
+ * TODO(2024-12-18): Apollo Client v4.x type definitions do not export useQuery/useMutation
+ * hooks with correct generic signatures, causing TS2305 errors. This is a known issue:
+ * @see https://github.com/apollographql/apollo-client/issues/11506
+ */
+// @ts-expect-error - Apollo Client v4 useQuery/useMutation hooks have incompatible type exports
 import { useQuery, useMutation } from '@apollo/client';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -319,7 +324,17 @@ const DonationForm: React.FC = () => {
    * @returns Formatted currency string
    */
   const formatCurrency = (amount: number, currency: string): string => {
-    return new Intl.NumberFormat('en-IN', {
+    // Map currency codes to their typical locales
+    const currencyLocaleMap: { [key: string]: string } = {
+      INR: 'en-IN',
+      USD: 'en-US',
+      EUR: 'de-DE',
+      GBP: 'en-GB',
+    };
+    // Use browser locale, then currency-specific locale, then default to en-US
+    const locale =
+      navigator?.language || currencyLocaleMap[currency] || 'en-US';
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency || 'INR',
     }).format(amount);

@@ -138,7 +138,7 @@ export interface IPluginContext<TDb = unknown, TConfig = PluginConfig> {
  * const MyPlugin: IPluginLifecycle = {
  *   onActivate: async (context) => {
  *     if (context.isActive) {
- *       context.logger?.warn('Plugin already active, skipping activation');
+ *       context.logger.warn('Plugin already active, skipping activation');
  *       return;
  *     }
  *     // Perform activation...
@@ -265,4 +265,39 @@ export interface IPluginLifecycle<TDb = unknown, TConfig = PluginConfig> {
     toVersion: string,
     context: IPluginContext<TDb, TConfig>,
   ) => Promise<void>;
+}
+
+/**
+ * Custom error class for plugin-related errors
+ *
+ * Use this to throw/catch plugin-specific errors that can be distinguished
+ * from generic system errors. Includes plugin name and hook context for debugging.
+ *
+ * @example
+ * ```typescript
+ * throw new PluginError('Database connection required', 'Razorpay', 'onActivate');
+ * ```
+ */
+export class PluginError extends Error {
+  /** Name of the plugin that threw the error */
+  readonly pluginName?: string;
+
+  /** Lifecycle hook where the error occurred */
+  readonly hook?: keyof IPluginLifecycle;
+
+  constructor(
+    message: string,
+    pluginName?: string,
+    hook?: keyof IPluginLifecycle,
+  ) {
+    super(message);
+    this.name = 'PluginError';
+    this.pluginName = pluginName;
+    this.hook = hook;
+
+    // Maintains proper stack trace for where error was thrown (V8 engines)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, PluginError);
+    }
+  }
 }

@@ -67,7 +67,7 @@ export const GET_RAZORPAY_CONFIG = gql`
  * Get Razorpay configuration (public - no secrets, for donation form)
  */
 export const GET_RAZORPAY_CONFIG_PUBLIC = gql`
-  query GetRazorpayConfig {
+  query GetRazorpayConfigPublic {
     razorpay_getRazorpayConfig {
       keyId
       isEnabled

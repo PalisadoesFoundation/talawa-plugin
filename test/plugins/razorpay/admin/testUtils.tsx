@@ -90,7 +90,7 @@ export const GET_RAZORPAY_CONFIG = gql`
 `;
 
 export const GET_RAZORPAY_CONFIG_PUBLIC = gql`
-  query GetRazorpayConfig {
+  query GetRazorpayConfigPublic {
     razorpay_getRazorpayConfig {
       keyId
       isEnabled
