@@ -30,60 +30,34 @@ const RazorpayLifecycle: IPluginLifecycle = {
   },
 
   onDeactivate: async () => {
-    // Cleanup plugin-specific resources
-    try {
-      // Clean up payment gateway connections
-      // Remove transaction tracking
-      // Clean up configuration
-      // Razorpay plugin cleanup completed
-    } catch (error) {
-      console.error('Razorpay plugin cleanup failed:', error);
-    }
+    // TODO: Implement plugin-specific resource cleanup
+    // - Clean up payment gateway connections
+    // - Remove transaction tracking
+    // - Clean up configuration
   },
 
   onInstall: async () => {
-    // Perform installation tasks
-    try {
-      // This could include:
-      // - Setting up default configuration
-      // - Creating initial database records
-      // - Setting up webhook endpoints
-      // - Configuring payment gateway
-      // Razorpay plugin installation completed
-    } catch (error) {
-      console.error('Razorpay plugin installation failed:', error);
-      throw error; // Re-throw to indicate installation failure
-    }
+    // TODO: Implement installation tasks
+    // - Setting up default configuration
+    // - Creating initial database records
+    // - Setting up webhook endpoints
+    // - Configuring payment gateway
   },
 
   onUninstall: async () => {
-    // Perform uninstallation cleanup
-    try {
-      // This could include:
-      // - Removing configuration data
-      // - Cleaning up database records
-      // - Removing webhook endpoints
-      // - Cleaning up payment gateway
-      // Razorpay plugin uninstallation completed
-    } catch (error) {
-      console.error('Razorpay plugin uninstallation failed:', error);
-      throw error; // Re-throw to indicate uninstallation failure
-    }
+    // TODO: Implement uninstallation cleanup
+    // - Removing configuration data
+    // - Cleaning up database records
+    // - Removing webhook endpoints
+    // - Cleaning up payment gateway
   },
 
   onUpdate: async () => {
-    // Perform version-specific updates
-    try {
-      // This could include:
-      // - Updating configuration schema
-      // - Migrating transaction data
-      // - Updating payment gateway integration
-      // - Refreshing webhook configurations
-      // Razorpay plugin update completed
-    } catch (error) {
-      console.error('Razorpay plugin update failed:', error);
-      throw error; // Re-throw to indicate update failure
-    }
+    // TODO: Implement version-specific updates
+    // - Updating configuration schema
+    // - Migrating transaction data
+    // - Updating payment gateway integration
+    // - Refreshing webhook configurations
   },
 };
 

@@ -254,7 +254,9 @@ export const GET_ORG_TRANSACTION_STATS = gql`
       pendingCount
     }
   }
-`; // Mock Data Factories
+`;
+
+// Mock Data Factories
 export const createMockUser = (overrides = {}) => ({
   id: 'user-123',
   firstName: 'John',
@@ -513,15 +515,22 @@ export const createOrgTransactionStatsQueryMock = (
       razorpay_getOrganizationTransactionStats: stats,
     },
   },
-}); // Error Mock Factories
+});
+
+// Error Mock Factories
 export const createErrorMock = (query: DocumentNode, errorMessage: string) => ({
   request: {
     query,
   },
   error: new Error(errorMessage),
-}); // Wait for loading state to resolve
-// Wait for loading state to resolve (flushes pending promises)
-export const waitForLoadingToFinish = async () => {
+});
+
+/**
+ * Flushes pending promises by yielding to the microtask/macrotask queue.
+ * Note: This only yields control to allow pending async operations to complete,
+ * it does not poll for or wait on actual loading state indicators.
+ */
+export const flushPromises = async () => {
   await act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
