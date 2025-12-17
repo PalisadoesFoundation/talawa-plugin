@@ -34,7 +34,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { Navigate } from 'react-router-dom';
-import useLocalStorage from '../../../../__mocks__/useLocalstorage';
+import useLocalStorage from 'utils/useLocalstorage';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -139,12 +139,7 @@ const UserTransactions: React.FC = () => {
   const { getItem } = useLocalStorage();
   const userId = getItem('id') as string | null;
 
-  // Redirect if no userId is available
-  if (!userId) {
-    return <Navigate to="/" replace />;
-  }
-
-  // GraphQL queries
+  // GraphQL queries - must be called unconditionally (React hooks rule)
   const {
     data: transactionsData,
     loading: transactionsLoading,
@@ -168,6 +163,11 @@ const UserTransactions: React.FC = () => {
       fetchPolicy: 'network-only',
     },
   );
+
+  // Redirect if no userId is available (after hooks are called)
+  if (!userId) {
+    return <Navigate to="/" replace />;
+  }
 
   const transactions = transactionsData?.razorpay_getUserTransactions || [];
 

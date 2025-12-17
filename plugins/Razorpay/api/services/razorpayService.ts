@@ -58,6 +58,54 @@ export interface RazorpayWebhookData {
   };
 }
 
+/** Razorpay Order response from API */
+export interface RazorpayOrder {
+  id: string;
+  entity: string;
+  amount: number;
+  amount_paid?: number;
+  amount_due?: number;
+  currency: string;
+  receipt?: string;
+  status: string;
+  attempts?: number;
+  notes?: Record<string, string>;
+  created_at?: number;
+}
+
+/** Razorpay Payment response from API */
+export interface RazorpayPayment {
+  id: string;
+  entity: string;
+  amount: number;
+  currency: string;
+  status: string;
+  order_id?: string;
+  method?: string;
+  description?: string;
+  bank?: string;
+  wallet?: string;
+  vpa?: string;
+  email?: string;
+  contact?: string;
+  fee?: number;
+  tax?: number;
+  error_code?: string;
+  error_description?: string;
+  created_at?: number;
+}
+
+/** Razorpay Refund response from API */
+export interface RazorpayRefund {
+  id: string;
+  entity: string;
+  amount: number;
+  currency?: string;
+  payment_id?: string;
+  status: string;
+  created_at?: number;
+}
+
 /**
  * Service class for handling Razorpay payment gateway operations.
  * Manages orders, payments, verification, and webhooks.
@@ -108,7 +156,7 @@ export class RazorpayService {
    * @returns The created Razorpay order object.
    * @throws Error if API credentials are invalid or unrelated errors occur.
    */
-  async createOrder(orderData: RazorpayOrderData): Promise<any> {
+  async createOrder(orderData: RazorpayOrderData): Promise<RazorpayOrder> {
     if (!this.razorpay) {
       await this.initialize();
     }
@@ -179,7 +227,9 @@ export class RazorpayService {
    * @param paymentData - Payment details.
    * @returns The created payment object.
    */
-  async createPayment(paymentData: RazorpayPaymentData): Promise<any> {
+  async createPayment(
+    paymentData: RazorpayPaymentData,
+  ): Promise<RazorpayPayment> {
     if (!this.razorpay) {
       await this.initialize();
     }
@@ -455,7 +505,7 @@ export class RazorpayService {
    * @param paymentId - The ID of the payment to fetch.
    * @returns The payment details object.
    */
-  async getPaymentDetails(paymentId: string): Promise<any> {
+  async getPaymentDetails(paymentId: string): Promise<RazorpayPayment> {
     if (!this.razorpay) {
       await this.initialize();
     }
@@ -476,7 +526,10 @@ export class RazorpayService {
    * @param amount - Optional amount to refund (if partial).
    * @returns The refund object.
    */
-  async refundPayment(paymentId: string, amount?: number): Promise<any> {
+  async refundPayment(
+    paymentId: string,
+    amount?: number,
+  ): Promise<RazorpayRefund> {
     if (!this.razorpay) {
       await this.initialize();
     }

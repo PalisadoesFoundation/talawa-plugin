@@ -5,6 +5,7 @@ import * as RRD from 'react-router-dom';
 const { MemoryRouter, Routes, Route } = RRD;
 import { render, RenderOptions, act } from '@testing-library/react';
 import { gql, InMemoryCache } from '@apollo/client';
+import type { DocumentNode } from 'graphql';
 
 /**
  * Test wrapper that provides Apollo MockedProvider and MemoryRouter
@@ -16,7 +17,8 @@ const TestWrapper: React.FC<{
   path?: string;
 }> = ({ children, mocks, initialEntries = ['/'], path = '/' }) => {
   // Disable addTypename to prevent mismatch with mocks that don't have it
-  const cache = new InMemoryCache({ addTypename: false } as any);
+  // @ts-expect-error - addTypename is valid but not exposed in v4 types
+  const cache = new InMemoryCache({ addTypename: false });
 
   return (
     <MockedProvider mocks={mocks} cache={cache}>
@@ -507,7 +509,7 @@ export const createOrgTransactionStatsQueryMock = (
     },
   },
 }); // Error Mock Factories
-export const createErrorMock = (query: any, errorMessage: string) => ({
+export const createErrorMock = (query: DocumentNode, errorMessage: string) => ({
   request: {
     query,
   },

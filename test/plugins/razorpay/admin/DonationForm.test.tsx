@@ -263,12 +263,18 @@ describe('DonationForm', () => {
       const submitBtn = screen.getByRole('button', { name: /Donate ₹100.00/i });
       fireEvent.click(submitBtn);
 
-      // Verify Razorpay was instantiated and open was called
+      // Verify Razorpay was instantiated
       await waitFor(
         () => {
           expect(RazorpayMock).toHaveBeenCalled();
-          // We can't easily check openMock because we don't capture the instance,
-          // but checking constructor call is enough evidence that script ran.
+        },
+        { timeout: 3000 },
+      );
+
+      // Verify open was called on the instance
+      await waitFor(
+        () => {
+          expect(openMock).toHaveBeenCalled();
         },
         { timeout: 3000 },
       );

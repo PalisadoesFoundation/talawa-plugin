@@ -83,9 +83,37 @@ interface RazorpaySuccessResponse {
   razorpay_signature: string;
 }
 
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  theme?: {
+    color?: string;
+  };
+  handler: (response: RazorpaySuccessResponse) => void;
+  modal?: {
+    ondismiss?: () => void;
+  };
+}
+
+interface VerifyPaymentResponse {
+  razorpay_verifyPayment: {
+    success: boolean;
+    message?: string;
+  };
+}
+
 declare global {
   interface Window {
-    Razorpay: new (options: any) => { open: () => void };
+    Razorpay: new (options: RazorpayOptions) => { open: () => void };
   }
 }
 
@@ -280,21 +308,23 @@ const DonationForm: React.FC = () => {
               },
             },
           })
-            .then(({ data: verificationData }: { data: any }) => {
-              if (verificationData?.razorpay_verifyPayment?.success) {
-                setCurrentStep('success');
-                toast.success(
-                  'Payment successful! Thank you for your donation.',
-                );
-                setIsProcessing(false);
-              } else {
-                toast.error(
-                  verificationData?.razorpay_verifyPayment?.message ||
-                    'Payment verification failed',
-                );
-                setIsProcessing(false);
-              }
-            })
+            .then(
+              ({ data: verificationData }: { data: VerifyPaymentResponse }) => {
+                if (verificationData?.razorpay_verifyPayment?.success) {
+                  setCurrentStep('success');
+                  toast.success(
+                    'Payment successful! Thank you for your donation.',
+                  );
+                  setIsProcessing(false);
+                } else {
+                  toast.error(
+                    verificationData?.razorpay_verifyPayment?.message ||
+                      'Payment verification failed',
+                  );
+                  setIsProcessing(false);
+                }
+              },
+            )
             .catch((error: unknown) => {
               console.error('Payment verification error:', error);
               toast.error(
