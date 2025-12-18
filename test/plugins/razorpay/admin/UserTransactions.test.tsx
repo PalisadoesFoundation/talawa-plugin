@@ -162,8 +162,9 @@ describe('UserTransactions', () => {
       // So we should see 'transactions.status.captured' in the document when dropdown is open.
 
       // Wait for dropdown
+      // Wait for dropdown
       // (Simplified test logic: just verify presence of filter inputs)
-      // (Simplified test logic: just verify presence of filter inputs)
+      expect(
       expect(
         screen.getAllByLabelText('transactions.filters.statusLabel')[0],
       ).toBeInTheDocument();
