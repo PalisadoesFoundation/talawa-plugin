@@ -156,7 +156,6 @@ it('should render status filter control', async () => {
   ).toBeInTheDocument();
 });
 
-
 describe('Action Buttons', () => {
   it('should render View button for each transaction', async () => {
     renderWithProviders(<UserTransactions />, {
@@ -200,7 +199,6 @@ describe('Error Handling', () => {
     });
 
     await waitFor(() => {
-
       expect(
         screen.getByText(/transactions.error.loadFailed/i),
       ).toBeInTheDocument();
