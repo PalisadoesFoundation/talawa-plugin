@@ -87,6 +87,22 @@ interface RazorpayWebhookPayload {
 }
 
 /**
+ * Interface for Order record
+ */
+interface OrderRecord {
+  id: string;
+  organizationId: string;
+  userId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  razorpayOrderId: string;
+  receipt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
  * Plugin request with context
  */
 interface PluginRequest {
@@ -487,7 +503,9 @@ export async function handleRazorpayWebhook(
       if (pluginContext.log?.error) {
         pluginContext.log.error('Webhook secret not configured');
       } else {
-        console.error('Razorpay Webhook Error: Webhook secret not configured');
+        process.stderr.write(
+          'Razorpay Webhook Error: Webhook secret not configured\n',
+        );
       }
       return reply.status(500).send({
         error: 'Webhook secret not configured',
@@ -497,19 +515,7 @@ export async function handleRazorpayWebhook(
 
     // Verify signature
     const crypto = await import('node:crypto');
-    // Interface for Order record
-    interface OrderRecord {
-      id: string;
-      organizationId: string;
-      userId: string;
-      amount: number;
-      currency: string;
-      status: string;
-      razorpayOrderId: string;
-      receipt: string;
-      createdAt: string;
-      updatedAt: string;
-    }
+    // Verify signature
 
     const expectedSignature = crypto
       .createHmac('sha256', (config[0] as any).webhookSecret)
@@ -526,8 +532,8 @@ export async function handleRazorpayWebhook(
           'Invalid signature format: not a valid hex string',
         );
       } else {
-        console.error(
-          'Razorpay Webhook Error: Invalid signature format - not a valid hex string',
+        process.stderr.write(
+          'Razorpay Webhook Error: Invalid signature format - not a valid hex string\n',
         );
       }
       return reply.status(400).send({
@@ -547,8 +553,8 @@ export async function handleRazorpayWebhook(
       if (pluginContext.log?.error) {
         pluginContext.log.error('Webhook signature validation failed');
       } else {
-        console.error(
-          'Razorpay Webhook Error: Webhook signature validation failed',
+        process.stderr.write(
+          'Razorpay Webhook Error: Webhook signature validation failed\n',
         );
       }
       return reply.status(400).send({
@@ -576,8 +582,8 @@ export async function handleRazorpayWebhook(
           `Order not found for payment: ${paymentEntity.id}`,
         );
       } else {
-        console.error(
-          `Razorpay Webhook Error: Order not found for payment: ${paymentEntity.id}`,
+        process.stderr.write(
+          `Razorpay Webhook Error: Order not found for payment: ${paymentEntity.id}\n`,
         );
       }
       return reply.status(400).send({

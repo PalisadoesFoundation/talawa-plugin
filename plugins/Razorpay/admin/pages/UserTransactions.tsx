@@ -31,6 +31,7 @@ import {
   Row,
   Col,
 } from 'antd';
+import { Navigate } from 'react-router-dom';
 import {
   CreditCardOutlined,
   EyeOutlined,
@@ -44,7 +45,6 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
-import { Navigate } from 'react-router-dom';
 import useLocalStorage from 'utils/useLocalstorage';
 
 const { Title, Text } = Typography;

@@ -68,6 +68,13 @@ describe('RazorpayOrganizationTransactionsInjector', () => {
           },
           error: new Error('Failed to fetch'),
         },
+        {
+          request: {
+            query: GET_ORG_TRANSACTION_STATS,
+            variables: { orgId: 'test-org-id' },
+          },
+          error: new Error('Failed to fetch stats'),
+        },
       ];
 
       renderWithProviders(<RazorpayOrganizationTransactionsInjector />, {
