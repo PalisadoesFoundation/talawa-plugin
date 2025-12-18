@@ -198,11 +198,12 @@ describe('Razorpay GraphQL Mutations', () => {
           {},
 
           {
+            // @ts-expect-error Testing anonymous donation without userId
             input: {
               ...input,
               userId: undefined,
               anonymous: true,
-            } as unknown as any,
+            },
           },
           mockContext,
         ),
