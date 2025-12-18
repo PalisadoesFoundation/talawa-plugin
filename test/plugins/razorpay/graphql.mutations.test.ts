@@ -196,7 +196,7 @@ describe('Razorpay GraphQL Mutations', () => {
       await expect(
         createPaymentOrderResolver(
           {},
-           
+
           {
             input: {
               ...input,
