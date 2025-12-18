@@ -114,7 +114,9 @@
   },
   "transactions": {
     "title": "Transaction History",
+    "orgTitle": "Razorpay Organization Transactions",
     "subtitle": "View your payment transaction history",
+    "orgSubtitle": "Payment transactions for your organization processed through Razorpay",
     "search": "Search transactions...",
     "filters": {
       "statusLabel": "Filter transactions by status",
@@ -130,8 +132,17 @@
       "amount": "Amount",
       "status": "Status",
       "organization": "Organization",
+      "donor": "Donor",
+      "method": "Payment Method",
+      "fees": "Fees",
       "actions": "Actions",
       "pagination": "{{start}}-{{end}} of {{total}} transactions"
+    },
+    "stats": {
+      "totalAmount": "Total Amount",
+      "totalTransactions": "Total Transactions",
+      "successRate": "Success Rate",
+      "failedTransactions": "Failed Transactions"
     },
     "status": {
       "captured": "Captured",
@@ -144,8 +155,10 @@
     "empty": "No transactions found",
     "viewButton": "View",
     "error": {
-      "loadFailed": "Failed to load transaction data"
-    }
+      "loadFailed": "Failed to load transaction data",
+      "loadOrgFailed": "Error loading transactions"
+    },
+    "loadingOrg": "Loading Razorpay organization transactions..."
   },
   "common": {
     "loading": "Loading...",

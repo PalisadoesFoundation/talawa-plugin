@@ -6,6 +6,13 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+/**
+ * TODO(2024-12-18): Apollo Client v4.x type definitions do not export useQuery/useMutation
+ * hooks with correct generic signatures, causing TS2305 errors. This is a known issue:
+ * @see https://github.com/apollographql/apollo-client/issues/11506
+ */
+// @ts-expect-error - Apollo Client v4 types issue
 import { useQuery } from '@apollo/client';
 import {
   GET_ORG_TRANSACTIONS,
@@ -63,6 +70,7 @@ interface RazorpayOrganizationTransaction {
 }
 
 const RazorpayOrganizationTransactionsInjector: React.FC = () => {
+  const { t } = useTranslation('razorpay');
   const { orgId } = useParams();
 
   // GraphQL queries
@@ -138,7 +146,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
 
   const columns: ColumnsType<RazorpayOrganizationTransaction> = [
     {
-      title: 'Transaction ID',
+      title: t('transactions.table.id'),
       dataIndex: 'paymentId',
       key: 'paymentId',
       render: (paymentId: string) => (
@@ -148,7 +156,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
       ),
     },
     {
-      title: 'Amount',
+      title: t('transactions.table.amount'),
       dataIndex: 'amount',
       key: 'amount',
       render: (amount: number, record: RazorpayOrganizationTransaction) => (
@@ -158,7 +166,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
       ),
     },
     {
-      title: 'Status',
+      title: t('transactions.table.status'),
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
@@ -166,7 +174,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
       ),
     },
     {
-      title: 'Donor',
+      title: t('transactions.table.donor'),
       key: 'donor',
       render: (_, record: RazorpayOrganizationTransaction) => (
         <div>
@@ -180,13 +188,13 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
       ),
     },
     {
-      title: 'Payment Method',
+      title: t('transactions.table.method'),
       dataIndex: 'method',
       key: 'method',
       render: (method: string) => method || 'N/A',
     },
     {
-      title: 'Fees',
+      title: t('transactions.table.fees'),
       dataIndex: 'fee',
       key: 'fee',
       render: (fee: number, record: RazorpayOrganizationTransaction) => (
@@ -196,13 +204,13 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
       ),
     },
     {
-      title: 'Date',
+      title: t('transactions.table.date'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (date: string) => formatDate(date),
     },
     {
-      title: 'Actions',
+      title: t('transactions.table.actions'),
       key: 'actions',
       render: (_, record: RazorpayOrganizationTransaction) => (
         <Space size="small">
@@ -233,7 +241,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
         <div style={{ textAlign: 'center', padding: '40px' }}>
           <Spin size="large" />
           <div style={{ marginTop: '16px' }}>
-            <Text>Loading Razorpay organization transactions...</Text>
+            <Text>{t('transactions.loadingOrg')}</Text>
           </div>
         </div>
       </Card>
@@ -245,7 +253,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
       <Card>
         <div style={{ textAlign: 'center', padding: '40px' }}>
           <Text type="danger">
-            Error loading transactions:{' '}
+            {t('transactions.error.loadOrgFailed')}:{' '}
             {transactionsError?.message || statsError?.message}
           </Text>
         </div>
@@ -259,11 +267,11 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
         <Space align="center">
           <CreditCardOutlined style={{ fontSize: '20px', color: '#1890ff' }} />
           <Title level={4} style={{ margin: 0 }}>
-            Razorpay Organization Transactions
+            {t('transactions.orgTitle')}
           </Title>
         </Space>
         <Text type="secondary" style={{ display: 'block', marginTop: '4px' }}>
-          Payment transactions for your organization processed through Razorpay
+          {t('transactions.orgSubtitle')}
         </Text>
       </div>
 
@@ -273,7 +281,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
           <Col span={6}>
             <Card size="small">
               <Statistic
-                title="Total Amount"
+                title={t('transactions.stats.totalAmount')}
                 value={stats.totalAmount ? stats.totalAmount / 100 : 0}
                 precision={2}
                 prefix={<DollarOutlined />}
@@ -285,7 +293,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
           <Col span={6}>
             <Card size="small">
               <Statistic
-                title="Total Transactions"
+                title={t('transactions.stats.totalTransactions')}
                 value={stats.totalTransactions || 0}
                 prefix={<UserOutlined />}
                 valueStyle={{ color: '#1890ff' }}
@@ -295,7 +303,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
           <Col span={6}>
             <Card size="small">
               <Statistic
-                title="Success Rate"
+                title={t('transactions.stats.successRate')}
                 value={
                   stats.totalTransactions
                     ? ((stats.successCount || 0) / stats.totalTransactions) *
@@ -311,7 +319,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
           <Col span={6}>
             <Card size="small">
               <Statistic
-                title="Failed Transactions"
+                title={t('transactions.stats.failedTransactions')}
                 value={stats.failedCount || 0}
                 valueStyle={{ color: '#cf1322' }}
               />
@@ -329,7 +337,11 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
           showSizeChanger: true,
           showQuickJumper: true,
           showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} transactions`,
+            t('transactions.table.pagination', {
+              start: range[0],
+              end: range[1],
+              total,
+            }),
         }}
         scroll={{ x: 1000 }}
       />

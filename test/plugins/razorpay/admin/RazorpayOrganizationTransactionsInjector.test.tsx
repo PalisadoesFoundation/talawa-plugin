@@ -54,9 +54,7 @@ describe('RazorpayOrganizationTransactionsInjector', () => {
         path: '/org/:orgId',
       });
 
-      expect(
-        screen.getByText(/Loading Razorpay organization transactions/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText('transactions.loadingOrg')).toBeInTheDocument();
     });
   });
 
@@ -80,7 +78,7 @@ describe('RazorpayOrganizationTransactionsInjector', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/Error loading transactions/i),
+          screen.getByText(/transactions.error.loadOrgFailed/),
         ).toBeInTheDocument();
       });
     });
@@ -93,13 +91,13 @@ describe('RazorpayOrganizationTransactionsInjector', () => {
       path: '/org/:orgId',
     });
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('Razorpay Organization Transactions'),
-      ).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByText('transactions.orgTitle'),
+    ).toBeInTheDocument();
 
     expect(screen.getByText('pay_org1')).toBeInTheDocument();
-    expect(screen.getByText('Total Transactions')).toBeInTheDocument();
+    expect(
+      screen.getByText('transactions.stats.totalTransactions'),
+    ).toBeInTheDocument();
   });
 });

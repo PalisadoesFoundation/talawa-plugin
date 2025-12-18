@@ -497,6 +497,20 @@ export async function handleRazorpayWebhook(
 
     // Verify signature
     const crypto = await import('node:crypto');
+    // Interface for Order record
+    interface OrderRecord {
+      id: string;
+      organizationId: string;
+      userId: string;
+      amount: number;
+      currency: string;
+      status: string;
+      razorpayOrderId: string;
+      receipt: string;
+      createdAt: string;
+      updatedAt: string;
+    }
+
     const expectedSignature = crypto
       .createHmac('sha256', (config[0] as any).webhookSecret)
       .update(webhookBody)
@@ -572,7 +586,7 @@ export async function handleRazorpayWebhook(
       });
     }
 
-    const order = orderDetails[0];
+    const order = orderDetails[0] as unknown as OrderRecord;
 
     // Check if transaction already exists
     const existingTransaction = await pluginContext.db
@@ -585,11 +599,11 @@ export async function handleRazorpayWebhook(
       // Create new transaction with userId from order
       await pluginContext.db.insert(transactionsTable).values({
         paymentId: paymentEntity.id,
-        orderId: (order as any).id,
-        organizationId: (order as any).organizationId,
-        userId: (order as any).userId, // Use userId from order
-        amount: (order as any).amount,
-        currency: (order as any).currency,
+        orderId: order.id,
+        organizationId: order.organizationId,
+        userId: order.userId, // Use userId from order
+        amount: order.amount,
+        currency: order.currency,
         status: paymentEntity.status,
         method: paymentEntity.method,
         bank: paymentEntity.bank || undefined,

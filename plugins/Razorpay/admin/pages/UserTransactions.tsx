@@ -8,6 +8,11 @@
 
 import React, { useState } from 'react';
 
+/**
+ * TODO(2024-12-18): Apollo Client v4.x type definitions do not export useQuery/useMutation
+ * hooks with correct generic signatures, causing TS2305 errors. This is a known issue:
+ * @see https://github.com/apollographql/apollo-client/issues/11506
+ */
 // @ts-expect-error - Apollo Client v4 types issue
 import { useQuery } from '@apollo/client';
 import { useTranslation } from 'react-i18next';
@@ -34,6 +39,11 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 import { Navigate } from 'react-router-dom';
 import useLocalStorage from 'utils/useLocalstorage';
 
@@ -139,8 +149,8 @@ const UserTransactions: React.FC = () => {
       if (dateRange && dateRange[0] && dateRange[1]) {
         const transactionDate = dayjs(transaction.createdAt);
         if (
-          !transactionDate.isAfter(dateRange[0]) ||
-          !transactionDate.isBefore(dateRange[1])
+          !transactionDate.isSameOrAfter(dateRange[0], 'day') ||
+          !transactionDate.isSameOrBefore(dateRange[1], 'day')
         ) {
           return false;
         }
