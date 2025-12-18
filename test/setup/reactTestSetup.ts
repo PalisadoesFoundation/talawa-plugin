@@ -67,7 +67,7 @@ if (typeof window !== 'undefined') {
   });
 
   // Razorpay global mock
-
+  // @ts-expect-error - Razorpay is not typed on window
   window.Razorpay = vi.fn().mockImplementation(() => ({
     open: vi.fn(),
     on: vi.fn(),
