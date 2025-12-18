@@ -335,7 +335,7 @@ const DonationForm: React.FC = () => {
     };
     // Use browser locale, then currency-specific locale, then default to en-US
     const locale =
-      navigator?.language || currencyLocaleMap[currency] || 'en-US';
+      currencyLocaleMap[currency] || navigator?.language || 'en-US';
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency || 'INR',

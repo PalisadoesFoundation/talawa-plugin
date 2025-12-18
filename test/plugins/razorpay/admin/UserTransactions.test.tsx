@@ -129,31 +129,27 @@ describe('UserTransactions', () => {
         ).toBeInTheDocument();
       });
     });
+
+    it('should render status filter control', async () => {
+      // Create userEvent instance
+      userEvent.setup();
+
+      renderWithProviders(<UserTransactions />, {
+        mocks: standardMocks,
+        initialEntries: ['/user/razorpay/my-transactions'],
+        path: '/user/razorpay/my-transactions',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('pay_abc123')).toBeInTheDocument();
+      });
+
+      // Verification of filter presence (smoke test)
+      expect(
+        screen.getAllByLabelText('transactions.filters.statusLabel')[0],
+      ).toBeInTheDocument();
+    });
   });
-});
-
-it('should render status filter control', async () => {
-  // Create userEvent instance
-  userEvent.setup();
-
-  renderWithProviders(<UserTransactions />, {
-    mocks: standardMocks,
-    initialEntries: ['/user/razorpay/my-transactions'],
-    path: '/user/razorpay/my-transactions',
-  });
-
-  await waitFor(() => {
-    expect(screen.getByText('pay_abc123')).toBeInTheDocument();
-  });
-
-  await waitFor(() => {
-    expect(screen.getByText('pay_abc123')).toBeInTheDocument();
-  });
-
-  // Verification of filter presence (smoke test)
-  expect(
-    screen.getAllByLabelText('transactions.filters.statusLabel')[0],
-  ).toBeInTheDocument();
 });
 
 describe('Action Buttons', () => {

@@ -13,7 +13,6 @@
       "fullNameRequired": "Full Name *",
       "emailLabel": "Email Address",
       "emailPlaceholder": "Enter your email",
-      "email": "Email Address",
       "phone": "Phone Number",
       "message": "Message (Optional)",
       "phonePlaceholder": "Enter your phone number",

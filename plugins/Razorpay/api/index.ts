@@ -1,12 +1,14 @@
 import type { IPluginContext, IPluginLifecycle } from '../../types';
-import { eq } from 'drizzle-orm';
+
+import { eq, type InferSelectModel } from 'drizzle-orm';
 
 /**
  * DrizzleDB interface for type-safe database operations
  *
  * This custom interface represents the subset of Drizzle ORM methods used by this plugin.
  * We intentionally avoid importing `PostgresJsDatabase` from `drizzle-orm/postgres-js` because:
- * 1. The plugin should be database-agnostic (may run on PostgreSQL, MySQL, SQLite, etc.)
+ * 1. The plugin requires a Postgres-compatible Drizzle DB (uses pgTable).
+ *    See ./database/tables.ts for table definitions.
  * 2. The host application provides the database instance with its own configuration
  * 3. This minimal interface covers all operations needed by the plugin
  *
@@ -87,30 +89,15 @@ interface RazorpayWebhookPayload {
 }
 
 /**
- * Interface for Order record
- */
-interface OrderRecord {
-  id: string;
-  organizationId: string;
-  userId: string;
-  amount: number;
-  currency: string;
-  status: string;
-  razorpayOrderId: string;
-  receipt: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-/**
  * Plugin request with context
  */
 interface PluginRequest {
   body: RazorpayWebhookPayload;
   headers: Record<string, string | string[] | undefined>;
+  organizationId?: string;
   pluginContext?: {
     db: DrizzleDB;
-    log?: {
+    logger: {
       info(message: string, data?: unknown): void;
       warn(message: string, data?: unknown): void;
       error(message: string, data?: unknown): void;
@@ -419,18 +406,6 @@ export async function getPluginInfo(_context: IPluginContext) {
   };
 }
 
-/**
- * Interface for Razorpay config
- */
-interface RazorpayConfig {
-  id: string;
-  keyId: string;
-  keySecret: string;
-  webhookSecret: string;
-  isEnabled: boolean;
-  organizationId: string;
-}
-
 // Webhook handler for Razorpay - Standard implementation per Razorpay docs
 export async function handleRazorpayWebhook(
   request: PluginRequest,
@@ -454,8 +429,8 @@ export async function handleRazorpayWebhook(
     const pluginContext = request.pluginContext;
 
     // Log the webhook for debugging
-    if (pluginContext?.log) {
-      pluginContext.log.info('Razorpay webhook received', {
+    if (pluginContext?.logger) {
+      pluginContext.logger.info('Razorpay webhook received', {
         paymentId: paymentEntity.id,
         status: paymentEntity.status,
       });
@@ -472,8 +447,8 @@ export async function handleRazorpayWebhook(
       currencySymbols[paymentEntity.currency] || paymentEntity.currency;
     const displayAmount = (paymentEntity.amount / 100).toFixed(2);
 
-    if (pluginContext?.log) {
-      pluginContext.log.info('Payment Details', {
+    if (pluginContext?.logger) {
+      pluginContext.logger.info('Payment Details', {
         id: paymentEntity.id,
         status: paymentEntity.status,
         amount: `${symbol}${displayAmount} ${paymentEntity.currency}`,
@@ -498,7 +473,7 @@ export async function handleRazorpayWebhook(
     const signature = request.headers['x-razorpay-signature'] as string;
 
     if (!signature) {
-      pluginContext.log?.warn('Missing Razorpay signature header');
+      pluginContext.logger.warn('Missing Razorpay signature header');
       return reply.status(400).send({
         error: 'Missing signature',
         message: 'Missing x-razorpay-signature header',
@@ -509,19 +484,32 @@ export async function handleRazorpayWebhook(
 
     // Get webhook secret from config
     const { configTable } = await import('./database/tables');
-    const { eq } = await import('drizzle-orm');
+    // eq and InferSelectModel are imported at top level
+
+    const orgId = request.organizationId; // Assuming organizationId is available on the request
+    if (!orgId) {
+      pluginContext.logger.error(
+        'Organization ID not found in request for webhook',
+      );
+      return reply.status(400).send({
+        error: 'Organization ID missing',
+        message: 'Cannot process webhook without organization context',
+      });
+    }
+
+    type ConfigRow = InferSelectModel<typeof configTable>;
 
     // Use db.select() to fetch config, keeping consistency with existing pattern
-    // Cast to RazorpayConfig[] to ensure type safety
+    // Cast to ConfigRow[] to ensure type safety
     const config = (await pluginContext.db
       .select()
       .from(configTable)
-      .limit(1)) as unknown as RazorpayConfig[];
+      .limit(1)) as ConfigRow[];
 
     // Ensure config exists and check webhookSecret
     if (config.length === 0 || !config[0]?.webhookSecret) {
-      if (pluginContext.log?.error) {
-        pluginContext.log.error('Webhook secret not configured');
+      if (pluginContext.logger) {
+        pluginContext.logger.error('Webhook secret not configured');
       } else {
         process.stderr.write(
           'Razorpay Webhook Error: Webhook secret not configured\n',
@@ -547,8 +535,8 @@ export async function handleRazorpayWebhook(
       /^[0-9a-fA-F]+$/.test(str) && str.length % 2 === 0;
 
     if (!isValidHex(signature) || !isValidHex(expectedSignature)) {
-      if (pluginContext.log?.error) {
-        pluginContext.log.error(
+      if (pluginContext.logger) {
+        pluginContext.logger.error(
           'Invalid signature format: not a valid hex string',
         );
       } else {
@@ -570,8 +558,8 @@ export async function handleRazorpayWebhook(
       crypto.timingSafeEqual(expectedBuffer, signatureBuffer);
 
     if (!isValidSignature) {
-      if (pluginContext.log?.error) {
-        pluginContext.log.error('Webhook signature validation failed');
+      if (pluginContext.logger) {
+        pluginContext.logger.error('Webhook signature validation failed');
       } else {
         process.stderr.write(
           'Razorpay Webhook Error: Webhook signature validation failed\n',
@@ -596,8 +584,8 @@ export async function handleRazorpayWebhook(
       .limit(1);
 
     if (orderDetails.length === 0) {
-      if (pluginContext.log?.error) {
-        pluginContext.log.error(
+      if (pluginContext.logger) {
+        pluginContext.logger.error(
           `Order not found for payment: ${paymentEntity.id}`,
         );
       } else {
@@ -611,7 +599,8 @@ export async function handleRazorpayWebhook(
       });
     }
 
-    const order = orderDetails[0] as unknown as OrderRecord;
+    type OrderRow = InferSelectModel<typeof ordersTable>;
+    const order = orderDetails[0] as OrderRow;
 
     // Check if transaction already exists
     const existingTransaction = await pluginContext.db

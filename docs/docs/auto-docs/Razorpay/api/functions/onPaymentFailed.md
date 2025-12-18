@@ -6,7 +6,7 @@
 
 > **onPaymentFailed**(`data`, `context`): `Promise`\<`void`\>
 
-Defined in: [plugins/Razorpay/api/index.ts:339](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/index.ts#L339)
+Defined in: [plugins/Razorpay/api/index.ts:328](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/index.ts#L328)
 
 ## Parameters
 

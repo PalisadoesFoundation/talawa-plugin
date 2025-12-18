@@ -17,7 +17,7 @@ export const SummarizeAPIInput = builder
   });
 
 export const summarizeAPIConfigInputSchema = z.object({
-  apiEndpoint: z.string().url().optional().nullable(),
+  apiEndpoint: z.url().optional().nullable(),
   apiKey: z.string().optional().nullable(),
   isEnabled: z.boolean(),
   maxLength: z.number().int().min(50).max(500),
