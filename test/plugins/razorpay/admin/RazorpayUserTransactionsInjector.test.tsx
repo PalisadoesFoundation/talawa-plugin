@@ -143,19 +143,13 @@ describe('RazorpayUserTransactionsInjector', () => {
 
   describe('Error Handling', () => {
     it('should handle errors gracefully', async () => {
-      // Manually constructing mock to include variables as createErrorMock helper doesn't support them yet
+    it('should handle errors gracefully', async () => {
       const errorMocks = [
-        {
-          request: {
-            query: GET_USER_TXN_INJECTOR,
-            variables: {
-              userId: 'test-user-id',
-              orgId: 'test-org-id',
-              limit: 10,
-            },
-          },
-          error: new Error('Failed'),
-        },
+        createErrorMock(GET_USER_TXN_INJECTOR, {
+          userId: 'test-user-id',
+          orgId: 'test-org-id',
+          limit: 10,
+        }),
       ];
 
       renderWithProviders(<RazorpayUserTransactionsInjector />, {
