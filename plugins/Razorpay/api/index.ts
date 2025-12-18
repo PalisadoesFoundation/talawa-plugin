@@ -1,6 +1,7 @@
 import type { IPluginContext, IPluginLifecycle } from '../../types';
 
 import { eq, type InferSelectModel } from 'drizzle-orm';
+import { configTable, ordersTable, transactionsTable } from './database/tables';
 
 /**
  * DrizzleDB interface for type-safe database operations
@@ -50,8 +51,15 @@ interface PaymentEventData {
   organizationId: string;
   amount: number;
   currency?: string;
-  status?: string;
+  updatedAt: string;
 }
+
+/**
+ * Type definitions for Drizzle query results
+ */
+export type ConfigRow = InferSelectModel<typeof configTable>;
+export type OrderRow = InferSelectModel<typeof ordersTable>;
+export type TransactionRow = InferSelectModel<typeof transactionsTable>;
 
 /**
  * Razorpay payment entity from webhook
@@ -484,7 +492,6 @@ export async function handleRazorpayWebhook(
 
     // Get webhook secret from config
     const { configTable } = await import('./database/tables');
-    // eq and InferSelectModel are imported at top level
 
     const orgId = request.organizationId; // Assuming organizationId is available on the request
     if (!orgId) {
@@ -496,8 +503,6 @@ export async function handleRazorpayWebhook(
         message: 'Cannot process webhook without organization context',
       });
     }
-
-    type ConfigRow = InferSelectModel<typeof configTable>;
 
     // Use db.select() to fetch config, keeping consistency with existing pattern
     // Cast to ConfigRow[] to ensure type safety
@@ -599,7 +604,6 @@ export async function handleRazorpayWebhook(
       });
     }
 
-    type OrderRow = InferSelectModel<typeof ordersTable>;
     const order = orderDetails[0] as OrderRow;
 
     // Check if transaction already exists

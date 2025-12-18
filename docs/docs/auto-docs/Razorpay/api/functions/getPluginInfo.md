@@ -6,7 +6,7 @@
 
 > **getPluginInfo**(`_context`): `Promise`\<\{ `description`: `string`; `events`: `string`[]; `features`: `string`[]; `graphqlOperations`: `string`[]; `name`: `string`; `tables`: `string`[]; `version`: `string`; `webhooks`: `string`[]; \}\>
 
-Defined in: [plugins/Razorpay/api/index.ts:373](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/index.ts#L373)
+Defined in: [plugins/Razorpay/api/index.ts:385](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/index.ts#L385)
 
 ## Parameters
 

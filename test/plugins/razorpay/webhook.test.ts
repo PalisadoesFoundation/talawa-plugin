@@ -40,7 +40,32 @@ describe('Razorpay Webhook Handler', () => {
     mockRequest = createMockFastifyRequest();
     // Attach plugin context to request as expected by the handler
     (mockRequest as any).pluginContext = mockContext;
+    // Fix logger mismatch: api/index.ts expects 'logger', mock provides 'log'
+    mockContext.logger = mockContext.log;
+    (mockRequest as any).organizationId = 'org-123';
     mockReply = createMockFastifyReply();
+    // Reset and properly configure all mocks
+    vi.clearAllMocks();
+
+    // Configure insert mock chain
+    mockContext.drizzleClient.insert = vi.fn().mockReturnValue({
+      values: vi.fn().mockResolvedValue({}),
+    });
+
+    // Configure update mock chain
+    mockContext.drizzleClient.update = vi.fn().mockReturnValue({
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue({}),
+      }),
+    });
+
+    // Configure select chain properly with default empty return
+    mockContext.drizzleClient.from = vi.fn().mockReturnValue({
+      where: vi.fn().mockReturnThis(),
+      offset: vi.fn().mockReturnThis(),
+      orderBy: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue([]),
+    });
   });
 
   describe('signature verification', () => {
@@ -60,10 +85,20 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature1 };
 
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockConfig])
-        .mockResolvedValueOnce([mockOrder])
-        .mockResolvedValueOnce([]);
+      // Configure mocks in correct order: config -> order -> transaction
+      mockContext.drizzleClient.from
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockConfig]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockOrder]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([]),
+        });
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
@@ -79,7 +114,10 @@ describe('Razorpay Webhook Handler', () => {
 
       // Ensure config has webhookSecret
       const configWithSecret = { ...mockConfig, webhookSecret: 'test_secret' };
-      mockContext.drizzleClient.limit.mockResolvedValue([configWithSecret]);
+      mockContext.drizzleClient.from.mockReturnValue({
+        where: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockResolvedValue([configWithSecret]),
+      });
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
@@ -103,7 +141,10 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': 'some_signature' };
 
-      mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
+      mockContext.drizzleClient.from.mockReturnValue({
+        where: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockResolvedValue([mockConfig]),
+      });
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
@@ -129,10 +170,19 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': validSignature };
 
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockConfig])
-        .mockResolvedValueOnce([mockOrder])
-        .mockResolvedValueOnce([]);
+      mockContext.drizzleClient.from
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockConfig]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockOrder]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([]),
+        });
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
@@ -156,10 +206,19 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
 
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockConfig])
-        .mockResolvedValueOnce([mockOrder])
-        .mockResolvedValueOnce([]);
+      mockContext.drizzleClient.from
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockConfig]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockOrder]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([]),
+        });
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
@@ -180,10 +239,19 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
 
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockConfig])
-        .mockResolvedValueOnce([mockOrder])
-        .mockResolvedValueOnce([]);
+      mockContext.drizzleClient.from
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockConfig]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockOrder]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([]),
+        });
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
@@ -201,10 +269,19 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
 
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockConfig])
-        .mockResolvedValueOnce([mockOrder])
-        .mockResolvedValueOnce([]);
+      mockContext.drizzleClient.from
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockConfig]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockOrder]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([]),
+        });
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
@@ -227,10 +304,19 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
 
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockConfig])
-        .mockResolvedValueOnce([mockOrder])
-        .mockResolvedValueOnce([]); // No existing transaction
+      mockContext.drizzleClient.from
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockConfig]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockOrder]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([]),
+        }); // No existing transaction
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
@@ -249,10 +335,19 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
 
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockConfig])
-        .mockResolvedValueOnce([mockOrder])
-        .mockResolvedValueOnce([mockTransaction]); // Existing transaction
+      mockContext.drizzleClient.from
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockConfig]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockOrder]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockTransaction]),
+        }); // Existing transaction
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
@@ -270,10 +365,19 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
 
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockConfig])
-        .mockResolvedValueOnce([mockOrder])
-        .mockResolvedValueOnce([]);
+      mockContext.drizzleClient.from
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockConfig]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockOrder]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([]),
+        });
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
@@ -291,9 +395,15 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
 
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockConfig])
-        .mockRejectedValueOnce(new Error('Database error'));
+      mockContext.drizzleClient.from
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockResolvedValue([mockConfig]),
+        })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockRejectedValueOnce(new Error('Database error')),
+        });
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
@@ -311,9 +421,15 @@ describe('Razorpay Webhook Handler', () => {
     mockRequest.body = webhookData;
     mockRequest.headers = { 'x-razorpay-signature': signature };
 
-    mockContext.drizzleClient.limit
-      .mockResolvedValueOnce([mockConfig])
-      .mockResolvedValueOnce([]); // No order found
+    mockContext.drizzleClient.from
+      .mockReturnValueOnce({
+        where: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockResolvedValue([mockConfig]),
+      })
+      .mockReturnValueOnce({
+        where: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockResolvedValue([]),
+      }); // No order found
 
     await handleRazorpayWebhook(mockRequest, mockReply);
 
@@ -323,17 +439,18 @@ describe('Razorpay Webhook Handler', () => {
 
   it('should handle network failures during processing', async () => {
     const webhookData = createMockWebhookData('payment.captured');
-    const mockConfig = createMockConfig({ webhookSecret: secret });
-
-    const webhookBody = JSON.stringify(webhookData);
-    const signature = createWebhookSignature(webhookBody, secret);
+    const signature = createWebhookSignature(
+      JSON.stringify(webhookData),
+      secret,
+    );
 
     mockRequest.body = webhookData;
     mockRequest.headers = { 'x-razorpay-signature': signature };
 
-    mockContext.drizzleClient.limit.mockRejectedValue(
-      new Error('Network timeout'),
-    );
+    mockContext.drizzleClient.from.mockReturnValue({
+      where: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockRejectedValue(new Error('Network timeout')),
+    });
 
     await handleRazorpayWebhook(mockRequest, mockReply);
 
@@ -343,11 +460,7 @@ describe('Razorpay Webhook Handler', () => {
   // Verify database calls (tables are imported at top level or mocked via utils)
   // Here we rely on standard mocks returning success
   it('should handle concurrent webhook processing', async () => {
-    const webhookData = createMockWebhookData('payment.captured');
     const mockConfig = createMockConfig({ webhookSecret: secret });
-
-    // SMART MOCK for concurrent handling
-    let currentTable: any = null;
 
     // Generate valid signatures for concurrent requests
     // Note: we must use the EXACT object structure that we pass to body for signature to match
@@ -379,91 +492,59 @@ describe('Razorpay Webhook Handler', () => {
         },
       },
     };
-    const signature2 = createWebhookSignature(JSON.stringify(payload2), secret);
 
     const mockRequest1 = {
       pluginContext: mockContext,
       headers: { 'x-razorpay-signature': signature1 },
       body: payload1,
+      organizationId: 'org-123',
     } as any;
 
     const mockRequest2 = {
       pluginContext: mockContext,
       headers: {}, // Missing signature as per test intent
       body: payload2,
+      organizationId: 'org-123',
     } as any;
 
     const mockReply1 = createMockFastifyReply();
 
     const mockReply2 = createMockFastifyReply();
 
-    // Ensure mocks return values for ALL calls
-    mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]); // For config
-    // For order lookup (return order), then transaction lookup (return empty)
-    // Since calls are concurrent, we need robust mocking.
-    // We can just rely on limit returning something always.
-    // First limit: Config. Second: Order. Third: Transaction.
-    // We can check table in args if needed, but simple array is enough if we assume order matters?
-    // Actually, code does: select config -> select order -> select transaction.
-    // So 3 selects per request. Total 6 selects.
-    mockContext.drizzleClient.limit.mockImplementation(() =>
-      Promise.resolve([mockConfig]),
-    );
-
-    // But wait. select Order needs to return an ORDER. select Transaction needs to return EMPTY (or existing).
-    // If we return [mockConfig] for Order query, it might fail if accessing .id?
-    // Config has id. Order has id.
-    // Config doesn't have userId, organizationId, etc used in Transaction.
-    // So we need to mock based on TABLE.
-    // But table is passed to `from()`.
-    // `drizzleClient.from(table)` -> returns builder.
-    // This is complex to mock if not using `when` or table detection.
-    // We can refine the mock in `beforeEach` or here?
-    // Safe Mock for concurrent handling using closures
+    // For concurrent handling, we need robust mocking based on tables
     const mockOrderConcurrent = {
       ...createMockOrder(),
       id: 'order_concurrent',
       razorpayOrderId: 'order_concurrent',
     };
+
     mockContext.drizzleClient.from.mockImplementation((table: any) => {
-      // Return a unique object for THIS chain
+      // 1. Name check (Refined)
+      const tableName =
+        table === configTable
+          ? 'config'
+          : table === ordersTable
+            ? 'orders'
+            : table === transactionsTable
+              ? 'transactions'
+              : table?._?.name || table?.name || '';
+
+      // Return a unique builder object for THIS chain
       return {
         where: vi.fn().mockReturnThis(),
         offset: vi.fn().mockReturnThis(),
         orderBy: vi.fn().mockReturnThis(),
         limit: vi.fn().mockImplementation(async () => {
-          const tableAny = table as any;
+          // Identify table based on known refs or properties
+          if (tableName === 'config' || table?.webhookSecret)
+            return [mockConfig];
+          if (tableName === 'orders' || table?.razorpayOrderId)
+            return [mockOrderConcurrent];
+          if (tableName === 'transactions' || table?.paymentId) return [];
 
-          // 1. Strict ref check
-          if (table === configTable) return [mockConfig];
-          if (table === ordersTable) return [mockOrderConcurrent];
-          if (table === transactionsTable) return [];
-
-          // 2. Name check (Drizzle internal)
-          const name =
-            tableAny._?.name ||
-            tableAny.name ||
-            tableAny[Symbol.for('drizzle:Name')];
-          if (name === 'razorpay_config') return [mockConfig];
-          if (name === 'razorpay_orders') return [mockOrderConcurrent];
-          if (name === 'razorpay_transactions') return [];
-
-          // 3. Column check fallback
-          if (tableAny.webhookSecret) return [mockConfig];
-          if (tableAny.razorpayOrderId) return [mockOrderConcurrent];
-          if (tableAny.paymentId) return [];
-
-          return []; // Return empty result on first call
+          return [];
         }),
       };
-    });
-
-    // Fix insert/update to simple success
-    mockContext.drizzleClient.insert = vi
-      .fn()
-      .mockReturnValue({ values: vi.fn().mockResolvedValue({}) });
-    mockContext.drizzleClient.update = vi.fn().mockReturnValue({
-      set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue({}) }),
     });
 
     await Promise.all([

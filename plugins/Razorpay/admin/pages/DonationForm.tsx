@@ -612,8 +612,10 @@ const DonationForm: React.FC = () => {
                   </Col>
                 </Row>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>{t('donation.form.phoneLabel')}</Form.Label>
+                <Form.Group className="mb-3" controlId="donorContact">
+                  <Form.Label htmlFor="donorContact">
+                    {t('donation.form.phoneLabel')}
+                  </Form.Label>
                   <Form.Control
                     id="donorContact"
                     type="tel"
@@ -625,8 +627,10 @@ const DonationForm: React.FC = () => {
                   />
                 </Form.Group>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>{t('donation.form.messageLabel')}</Form.Label>
+                <Form.Group className="mb-3" controlId="description">
+                  <Form.Label htmlFor="description">
+                    {t('donation.form.messageLabel')}
+                  </Form.Label>
                   <Form.Control
                     id="description"
                     as="textarea"
