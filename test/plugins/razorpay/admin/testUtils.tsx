@@ -4,7 +4,7 @@ import { MockedProvider } from '@apollo/client/testing/react';
 import * as RRD from 'react-router-dom';
 const { MemoryRouter, Routes, Route } = RRD;
 import { render, RenderOptions, act } from '@testing-library/react';
-import { gql, InMemoryCache } from '@apollo/client';
+import { InMemoryCache } from '@apollo/client';
 import type { DocumentNode } from 'graphql';
 
 /**
@@ -53,216 +53,35 @@ export const renderWithProviders = (
 };
 
 // GraphQL Query Definitions (matching the actual components)
-export const GET_CURRENT_USER = gql`
-  query GetCurrentUser {
-    me {
-      id
-      firstName
-      lastName
-      email
-      __typename
-    }
-  }
-`;
+import {
+  GET_CURRENT_USER,
+  GET_ORGANIZATION_INFO,
+  GET_RAZORPAY_CONFIG,
+  GET_RAZORPAY_CONFIG_PUBLIC,
+  CREATE_PAYMENT_ORDER,
+  VERIFY_PAYMENT,
+  UPDATE_RAZORPAY_CONFIG,
+  TEST_RAZORPAY_SETUP,
+  GET_USER_TRANSACTIONS,
+  GET_USER_TRANSACTION_STATS,
+  GET_ORG_TRANSACTIONS,
+  GET_ORG_TRANSACTION_STATS,
+} from '../../../../plugins/Razorpay/admin/graphql/queries';
 
-export const GET_ORGANIZATION_INFO = gql`
-  query GetOrganizationInfo($orgId: String!) {
-    organization(input: { id: $orgId }) {
-      id
-      name
-      description
-      avatarURL
-      __typename
-    }
-  }
-`;
-
-export const GET_RAZORPAY_CONFIG = gql`
-  query GetRazorpayConfig {
-    razorpay_getRazorpayConfig {
-      keyId
-      keySecret
-      webhookSecret
-      isEnabled
-      testMode
-      currency
-      description
-      __typename
-    }
-  }
-`;
-
-export const GET_RAZORPAY_CONFIG_PUBLIC = gql`
-  query GetRazorpayConfigPublic {
-    razorpay_getRazorpayConfig {
-      keyId
-      isEnabled
-      testMode
-      currency
-      description
-      __typename
-    }
-  }
-`;
-
-export const CREATE_PAYMENT_ORDER = gql`
-  mutation CreatePaymentOrder($input: RazorpayOrderInput!) {
-    razorpay_createPaymentOrder(input: $input) {
-      id
-      razorpayOrderId
-      organizationId
-      userId
-      amount
-      currency
-      status
-      donorName
-      donorEmail
-      donorPhone
-      description
-      createdAt
-      updatedAt
-    }
-  }
-`;
-export const VERIFY_PAYMENT = gql`
-  mutation VerifyPayment($input: RazorpayVerificationInput!) {
-    razorpay_verifyPayment(input: $input) {
-      success
-      message
-      transaction {
-        paymentId
-        status
-        amount
-        currency
-      }
-    }
-  }
-`;
-export const UPDATE_RAZORPAY_CONFIG = gql`
-  mutation UpdateRazorpayConfig($input: RazorpayConfigInput!) {
-    razorpay_updateRazorpayConfig(input: $input) {
-      keyId
-      keySecret
-      webhookSecret
-      isEnabled
-      testMode
-      currency
-      description
-    }
-  }
-`;
-export const TEST_RAZORPAY_SETUP = gql`
-  mutation TestRazorpaySetup {
-    razorpay_testRazorpaySetup {
-      success
-      message
-    }
-  }
-`;
-export const GET_USER_TRANSACTIONS = gql`
-  query GetUserTransactions(
-    $userId: String!
-    $limit: Int
-    $offset: Int
-    $status: String
-    $dateFrom: String
-    $dateTo: String
-  ) {
-    razorpay_getUserTransactions(
-      userId: $userId
-      limit: $limit
-      offset: $offset
-      status: $status
-      dateFrom: $dateFrom
-      dateTo: $dateTo
-    ) {
-      id
-      paymentId
-      amount
-      currency
-      status
-      donorName
-      donorEmail
-      method
-      bank
-      wallet
-      vpa
-      email
-      contact
-      fee
-      tax
-      errorCode
-      errorDescription
-      refundStatus
-      capturedAt
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const GET_USER_TRANSACTION_STATS = gql`
-  query GetUserTransactionStats(
-    $userId: String!
-    $dateFrom: String
-    $dateTo: String
-  ) {
-    razorpay_getUserTransactionStats(
-      userId: $userId
-      dateFrom: $dateFrom
-      dateTo: $dateTo
-    ) {
-      totalTransactions
-      totalAmount
-      currency
-      successCount
-      failedCount
-      pendingCount
-      __typename
-    }
-  }
-`;
-export const GET_ORG_TRANSACTIONS = gql`
-  query GetOrganizationTransactions($orgId: String!, $limit: Int) {
-    razorpay_getOrganizationTransactions(orgId: $orgId, limit: $limit) {
-      id
-      paymentId
-      amount
-      currency
-      status
-      donorName
-      donorEmail
-      method
-      bank
-      wallet
-      vpa
-      email
-      contact
-      fee
-      tax
-      errorCode
-      errorDescription
-      refundStatus
-      capturedAt
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const GET_ORG_TRANSACTION_STATS = gql`
-  query GetOrganizationTransactionStats($orgId: String!) {
-    razorpay_getOrganizationTransactionStats(orgId: $orgId) {
-      totalTransactions
-      totalAmount
-      currency
-      successCount
-      failedCount
-      pendingCount
-      __typename
-    }
-  }
-`;
+export {
+  GET_CURRENT_USER,
+  GET_ORGANIZATION_INFO,
+  GET_RAZORPAY_CONFIG,
+  GET_RAZORPAY_CONFIG_PUBLIC,
+  CREATE_PAYMENT_ORDER,
+  VERIFY_PAYMENT,
+  UPDATE_RAZORPAY_CONFIG,
+  TEST_RAZORPAY_SETUP,
+  GET_USER_TRANSACTIONS,
+  GET_USER_TRANSACTION_STATS,
+  GET_ORG_TRANSACTIONS,
+  GET_ORG_TRANSACTION_STATS,
+};
 
 // Mock Data Factories
 export const createMockUser = (overrides = {}) => ({

@@ -21,6 +21,13 @@ interface RazorpayConfig {
   description: string;
 }
 
+/**
+ * Razorpay Configuration Page
+ *
+ * Allows organization administrators to configure their Razorpay payment gateway credentials
+ * and settings. Supports managing API keys, webhook secrets, and test/live mode toggles.
+ * Also provides functionality to test the configuration with a dummy payment initiation.
+ */
 const RazorpayConfiguration: React.FC = () => {
   const { t } = useTranslation('razorpay');
   const [validated, setValidated] = useState(false);
@@ -59,6 +66,10 @@ const RazorpayConfiguration: React.FC = () => {
     }));
   };
 
+  /**
+   * Handles saving the updated Razorpay configuration to the database
+   * @param e - Form submission event
+   */
   const handleSaveConfig = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -94,6 +105,10 @@ const RazorpayConfiguration: React.FC = () => {
     }
   };
 
+  /**
+   * Tests the current configuration by initiating a dummy payment setup
+   * Validates API keys before attempting the test
+   */
   const handleTestSetup = async () => {
     if (!config.keyId || !config.keySecret || !config.webhookSecret) {
       toast.error(

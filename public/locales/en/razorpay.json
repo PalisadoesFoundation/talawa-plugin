@@ -115,23 +115,37 @@
   "transactions": {
     "title": "Transaction History",
     "subtitle": "View your payment transaction history",
+    "search": "Search transactions...",
+    "filters": {
+      "statusLabel": "Filter transactions by status",
+      "statusPlaceholder": "Filter by status",
+      "allStatuses": "All Statuses",
+      "dateRangeLabel": "Filter by date range",
+      "startDate": "Start Date",
+      "endDate": "End Date"
+    },
     "table": {
       "id": "Transaction ID",
       "date": "Date",
       "amount": "Amount",
       "status": "Status",
       "organization": "Organization",
-      "actions": "Actions"
+      "actions": "Actions",
+      "pagination": "{{start}}-{{end}} of {{total}} transactions"
     },
     "status": {
-      "success": "Success",
+      "captured": "Captured",
+      "authorized": "Authorized",
       "failed": "Failed",
-      "pending": "Pending",
-      "refunded": "Refunded"
+      "refunded": "Refunded",
+      "success": "Success",
+      "pending": "Pending"
     },
     "empty": "No transactions found",
-    "search": "Search transactions...",
-    "viewButton": "View"
+    "viewButton": "View",
+    "error": {
+      "loadFailed": "Failed to load transaction data"
+    }
   },
   "common": {
     "loading": "Loading...",

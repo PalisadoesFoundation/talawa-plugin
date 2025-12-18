@@ -5,9 +5,12 @@
  * Razorpay payment provider transactions for organization admins in their transaction management.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useQuery } from '@apollo/client';
-import { gql } from 'graphql-tag';
+import {
+  GET_ORG_TRANSACTIONS,
+  GET_ORG_TRANSACTION_STATS,
+} from '../graphql/queries';
 import {
   Card,
   Table,
@@ -30,51 +33,10 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useParams } from 'react-router-dom';
-import useLocalStorage from 'utils/useLocalstorage';
 
 const { Title, Text } = Typography;
 
 // GraphQL queries for fetching organization transactions and stats
-const GET_ORG_TRANSACTIONS = gql`
-  query GetOrganizationTransactions($orgId: String!, $limit: Int) {
-    razorpay_getOrganizationTransactions(orgId: $orgId, limit: $limit) {
-      id
-      paymentId
-      amount
-      currency
-      status
-      donorName
-      donorEmail
-      method
-      bank
-      wallet
-      vpa
-      email
-      contact
-      fee
-      tax
-      errorCode
-      errorDescription
-      refundStatus
-      capturedAt
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-const GET_ORG_TRANSACTION_STATS = gql`
-  query GetOrganizationTransactionStats($orgId: String!) {
-    razorpay_getOrganizationTransactionStats(orgId: $orgId) {
-      totalTransactions
-      totalAmount
-      currency
-      successCount
-      failedCount
-      pendingCount
-    }
-  }
-`;
 
 interface RazorpayOrganizationTransaction {
   id: string;
@@ -100,18 +62,8 @@ interface RazorpayOrganizationTransaction {
   updatedAt: string;
 }
 
-interface TransactionStats {
-  totalTransactions: number;
-  totalAmount: number;
-  currency: string;
-  successCount: number;
-  failedCount: number;
-  pendingCount: number;
-}
-
 const RazorpayOrganizationTransactionsInjector: React.FC = () => {
   const { orgId } = useParams();
-  const { getItem } = useLocalStorage();
 
   // GraphQL queries
   const {

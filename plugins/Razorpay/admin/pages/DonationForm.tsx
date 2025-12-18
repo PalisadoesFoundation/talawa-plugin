@@ -109,6 +109,7 @@ const DonationForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<
     'form' | 'payment' | 'success'
   >('form');
+  const [validated, setValidated] = useState(false);
 
   // GraphQL operations
   const {
@@ -195,6 +196,7 @@ const DonationForm: React.FC = () => {
    */
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
+    setValidated(true);
 
     if (!validateForm()) return;
 
@@ -503,6 +505,16 @@ const DonationForm: React.FC = () => {
                           className="ps-4"
                           required
                           aria-required="true"
+                          isInvalid={
+                            validated &&
+                            (!formData.amount ||
+                              parseFloat(formData.amount) <= 0)
+                          }
+                          aria-invalid={
+                            validated &&
+                            (!formData.amount ||
+                              parseFloat(formData.amount) <= 0)
+                          }
                           aria-label={t('donation.form.amountLabel')}
                         />
                       </div>
@@ -570,6 +582,8 @@ const DonationForm: React.FC = () => {
                         placeholder={t('donation.form.fullNamePlaceholder')}
                         required
                         aria-required="true"
+                        isInvalid={validated && !formData.donorName.trim()}
+                        aria-invalid={validated && !formData.donorName.trim()}
                         aria-label={t('donation.form.fullNameLabel')}
                       />
                     </Form.Group>
@@ -590,6 +604,8 @@ const DonationForm: React.FC = () => {
                         placeholder={t('donation.form.emailPlaceholder')}
                         required
                         aria-required="true"
+                        isInvalid={validated && !formData.donorEmail.trim()}
+                        aria-invalid={validated && !formData.donorEmail.trim()}
                         aria-label={t('donation.form.emailLabel')}
                       />
                     </Form.Group>
