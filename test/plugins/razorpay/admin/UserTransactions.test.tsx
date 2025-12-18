@@ -131,8 +131,6 @@ describe('UserTransactions', () => {
     });
 
     it('should render status filter control', async () => {
-      // Create userEvent instance
-
       renderWithProviders(<UserTransactions />, {
         mocks: standardMocks,
         initialEntries: ['/user/razorpay/my-transactions'],

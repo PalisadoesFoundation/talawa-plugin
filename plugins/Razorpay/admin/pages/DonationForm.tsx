@@ -294,7 +294,8 @@ const DonationForm: React.FC = () => {
                 }
               },
             )
-            .catch(() => {
+            .catch((error) => {
+              console.error('Razorpay verification error:', error);
               toast.error(t('donation.error.verificationFailed'));
               setIsProcessing(false);
             });

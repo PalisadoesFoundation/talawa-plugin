@@ -17,6 +17,7 @@ export const configTable = pgTable('razorpay_config', {
   testMode: boolean('test_mode').default(true), // Test mode flag
   currency: text('currency').default('INR'), // Default currency
   description: text('description').default('Donation to organization'), // Default payment description
+  organizationId: uuid('organization_id'), // Organization this config belongs to
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });

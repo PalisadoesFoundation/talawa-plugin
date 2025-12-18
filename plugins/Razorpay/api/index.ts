@@ -1,6 +1,7 @@
 import type { IPluginContext, IPluginLifecycle } from '../../types';
 
 import { eq, type InferSelectModel } from 'drizzle-orm';
+import crypto from 'node:crypto';
 import { configTable, ordersTable, transactionsTable } from './database/tables';
 
 /**
@@ -509,6 +510,7 @@ export async function handleRazorpayWebhook(
     const config = (await pluginContext.db
       .select()
       .from(configTable)
+      .where(eq(configTable.organizationId, orgId))
       .limit(1)) as ConfigRow[];
 
     // Ensure config exists and check webhookSecret
@@ -520,15 +522,13 @@ export async function handleRazorpayWebhook(
           'Razorpay Webhook Error: Webhook secret not configured\n',
         );
       }
-      return reply.status(500).send({
-        error: 'Webhook secret not configured',
-        message: 'Cannot verify webhook signature without webhook secret',
+      return reply.status(404).send({
+        error: 'Configuration not found',
+        message: 'Razorpay configuration not found for this organization',
       });
     }
 
     // Verify signature
-    const crypto = await import('node:crypto');
-
     // Use typed config[0].webhookSecret
     const expectedSignature = crypto
       .createHmac('sha256', config[0].webhookSecret)
