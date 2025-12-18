@@ -419,6 +419,18 @@ export async function getPluginInfo(_context: IPluginContext) {
   };
 }
 
+/**
+ * Interface for Razorpay config
+ */
+interface RazorpayConfig {
+  id: string;
+  keyId: string;
+  keySecret: string;
+  webhookSecret: string;
+  isEnabled: boolean;
+  organizationId: string;
+}
+
 // Webhook handler for Razorpay - Standard implementation per Razorpay docs
 export async function handleRazorpayWebhook(
   request: PluginRequest,
@@ -497,9 +509,17 @@ export async function handleRazorpayWebhook(
 
     // Get webhook secret from config
     const { configTable } = await import('./database/tables');
-    const config = await pluginContext.db.select().from(configTable).limit(1);
+    const { eq } = await import('drizzle-orm');
 
-    if (config.length === 0 || !(config[0] as any)?.webhookSecret) {
+    // Use db.select() to fetch config, keeping consistency with existing pattern
+    // Cast to RazorpayConfig[] to ensure type safety
+    const config = (await pluginContext.db
+      .select()
+      .from(configTable)
+      .limit(1)) as unknown as RazorpayConfig[];
+
+    // Ensure config exists and check webhookSecret
+    if (config.length === 0 || !config[0]?.webhookSecret) {
       if (pluginContext.log?.error) {
         pluginContext.log.error('Webhook secret not configured');
       } else {
@@ -515,10 +535,10 @@ export async function handleRazorpayWebhook(
 
     // Verify signature
     const crypto = await import('node:crypto');
-    // Verify signature
 
+    // Use typed config[0].webhookSecret
     const expectedSignature = crypto
-      .createHmac('sha256', (config[0] as any).webhookSecret)
+      .createHmac('sha256', config[0].webhookSecret)
       .update(webhookBody)
       .digest('hex');
 
@@ -567,7 +587,6 @@ export async function handleRazorpayWebhook(
     const { ordersTable, transactionsTable } = await import(
       './database/tables'
     );
-    const { eq } = await import('drizzle-orm');
 
     // Get order details to get userId and other info
     const orderDetails = await pluginContext.db

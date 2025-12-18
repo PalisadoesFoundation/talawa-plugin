@@ -613,27 +613,29 @@ const DonationForm: React.FC = () => {
                 </Row>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Phone Number (Optional)</Form.Label>
+                  <Form.Label>{t('donation.form.phoneLabel')}</Form.Label>
                   <Form.Control
+                    id="donorContact"
                     type="tel"
                     value={formData.donorPhone}
                     onChange={(e) =>
                       handleInputChange('donorPhone', e.target.value)
                     }
-                    placeholder="Enter your phone number"
+                    placeholder={t('donation.form.phonePlaceholder')}
                   />
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Message (Optional)</Form.Label>
+                  <Form.Label>{t('donation.form.messageLabel')}</Form.Label>
                   <Form.Control
+                    id="description"
                     as="textarea"
                     rows={3}
                     value={formData.description}
                     onChange={(e) =>
                       handleInputChange('description', e.target.value)
                     }
-                    placeholder="Add a personal message with your donation"
+                    placeholder={t('donation.form.messagePlaceholder')}
                   />
                 </Form.Group>
               </div>
