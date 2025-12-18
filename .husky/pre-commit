@@ -1,15 +1,13 @@
 #!/bin/sh
 set -e
 
-pnpm run generate-docs
 pnpm exec lint-staged
 
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx)$' || true)
 
 if [ -n "$STAGED_FILES" ]; then
+  pnpm run generate-docs
   pnpm knip --include files,exports
   pnpm knip --config knip.deps.json --include dependencies
+  git add docs/
 fi
-
-git add docs/
-git add -u
