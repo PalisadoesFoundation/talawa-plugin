@@ -9,7 +9,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { MockedResponse } from '@apollo/client/testing';
 import RazorpayUserTransactionsInjector from '../../../../plugins/Razorpay/admin/injector/RazorpayUserTransactionsInjector';
-import { renderWithProviders, createMockTransaction } from './testUtils';
+import {
+  renderWithProviders,
+  createMockTransaction,
+  createErrorMock,
+} from './testUtils';
 import { gql } from '@apollo/client';
 
 // Define local GET_USER_TRANSACTIONS with orgId to match component query
@@ -142,7 +146,6 @@ describe('RazorpayUserTransactionsInjector', () => {
   });
 
   describe('Error Handling', () => {
-    it('should handle errors gracefully', async () => {
     it('should handle errors gracefully', async () => {
       const errorMocks = [
         createErrorMock(GET_USER_TXN_INJECTOR, {

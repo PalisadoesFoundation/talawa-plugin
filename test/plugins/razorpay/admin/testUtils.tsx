@@ -345,12 +345,25 @@ export const createOrgTransactionStatsQueryMock = (
 });
 
 // Error Mock Factories
-export const createErrorMock = (query: DocumentNode, errorMessage: string) => ({
-  request: {
-    query,
-  },
-  error: new Error(errorMessage),
-});
+// Error Mock Factories
+export const createErrorMock = (
+  query: DocumentNode,
+  variablesOrMessage?: any,
+  errorMessage = 'An error occurred',
+) => {
+  const variables =
+    typeof variablesOrMessage === 'object' ? variablesOrMessage : undefined;
+  const message =
+    typeof variablesOrMessage === 'string' ? variablesOrMessage : errorMessage;
+
+  return {
+    request: {
+      query,
+      variables,
+    },
+    error: new Error(message),
+  };
+};
 
 /**
  * Flushes pending promises by yielding to the microtask/macrotask queue.
