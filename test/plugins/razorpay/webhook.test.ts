@@ -17,12 +17,10 @@ import {
   ordersTable,
   transactionsTable,
 } from '../../../plugins/Razorpay/api/database/tables';
-import type { MockFastifyRequest } from '../../utils/mockClients';
-import { createMockFastifyRequest } from '../../utils/mockClients';
 
 // Define a strict mock type for Reply that satisfies PluginReply
 interface TestReply extends PluginReply {
-  status: Mock<[code: number], { send: Mock<[data: unknown], void> }>;
+  status: Mock<(code: number) => { send: Mock<(data: unknown) => void> }>;
 }
 
 // Helper to create a fresh mock reply that matches TestReply
@@ -34,7 +32,7 @@ const createMockReply = (): TestReply => {
 
 // Define a strict mock type for Request that satisfies PluginRequest
 // We strictly override pluginContext to match our mock's capability plus required fields
-interface TestRequest extends PluginRequest, Partial<MockFastifyRequest> {
+interface TestRequest extends PluginRequest {
   pluginContext: PluginRequest['pluginContext'] &
     ReturnType<typeof createMockRazorpayContext>;
 }
@@ -48,7 +46,6 @@ describe('Razorpay Webhook Handler', () => {
   beforeEach(() => {
     // Create base mocks
     const baseContext = createMockRazorpayContext();
-    const baseRequest = createMockFastifyRequest();
 
     // Align mockContext with PluginRequest expectations
     // PluginRequest expects 'db' and 'logger', our mock has 'drizzleClient' and 'log'
@@ -60,16 +57,14 @@ describe('Razorpay Webhook Handler', () => {
 
     mockContext = baseContext; // Keep ref to base for assertions
 
-    // Assemble strict TestRequest
-    // We cast to TestRequest['pluginContext'] to satisfy the intersection type
+    // Assemble strict TestRequest without any leftovers from MockFastifyRequest
     mockRequest = {
-      ...baseRequest,
       pluginContext:
         contextWithAliases as unknown as TestRequest['pluginContext'],
       organizationId: 'org-123',
       headers: {},
       body: {} as PluginRequest['body'],
-    } as TestRequest;
+    };
 
     mockReply = createMockReply();
 

@@ -51,22 +51,14 @@ const GET_USER_TXN_INJECTOR = gql`
 `;
 
 const GET_USER_TRANSACTIONS_STATS = gql`
-  query GetUserTransactionStats(
-    $userId: String!
-    $dateFrom: String
-    $dateTo: String
-  ) {
-    razorpay_getUserTransactionStats(
-      userId: $userId
-      dateFrom: $dateFrom
-      dateTo: $dateTo
-    ) {
+  query GetUserPaymentStats($userId: ID!) {
+    razorpay_getUserTransactionStats(userId: $userId) {
       totalTransactions
       totalAmount
       currency
-      successCount
-      failedCount
-      pendingCount
+      successfulTransactions
+      failedTransactions
+      averageTransactionAmount
     }
   }
 `;
@@ -101,9 +93,9 @@ const standardMocks: MockedResponse[] = [
           totalTransactions: 1,
           totalAmount: 10000,
           currency: 'INR',
-          successCount: 1,
-          failedCount: 0,
-          pendingCount: 0,
+          successfulTransactions: 1,
+          failedTransactions: 0,
+          averageTransactionAmount: 10000,
         },
       },
     },
@@ -196,9 +188,9 @@ describe('RazorpayUserTransactionsInjector', () => {
                 totalTransactions: 0,
                 totalAmount: 0,
                 currency: 'INR',
-                successCount: 0,
-                failedCount: 0,
-                pendingCount: 0,
+                successfulTransactions: 0,
+                failedTransactions: 0,
+                averageTransactionAmount: 0,
                 __typename: 'RazorpayTransactionStats',
               },
             },
@@ -271,9 +263,9 @@ describe('RazorpayUserTransactionsInjector', () => {
                 totalTransactions: 1,
                 totalAmount: 5000,
                 currency: 'INR',
-                successCount: 1,
-                failedCount: 0,
-                pendingCount: 0,
+                successfulTransactions: 1,
+                failedTransactions: 0,
+                averageTransactionAmount: 5000,
                 __typename: 'RazorpayTransactionStats',
               },
             },

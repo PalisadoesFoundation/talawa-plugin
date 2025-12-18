@@ -280,17 +280,16 @@ describe('Razorpay GraphQL Queries', () => {
     };
 
     it('should return transaction stats for admin', async () => {
-      const mockStats = [
+      mockContext.drizzleClient.execute.mockResolvedValue([
         {
           totalTransactions: 10,
           totalAmount: 1000000,
           currency: 'INR',
           successCount: 8,
-          failedCount: 2,
+          failedCount: 1,
           pendingCount: 0,
         },
-      ];
-      mockContext.drizzleClient.execute.mockResolvedValue(mockStats);
+      ]);
 
       const result = await getOrganizationTransactionStatsResolver(
         {},
@@ -298,7 +297,14 @@ describe('Razorpay GraphQL Queries', () => {
         mockContext,
       );
 
-      expect(result).toEqual(mockStats[0]);
+      expect(result).toEqual({
+        totalTransactions: 10,
+        totalAmount: 1000000,
+        currency: 'INR',
+        successfulTransactions: 8,
+        failedTransactions: 1,
+        averageTransactionAmount: 100000,
+      });
     });
 
     it('should filter stats by date range', async () => {
@@ -364,9 +370,9 @@ describe('Razorpay GraphQL Queries', () => {
           totalTransactions: 5,
           totalAmount: 500000,
           currency: 'INR',
-          successCount: 4,
-          failedCount: 1,
-          pendingCount: 0,
+          successfulTransactions: 4,
+          failedTransactions: 1,
+          averageTransactionAmount: 10000,
         },
       ];
       mockContext.drizzleClient.execute.mockResolvedValue(mockStats);

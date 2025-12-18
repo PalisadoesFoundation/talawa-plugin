@@ -4,9 +4,9 @@
 
 # Function: getOrganizationTransactionStatsResolver()
 
-> **getOrganizationTransactionStatsResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `currency`: `any`; `failedCount`: `any`; `pendingCount`: `any`; `successCount`: `any`; `totalAmount`: `any`; `totalTransactions`: `any`; \}\>
+> **getOrganizationTransactionStatsResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `averageTransactionAmount`: `number`; `currency`: `any`; `failedTransactions`: `any`; `successfulTransactions`: `any`; `totalAmount`: `any`; `totalTransactions`: `any`; \}\>
 
-Defined in: [plugins/Razorpay/api/graphql/queries.ts:374](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/graphql/queries.ts#L374)
+Defined in: [plugins/Razorpay/api/graphql/queries.ts:385](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/graphql/queries.ts#L385)
 
 ## Parameters
 
@@ -34,4 +34,4 @@ Defined in: [plugins/Razorpay/api/graphql/queries.ts:374](https://github.com/Pal
 
 ## Returns
 
-`Promise`\<\{ `currency`: `any`; `failedCount`: `any`; `pendingCount`: `any`; `successCount`: `any`; `totalAmount`: `any`; `totalTransactions`: `any`; \}\>
+`Promise`\<\{ `averageTransactionAmount`: `number`; `currency`: `any`; `failedTransactions`: `any`; `successfulTransactions`: `any`; `totalAmount`: `any`; `totalTransactions`: `any`; \}\>

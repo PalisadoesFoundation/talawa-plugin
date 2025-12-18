@@ -131,6 +131,7 @@ export const createMockPaymentOrder = (overrides = {}) => ({
 export const createMockTransaction = (overrides = {}) => ({
   id: 'txn-123',
   paymentId: 'pay_abc123',
+  orderId: 'order_abc123',
   amount: 10000, // 100 INR in paise
   currency: 'INR',
   status: 'captured',
@@ -157,9 +158,9 @@ export const createMockTransactionStats = (overrides = {}) => ({
   totalTransactions: 10,
   totalAmount: 100000, // 1000 INR in paise
   currency: 'INR',
-  successCount: 8,
-  failedCount: 1,
-  pendingCount: 1,
+  successfulTransactions: 8,
+  failedTransactions: 1,
+  averageTransactionAmount: 10000, // 100000 / 10
   __typename: 'RazorpayTransactionStats',
   ...overrides,
 }); // Mock Response Factories for GraphQL
@@ -344,7 +345,6 @@ export const createOrgTransactionStatsQueryMock = (
   },
 });
 
-// Error Mock Factories
 // Error Mock Factories
 export const createErrorMock = (
   query: DocumentNode,
