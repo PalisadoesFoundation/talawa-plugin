@@ -5,22 +5,31 @@ import {
   uuid,
   integer,
   boolean,
+  index,
 } from 'drizzle-orm/pg-core';
 
 // Razorpay Configuration table - stores payment gateway settings
-export const configTable = pgTable('razorpay_config', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  keyId: text('key_id'), // Razorpay Key ID - optional for initial setup
-  keySecret: text('key_secret'), // Razorpay Key Secret (encrypted) - optional for initial setup
-  webhookSecret: text('webhook_secret'), // Webhook secret for signature verification
-  isEnabled: boolean('is_enabled').default(false), // Whether payments are enabled
-  testMode: boolean('test_mode').default(true), // Test mode flag
-  currency: text('currency').default('INR'), // Default currency
-  description: text('description').default('Donation to organization'), // Default payment description
-  organizationId: uuid('organization_id'), // Organization this config belongs to
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+export const configTable = pgTable(
+  'razorpay_config',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    keyId: text('key_id'), // Razorpay Key ID - optional for initial setup
+    keySecret: text('key_secret'), // Razorpay Key Secret (encrypted) - optional for initial setup
+    webhookSecret: text('webhook_secret'), // Webhook secret for signature verification
+    isEnabled: boolean('is_enabled').default(false), // Whether payments are enabled
+    testMode: boolean('test_mode').default(true), // Test mode flag
+    currency: text('currency').default('INR'), // Default currency
+    description: text('description').default('Donation to organization'), // Default payment description
+    organizationId: uuid('organization_id').notNull().unique(), // Organization this config belongs to
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  (table) => {
+    return {
+      orgIdIdx: index('razorpay_config_org_id_idx').on(table.organizationId),
+    };
+  },
+);
 
 // Razorpay Orders table - stores payment orders
 export const ordersTable = pgTable('razorpay_orders', {

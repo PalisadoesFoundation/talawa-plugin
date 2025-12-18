@@ -348,11 +348,13 @@ export const createOrgTransactionStatsQueryMock = (
 // Error Mock Factories
 export const createErrorMock = (
   query: DocumentNode,
-  variablesOrMessage?: any,
+  variablesOrMessage?: Record<string, unknown> | string,
   errorMessage = 'An error occurred',
 ) => {
   const variables =
-    typeof variablesOrMessage === 'object' ? variablesOrMessage : undefined;
+    typeof variablesOrMessage === 'object'
+      ? (variablesOrMessage as Record<string, unknown>)
+      : undefined;
   const message =
     typeof variablesOrMessage === 'string' ? variablesOrMessage : errorMessage;
 

@@ -12,11 +12,11 @@ Defined in: [plugins/Razorpay/api/index.ts:419](https://github.com/PalisadoesFou
 
 ### request
 
-`PluginRequest`
+[`PluginRequest`](../interfaces/PluginRequest.md)
 
 ### reply
 
-`PluginReply`
+[`PluginReply`](../interfaces/PluginReply.md)
 
 ## Returns
 

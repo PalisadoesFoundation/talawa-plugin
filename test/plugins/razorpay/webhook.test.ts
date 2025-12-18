@@ -1,5 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { handleRazorpayWebhook } from '../../../plugins/Razorpay/api/index';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import {
+  handleRazorpayWebhook,
+  type PluginRequest,
+  type PluginReply,
+} from '../../../plugins/Razorpay/api/index';
 import {
   createMockRazorpayContext,
   createMockConfig,
@@ -16,56 +20,77 @@ import {
 import type { MockFastifyRequest } from '../../utils/mockClients';
 import { createMockFastifyRequest } from '../../utils/mockClients';
 
+// Define a strict mock type for Reply that satisfies PluginReply
+interface TestReply extends PluginReply {
+  status: Mock<[code: number], { send: Mock<[data: unknown], void> }>;
+}
+
+// Helper to create a fresh mock reply that matches TestReply
+const createMockReply = (): TestReply => {
+  const send = vi.fn();
+  const status = vi.fn().mockReturnValue({ send });
+  return { status, send } as unknown as TestReply;
+};
+
+// Define a strict mock type for Request that satisfies PluginRequest
+// We strictly override pluginContext to match our mock's capability plus required fields
+interface TestRequest extends PluginRequest, Partial<MockFastifyRequest> {
+  pluginContext: PluginRequest['pluginContext'] &
+    ReturnType<typeof createMockRazorpayContext>;
+}
+
 describe('Razorpay Webhook Handler', () => {
-  let mockContext: any;
-  let mockRequest: MockFastifyRequest;
-  let mockReply: any;
+  let mockContext: ReturnType<typeof createMockRazorpayContext>;
+  let mockRequest: TestRequest;
+  let mockReply: TestReply;
   const secret = 'webhook_secret_123';
 
   beforeEach(() => {
-    mockContext = createMockRazorpayContext();
-    mockRequest = createMockFastifyRequest();
-    // Attach plugin context to request as expected by the handler
-    (mockRequest as any).pluginContext = mockContext;
-    // Fix logger mismatch: api/index.ts expects 'logger', mock provides 'log'
-    mockContext.logger = mockContext.log;
-    // Add organizationId as per new requirement
-    (mockRequest as any).organizationId = 'org-123';
+    // Create base mocks
+    const baseContext = createMockRazorpayContext();
+    const baseRequest = createMockFastifyRequest();
 
-    // Mock Reply with status chaining
-    // interface PluginReply { status(code: number): { send(data: unknown): void; }; }
-    const sendMock = vi.fn();
-    const statusMock = vi.fn().mockReturnValue({ send: sendMock });
-    mockReply = {
-      status: statusMock,
-      send: sendMock, // Expose for easy verification if needed, though usually accessed via return of status
+    // Align mockContext with PluginRequest expectations
+    // PluginRequest expects 'db' and 'logger', our mock has 'drizzleClient' and 'log'
+    const contextWithAliases = {
+      ...baseContext,
+      db: baseContext.drizzleClient,
+      logger: baseContext.log,
     };
 
-    // Reset and properly configure all mocks
+    mockContext = baseContext; // Keep ref to base for assertions
+
+    // Assemble strict TestRequest
+    // We cast to TestRequest['pluginContext'] to satisfy the intersection type
+    mockRequest = {
+      ...baseRequest,
+      pluginContext:
+        contextWithAliases as unknown as TestRequest['pluginContext'],
+      organizationId: 'org-123',
+      headers: {},
+      body: {} as PluginRequest['body'],
+    } as TestRequest;
+
+    mockReply = createMockReply();
+
     vi.clearAllMocks();
 
-    // Configure insert mock chain
+    // Default mock behavior
     mockContext.drizzleClient.insert = vi.fn().mockReturnValue({
       values: vi.fn().mockResolvedValue({}),
     });
-
-    // Configure update mock chain
     mockContext.drizzleClient.update = vi.fn().mockReturnValue({
       set: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue({}),
       }),
     });
-
-    // Configure select chain with robust table comparison
+    // Use 'unknown' for table argument to avoid 'any' lint warning
     mockContext.drizzleClient.from = vi
       .fn()
-      .mockImplementation((_table: any) => {
-        // Default empty return
-        return {
-          where: vi.fn().mockReturnThis(),
-          limit: vi.fn().mockResolvedValue([]),
-        };
-      });
+      .mockImplementation((_table: unknown) => ({
+        where: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockResolvedValue([]),
+      }));
   });
 
   describe('signature verification', () => {
@@ -82,20 +107,17 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature1 };
 
-      // Precise mocking based on table reference
-      mockContext.drizzleClient.from.mockImplementation((table: any) => {
-        if (table === configTable) {
+      mockContext.drizzleClient.from.mockImplementation((table: unknown) => {
+        if (table === configTable)
           return {
             where: vi.fn().mockReturnThis(),
             limit: vi.fn().mockResolvedValue([mockConfig]),
           };
-        }
-        if (table === ordersTable) {
+        if (table === ordersTable)
           return {
             where: vi.fn().mockReturnThis(),
             limit: vi.fn().mockResolvedValue([mockOrder]),
           };
-        }
         return {
           where: vi.fn().mockReturnThis(),
           limit: vi.fn().mockResolvedValue([]),
@@ -104,6 +126,7 @@ describe('Razorpay Webhook Handler', () => {
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
+      // Assert using the mocked status function directly
       expect(mockReply.status).toHaveBeenCalledWith(200);
     });
 
@@ -114,13 +137,12 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': 'invalid_signature' };
 
-      mockContext.drizzleClient.from.mockImplementation((table: any) => {
-        if (table === configTable) {
+      mockContext.drizzleClient.from.mockImplementation((table: unknown) => {
+        if (table === configTable)
           return {
             where: vi.fn().mockReturnThis(),
             limit: vi.fn().mockResolvedValue([mockConfig]),
           };
-        }
         return {
           where: vi.fn().mockReturnThis(),
           limit: vi.fn().mockResolvedValue([]),
@@ -149,13 +171,12 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': 'some_signature' };
 
-      mockContext.drizzleClient.from.mockImplementation((table: any) => {
-        if (table === configTable) {
+      mockContext.drizzleClient.from.mockImplementation((table: unknown) => {
+        if (table === configTable)
           return {
             where: vi.fn().mockReturnThis(),
             limit: vi.fn().mockResolvedValue([mockConfig]),
           };
-        }
         return {
           where: vi.fn().mockReturnThis(),
           limit: vi.fn().mockResolvedValue([]),
@@ -164,16 +185,12 @@ describe('Razorpay Webhook Handler', () => {
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
-      expect(mockReply.status).toHaveBeenCalledWith(404); // Updated to expect 404 per api/index.ts change logic (or 500 depending on flow)
-      // Actually, if secret is null but config exists, code returns 404 now?
-      // "if (config.length === 0 || !config[0]?.webhookSecret) ... return reply.status(404)"
-      // Yes.
+      expect(mockReply.status).toHaveBeenCalledWith(404);
     });
   });
 
   describe('event processing', () => {
     let validSignature: string;
-    const secret = 'webhook_secret_123';
 
     beforeEach(() => {
       const webhookData = createMockWebhookData('payment.captured');
@@ -189,7 +206,7 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': validSignature };
 
-      mockContext.drizzleClient.from.mockImplementation((table: any) => {
+      mockContext.drizzleClient.from.mockImplementation((table: unknown) => {
         if (table === configTable)
           return {
             where: vi.fn().mockReturnThis(),
@@ -230,7 +247,7 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
 
-      mockContext.drizzleClient.from.mockImplementation((table: any) => {
+      mockContext.drizzleClient.from.mockImplementation((table: unknown) => {
         if (table === configTable)
           return {
             where: vi.fn().mockReturnThis(),
@@ -252,8 +269,6 @@ describe('Razorpay Webhook Handler', () => {
       expect(mockReply.status).toHaveBeenCalledWith(200);
     });
 
-    // ... (skipping extensive similar tests for brevity, rely on catch-all logic and specific critical paths)
-
     it('should handle unknown event types gracefully', async () => {
       const webhookData = createMockWebhookData('payment.unknown_event');
       const mockConfig = createMockConfig({ webhookSecret: secret });
@@ -267,7 +282,7 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
 
-      mockContext.drizzleClient.from.mockImplementation((table: any) => {
+      mockContext.drizzleClient.from.mockImplementation((table: unknown) => {
         if (table === configTable)
           return {
             where: vi.fn().mockReturnThis(),
@@ -286,7 +301,6 @@ describe('Razorpay Webhook Handler', () => {
 
       await handleRazorpayWebhook(mockRequest, mockReply);
 
-      // Should still process even unknown events
       expect(mockReply.status).toHaveBeenCalledWith(200);
     });
   });
@@ -306,7 +320,7 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
 
-      mockContext.drizzleClient.from.mockImplementation((table: any) => {
+      mockContext.drizzleClient.from.mockImplementation((table: unknown) => {
         if (table === configTable)
           return {
             where: vi.fn().mockReturnThis(),
@@ -346,7 +360,7 @@ describe('Razorpay Webhook Handler', () => {
       mockRequest.body = webhookData;
       mockRequest.headers = { 'x-razorpay-signature': signature };
 
-      mockContext.drizzleClient.from.mockImplementation((table: any) => {
+      mockContext.drizzleClient.from.mockImplementation((table: unknown) => {
         if (table === configTable)
           return {
             where: vi.fn().mockReturnThis(),
@@ -372,13 +386,12 @@ describe('Razorpay Webhook Handler', () => {
     mockRequest.body = webhookData;
     mockRequest.headers = { 'x-razorpay-signature': signature };
 
-    mockContext.drizzleClient.from.mockImplementation((table: any) => {
+    mockContext.drizzleClient.from.mockImplementation((table: unknown) => {
       if (table === configTable)
         return {
           where: vi.fn().mockReturnThis(),
           limit: vi.fn().mockResolvedValue([mockConfig]),
         };
-      // Orders returns empty
       return {
         where: vi.fn().mockReturnThis(),
         limit: vi.fn().mockResolvedValue([]),
@@ -425,30 +438,22 @@ describe('Razorpay Webhook Handler', () => {
         },
       },
     };
-    // Missing signature for req2 to test error path concurrently
 
-    const mockRequest1 = {
-      pluginContext: mockContext,
+    // Construct valid TestRequests
+    const mockRequest1: TestRequest = {
+      ...mockRequest,
       headers: { 'x-razorpay-signature': signature1 },
-      body: payload1,
-      organizationId: 'org-123',
-    } as any;
-
-    const mockRequest2 = {
-      pluginContext: mockContext,
-      headers: {},
-      body: payload2,
-      organizationId: 'org-123',
-    } as any;
-
-    const mockReply1 = {
-      status: vi.fn().mockReturnValue({ send: vi.fn() }),
-      send: vi.fn(),
+      body: payload1 as unknown as PluginRequest['body'],
     };
-    const mockReply2 = {
-      status: vi.fn().mockReturnValue({ send: vi.fn() }),
-      send: vi.fn(),
+
+    const mockRequest2: TestRequest = {
+      ...mockRequest,
+      headers: {}, // Missing signature
+      body: payload2 as unknown as PluginRequest['body'],
     };
+
+    const mockReply1 = createMockReply();
+    const mockReply2 = createMockReply();
 
     const mockOrder = {
       ...createMockOrder(),
@@ -456,7 +461,7 @@ describe('Razorpay Webhook Handler', () => {
       razorpayOrderId: 'order_1',
     };
 
-    mockContext.drizzleClient.from.mockImplementation((table: any) => {
+    mockContext.drizzleClient.from.mockImplementation((table: unknown) => {
       if (table === configTable)
         return {
           where: vi.fn().mockReturnThis(),
@@ -479,6 +484,6 @@ describe('Razorpay Webhook Handler', () => {
     ]);
 
     expect(mockReply1.status).toHaveBeenCalledWith(200);
-    expect(mockReply2.status).toHaveBeenCalledWith(400); // Missing signature
+    expect(mockReply2.status).toHaveBeenCalledWith(400);
   });
 });

@@ -100,7 +100,7 @@ interface RazorpayWebhookPayload {
 /**
  * Plugin request with context
  */
-interface PluginRequest {
+export interface PluginRequest {
   body: RazorpayWebhookPayload;
   headers: Record<string, string | string[] | undefined>;
   organizationId?: string;
@@ -117,7 +117,7 @@ interface PluginRequest {
 /**
  * Plugin reply interface
  */
-interface PluginReply {
+export interface PluginReply {
   status(code: number): {
     send(data: unknown): void;
   };
