@@ -11,4 +11,5 @@ if [ -n "$STAGED_FILES" ]; then
   pnpm knip --config knip.deps.json --include dependencies
 fi
 
+git add docs/
 git add -u
