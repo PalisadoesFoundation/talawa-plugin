@@ -3,11 +3,18 @@ import { vi } from 'vitest';
 
 // Debug log removed
 
+// Mock ResizeObserver
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 // Mock GraphQL Builder
 export const mockBuilder = {
   queryType: vi.fn(() => mockBuilder),
   mutationType: vi.fn(() => mockBuilder),
-  objectRef: vi.fn((name: string) => ({
+  objectRef: vi.fn(() => ({
     implement: vi.fn(() => mockBuilder),
   })),
   objectType: vi.fn(() => mockBuilder),

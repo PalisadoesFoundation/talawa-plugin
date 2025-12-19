@@ -20,9 +20,32 @@ const localThreads = Math.min(MAX_LOCAL_THREADS, Math.max(4, cpuCount));
 
 export default defineConfig({
   resolve: {
-    alias: {
-      razorpay: path.resolve(__dirname, './__mocks__/razorpay.ts'),
-    },
+    alias: [
+      {
+        find: 'razorpay',
+        replacement: path.resolve(__dirname, './__mocks__/razorpay.ts'),
+      },
+      {
+        find: 'utils/useLocalstorage',
+        replacement: path.resolve(__dirname, './__mocks__/useLocalstorage.ts'),
+      },
+      {
+        find: 'components/Loader/Loader',
+        replacement: path.resolve(__dirname, './__mocks__/Loader.tsx'),
+      },
+
+      {
+        find: 'components',
+        replacement: path.resolve(__dirname, './__mocks__/components_mock'),
+      },
+      {
+        find: /^@apollo\/client$/,
+        replacement: path.resolve(
+          __dirname,
+          './__mocks__/apollo-client-proxy.ts',
+        ),
+      },
+    ],
   },
   test: {
     globals: true,
@@ -39,17 +62,10 @@ export default defineConfig({
       '**/*.d.ts',
       'plugin-zips/**',
     ],
-    setupFiles: ['test/setup/globalMocks.ts'],
-    pool: 'threads',
-    // @ts-expect-error - poolOptions exists in Vitest config but types might be lagging
-    poolOptions: {
-      threads: {
-        singleThread: false,
-        minThreads: 1,
-        maxThreads: isCI ? ciThreads : localThreads,
-        isolate: true,
-      },
-    },
+    setupFiles: ['test/setup/globalMocks.ts', 'test/setup/reactTestSetup.ts'],
+    // Vitest v4 Migration: poolOptions removed, replaced by top-level worker options
+    maxWorkers: isCI ? ciThreads : localThreads,
+    isolate: true,
     maxConcurrency: isCI ? ciThreads : localThreads,
     fileParallelism: true,
     sequence: {
@@ -72,6 +88,10 @@ export default defineConfig({
         'scripts/githooks/**',
         '**/*.config.{js,ts}',
         '**/index.{js,ts}',
+        'test/**',
+        '**/__mocks__/**',
+        '**/testUtils.{ts,tsx}',
+        '**/setupTests.ts',
       ],
       thresholds: {
         lines: 60,

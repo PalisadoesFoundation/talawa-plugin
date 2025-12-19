@@ -6,8 +6,16 @@
  * in one place, regardless of which organization the transactions were made to.
  */
 
-import React, { useState, useEffect } from 'react';
-import { useQuery, gql } from '@apollo/client';
+import React, { useState } from 'react';
+
+/**
+ * TODO(2024-12-18): Apollo Client v4.x type definitions do not export useQuery/useMutation
+ * hooks with correct generic signatures, causing TS2305 errors. This is a known issue:
+ * @see https://github.com/apollographql/apollo-client/issues/11506
+ */
+// @ts-expect-error - Apollo Client v4 types issue
+import { useQuery } from '@apollo/client';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   Table,
@@ -23,16 +31,20 @@ import {
   Row,
   Col,
 } from 'antd';
+import { Navigate } from 'react-router-dom';
 import {
   CreditCardOutlined,
   EyeOutlined,
   DownloadOutlined,
   SearchOutlined,
-  FilterOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import { useParams, Navigate } from 'react-router-dom';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 import useLocalStorage from 'utils/useLocalstorage';
 
 const { Title, Text } = Typography;
@@ -40,68 +52,10 @@ const { Search } = Input;
 const { RangePicker } = DatePicker;
 
 // GraphQL operations
-const GET_USER_TRANSACTIONS = gql`
-  query GetUserTransactions(
-    $userId: String!
-    $limit: Int
-    $offset: Int
-    $status: String
-    $dateFrom: String
-    $dateTo: String
-  ) {
-    razorpay_getUserTransactions(
-      userId: $userId
-      limit: $limit
-      offset: $offset
-      status: $status
-      dateFrom: $dateFrom
-      dateTo: $dateTo
-    ) {
-      id
-      paymentId
-      amount
-      currency
-      status
-      donorName
-      donorEmail
-      method
-      bank
-      wallet
-      vpa
-      email
-      contact
-      fee
-      tax
-      errorCode
-      errorDescription
-      refundStatus
-      capturedAt
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-const GET_USER_TRANSACTION_STATS = gql`
-  query GetUserTransactionStats(
-    $userId: String!
-    $dateFrom: String
-    $dateTo: String
-  ) {
-    razorpay_getUserTransactionStats(
-      userId: $userId
-      dateFrom: $dateFrom
-      dateTo: $dateTo
-    ) {
-      totalTransactions
-      totalAmount
-      currency
-      successCount
-      failedCount
-      pendingCount
-    }
-  }
-`;
+import {
+  GET_USER_TRANSACTIONS,
+  GET_USER_TRANSACTION_STATS,
+} from '../graphql/queries';
 
 interface RazorpayTransaction {
   id: string;
@@ -128,6 +82,7 @@ interface RazorpayTransaction {
 }
 
 const UserTransactions: React.FC = () => {
+  const { t } = useTranslation('razorpay');
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(
@@ -138,21 +93,11 @@ const UserTransactions: React.FC = () => {
   const { getItem } = useLocalStorage();
   const userId = getItem('id') as string | null;
 
-  // Debug logging
-  console.log('UserTransactions: userId =', userId);
-
-  // Redirect if no userId is available
-  if (!userId) {
-    console.log('UserTransactions: No userId, redirecting to /');
-    return <Navigate to="/" replace />;
-  }
-
-  // GraphQL queries
+  // GraphQL queries - must be called unconditionally (React hooks rule)
   const {
     data: transactionsData,
     loading: transactionsLoading,
     error: transactionsError,
-    refetch: refetchTransactions,
   } = useQuery(GET_USER_TRANSACTIONS, {
     variables: {
       userId: userId || '',
@@ -162,59 +107,58 @@ const UserTransactions: React.FC = () => {
     fetchPolicy: 'network-only',
   });
 
-  const {
-    data: statsData,
-    loading: statsLoading,
-    error: statsError,
-  } = useQuery(GET_USER_TRANSACTION_STATS, {
-    variables: {
-      userId: userId || '',
+  const { loading: statsLoading, error: statsError } = useQuery(
+    GET_USER_TRANSACTION_STATS,
+    {
+      variables: {
+        userId: userId || '',
+      },
+      skip: !userId,
+      fetchPolicy: 'network-only',
     },
-    skip: !userId,
-    fetchPolicy: 'network-only',
-  });
+  );
+
+  // Redirect if no userId is available (after hooks are called)
+  if (!userId) {
+    return <Navigate to="/" replace />;
+  }
 
   const transactions = transactionsData?.razorpay_getUserTransactions || [];
-  const stats = statsData?.razorpay_getUserTransactionStats;
-
-  // Debug logging
-  console.log('UserTransactions: transactionsData =', transactionsData);
-  console.log('UserTransactions: transactions =', transactions);
-  console.log('UserTransactions: transactionsLoading =', transactionsLoading);
-  console.log('UserTransactions: transactionsError =', transactionsError);
 
   // Apply filters to transactions
-  const filteredTransactions = transactions.filter((transaction) => {
-    // Search filter
-    if (searchText) {
-      const searchLower = searchText.toLowerCase();
-      const matchesSearch =
-        transaction.paymentId?.toLowerCase().includes(searchLower) ||
-        transaction.donorName?.toLowerCase().includes(searchLower) ||
-        transaction.donorEmail?.toLowerCase().includes(searchLower) ||
-        transaction.id.toLowerCase().includes(searchLower);
+  const filteredTransactions = transactions.filter(
+    (transaction: RazorpayTransaction) => {
+      // Search filter
+      if (searchText) {
+        const searchLower = searchText.toLowerCase();
+        const matchesSearch =
+          transaction.paymentId?.toLowerCase().includes(searchLower) ||
+          transaction.donorName?.toLowerCase().includes(searchLower) ||
+          transaction.donorEmail?.toLowerCase().includes(searchLower) ||
+          transaction.id.toLowerCase().includes(searchLower);
 
-      if (!matchesSearch) return false;
-    }
-
-    // Status filter
-    if (statusFilter !== 'all') {
-      if (transaction.status !== statusFilter) return false;
-    }
-
-    // Date range filter
-    if (dateRange && dateRange[0] && dateRange[1]) {
-      const transactionDate = dayjs(transaction.createdAt);
-      if (
-        !transactionDate.isAfter(dateRange[0]) ||
-        !transactionDate.isBefore(dateRange[1])
-      ) {
-        return false;
+        if (!matchesSearch) return false;
       }
-    }
 
-    return true;
-  });
+      // Status filter
+      if (statusFilter !== 'all') {
+        if (transaction.status !== statusFilter) return false;
+      }
+
+      // Date range filter
+      if (dateRange && dateRange[0] && dateRange[1]) {
+        const transactionDate = dayjs(transaction.createdAt);
+        if (
+          !transactionDate.isSameOrAfter(dateRange[0], 'day') ||
+          !transactionDate.isSameOrBefore(dateRange[1], 'day')
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    },
+  );
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -358,7 +302,7 @@ const UserTransactions: React.FC = () => {
         <div style={{ textAlign: 'center', padding: '40px' }}>
           <Spin size="large" />
           <div style={{ marginTop: '16px' }}>
-            <Text>Loading your transaction history...</Text>
+            <Text>{t('common.loading')}</Text>
           </div>
         </div>
       </Card>
@@ -370,7 +314,7 @@ const UserTransactions: React.FC = () => {
       <Card>
         <div style={{ textAlign: 'center', padding: '40px' }}>
           <Text type="danger">
-            Failed to load transaction data:{' '}
+            {t('transactions.error.loadFailed')}:{' '}
             {transactionsError?.message || statsError?.message}
           </Text>
         </div>
@@ -387,11 +331,11 @@ const UserTransactions: React.FC = () => {
               style={{ fontSize: '24px', color: '#1890ff' }}
             />
             <Title level={3} style={{ margin: 0 }}>
-              My Razorpay Transactions
+              {t('transactions.title')}
             </Title>
           </Space>
           <Text type="secondary" style={{ display: 'block', marginTop: '4px' }}>
-            View all your payment transactions across all organizations
+            {t('transactions.subtitle')}
           </Text>
         </div>
 
@@ -399,7 +343,8 @@ const UserTransactions: React.FC = () => {
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} md={8} lg={8}>
             <Search
-              placeholder="Search transactions..."
+              placeholder={t('transactions.search')}
+              aria-label={t('transactions.search')}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               onSearch={setSearchText}
@@ -409,17 +354,28 @@ const UserTransactions: React.FC = () => {
           </Col>
           <Col xs={24} sm={12} md={8} lg={8}>
             <Select
-              placeholder="Filter by status"
+              placeholder={t('transactions.filters.statusPlaceholder')}
+              aria-label={t('transactions.filters.statusLabel')}
               value={statusFilter}
               onChange={setStatusFilter}
               style={{ width: '100%' }}
               allowClear
             >
-              <Select.Option value="all">All Statuses</Select.Option>
-              <Select.Option value="captured">Captured</Select.Option>
-              <Select.Option value="authorized">Authorized</Select.Option>
-              <Select.Option value="failed">Failed</Select.Option>
-              <Select.Option value="refunded">Refunded</Select.Option>
+              <Select.Option value="all">
+                {t('transactions.filters.allStatuses')}
+              </Select.Option>
+              <Select.Option value="captured">
+                {t('transactions.status.captured')}
+              </Select.Option>
+              <Select.Option value="authorized">
+                {t('transactions.status.authorized')}
+              </Select.Option>
+              <Select.Option value="failed">
+                {t('transactions.status.failed')}
+              </Select.Option>
+              <Select.Option value="refunded">
+                {t('transactions.status.refunded')}
+              </Select.Option>
             </Select>
           </Col>
           <Col xs={24} sm={12} md={8} lg={8}>
@@ -429,7 +385,11 @@ const UserTransactions: React.FC = () => {
                 setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs] | null)
               }
               style={{ width: '100%' }}
-              placeholder={['Start Date', 'End Date']}
+              placeholder={[
+                t('transactions.filters.startDate'),
+                t('transactions.filters.endDate'),
+              ]}
+              aria-label={t('transactions.filters.dateRangeLabel')}
             />
           </Col>
         </Row>
@@ -445,7 +405,11 @@ const UserTransactions: React.FC = () => {
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} transactions`,
+              t('transactions.table.pagination', {
+                start: range[0],
+                end: range[1],
+                total,
+              }),
           }}
           scroll={{ x: 1000 }}
         />

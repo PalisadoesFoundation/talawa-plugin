@@ -25,6 +25,7 @@ export async function getRazorpayConfigResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
@@ -32,6 +33,7 @@ export async function getRazorpayConfigResolver(
   // Check for superadmin access (strict)
   if (!ctx.user || !ctx.user.isSuperAdmin) {
     throw new TalawaGraphQLError({
+      message: 'Forbidden',
       extensions: { code: 'forbidden' },
     });
   }
@@ -76,6 +78,7 @@ export async function getRazorpayConfigResolver(
   } catch (error) {
     ctx.log?.error('Error getting Razorpay config:', error);
     throw new TalawaGraphQLError({
+      message: 'Unexpected error',
       extensions: { code: 'unexpected' },
     });
   }
@@ -101,12 +104,14 @@ export async function getOrganizationTransactionsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
 
   if (!ctx.isAdmin) {
     throw new TalawaGraphQLError({
+      message: 'Forbidden',
       extensions: { code: 'forbidden' },
     });
   }
@@ -119,6 +124,7 @@ export async function getOrganizationTransactionsResolver(
 
   if (!success) {
     throw new TalawaGraphQLError({
+      message: 'Invalid arguments',
       extensions: {
         code: 'invalid_arguments',
         issues: error.issues.map((issue) => ({
@@ -212,6 +218,7 @@ export async function getOrganizationTransactionsResolver(
   } catch (error) {
     ctx.log?.error('Error getting organization transactions:', error);
     throw new TalawaGraphQLError({
+      message: 'Unexpected error',
       extensions: { code: 'unexpected' },
     });
   }
@@ -238,6 +245,7 @@ export async function getUserTransactionsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
@@ -250,6 +258,7 @@ export async function getUserTransactionsResolver(
 
   if (!success) {
     throw new TalawaGraphQLError({
+      message: 'Invalid arguments',
       extensions: {
         code: 'invalid_arguments',
         issues: error.issues.map((issue) => ({
@@ -274,6 +283,7 @@ export async function getUserTransactionsResolver(
     // Users can only view their own transactions unless they are admin
     if (userId !== ctx.userId && !ctx.isAdmin) {
       throw new TalawaGraphQLError({
+        message: 'Forbidden',
         extensions: { code: 'forbidden' },
       });
     }
@@ -356,6 +366,7 @@ export async function getUserTransactionsResolver(
   } catch (error) {
     ctx.log?.error('Error getting user transactions:', error);
     throw new TalawaGraphQLError({
+      message: 'Unexpected error',
       extensions: { code: 'unexpected' },
     });
   }
@@ -378,12 +389,14 @@ export async function getOrganizationTransactionStatsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
 
   if (!ctx.isAdmin) {
     throw new TalawaGraphQLError({
+      message: 'Forbidden',
       extensions: { code: 'forbidden' },
     });
   }
@@ -396,6 +409,7 @@ export async function getOrganizationTransactionStatsResolver(
 
   if (!success) {
     throw new TalawaGraphQLError({
+      message: 'Invalid arguments',
       extensions: {
         code: 'invalid_arguments',
         issues: error.issues.map((issue) => ({
@@ -439,9 +453,9 @@ export async function getOrganizationTransactionStatsResolver(
         totalTransactions: 0,
         totalAmount: 0,
         currency: 'INR',
-        successCount: 0,
-        failedCount: 0,
-        pendingCount: 0,
+        successfulTransactions: 0,
+        failedTransactions: 0,
+        averageTransactionAmount: 0,
       };
     }
 
@@ -449,9 +463,14 @@ export async function getOrganizationTransactionStatsResolver(
       totalTransactions: stats[0]?.totalTransactions || 0,
       totalAmount: stats[0]?.totalAmount || 0,
       currency: stats[0]?.currency || 'INR',
-      successCount: stats[0]?.successCount || 0,
-      failedCount: stats[0]?.failedCount || 0,
-      pendingCount: stats[0]?.pendingCount || 0,
+      successfulTransactions: stats[0]?.successCount || 0,
+      failedTransactions: stats[0]?.failedCount || 0,
+      averageTransactionAmount:
+        (stats[0]?.totalTransactions || 0) > 0
+          ? Math.round(
+              (stats[0]?.totalAmount || 0) / (stats[0]?.totalTransactions || 1),
+            )
+          : 0,
     };
   } catch (error) {
     ctx.log?.error('Error getting organization transaction stats:', error);
@@ -538,9 +557,9 @@ export async function getUserTransactionStatsResolver(
         totalTransactions: 0,
         totalAmount: 0,
         currency: 'INR',
-        successCount: 0,
-        failedCount: 0,
-        pendingCount: 0,
+        successfulTransactions: 0,
+        failedTransactions: 0,
+        averageTransactionAmount: 0,
       };
     }
 

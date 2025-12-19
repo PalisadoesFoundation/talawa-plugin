@@ -1,123 +1,80 @@
+/**
+ * DonationForm Component
+ *
+ * A comprehensive donation form that integrates with Razorpay payment gateway.
+ * Allows users to make donations to organizations with real-time payment processing.
+ *
+ * @module DonationForm
+ */
+
 import React, { useState, useEffect } from 'react';
-import { useMutation, useQuery, gql } from '@apollo/client';
+import { useTranslation } from 'react-i18next';
+/**
+ * TODO(2024-12-18): Apollo Client v4.x type definitions do not export useQuery/useMutation
+ * hooks with correct generic signatures, causing TS2305 errors. This is a known issue:
+ * @see https://github.com/apollographql/apollo-client/issues/11506
+ */
+// @ts-expect-error - Apollo Client v4 useQuery/useMutation hooks have incompatible type exports
+import { useQuery, useMutation } from '@apollo/client';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import Loader from '../../../../components/Loader/Loader';
+import {
+  GET_CURRENT_USER,
+  GET_ORGANIZATION_INFO,
+  GET_RAZORPAY_CONFIG_PUBLIC as GET_RAZORPAY_CONFIG,
+  CREATE_PAYMENT_ORDER,
+  VERIFY_PAYMENT,
+} from '../graphql/queries';
 
-// GraphQL operations
-const GET_CURRENT_USER = gql`
-  query GetCurrentUser {
-    me {
-      id
-      firstName
-      lastName
-      email
-    }
-  }
-`;
+interface RazorpaySuccessResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
 
-const GET_ORGANIZATION_INFO = gql`
-  query GetOrganizationInfo($orgId: String!) {
-    organization(input: { id: $orgId }) {
-      id
-      name
-      description
-      avatarURL
-    }
-  }
-`;
-
-const GET_RAZORPAY_CONFIG = gql`
-  query GetRazorpayConfig {
-    razorpay_getRazorpayConfig {
-      keyId
-      isEnabled
-      testMode
-      currency
-      description
-    }
-  }
-`;
-
-const CREATE_PAYMENT_ORDER = gql`
-  mutation CreatePaymentOrder($input: RazorpayOrderInput!) {
-    razorpay_createPaymentOrder(input: $input) {
-      id
-      razorpayOrderId
-      organizationId
-      userId
-      amount
-      currency
-      status
-      donorName
-      donorEmail
-      donorPhone
-      description
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-const VERIFY_PAYMENT = gql`
-  mutation VerifyPayment($input: RazorpayVerificationInput!) {
-    razorpay_verifyPayment(input: $input) {
-      success
-      message
-      transaction {
-        paymentId
-        status
-        amount
-        currency
-      }
-    }
-  }
-`;
-
-interface OrganizationInfo {
-  id: string;
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
   name: string;
   description: string;
-  avatarURL: string;
-}
-
-interface PaymentOrder {
-  id: string;
-  razorpayOrderId?: string;
-  organizationId?: string;
-  userId?: string;
-  amount?: number;
-  currency: string;
-  status: string;
-  donorName?: string;
-  donorEmail?: string;
-  donorPhone?: string;
-  description?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface RazorpayConfig {
-  keyId: string;
-  isEnabled: boolean;
-  testMode: boolean;
-  currency: string;
-  description: string;
-}
-
-interface PaymentResult {
-  success: boolean;
-  message: string;
-  transaction?: {
-    paymentId?: string;
-    status: string;
-    amount?: number;
-    currency: string;
+  order_id: string;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  theme?: {
+    color?: string;
+  };
+  handler: (response: RazorpaySuccessResponse) => void;
+  modal?: {
+    ondismiss?: () => void;
   };
 }
 
+interface VerifyPaymentResponse {
+  razorpay_verifyPayment: {
+    success: boolean;
+    message?: string;
+  };
+}
+
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => { open: () => void };
+  }
+}
+
+/**
+ * DonationForm component for processing donations via Razorpay
+ *
+ * @returns {React.ReactElement} The donation form UI
+ */
 const DonationForm: React.FC = () => {
+  const { t } = useTranslation('razorpay');
   const { orgId } = useParams<{ orgId: string }>();
   const navigate = useNavigate();
 
@@ -152,6 +109,7 @@ const DonationForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<
     'form' | 'payment' | 'success'
   >('form');
+  const [validated, setValidated] = useState(false);
 
   // GraphQL operations
   const {
@@ -195,35 +153,50 @@ const DonationForm: React.FC = () => {
 
   useEffect(() => {
     if (userError) {
-      console.error('Error loading user data:', userError);
+      toast.error(t('donation.error.loadUserFailed'));
     }
-  }, [userError]);
+  }, [userError, t]);
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  /**
+   * Handles form input changes and updates form state
+   * @param field - The form field name to update
+   * @param value - The new value for the field
+   */
+  const handleInputChange = (field: string, value: string | boolean): void => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const validateForm = () => {
+  /**
+   * Validates the donation form fields
+   * @returns {boolean} True if form is valid, false otherwise
+   */
+  const validateForm = (): boolean => {
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
-      toast.error('Please enter a valid amount');
+      toast.error(t('donation.validation.amountRequired'));
       return false;
     }
     if (!formData.donorName.trim()) {
-      toast.error('Please enter your name');
+      toast.error(t('donation.validation.nameRequired'));
       return false;
     }
     if (!formData.donorEmail.trim()) {
-      toast.error('Please enter your email');
+      toast.error(t('donation.validation.emailRequired'));
       return false;
     }
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  /**
+   * Handles form submission and initiates Razorpay payment flow
+   * @param e - Form submit event
+   * @throws {Error} When payment order creation fails
+   */
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
+    setValidated(true);
 
     if (!validateForm()) return;
 
@@ -232,9 +205,7 @@ const DonationForm: React.FC = () => {
       !razorpayConfig?.razorpay_getRazorpayConfig?.keyId ||
       !razorpayConfig?.razorpay_getRazorpayConfig?.isEnabled
     ) {
-      toast.error(
-        'Razorpay is not configured or enabled. Please contact the administrator.',
-      );
+      toast.error(t('donation.error.configNotEnabled'));
       return;
     }
 
@@ -242,21 +213,23 @@ const DonationForm: React.FC = () => {
 
     try {
       // Step 1: Create payment order
-      const { data: orderData } = await createOrder({
-        variables: {
-          input: {
-            organizationId: orgId,
-            userId: currentUserData?.me?.id || null,
-            amount: parseFloat(formData.amount) * 100, // Convert to paise
-            currency: formData.currency,
-            description:
-              formData.description ||
-              `Donation to ${orgData?.organization?.name}`,
-            donorName: formData.donorName,
-            donorEmail: formData.donorEmail,
-            donorPhone: formData.donorPhone,
-          },
+      const orderVariables = {
+        input: {
+          organizationId: orgId,
+          userId: currentUserData?.me?.id || null,
+          amount: parseFloat(formData.amount) * 100, // Convert to paise
+          currency: formData.currency,
+          description:
+            formData.description ||
+            `Donation to ${orgData?.organization?.name}`,
+          donorName: formData.donorName,
+          donorEmail: formData.donorEmail,
+          donorPhone: formData.donorPhone,
         },
+      };
+
+      const { data: orderData } = await createOrder({
+        variables: orderVariables,
       });
 
       if (!orderData?.razorpay_createPaymentOrder) {
@@ -290,7 +263,7 @@ const DonationForm: React.FC = () => {
         theme: {
           color: '#3399cc',
         },
-        handler: function (response: any) {
+        handler: function (response: RazorpaySuccessResponse) {
           // Payment successful - verify payment
           verifyPayment({
             variables: {
@@ -306,26 +279,24 @@ const DonationForm: React.FC = () => {
               },
             },
           })
-            .then(({ data: verificationData }) => {
-              if (verificationData?.razorpay_verifyPayment?.success) {
-                setCurrentStep('success');
-                toast.success(
-                  'Payment successful! Thank you for your donation.',
-                );
-                setIsProcessing(false);
-              } else {
-                toast.error(
-                  verificationData?.razorpay_verifyPayment?.message ||
-                    'Payment verification failed',
-                );
-                setIsProcessing(false);
-              }
-            })
+            .then(
+              ({ data: verificationData }: { data: VerifyPaymentResponse }) => {
+                if (verificationData?.razorpay_verifyPayment?.success) {
+                  setCurrentStep('success');
+                  toast.success(t('donation.success.thankYou'));
+                  setIsProcessing(false);
+                } else {
+                  toast.error(
+                    verificationData?.razorpay_verifyPayment?.message ||
+                      t('donation.error.verificationFailed'),
+                  );
+                  setIsProcessing(false);
+                }
+              },
+            )
             .catch((error) => {
-              console.error('Payment verification error:', error);
-              toast.error(
-                'Payment verification failed. Please contact support.',
-              );
+              console.error('Razorpay verification error:', error);
+              toast.error(t('donation.error.verificationFailed'));
               setIsProcessing(false);
             });
         },
@@ -337,23 +308,47 @@ const DonationForm: React.FC = () => {
       };
 
       // Simple Razorpay integration as per official docs
-      const rzp = new (window as any).Razorpay(options);
+      const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error) {
-      console.error('Payment error:', error);
-      toast.error(error instanceof Error ? error.message : 'Payment failed');
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : t('donation.error.paymentFailed'),
+      );
       setIsProcessing(false);
     }
   };
 
-  const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-IN', {
+  /**
+   * Formats currency amount according to locale
+   * @param amount - Numeric amount to format
+   * @param currency - ISO currency code (e.g., 'INR', 'USD')
+   * @returns Formatted currency string
+   */
+  const formatCurrency = (amount: number, currency: string): string => {
+    // Map currency codes to their typical locales
+    const currencyLocaleMap: { [key: string]: string } = {
+      INR: 'en-IN',
+      USD: 'en-US',
+      EUR: 'de-DE',
+      GBP: 'en-GB',
+    };
+    // Use browser locale, then currency-specific locale, then default to en-US
+    const locale =
+      currencyLocaleMap[currency] || navigator?.language || 'en-US';
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency || 'INR',
     }).format(amount);
   };
 
-  const getCurrencySymbol = (currency: string) => {
+  /**
+   * Gets the currency symbol for a given currency code
+   * @param currency - ISO currency code
+   * @returns Currency symbol or the code if symbol not found
+   */
+  const getCurrencySymbol = (currency: string): string => {
     const symbols: { [key: string]: string } = {
       INR: '₹',
       USD: '$',
@@ -369,16 +364,16 @@ const DonationForm: React.FC = () => {
 
   if (orgError) {
     return (
-      <Alert variant="danger">
-        Failed to load organization information: {orgError.message}
+      <Alert variant="danger" role="alert" aria-live="polite">
+        {t('donation.error.loadOrgFailed')}: {orgError.message}
       </Alert>
     );
   }
 
   if (configError) {
     return (
-      <Alert variant="danger">
-        Failed to load Razorpay configuration: {configError.message}
+      <Alert variant="danger" role="alert" aria-live="polite">
+        {t('configuration.error.loadFailed')}: {configError.message}
       </Alert>
     );
   }
@@ -491,22 +486,37 @@ const DonationForm: React.FC = () => {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Amount</Form.Label>
+                      <Form.Label htmlFor="donation-amount">
+                        {t('donation.form.amountLabel')}
+                      </Form.Label>
                       <div className="position-relative">
                         <span className="position-absolute top-50 start-0 translate-middle-y ms-2 text-muted">
                           {getCurrencySymbol(formData.currency)}
                         </span>
                         <Form.Control
+                          id="donation-amount"
                           type="number"
                           value={formData.amount}
                           onChange={(e) =>
                             handleInputChange('amount', e.target.value)
                           }
-                          placeholder="0.00"
+                          placeholder={t('donation.form.amountPlaceholder')}
                           min="1"
                           step="0.01"
                           className="ps-4"
                           required
+                          aria-required="true"
+                          isInvalid={
+                            validated &&
+                            (!formData.amount ||
+                              parseFloat(formData.amount) <= 0)
+                          }
+                          aria-invalid={
+                            validated &&
+                            (!formData.amount ||
+                              parseFloat(formData.amount) <= 0)
+                          }
+                          aria-label={t('donation.form.amountLabel')}
                         />
                       </div>
                     </Form.Group>
@@ -553,62 +563,84 @@ const DonationForm: React.FC = () => {
 
               {/* Donor Information */}
               <div className="mb-4">
-                <h3 className="text-lg font-semibold mb-3">Your Information</h3>
+                <h3 className="text-lg font-semibold mb-3">
+                  {t('donation.form.donorInfoTitle')}
+                </h3>
 
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Full Name *</Form.Label>
+                      <Form.Label htmlFor="donor-name">
+                        {t('donation.form.fullNameRequired')}
+                      </Form.Label>
                       <Form.Control
+                        id="donor-name"
                         type="text"
                         value={formData.donorName}
                         onChange={(e) =>
                           handleInputChange('donorName', e.target.value)
                         }
-                        placeholder="Enter your full name"
+                        placeholder={t('donation.form.fullNamePlaceholder')}
                         required
+                        aria-required="true"
+                        isInvalid={validated && !formData.donorName.trim()}
+                        aria-invalid={validated && !formData.donorName.trim()}
+                        aria-label={t('donation.form.fullNameLabel')}
                       />
                     </Form.Group>
                   </Col>
 
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Email Address *</Form.Label>
+                      <Form.Label htmlFor="donor-email">
+                        {t('donation.form.emailRequired')}
+                      </Form.Label>
                       <Form.Control
+                        id="donor-email"
                         type="email"
                         value={formData.donorEmail}
                         onChange={(e) =>
                           handleInputChange('donorEmail', e.target.value)
                         }
-                        placeholder="Enter your email"
+                        placeholder={t('donation.form.emailPlaceholder')}
                         required
+                        aria-required="true"
+                        isInvalid={validated && !formData.donorEmail.trim()}
+                        aria-invalid={validated && !formData.donorEmail.trim()}
+                        aria-label={t('donation.form.emailLabel')}
                       />
                     </Form.Group>
                   </Col>
                 </Row>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>Phone Number (Optional)</Form.Label>
+                <Form.Group className="mb-3" controlId="donorContact">
+                  <Form.Label htmlFor="donorContact">
+                    {t('donation.form.phoneLabel')}
+                  </Form.Label>
                   <Form.Control
+                    id="donorContact"
                     type="tel"
                     value={formData.donorPhone}
                     onChange={(e) =>
                       handleInputChange('donorPhone', e.target.value)
                     }
-                    placeholder="Enter your phone number"
+                    placeholder={t('donation.form.phonePlaceholder')}
                   />
                 </Form.Group>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>Message (Optional)</Form.Label>
+                <Form.Group className="mb-3" controlId="description">
+                  <Form.Label htmlFor="description">
+                    {t('donation.form.messageLabel')}
+                  </Form.Label>
                   <Form.Control
+                    id="description"
                     as="textarea"
                     rows={3}
                     value={formData.description}
                     onChange={(e) =>
                       handleInputChange('description', e.target.value)
                     }
-                    placeholder="Add a personal message with your donation"
+                    placeholder={t('donation.form.messagePlaceholder')}
                   />
                 </Form.Group>
               </div>

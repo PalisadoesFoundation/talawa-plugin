@@ -27,6 +27,9 @@
     "eslint-plugin-prettier",
     "eslint-plugin-react",
     "eslint-plugin-tsdoc",
-    "eslint-plugin-vitest"
+    "eslint-plugin-vitest",
+    "tsc-files",
+    "i18next-browser-languagedetector",
+    "i18next-http-backend"
   ]
 }

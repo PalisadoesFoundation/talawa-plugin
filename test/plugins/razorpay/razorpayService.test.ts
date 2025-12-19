@@ -1,8 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  createRazorpayService,
-  RazorpayService,
-} from '../../../plugins/Razorpay/api/services/razorpayService';
+import { RazorpayService } from '../../../plugins/Razorpay/api/services/razorpayService';
 
 // Mock fetch
 global.fetch = vi.fn(() =>
@@ -209,7 +206,7 @@ describe('RazorpayService', () => {
 
       try {
         await service.createOrder(orderData);
-      } catch (e) {
+      } catch {
         // Ignore errors
       }
 

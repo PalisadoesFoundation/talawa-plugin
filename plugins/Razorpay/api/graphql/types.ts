@@ -27,6 +27,7 @@ RazorpayConfigRef.implement({
 export const RazorpayTransactionRef = builder.objectRef<{
   id: string;
   paymentId?: string;
+  orderId?: string;
   amount?: number;
   currency: string;
   status: string;
@@ -52,6 +53,7 @@ RazorpayTransactionRef.implement({
   fields: (t) => ({
     id: t.exposeID('id'),
     paymentId: t.exposeString('paymentId', { nullable: true }),
+    orderId: t.exposeString('orderId', { nullable: true }),
     amount: t.exposeFloat('amount', { nullable: true }),
     currency: t.exposeString('currency'),
     status: t.exposeString('status'),
@@ -79,9 +81,9 @@ export const RazorpayTransactionStatsRef = builder.objectRef<{
   totalTransactions: number;
   totalAmount: number;
   currency: string;
-  successCount: number;
-  failedCount: number;
-  pendingCount: number;
+  successfulTransactions: number;
+  failedTransactions: number;
+  averageTransactionAmount: number;
 }>('RazorpayTransactionStats');
 
 RazorpayTransactionStatsRef.implement({
@@ -89,9 +91,9 @@ RazorpayTransactionStatsRef.implement({
     totalTransactions: t.exposeInt('totalTransactions'),
     totalAmount: t.exposeFloat('totalAmount'),
     currency: t.exposeString('currency'),
-    successCount: t.exposeInt('successCount'),
-    failedCount: t.exposeInt('failedCount'),
-    pendingCount: t.exposeInt('pendingCount'),
+    successfulTransactions: t.exposeInt('successfulTransactions'),
+    failedTransactions: t.exposeInt('failedTransactions'),
+    averageTransactionAmount: t.exposeFloat('averageTransactionAmount'),
   }),
 });
 

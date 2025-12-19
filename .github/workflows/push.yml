@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [22.x]
+        node-version: [18.x, 20.x, 24.11.1]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,10 +36,10 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Run Vitest Tests
         env:
@@ -48,12 +48,33 @@ jobs:
           pnpm run test:coverage
 
       - name: Present and upload coverage to Codecov as ${{env.CODECOV_UNIQUE_NAME}}
+        if: matrix.node-version == '24.11.1'
         uses: codecov/codecov-action@v5
         with:
+          name: '${{env.CODECOV_UNIQUE_NAME}}'
           token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
           verbose: true
           exclude: 'docs/'
           gcov_ignore: 'docs/'
           files: ./coverage/vitest/lcov.info
-          fail_ci_if_error: false
-          name: '${{env.CODECOV_UNIQUE_NAME}}'
+
+  Test-Npm:
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    name: Test with npm@11
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.11.1
+          check-latest: false
+
+      - name: Install npm@11
+        run: npm install -g npm@11
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: npm test

@@ -12,7 +12,7 @@ Defined in: [plugins/SummarizeAPI/api/index.ts:10](https://github.com/Palisadoes
 
 ### \_context
 
-`IPluginContext`
+[`IPluginContext`](../../../types/interfaces/IPluginContext.md)
 
 ## Returns
 

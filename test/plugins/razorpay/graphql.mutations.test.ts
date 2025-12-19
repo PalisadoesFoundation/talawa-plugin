@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { GraphQLContext } from '~/src/graphql/context';
 import crypto from 'node:crypto';
 import {
   updateRazorpayConfigResolver,
@@ -9,15 +10,12 @@ import {
 } from '../../../plugins/Razorpay/api/graphql/mutations';
 import {
   createMockRazorpayContext,
-  createMockRazorpayInstance,
-  createMockConfig,
-  createMockOrder,
-  createMockRazorpayOrder,
   createMockTransaction,
   createMockRazorpayPayment,
   createMockDatabaseClient,
-  // Use local mock primitives instead of importing 'razorpay'
-  mockCryptoFunctions,
+  createMockConfig,
+  createMockOrder,
+  createMockRazorpayOrder,
 } from './utils/mockRazorpay';
 import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
 
@@ -29,7 +27,9 @@ import { mockOrders, mockPayments } from '../../../__mocks__/razorpay';
 vi.mock('razorpay');
 
 describe('Razorpay GraphQL Mutations', () => {
-  let mockContext: any;
+  let mockContext: GraphQLContext & {
+    request: { headers: Record<string, string> };
+  };
 
   beforeEach(() => {
     // Reset mocks and create a fresh context for each test
@@ -38,14 +38,13 @@ describe('Razorpay GraphQL Mutations', () => {
       drizzleClient: createMockDatabaseClient(), // Fresh mocks for each test
     });
     // Ensure request object exists
-    (mockContext as any).request = {
+    mockContext.request = {
       headers: {},
     };
     global.fetch = vi.fn(); // Mock fetch globally
 
     // Set default mock implementations for Razorpay API calls
     mockOrders.create.mockResolvedValue(createMockRazorpayOrder());
-    // @ts-ignore
     mockPayments.fetch.mockResolvedValue(createMockRazorpayPayment());
 
     // Default config exists for most tests
@@ -162,7 +161,7 @@ describe('Razorpay GraphQL Mutations', () => {
     it('should create payment order successfully', async () => {
       const mockConfig = createMockConfig();
       const mockOrder = createMockOrder();
-      const mockRzpOrder = createMockRazorpayOrder();
+      // mockRzpOrder removed
 
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
       mockContext.drizzleClient.returning.mockResolvedValue([mockOrder]);
@@ -187,7 +186,7 @@ describe('Razorpay GraphQL Mutations', () => {
 
     it('should handle anonymous donations (no userId)', async () => {
       const mockConfig = createMockConfig();
-      const mockOrder = createMockOrder({ userId: null });
+      // mockOrder removed
       const mockRazorpayOrder = createMockRazorpayOrder();
 
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
@@ -197,7 +196,14 @@ describe('Razorpay GraphQL Mutations', () => {
       await expect(
         createPaymentOrderResolver(
           {},
-          { input: { ...input, userId: undefined, anonymous: true } as any },
+
+          {
+            input: {
+              ...input,
+              userId: undefined,
+              anonymous: true,
+            } as typeof input & { anonymous: boolean },
+          },
           mockContext,
         ),
       ).resolves.not.toThrow();
@@ -374,7 +380,7 @@ describe('Razorpay GraphQL Mutations', () => {
       const mockConfig = createMockConfig();
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      (global.fetch as any).mockResolvedValue({
+      vi.mocked(global.fetch).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => ({ count: 0, items: [] }),
@@ -399,10 +405,10 @@ describe('Razorpay GraphQL Mutations', () => {
       const mockConfig = createMockConfig();
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      (global.fetch as any).mockRejectedValue(new TypeError('fetch failed'));
+      vi.mocked(global.fetch).mockRejectedValue(new TypeError('fetch failed'));
 
       // Mock network failure
-      // @ts-ignore
+      // Mock network failure
       mockOrders.create.mockRejectedValueOnce(new Error('Network error'));
       const result = await testRazorpaySetupResolver({}, {}, mockContext);
 
@@ -439,7 +445,7 @@ describe('Razorpay GraphQL Mutations', () => {
       // Since resolver logic checks key format before API, we don't need to mock API failure for this if logical check exists
       // But if logic solely relies on API, we mock API error
       // Assuming setupResolver catches API error
-      // @ts-ignore
+      // Assuming setupResolver catches API error
       mockOrders.create.mockRejectedValueOnce({
         error: {
           code: 'BAD_REQUEST_ERROR',

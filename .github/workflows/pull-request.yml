@@ -1,5 +1,4 @@
 ##############################################################################
-##############################################################################
 #
 # NOTE!
 #
@@ -35,6 +34,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         with:
+          version: 10.4.1
           run_install: false
 
       - name: Install Node.js
@@ -44,7 +44,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Count number of lines
         run: |
@@ -61,11 +61,22 @@ jobs:
           ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | tr '\n' ' ')
           echo "all_changed_files=${ALL_CHANGED_FILES}" >> $GITHUB_OUTPUT
 
+          # Filter for TS/TSX files
+          TS_CHANGED_FILES=$(echo "$ALL_CHANGED_FILES" | tr ' ' '\n' | { grep -E '\.(ts|tsx)$' || true; } | tr '\n' ' ')
+          echo "ts_changed_files=${TS_CHANGED_FILES}" >> $GITHUB_OUTPUT
+
           # Count all changed files
           ALL_CHANGED_FILES_COUNT=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | wc -l | tr -d ' ')
           echo "all_changed_files_count=$ALL_CHANGED_FILES_COUNT" >> $GITHUB_OUTPUT
 
-          # Check if any files changed
+          # Check if any TS files changed
+          if [ -n "$TS_CHANGED_FILES" ]; then
+            echo "any_ts_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "any_ts_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Check if any files changed (legacy support)
           if [ "$ALL_CHANGED_FILES_COUNT" -gt 0 ]; then
             echo "any_changed=true" >> $GITHUB_OUTPUT
           else
@@ -83,15 +94,17 @@ jobs:
         if: failure()
         run: pnpm run format:fix
 
-      # - name: Check for type errors
-      #   if: steps.changed-files.outputs.only_changed != 'true'
-      #   run: pnpm run typecheck
+      - name: Check for type errors
+        if: steps.changed-files.outputs.any_ts_changed == 'true'
+        env:
+          TS_FILES: ${{ steps.changed-files.outputs.ts_changed_files }}
+        run: pnpm exec tsc-files --noEmit $TS_FILES
 
-      # - name: Check for linting errors in modified files
-      #   if: steps.changed-files.outputs.only_changed != 'true'
-      #   env:
-      #     CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-      #   run: npx eslint ${CHANGED_FILES}
+      - name: Check for linting errors in modified files
+        if: steps.changed-files.outputs.any_ts_changed == 'true'
+        env:
+          TS_FILES: ${{ steps.changed-files.outputs.ts_changed_files }}
+        run: pnpm exec eslint -- $TS_FILES
 
       - name: Check for TSDoc comments
         run: pnpm run check-tsdoc # Run the TSDoc check script
@@ -418,8 +431,10 @@ jobs:
           node-version: '23.7.0'
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10.4.1
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Run Knip for files and exports
         run: pnpm knip --include files,exports
       - name: Run Knip for dependencies
@@ -450,6 +465,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         with:
+          version: 10.4.1
           run_install: false
 
       - name: Install Node.js
@@ -459,7 +475,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Run tests
         run: pnpm run test:coverage
@@ -468,17 +484,6 @@ jobs:
         run: |
           git fetch origin ${{ github.base_ref }}
 
-      - name: Calculate merge base for Codecov
-        id: get-merge-base
-        run: |
-          # Calculate the merge base
-          MERGE_BASE=$(git merge-base origin/${{ github.base_ref }} HEAD)
-          echo "Merge base commit: $MERGE_BASE"
-          echo "merge_base=$MERGE_BASE" >> $GITHUB_OUTPUT
-
-          # Verify the commit exists
-          git show -s --format=%ci $MERGE_BASE
-
       #######################################################################
       # DO NOT DELETE ANY references to env.CODECOV_UNIQUE_NAME in this
       # section. They are required for accurate calculations
@@ -486,13 +491,13 @@ jobs:
       - name: Present and upload coverage to Codecov as ${{env.CODECOV_UNIQUE_NAME}}
         uses: codecov/codecov-action@v5
         with:
-          name: '${{env.CODECOV_UNIQUE_NAME}}'
+          name: '${{env.CODECOV_UNIQUE_NAME}}-merged'
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
           verbose: true
           exclude: 'docs/'
           files: ./coverage/vitest/lcov.info
-          commit_parent: ${{ steps.get-merge-base.outputs.merge_base }}
+          flags: vitest
 
       - name: Test acceptable level of code coverage
         uses: VeryGoodOpenSource/very_good_coverage@v3

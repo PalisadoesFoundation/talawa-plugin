@@ -4,9 +4,9 @@
 
 # Function: getUserTransactionStatsResolver()
 
-> **getUserTransactionStatsResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `currency`: `any`; `failedCount`: `any`; `pendingCount`: `any`; `successCount`: `any`; `totalAmount`: `any`; `totalTransactions`: `any`; \}\>
+> **getUserTransactionStatsResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `averageTransactionAmount`: `number`; `currency`: `string`; `failedCount?`: `undefined`; `failedTransactions`: `number`; `pendingCount?`: `undefined`; `successCount?`: `undefined`; `successfulTransactions`: `number`; `totalAmount`: `number`; `totalTransactions`: `number`; \} \| \{ `averageTransactionAmount?`: `undefined`; `currency`: `any`; `failedCount`: `any`; `failedTransactions?`: `undefined`; `pendingCount`: `any`; `successCount`: `any`; `successfulTransactions?`: `undefined`; `totalAmount`: `any`; `totalTransactions`: `any`; \}\>
 
-Defined in: [plugins/Razorpay/api/graphql/queries.ts:475](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/graphql/queries.ts#L475)
+Defined in: [plugins/Razorpay/api/graphql/queries.ts:494](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/graphql/queries.ts#L494)
 
 Resolver for fetching transaction statistics for a specific user.
 Returns aggregation of user transactions.
@@ -37,4 +37,4 @@ Returns aggregation of user transactions.
 
 ## Returns
 
-`Promise`\<\{ `currency`: `any`; `failedCount`: `any`; `pendingCount`: `any`; `successCount`: `any`; `totalAmount`: `any`; `totalTransactions`: `any`; \}\>
+`Promise`\<\{ `averageTransactionAmount`: `number`; `currency`: `string`; `failedCount?`: `undefined`; `failedTransactions`: `number`; `pendingCount?`: `undefined`; `successCount?`: `undefined`; `successfulTransactions`: `number`; `totalAmount`: `number`; `totalTransactions`: `number`; \} \| \{ `averageTransactionAmount?`: `undefined`; `currency`: `any`; `failedCount`: `any`; `failedTransactions?`: `undefined`; `pendingCount`: `any`; `successCount`: `any`; `successfulTransactions?`: `undefined`; `totalAmount`: `any`; `totalTransactions`: `any`; \}\>
