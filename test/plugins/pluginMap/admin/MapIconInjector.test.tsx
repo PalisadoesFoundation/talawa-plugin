@@ -8,16 +8,19 @@ import MapIconInjector from '../../../../plugins/Plugin Map/admin/injector/MapIc
 
 // Mock EnvironmentOutlined and TransactionOutlined to avoid complex SVG structures in tests
 vi.mock('@ant-design/icons', async () => {
-  const actual = await vi.importActual<any>('@ant-design/icons');
+  const actual =
+    await vi.importActual<typeof import('@ant-design/icons')>(
+      '@ant-design/icons',
+    );
   return {
     ...actual,
-    EnvironmentOutlined: (props: any) => (
+    EnvironmentOutlined: (props: React.HTMLAttributes<HTMLSpanElement>) => (
       <span data-testid="map-icon" {...props} />
     ),
-    TransactionOutlined: (props: any) => (
+    TransactionOutlined: (props: React.HTMLAttributes<HTMLSpanElement>) => (
       <span data-testid="transaction-icon" {...props} />
     ),
-    AppstoreOutlined: (props: any) => (
+    AppstoreOutlined: (props: React.HTMLAttributes<HTMLSpanElement>) => (
       <span data-testid="app-icon" {...props} />
     ),
   };

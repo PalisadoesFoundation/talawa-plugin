@@ -9,11 +9,7 @@ import ExtensionPointsDashboard, {
   GET_PLUGIN_MAP_REQUESTS,
   LOG_PLUGIN_MAP_REQUEST,
 } from '../../../../plugins/Plugin Map/admin/pages/ExtensionPointsDashboard';
-import {
-  renderWithProviders,
-  createMockRequest,
-  flushPromises,
-} from './adminTestUtils';
+import { renderWithProviders, createMockRequest } from './adminTestUtils';
 
 import useLocalStorage from 'utils/useLocalstorage';
 
@@ -80,16 +76,49 @@ describe('ExtensionPointsDashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     cleanup();
+    // Default to test-user-id
+    vi.mocked(useLocalStorage).mockReturnValue({
+      getItem: (key: string) => (key === 'id' ? 'test-user-id' : null),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    });
   });
+
+  console.log('ExPointsDashboard:', ExtensionPointsDashboard);
 
   it('should render the dashboard title and description', async () => {
     renderWithProviders(<ExtensionPointsDashboard />, {
       mocks: standardMocks,
     });
 
-    expect(
-      screen.getByText('RA2 - Admin Global Extension Point'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('dashboard.title')).toBeInTheDocument();
+    expect(screen.getByText('dashboard.description')).toBeInTheDocument();
+  });
+
+  it('should verify components card titles and button', async () => {
+    renderWithProviders(<ExtensionPointsDashboard />, {
+      mocks: standardMocks,
+    });
+
+    await screen.findAllByText('1');
+
+    expect(screen.getByText('dashboard.testRequestSystem')).toBeInTheDocument();
+    expect(screen.getByText('dashboard.requestHistory')).toBeInTheDocument();
+    expect(screen.getByText('dashboard.requestButton')).toBeInTheDocument();
+  });
+
+  it('should render the table with correct headers', async () => {
+    renderWithProviders(<ExtensionPointsDashboard />, {
+      mocks: standardMocks,
+    });
+
+    await screen.findAllByText('1');
+
+    expect(screen.getByText('table.pollNumber')).toBeInTheDocument();
+    expect(screen.getByText('table.userId')).toBeInTheDocument();
+    expect(screen.getByText('table.userRole')).toBeInTheDocument();
+    expect(screen.getByText('table.extensionPoint')).toBeInTheDocument();
+    expect(screen.getByText('table.createdAt')).toBeInTheDocument();
   });
 
   it('should render the request history table', async () => {
@@ -104,10 +133,8 @@ describe('ExtensionPointsDashboard', () => {
     const twos = await screen.findAllByText('2');
     expect(twos.length).toBeGreaterThan(0);
 
-    // Verify pagination total (covers line 216)
-    expect(screen.getByTestId('pagination-total')).toHaveTextContent(
-      /1-2 of 2 requests/i,
-    );
+    // Verify total requests text is present
+    expect(screen.getByText('table.totalRequests')).toBeInTheDocument();
   });
 
   it('should log a new request when the button is clicked', async () => {
@@ -146,13 +173,16 @@ describe('ExtensionPointsDashboard', () => {
     // Wait for initial load
     await screen.findAllByText('1');
 
-    const button = screen.getByRole('button', { name: /Request RA2/i });
+    const button = screen.getByRole('button', {
+      name: 'dashboard.requestButton',
+    });
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(message.success).toHaveBeenCalledWith(
-        expect.stringContaining('Request 3 logged successfully from RA2'),
-      );
+      // Mock returns key, so message.success(t()) -> message.success(key)
+      // Check i18next mock implementation in globalMocks.ts:
+      // t: (key) => key
+      expect(message.success).toHaveBeenCalledWith('messages.success');
     });
   });
 
@@ -177,11 +207,13 @@ describe('ExtensionPointsDashboard', () => {
     });
 
     await screen.findAllByText('1');
-    const errButton = screen.getByRole('button', { name: /Request RA2/i });
-    fireEvent.click(errButton);
+    const button = screen.getByRole('button', {
+      name: 'dashboard.requestButton',
+    });
+    fireEvent.click(button);
 
     await waitFor(() => {
-      expect(message.error).toHaveBeenCalledWith('Failed to log request');
+      expect(message.error).toHaveBeenCalledWith('messages.error');
     });
   });
 
@@ -217,54 +249,59 @@ describe('ExtensionPointsDashboard', () => {
           },
         },
       },
+      {
+        request: {
+          query: LOG_PLUGIN_MAP_REQUEST,
+          variables: {
+            input: {
+              userId: 'unknown-user',
+              userRole: 'admin',
+              organizationId: null,
+              extensionPoint: 'RA2',
+            },
+          },
+        },
+        result: {
+          data: {
+            plugin_map_logPluginMapRequest: {
+              id: 'req-unknown',
+              pollNumber: 99,
+              userId: 'unknown-user',
+              userRole: 'admin',
+              organizationId: null,
+              extensionPoint: 'RA2',
+              createdAt: new Date().toISOString(),
+              __typename: 'PluginMapPoll',
+            },
+          },
+        },
+      },
     ];
 
-    const logMock = {
-      request: {
-        query: LOG_PLUGIN_MAP_REQUEST,
-        variables: {
-          input: {
-            userId: 'unknown-user',
-            userRole: 'admin',
-            organizationId: null,
-            extensionPoint: 'RA2',
-          },
-        },
-      },
-      result: {
-        data: {
-          plugin_map_logPluginMapRequest: {
-            id: 'req-unknown',
-            pollNumber: 99,
-            userId: 'unknown-user',
-            userRole: 'admin',
-            organizationId: null,
-            extensionPoint: 'RA2',
-            createdAt: new Date().toISOString(),
-            __typename: 'PluginMapPoll',
-          },
-        },
-      },
-    };
-
     renderWithProviders(<ExtensionPointsDashboard />, {
-      mocks: [...unknownUserMocks, logMock],
+      mocks: unknownUserMocks,
     });
 
+    // We can't query by text with interpolation easily with the simple mock
+    // Just wait for something that indicates loading finished or empty state
+    // But table renders empty dataSource
+
+    // We can verify "Total requests: 0" -> t('table.totalRequests', { count: 0 })
+    // With simple mock: returns 'table.totalRequests'
     await waitFor(() => {
-      expect(screen.getByText(/Total requests: 0/i)).toBeInTheDocument();
+      expect(screen.getByText('table.totalRequests')).toBeInTheDocument();
     });
 
-    const button = screen.getByRole('button', { name: /Request RA2/i });
+    const button = screen.getByRole('button', {
+      name: 'dashboard.requestButton',
+    });
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(message.success).toHaveBeenCalledWith(
-        expect.stringContaining('99'),
-      );
+      expect(message.success).toHaveBeenCalledWith('messages.success');
     });
 
-    vi.mocked(useLocalStorage).mockRestore();
+    vi.mocked(useLocalStorage).mockClear();
   });
 
   it('should handle missing mutation data gracefully', async () => {
@@ -292,13 +329,14 @@ describe('ExtensionPointsDashboard', () => {
     });
 
     await screen.findAllByText('1');
-    const button = screen.getByRole('button', { name: /Request RA2/i });
+    const button = screen.getByRole('button', {
+      name: 'dashboard.requestButton',
+    });
     fireEvent.click(button);
 
-    // Should not show success message if data is null (line 103 branch)
-    await flushPromises();
-    // expect(message.success).not.valueOf(); // Removed meaningless assertion
-    expect(message.success).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(message.error).toHaveBeenCalledWith('messages.error');
+    });
   });
 
   it('should render user role tags correctly', async () => {

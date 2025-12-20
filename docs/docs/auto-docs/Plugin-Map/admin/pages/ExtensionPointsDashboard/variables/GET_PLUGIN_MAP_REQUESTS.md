@@ -6,4 +6,4 @@
 
 > `const` **GET\_PLUGIN\_MAP\_REQUESTS**: `DocumentNode`
 
-Defined in: [plugins/Plugin Map/admin/pages/ExtensionPointsDashboard.tsx:43](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/admin/pages/ExtensionPointsDashboard.tsx#L43)
+Defined in: [plugins/Plugin Map/admin/pages/ExtensionPointsDashboard.tsx:51](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/admin/pages/ExtensionPointsDashboard.tsx#L51)

@@ -18,10 +18,19 @@ import {
   Table,
   Tag,
 } from 'antd';
-import { useMutation, useQuery } from '@apollo/client/react';
+// @ts-expect-error - Apollo Client v4 types issue
+import { useMutation, useQuery } from '@apollo/client';
 import { gql } from 'graphql-tag';
 import { useParams, Navigate } from 'react-router-dom';
 import useLocalStorage from 'utils/useLocalstorage';
+import { useTranslation } from 'react-i18next';
+import '../utils/i18n';
+import {
+  IGetPluginMapRequestsResponse,
+  IGetPluginMapRequestsVariables,
+  ILogPluginMapRequestResponse,
+  ILogPluginMapRequestVariables,
+} from '../types';
 
 const { Title, Paragraph } = Typography;
 
@@ -60,31 +69,38 @@ const GET_PLUGIN_MAP_REQUESTS = gql`
 `;
 
 const ExtensionPointsOrganization: React.FC = () => {
+  const { t } = useTranslation('plugin-map');
   const { orgId } = useParams();
   const { getItem } = useLocalStorage();
   const userId = getItem('id') as string | null;
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   // Move hooks before the early return to comply with rules-of-hooks
-  const [logRequest] = useMutation<any>(LOG_PLUGIN_MAP_REQUEST);
+  const [logRequest] = useMutation<
+    ILogPluginMapRequestResponse,
+    ILogPluginMapRequestVariables
+  >(LOG_PLUGIN_MAP_REQUEST);
 
   // Query to fetch requests for this extension point
   const {
     data: requestsData,
     loading: loadingRequests,
     refetch,
-  } = useQuery<any>(GET_PLUGIN_MAP_REQUESTS, {
-    variables: {
-      input: {
-        extensionPoint: 'RA1',
-        userRole: 'admin',
-        organizationId: orgId,
-        userId: userId || 'unknown-user', // Filter by current user ID
+  } = useQuery<IGetPluginMapRequestsResponse, IGetPluginMapRequestsVariables>(
+    GET_PLUGIN_MAP_REQUESTS,
+    {
+      variables: {
+        input: {
+          extensionPoint: 'RA1',
+          userRole: 'admin',
+          organizationId: orgId,
+          userId: userId || 'unknown-user', // Filter by current user ID
+        },
       },
+      skip: !orgId,
+      fetchPolicy: 'network-only',
     },
-    skip: !orgId,
-    fetchPolicy: 'network-only',
-  });
+  );
 
   // Refetch when a new request is logged
   useEffect(() => {
@@ -94,7 +110,7 @@ const ExtensionPointsOrganization: React.FC = () => {
   }, [refetchTrigger, refetch]);
 
   if (!orgId) {
-    message.error('Organization not found — redirecting to home');
+    message.error(t('organization.redirectError'));
     return <Navigate to="/" replace />;
   }
 
@@ -105,7 +121,7 @@ const ExtensionPointsOrganization: React.FC = () => {
           input: {
             userId: userId || 'unknown-user', // Use actual user ID from localStorage
             userRole: 'admin',
-            organizationId: orgId, // Use actual orgId from route params
+            organizationId: orgId,
             extensionPoint: 'RA1',
           },
         },
@@ -113,91 +129,81 @@ const ExtensionPointsOrganization: React.FC = () => {
 
       if (result.data?.plugin_map_logPluginMapRequest) {
         message.success(
-          `Request ${result.data.plugin_map_logPluginMapRequest.pollNumber} logged successfully from RA1`,
+          t('messages.success', {
+            pollNumber: result.data.plugin_map_logPluginMapRequest.pollNumber,
+            extensionPoint:
+              result.data.plugin_map_logPluginMapRequest.extensionPoint,
+          }),
         );
         // Trigger refetch to update the history
         setRefetchTrigger((prev) => prev + 1);
+      } else {
+        message.error(t('messages.error'));
       }
     } catch (error) {
       console.error('Error logging request:', error);
-      message.error('Failed to log request');
+      message.error(t('messages.error'));
     }
   };
 
   // Table columns for request history
   const columns = [
     {
-      title: 'Request #',
+      title: t('table.pollNumber'),
       dataIndex: 'pollNumber',
       key: 'pollNumber',
-      width: 100,
     },
     {
-      title: 'User ID',
+      title: t('table.userId'),
       dataIndex: 'userId',
       key: 'userId',
-      width: 150,
-      ellipsis: true,
     },
     {
-      title: 'User Role',
+      title: t('table.userRole'),
       dataIndex: 'userRole',
       key: 'userRole',
-      width: 100,
-      render: (userRole: string) => (
-        <Tag color={userRole === 'admin' ? 'red' : 'blue'}>{userRole}</Tag>
-      ),
+      render: (role: string) => <Tag color="blue">{role}</Tag>,
     },
     {
-      title: 'Extension Point',
+      title: t('table.extensionPoint'),
       dataIndex: 'extensionPoint',
       key: 'extensionPoint',
-      width: 120,
-      render: (extensionPoint: string) => (
-        <Tag color="green">{extensionPoint}</Tag>
-      ),
+      render: (point: string) => <Tag color="purple">{point}</Tag>,
     },
     {
-      title: 'Organization',
+      title: t('table.orgId'),
       dataIndex: 'organizationId',
       key: 'organizationId',
-      width: 150,
-      render: (orgId: string | null) => <span>{orgId || 'Global'}</span>,
+      render: (id: string | null) => (id ? <Tag color="green">{id}</Tag> : '-'),
     },
     {
-      title: 'Created At',
+      title: t('table.createdAt'),
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 180,
-      render: (createdAt: string) => (
-        <span>{new Date(createdAt).toLocaleString()}</span>
-      ),
+      render: (date: string) => new Date(date).toLocaleString(),
     },
   ];
 
-  const requests =
-    requestsData?.plugin_map_getPluginMapRequests?.requests || [];
-
   return (
-    <div style={{ padding: '24px' }}>
-      <Title level={2}>RA1 - Admin Organization Extension Point</Title>
-      <Paragraph>
-        This page represents the RA1 extension point - Admin Organization Route.
-        This is an admin organization route that provides admin functionality
-        within a specific organization.
-      </Paragraph>
+    <div style={{ padding: 24 }}>
+      <Title level={2}>{t('organization.title')}</Title>
+      <Paragraph>{t('organization.description')}</Paragraph>
 
       <Row gutter={[16, 16]}>
         <Col span={24}>
-          <Card title="Test Request System" style={{ marginBottom: '16px' }}>
+          <Card
+            title={t('organization.testRequestSystem')}
+            style={{ marginBottom: 16 }}
+          >
             <Space direction="vertical" style={{ width: '100%' }}>
-              <Paragraph>
-                Click the button below to test the request system for RA1
-                extension point.
-              </Paragraph>
+              <Paragraph>{t('organization.clickBelow')}</Paragraph>
 
-              <Button type="primary" onClick={handlePollClick}>
-                Request RA1 (Admin Organization)
+              <Button
+                type="primary"
+                onClick={handlePollClick}
+                aria-label={t('organization.requestButton')}
+              >
+                {t('organization.requestButton')}
               </Button>
             </Space>
           </Card>
@@ -205,29 +211,29 @@ const ExtensionPointsOrganization: React.FC = () => {
 
         <Col span={24}>
           <Card
-            title="Request History (RA1 - Admin Organization)"
-            style={{ marginBottom: '16px' }}
+            title={t('organization.requestHistory')}
+            style={{ marginBottom: 16 }}
           >
             <Space direction="vertical" style={{ width: '100%' }}>
               <Paragraph>
-                Recent requests logged for this extension point. Total requests:{' '}
-                {requestsData?.plugin_map_getPluginMapRequests?.totalCount || 0}
+                {t('table.totalRequests', {
+                  count:
+                    requestsData?.plugin_map_getPluginMapRequests?.totalCount ||
+                    0,
+                })}
               </Paragraph>
 
               <Table
                 columns={columns}
-                dataSource={requests}
+                dataSource={
+                  requestsData?.plugin_map_getPluginMapRequests.requests || []
+                }
                 loading={loadingRequests}
                 rowKey="id"
                 pagination={{
-                  pageSize: 10,
-                  showSizeChanger: true,
-                  showQuickJumper: true,
-                  showTotal: (total, range) =>
-                    `${range[0]}-${range[1]} of ${total} requests`,
+                  pageSize: 5,
                 }}
-                scroll={{ x: 800 }}
-                size="small"
+                scroll={{ x: true }}
               />
             </Space>
           </Card>
@@ -240,22 +246,43 @@ const ExtensionPointsOrganization: React.FC = () => {
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '16px',
+                    padding: 16,
                     background: '#f8f9fa',
-                    borderRadius: '6px',
+                    borderRadius: 6,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: '14px',
+                      fontSize: 14,
                       color: '#666',
-                      marginBottom: '4px',
+                      marginBottom: 4,
                     }}
                   >
-                    Extension ID
+                    {t('info.extensionId')}
                   </div>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                    RA1
+                  <div style={{ fontSize: 16, fontWeight: 'bold' }}>RA1</div>
+                </div>
+              </Col>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: 16,
+                    background: '#f8f9fa',
+                    borderRadius: 6,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 14,
+                      color: '#666',
+                      marginBottom: 4,
+                    }}
+                  >
+                    {t('info.type')}
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 'bold' }}>
+                    {t('info.orgRoute')}
                   </div>
                 </div>
               </Col>
@@ -263,22 +290,22 @@ const ExtensionPointsOrganization: React.FC = () => {
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '16px',
+                    padding: 16,
                     background: '#f8f9fa',
-                    borderRadius: '6px',
+                    borderRadius: 6,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: '14px',
+                      fontSize: 14,
                       color: '#666',
-                      marginBottom: '4px',
+                      marginBottom: 4,
                     }}
                   >
-                    Type
+                    {t('info.accessLevel')}
                   </div>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                    Organization Route
+                  <div style={{ fontSize: 16, fontWeight: 'bold' }}>
+                    {t('info.adminOnly')}
                   </div>
                 </div>
               </Col>
@@ -286,44 +313,21 @@ const ExtensionPointsOrganization: React.FC = () => {
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '16px',
+                    padding: 16,
                     background: '#f8f9fa',
-                    borderRadius: '6px',
+                    borderRadius: 6,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: '14px',
+                      fontSize: 14,
                       color: '#666',
-                      marginBottom: '4px',
+                      marginBottom: 4,
                     }}
                   >
-                    Access Level
+                    {t('info.organization')}
                   </div>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                    Admin Only
-                  </div>
-                </div>
-              </Col>
-              <Col span={6}>
-                <div
-                  style={{
-                    textAlign: 'center',
-                    padding: '16px',
-                    background: '#f8f9fa',
-                    borderRadius: '6px',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '14px',
-                      color: '#666',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    Organization
-                  </div>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                  <div style={{ fontSize: 16, fontWeight: 'bold' }}>
                     {orgId}
                   </div>
                 </div>
@@ -331,17 +335,14 @@ const ExtensionPointsOrganization: React.FC = () => {
             </Row>
             <div
               style={{
-                marginTop: '16px',
-                padding: '16px',
+                marginTop: 16,
+                padding: 16,
                 background: '#f0f8ff',
-                borderRadius: '6px',
+                borderRadius: 6,
                 border: '1px solid #d6e4ff',
               }}
             >
-              <strong>Note:</strong> This extension point provides
-              organization-specific administrative capabilities. Plugins can
-              access organization data and manage features within the current
-              organization context.
+              <strong>{t('info.note')}</strong> {t('info.orgAdminDesc')}
             </div>
           </Card>
         </Col>

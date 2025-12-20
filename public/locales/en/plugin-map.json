@@ -1,0 +1,72 @@
+{
+  "dashboard": {
+    "title": "Extension Points Dashboard",
+    "description": "This component displays all available extension points in the Talawa Admin Panel from a global admin perspective, helping developers understand the full ecosystem.",
+    "requestButton": "Request RA2 (Admin Dashboard)",
+    "requestHistory": "Request History (RA2 - Admin Dashboard)",
+    "testRequestSystem": "Test Request System",
+    "clickBelow": "Click the button below to test the request system for RA2 extension point."
+  },
+  "global": {
+    "title": "Global Plugin Map Dashboard",
+    "description": "This component displays all available extension points in the Talawa Admin Panel from a global user perspective, helping developers understand the full ecosystem.",
+    "requestButton": "Request RU2 (Global User)",
+    "requestHistory": "Request History (RU2 - Global User)",
+    "testRequestSystem": "Test Request System",
+    "clickBelow": "Click the button below to test the request system for RU2 extension point."
+  },
+  "organization": {
+    "title": "RA1 - Admin Organization Extension Point",
+    "description": "This page represents the RA1 extension point - Admin Organization Route. This is an admin organization route that provides admin functionality within a specific organization.",
+    "requestButton": "Request RA1 (Admin Organization)",
+    "requestHistory": "Request History (RA1 - Admin Organization)",
+    "testRequestSystem": "Test Request System",
+    "clickBelow": "Click the button below to test the request system for RA1 extension point.",
+    "redirectError": "Organization not found — redirecting to home"
+  },
+  "user": {
+    "title": "RU1 - User Organization Extension Point",
+    "description": "This page represents the RU1 extension point - User Organization Route. This is a user organization route that provides functionality accessible to member users within a specific organization.",
+    "requestButton": "Request RU1 (User Organization)",
+    "requestHistory": "Request History (RU1 - User Organization)",
+    "testRequestSystem": "Test Request System",
+    "clickBelow": "Click the button below to test the request system for RU1 extension point.",
+    "redirectError": "Organization not found — redirecting to home"
+  },
+  "table": {
+    "pollNumber": "Poll Number",
+    "userId": "User ID",
+    "userRole": "User Role",
+    "orgId": "Org ID",
+    "extensionPoint": "Extension Point",
+    "createdAt": "Created At",
+    "action": "Action",
+    "totalRequests": "Total requests: {{count}}",
+    "view": "View"
+  },
+  "messages": {
+    "success": "Request {{pollNumber}} logged successfully from {{extensionPoint}}",
+    "error": "Failed to log request"
+  },
+  "info": {
+    "extensionId": "Extension ID",
+    "type": "Type",
+    "accessLevel": "Access Level",
+    "organization": "Organization",
+    "note": "Note:",
+    "globalUser": "Global User",
+    "globalRoute": "Global Route",
+    "allAuthUsers": "All Authenticated Users",
+    "globalAdmin": "Global Admin",
+    "adminDashboard": "Admin Dashboard",
+    "adminsOnly": "Admins Only",
+    "orgRoute": "Organization Route",
+    "adminOnly": "Admin Only",
+    "userOrgRoute": "User Organization Route",
+    "orgUsers": "Organization Users",
+    "globalDesc": "This extension point relies on global user context and is available throughout the application for authenticated users.",
+    "dashboardDesc": "This extension point provides administrative capabilities at the global level. Plugins can add widgets and data visualizations here.",
+    "orgAdminDesc": "This extension point provides organization-specific administrative capabilities. Plugins can access organization data and manage features within the current organization context.",
+    "orgUserDesc": "This extension point provides organization-specific features for regular users. Plugins can offer tools and content relevant to the organization members."
+  }
+}

@@ -39,6 +39,21 @@ if (typeof window !== 'undefined') {
     default: () => 'Loading...',
   }));
 
+  // Mock react-i18next
+  vi.mock('react-i18next', () => ({
+    useTranslation: () => ({
+      t: (key: string) => key,
+      i18n: {
+        changeLanguage: vi.fn(),
+        language: 'en',
+      },
+    }),
+    initReactI18next: {
+      type: '3rdParty',
+      init: vi.fn(),
+    },
+  }));
+
   // Mock useLocalstorage hook
   vi.mock('utils/useLocalstorage', () => ({
     default: () => ({
@@ -67,7 +82,6 @@ if (typeof window !== 'undefined') {
   });
 
   // Razorpay global mock
-  // @ts-expect-error - Razorpay is not typed on window
   window.Razorpay = vi.fn().mockImplementation(() => ({
     open: vi.fn(),
     on: vi.fn(),

@@ -21,6 +21,14 @@ import {
 import { useMutation, useQuery } from '@apollo/client';
 import { gql } from 'graphql-tag';
 import useLocalStorage from 'utils/useLocalstorage';
+import { useTranslation } from 'react-i18next';
+import '../utils/i18n';
+import {
+  IGetPluginMapRequestsResponse,
+  IGetPluginMapRequestsVariables,
+  ILogPluginMapRequestResponse,
+  ILogPluginMapRequestVariables,
+} from '../types';
 
 const { Title, Paragraph } = Typography;
 
@@ -59,7 +67,11 @@ export const GET_PLUGIN_MAP_REQUESTS = gql`
 `;
 
 const ExtensionPointsDashboard: React.FC = () => {
-  const [logRequest] = useMutation(LOG_PLUGIN_MAP_REQUEST);
+  const { t } = useTranslation('plugin-map');
+  const [logRequest] = useMutation<
+    ILogPluginMapRequestResponse,
+    ILogPluginMapRequestVariables
+  >(LOG_PLUGIN_MAP_REQUEST);
   const { getItem } = useLocalStorage();
   const userId = getItem('id') as string | null;
   const [refetchTrigger, setRefetchTrigger] = useState(0);
@@ -69,17 +81,20 @@ const ExtensionPointsDashboard: React.FC = () => {
     data: requestsData,
     loading: loadingRequests,
     refetch,
-  } = useQuery(GET_PLUGIN_MAP_REQUESTS, {
-    variables: {
-      input: {
-        extensionPoint: 'RA2',
-        userRole: 'admin',
-        organizationId: null, // Global routes have no organization
-        userId: userId || 'unknown-user', // Filter by current user ID
+  } = useQuery<IGetPluginMapRequestsResponse, IGetPluginMapRequestsVariables>(
+    GET_PLUGIN_MAP_REQUESTS,
+    {
+      variables: {
+        input: {
+          extensionPoint: 'RA2',
+          userRole: 'admin',
+          organizationId: null, // Global routes have no organization
+          userId: userId || 'unknown-user', // Filter by current user ID
+        },
       },
+      fetchPolicy: 'network-only',
     },
-    fetchPolicy: 'network-only',
-  });
+  );
 
   // Refetch when a new request is logged
   useEffect(() => {
@@ -103,91 +118,79 @@ const ExtensionPointsDashboard: React.FC = () => {
 
       if (result.data?.plugin_map_logPluginMapRequest) {
         message.success(
-          `Request ${result.data.plugin_map_logPluginMapRequest.pollNumber} logged successfully from RA2`,
+          t('messages.success', {
+            pollNumber: result.data.plugin_map_logPluginMapRequest.pollNumber,
+            extensionPoint:
+              result.data.plugin_map_logPluginMapRequest.extensionPoint,
+          }),
         );
-        // Trigger refetch to update the history
         setRefetchTrigger((prev) => prev + 1);
+      } else {
+        message.error(t('messages.error'));
       }
     } catch (error) {
       console.error('Error logging request:', error);
-      message.error('Failed to log request');
+      message.error(t('messages.error'));
     }
   };
 
-  // Table columns for request history
   const columns = [
     {
-      title: 'Request #',
+      title: t('table.pollNumber'),
       dataIndex: 'pollNumber',
       key: 'pollNumber',
-      width: 100,
     },
     {
-      title: 'User ID',
+      title: t('table.userId'),
       dataIndex: 'userId',
       key: 'userId',
-      width: 150,
-      ellipsis: true,
     },
     {
-      title: 'User Role',
+      title: t('table.userRole'),
       dataIndex: 'userRole',
       key: 'userRole',
-      width: 100,
-      render: (userRole: string) => (
-        <Tag color={userRole === 'admin' ? 'red' : 'blue'}>{userRole}</Tag>
-      ),
+      render: (role: string) => <Tag color="blue">{role}</Tag>,
     },
     {
-      title: 'Extension Point',
-      dataIndex: 'extensionPoint',
-      key: 'extensionPoint',
-      width: 120,
-      render: (extensionPoint: string) => (
-        <Tag color="green">{extensionPoint}</Tag>
-      ),
-    },
-    {
-      title: 'Organization',
+      title: t('table.orgId'),
       dataIndex: 'organizationId',
       key: 'organizationId',
-      width: 150,
-      render: (orgId: string | null) => <span>{orgId || 'Global'}</span>,
+      render: (orgId: string | null) =>
+        orgId ? <Tag color="green">{orgId}</Tag> : '-',
     },
     {
-      title: 'Created At',
+      title: t('table.extensionPoint'),
+      dataIndex: 'extensionPoint',
+      key: 'extensionPoint',
+      render: (point: string) => <Tag color="purple">{point}</Tag>,
+    },
+    {
+      title: t('table.createdAt'),
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 180,
-      render: (createdAt: string) => (
-        <span>{new Date(createdAt).toLocaleString()}</span>
-      ),
+      render: (date: string) => new Date(date).toLocaleString(),
     },
   ];
 
-  const requests =
-    requestsData?.plugin_map_getPluginMapRequests?.requests || [];
-
   return (
-    <div style={{ padding: '24px' }}>
-      <Title level={2}>RA2 - Admin Global Extension Point</Title>
-      <Paragraph>
-        This page represents the RA2 extension point - Admin Global Route. This
-        is a global admin route that provides admin functionality across all
-        organizations.
-      </Paragraph>
+    <div style={{ padding: 24 }}>
+      <Title level={2}>{t('dashboard.title')}</Title>
+      <Paragraph>{t('dashboard.description')}</Paragraph>
 
       <Row gutter={[16, 16]}>
         <Col span={24}>
-          <Card title="Test Request System" style={{ marginBottom: '16px' }}>
+          <Card
+            title={t('dashboard.testRequestSystem')}
+            style={{ marginBottom: 16 }}
+          >
             <Space direction="vertical" style={{ width: '100%' }}>
-              <Paragraph>
-                Click the button below to test the request system for RA2
-                extension point.
-              </Paragraph>
-
-              <Button type="primary" onClick={handlePollClick}>
-                Request RA2 (Admin Global)
+              <Paragraph>{t('dashboard.clickBelow')}</Paragraph>
+              <Button
+                type="primary"
+                onClick={handlePollClick}
+                aria-label={t('dashboard.requestButton')}
+              >
+                {t('dashboard.requestButton')}
               </Button>
             </Space>
           </Card>
@@ -195,29 +198,26 @@ const ExtensionPointsDashboard: React.FC = () => {
 
         <Col span={24}>
           <Card
-            title="Request History (RA2 - Admin Global)"
-            style={{ marginBottom: '16px' }}
+            title={t('dashboard.requestHistory')}
+            style={{ marginBottom: 16 }}
           >
             <Space direction="vertical" style={{ width: '100%' }}>
               <Paragraph>
-                Recent requests logged for this extension point. Total requests:{' '}
-                {requestsData?.plugin_map_getPluginMapRequests?.totalCount || 0}
+                {t('table.totalRequests', {
+                  count:
+                    requestsData?.plugin_map_getPluginMapRequests.totalCount ||
+                    0,
+                })}
               </Paragraph>
-
               <Table
+                dataSource={
+                  requestsData?.plugin_map_getPluginMapRequests.requests || []
+                }
                 columns={columns}
-                dataSource={requests}
-                loading={loadingRequests}
                 rowKey="id"
-                pagination={{
-                  pageSize: 10,
-                  showSizeChanger: true,
-                  showQuickJumper: true,
-                  showTotal: (total, range) =>
-                    `${range[0]}-${range[1]} of ${total} requests`,
-                }}
-                scroll={{ x: 800 }}
-                size="small"
+                loading={loadingRequests}
+                pagination={{ pageSize: 5 }}
+                scroll={{ x: true }}
               />
             </Space>
           </Card>
@@ -230,22 +230,43 @@ const ExtensionPointsDashboard: React.FC = () => {
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '16px',
+                    padding: 16,
                     background: '#f8f9fa',
-                    borderRadius: '6px',
+                    borderRadius: 6,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: '14px',
+                      fontSize: 14,
                       color: '#666',
-                      marginBottom: '4px',
+                      marginBottom: 4,
                     }}
                   >
-                    Extension ID
+                    {t('info.extensionId')}
                   </div>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                    RA2
+                  <div style={{ fontSize: 16, fontWeight: 'bold' }}>RA2</div>
+                </div>
+              </Col>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: 16,
+                    background: '#f8f9fa',
+                    borderRadius: 6,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 14,
+                      color: '#666',
+                      marginBottom: 4,
+                    }}
+                  >
+                    {t('info.type')}
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 'bold' }}>
+                    {t('info.adminDashboard')}
                   </div>
                 </div>
               </Col>
@@ -253,22 +274,22 @@ const ExtensionPointsDashboard: React.FC = () => {
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '16px',
+                    padding: 16,
                     background: '#f8f9fa',
-                    borderRadius: '6px',
+                    borderRadius: 6,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: '14px',
+                      fontSize: 14,
                       color: '#666',
-                      marginBottom: '4px',
+                      marginBottom: 4,
                     }}
                   >
-                    Type
+                    {t('info.accessLevel')}
                   </div>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                    Global Route
+                  <div style={{ fontSize: 16, fontWeight: 'bold' }}>
+                    {t('info.adminsOnly')}
                   </div>
                 </div>
               </Col>
@@ -276,62 +297,34 @@ const ExtensionPointsDashboard: React.FC = () => {
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '16px',
+                    padding: 16,
                     background: '#f8f9fa',
-                    borderRadius: '6px',
+                    borderRadius: 6,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: '14px',
+                      fontSize: 14,
                       color: '#666',
-                      marginBottom: '4px',
+                      marginBottom: 4,
                     }}
                   >
-                    Access Level
+                    {t('info.organization')}
                   </div>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                    Admin Only
-                  </div>
-                </div>
-              </Col>
-              <Col span={6}>
-                <div
-                  style={{
-                    textAlign: 'center',
-                    padding: '16px',
-                    background: '#f8f9fa',
-                    borderRadius: '6px',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '14px',
-                      color: '#666',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    Organization
-                  </div>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                    None (Global)
-                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 'bold' }}>Global</div>
                 </div>
               </Col>
             </Row>
             <div
               style={{
-                marginTop: '16px',
-                padding: '16px',
+                marginTop: 16,
+                padding: 16,
                 background: '#f0f8ff',
-                borderRadius: '6px',
+                borderRadius: 6,
                 border: '1px solid #d6e4ff',
               }}
             >
-              <strong>Note:</strong> This extension point provides system-wide
-              administrative capabilities. Plugins can access global data and
-              manage cross-organization features. No organization context is
-              required.
+              <strong>{t('info.note')}</strong> {t('info.dashboardDesc')}
             </div>
           </Card>
         </Col>

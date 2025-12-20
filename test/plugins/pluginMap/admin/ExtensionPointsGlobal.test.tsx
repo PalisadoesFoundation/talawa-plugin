@@ -10,11 +10,7 @@ import {
   GET_PLUGIN_MAP_REQUESTS,
   LOG_PLUGIN_MAP_REQUEST,
 } from '../../../../plugins/Plugin Map/admin/pages/ExtensionPointsDashboard';
-import {
-  renderWithProviders,
-  createMockRequest,
-  flushPromises,
-} from './adminTestUtils';
+import { renderWithProviders, createMockRequest } from './adminTestUtils';
 
 import useLocalStorage from 'utils/useLocalstorage';
 
@@ -101,10 +97,20 @@ describe('ExtensionPointsGlobal', () => {
       mocks: standardMocks,
     });
 
-    expect(
-      screen.getByText('RU2 - User Global Extension Point'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('global.title')).toBeInTheDocument();
+    expect(screen.getByText('global.description')).toBeInTheDocument();
+  });
+
+  it('should verify components card titles and button', async () => {
+    renderWithProviders(<ExtensionPointsGlobal />, {
+      mocks: standardMocks,
+    });
+
     await screen.findAllByText('1');
+
+    expect(screen.getByText('global.testRequestSystem')).toBeInTheDocument();
+    expect(screen.getByText('global.requestHistory')).toBeInTheDocument();
+    expect(screen.getByText('global.requestButton')).toBeInTheDocument();
   });
 
   it('should log a new request on button click', async () => {
@@ -124,7 +130,7 @@ describe('ExtensionPointsGlobal', () => {
         data: {
           plugin_map_logPluginMapRequest: {
             id: 'req-new',
-            pollNumber: 5,
+            pollNumber: 3,
             userId: 'test-user-id',
             userRole: 'user',
             organizationId: null,
@@ -141,13 +147,11 @@ describe('ExtensionPointsGlobal', () => {
     });
 
     await screen.findAllByText('1');
-    const button = screen.getByRole('button', { name: /Request RU2/i });
+    const button = screen.getByRole('button', { name: 'global.requestButton' });
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(message.success).toHaveBeenCalledWith(
-        expect.stringContaining('Request 5 logged successfully from RU2'),
-      );
+      expect(message.success).toHaveBeenCalledWith('messages.success');
     });
   });
 
@@ -160,7 +164,7 @@ describe('ExtensionPointsGlobal', () => {
             extensionPoint: 'RU2',
             userRole: 'user',
             organizationId: null,
-            userId: 'user-1',
+            userId: 'test-user-id',
           },
         },
       },
@@ -172,11 +176,11 @@ describe('ExtensionPointsGlobal', () => {
     });
 
     await screen.findAllByText('1');
-    const button = screen.getByRole('button', { name: /Request RU2/i });
+    const button = screen.getByRole('button', { name: 'global.requestButton' });
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(message.error).toHaveBeenCalledWith('Failed to log request');
+      expect(message.error).toHaveBeenCalledWith('messages.error');
     });
   });
 
@@ -188,7 +192,7 @@ describe('ExtensionPointsGlobal', () => {
       removeItem: vi.fn(),
     });
 
-    const mocks = [
+    const unknownUserMocks = [
       {
         request: {
           query: GET_PLUGIN_MAP_REQUESTS,
@@ -212,54 +216,51 @@ describe('ExtensionPointsGlobal', () => {
           },
         },
       },
+      {
+        request: {
+          query: LOG_PLUGIN_MAP_REQUEST,
+          variables: {
+            input: {
+              userId: 'unknown-user',
+              userRole: 'user',
+              organizationId: null,
+              extensionPoint: 'RU2',
+            },
+          },
+        },
+        result: {
+          data: {
+            plugin_map_logPluginMapRequest: {
+              id: 'req-unknown',
+              pollNumber: 99,
+              userId: 'unknown-user',
+              userRole: 'user',
+              organizationId: null,
+              extensionPoint: 'RU2',
+              createdAt: new Date().toISOString(),
+              __typename: 'PluginMapPoll',
+            },
+          },
+        },
+      },
     ];
 
-    const logMock = {
-      request: {
-        query: LOG_PLUGIN_MAP_REQUEST,
-        variables: {
-          input: {
-            userId: 'unknown-user',
-            userRole: 'user',
-            organizationId: null,
-            extensionPoint: 'RU2',
-          },
-        },
-      },
-      result: {
-        data: {
-          plugin_map_logPluginMapRequest: {
-            id: 'req-unknown-global',
-            pollNumber: 88,
-            userId: 'unknown-user',
-            userRole: 'user',
-            organizationId: null,
-            extensionPoint: 'RU2',
-            createdAt: new Date().toISOString(),
-            __typename: 'PluginMapPoll',
-          },
-        },
-      },
-    };
-
     renderWithProviders(<ExtensionPointsGlobal />, {
-      mocks: [...mocks, logMock],
+      mocks: unknownUserMocks,
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/Total requests: 0/i)).toBeInTheDocument();
+      expect(screen.getByText('table.totalRequests')).toBeInTheDocument();
     });
 
-    const button = screen.getByRole('button', { name: /Request RU2/i });
+    const button = screen.getByRole('button', { name: 'global.requestButton' });
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(message.success).toHaveBeenCalledWith(
-        expect.stringContaining('88'),
-      );
+      expect(message.success).toHaveBeenCalledWith('messages.success');
     });
 
-    vi.mocked(useLocalStorage).mockRestore();
+    vi.mocked(useLocalStorage).mockClear();
   });
 
   it('should handle missing mutation data', async () => {
@@ -268,7 +269,7 @@ describe('ExtensionPointsGlobal', () => {
         query: LOG_PLUGIN_MAP_REQUEST,
         variables: {
           input: {
-            userId: 'user-1',
+            userId: 'test-user-id',
             userRole: 'user',
             organizationId: null,
             extensionPoint: 'RU2',
@@ -287,10 +288,11 @@ describe('ExtensionPointsGlobal', () => {
     });
 
     await screen.findAllByText('1');
-    const button = screen.getByRole('button', { name: /Request RU2/i });
+    const button = screen.getByRole('button', { name: 'global.requestButton' });
     fireEvent.click(button);
 
-    await flushPromises();
-    expect(message.success).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(message.error).toHaveBeenCalledWith('messages.error');
+    });
   });
 });

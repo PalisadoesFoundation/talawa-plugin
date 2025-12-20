@@ -9,11 +9,7 @@ import ExtensionPointsUser, {
   GET_PLUGIN_MAP_REQUESTS,
   LOG_PLUGIN_MAP_REQUEST,
 } from '../../../../plugins/Plugin Map/admin/pages/ExtensionPointsUser';
-import {
-  renderWithProviders,
-  createMockRequest,
-  flushPromises,
-} from './adminTestUtils';
+import { renderWithProviders, createMockRequest } from './adminTestUtils';
 
 import useLocalStorage from 'utils/useLocalstorage';
 
@@ -101,16 +97,11 @@ describe('ExtensionPointsUser', () => {
       path: '/org/:orgId/plugin-map',
     });
 
-    expect(
-      screen.getByText('RU1 - User Organization Extension Point'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('user.title')).toBeInTheDocument();
 
     await screen.findAllByText('1');
-
-    // Verify pagination total (covers line 224)
-    expect(screen.getByTestId('pagination-total')).toHaveTextContent(
-      /1-1 of 1 requests/i,
-    );
+    // Check that orgId is rendered
+    expect(screen.getAllByText('org-test').length).toBeGreaterThan(0);
   });
 
   it('should log a new request on button click', async () => {
@@ -130,7 +121,7 @@ describe('ExtensionPointsUser', () => {
         data: {
           plugin_map_logPluginMapRequest: {
             id: 'req-new',
-            pollNumber: 10,
+            pollNumber: 3,
             userId: 'test-user-id',
             userRole: 'user',
             organizationId: 'org-test',
@@ -143,7 +134,7 @@ describe('ExtensionPointsUser', () => {
     };
 
     renderWithProviders(<ExtensionPointsUser />, {
-      mocks: [...standardMocks, logMock],
+      mocks: [...standardMocks, logMock, ...standardMocks],
       initialEntries: ['/org/org-test/plugin-map'],
       path: '/org/:orgId/plugin-map',
     });
@@ -151,13 +142,11 @@ describe('ExtensionPointsUser', () => {
     // Wait for initial load
     await screen.findAllByText('1');
 
-    const button = screen.getByRole('button', { name: /Request RU1/i });
+    const button = screen.getByRole('button', { name: 'user.requestButton' });
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(message.success).toHaveBeenCalledWith(
-        expect.stringContaining('Request 10 logged successfully from RU1'),
-      );
+      expect(message.success).toHaveBeenCalledWith('messages.success');
     });
   });
 
@@ -184,11 +173,11 @@ describe('ExtensionPointsUser', () => {
     });
 
     await screen.findAllByText('1');
-    const errButton = screen.getByRole('button', { name: /Request RU1/i });
-    fireEvent.click(errButton);
+    const button = screen.getByRole('button', { name: 'user.requestButton' });
+    fireEvent.click(button);
 
     await waitFor(() => {
-      expect(message.error).toHaveBeenCalledWith('Failed to log request');
+      expect(message.error).toHaveBeenCalledWith('messages.error');
     });
   });
 
@@ -199,17 +188,10 @@ describe('ExtensionPointsUser', () => {
       path: '/plugin-map',
     });
 
-    expect(
-      screen.queryByText('RU1 - User Organization Extension Point'),
-    ).not.toBeInTheDocument();
-    // Verify redirect (router puts us at root for invalid/missing/redirected states in standard setup)
-    // In our test, we expect <Navigate to="/" /> was rendered.
-    // Since invalid orgId triggers a message.error followed by Navigate, checking the location is tricky without memory router history access.
-    // However, since we rendered with specific path, simply checking we are NOT at required text is a good start.
-    // We can also verify we are NOT seeing the component's main content.
+    expect(screen.queryByText('user.title')).not.toBeInTheDocument();
   });
 
-  it('should use unknown-user if userId is missing in localStorage', async () => {
+  it('should use unknown-user if userId is missing', async () => {
     // Mock useLocalStorage to return null for 'id'
     vi.mocked(useLocalStorage).mockReturnValue({
       getItem: (key: string) => (key === 'id' ? null : null),
@@ -257,7 +239,7 @@ describe('ExtensionPointsUser', () => {
           data: {
             plugin_map_logPluginMapRequest: {
               id: 'req-unknown',
-              pollNumber: 77,
+              pollNumber: 99,
               userId: 'unknown-user',
               userRole: 'user',
               organizationId: 'org-test',
@@ -271,25 +253,23 @@ describe('ExtensionPointsUser', () => {
     ];
 
     renderWithProviders(<ExtensionPointsUser />, {
-      mocks: [...unknownUserMocks],
+      mocks: [...unknownUserMocks, unknownUserMocks[0]],
       initialEntries: ['/org/org-test/plugin-map'],
       path: '/org/:orgId/plugin-map',
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/Total requests: 0/i)).toBeInTheDocument();
+      expect(screen.getByText('table.totalRequests')).toBeInTheDocument();
     });
 
-    const button = screen.getByRole('button', { name: /Request RU1/i });
+    const button = screen.getByRole('button', { name: 'user.requestButton' });
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(message.success).toHaveBeenCalledWith(
-        expect.stringContaining('77'),
-      );
+      expect(message.success).toHaveBeenCalledWith('messages.success');
     });
 
-    vi.mocked(useLocalStorage).mockRestore();
+    vi.mocked(useLocalStorage).mockClear();
   });
 
   it('should handle missing mutation data', async () => {
@@ -298,7 +278,7 @@ describe('ExtensionPointsUser', () => {
         query: LOG_PLUGIN_MAP_REQUEST,
         variables: {
           input: {
-            userId: 'user-1',
+            userId: 'test-user-id',
             userRole: 'user',
             organizationId: 'org-test',
             extensionPoint: 'RU1',
@@ -319,10 +299,11 @@ describe('ExtensionPointsUser', () => {
     });
 
     await screen.findAllByText('1');
-    const button = screen.getByRole('button', { name: /Request RU1/i });
+    const button = screen.getByRole('button', { name: 'user.requestButton' });
     fireEvent.click(button);
 
-    await flushPromises();
-    expect(message.success).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(message.error).toHaveBeenCalledWith('messages.error');
+    });
   });
 });

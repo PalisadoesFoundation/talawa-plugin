@@ -1,7 +1,6 @@
-import type { Vi } from 'vitest';
 import React from 'react';
 
-export const createAntdMocks = (vi: Vi) => {
+export const createAntdMocks = (vi: any) => {
   const MockComponent = ({ children, ...props }: any) => (
     <div {...props}> {children} </div>
   );
@@ -25,6 +24,13 @@ export const createAntdMocks = (vi: Vi) => {
     Table: ({ dataSource, columns, pagination, ...props }: any) => (
       <div {...props}>
         <table>
+          <thead>
+            <tr>
+              {columns?.map((col: any, j: number) => (
+                <th key={j}>{col.title}</th>
+              ))}
+            </tr>
+          </thead>
           <tbody>
             {dataSource?.map((row: any, i: number) => (
               <tr key={i}>
@@ -50,7 +56,12 @@ export const createAntdMocks = (vi: Vi) => {
       </div>
     ),
     Tag: ({ children, ...props }: any) => <span {...props}> {children} </span>,
-    Card: MockComponent,
+    Card: ({ title, children, ...props }: any) => (
+      <div {...props}>
+        {title && <div className="ant-card-head-title">{title}</div>}
+        {children}
+      </div>
+    ),
     Space: MockComponent,
     Row: MockComponent,
     Col: MockComponent,

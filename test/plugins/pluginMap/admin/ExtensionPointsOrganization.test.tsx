@@ -10,11 +10,7 @@ import {
   GET_PLUGIN_MAP_REQUESTS,
   LOG_PLUGIN_MAP_REQUEST,
 } from '../../../../plugins/Plugin Map/admin/pages/ExtensionPointsDashboard';
-import {
-  renderWithProviders,
-  createMockRequest,
-  flushPromises,
-} from './adminTestUtils';
+import { renderWithProviders, createMockRequest } from './adminTestUtils';
 
 import useLocalStorage from 'utils/useLocalstorage';
 
@@ -99,10 +95,8 @@ describe('ExtensionPointsOrganization', () => {
       path: '/org/:orgId/plugin-map',
     });
 
-    expect(
-      screen.getByText('RA1 - Admin Organization Extension Point'),
-    ).toBeInTheDocument();
-    expect(screen.getByText('org-123')).toBeInTheDocument();
+    expect(screen.getByText('organization.title')).toBeInTheDocument();
+    expect(screen.getAllByText('org-123').length).toBeGreaterThan(0);
     await screen.findAllByText('1');
   });
 
@@ -113,9 +107,7 @@ describe('ExtensionPointsOrganization', () => {
       path: '/plugin-map',
     });
 
-    expect(
-      screen.queryByText('RA1 - Admin Organization Extension Point'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('organization.title')).not.toBeInTheDocument();
   });
 
   it('should log a new request on button click', async () => {
@@ -148,19 +140,19 @@ describe('ExtensionPointsOrganization', () => {
     };
 
     renderWithProviders(<ExtensionPointsOrganization />, {
-      mocks: [...standardMocks, logMock],
+      mocks: [...standardMocks, logMock, ...standardMocks],
       initialEntries: ['/org/org-123/plugin-map'],
       path: '/org/:orgId/plugin-map',
     });
 
     await screen.findAllByText('1');
-    const button = screen.getByRole('button', { name: /Request RA1/i });
+    const button = screen.getByRole('button', {
+      name: 'organization.requestButton',
+    });
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(message.success).toHaveBeenCalledWith(
-        expect.stringContaining('Request 7 logged successfully from RA1'),
-      );
+      expect(message.success).toHaveBeenCalledWith('messages.success');
     });
   });
 
@@ -168,7 +160,14 @@ describe('ExtensionPointsOrganization', () => {
     const errorLogMock = {
       request: {
         query: LOG_PLUGIN_MAP_REQUEST,
-        variables: expect.anything(),
+        variables: {
+          input: {
+            extensionPoint: 'RA1',
+            userRole: 'admin',
+            organizationId: 'org-123',
+            userId: 'test-user-id',
+          },
+        },
       },
       error: new Error('Simulation Error'),
     };
@@ -180,11 +179,13 @@ describe('ExtensionPointsOrganization', () => {
     });
 
     await screen.findAllByText('1');
-    const button = screen.getByRole('button', { name: /Request RA1/i });
+    const button = screen.getByRole('button', {
+      name: 'organization.requestButton',
+    });
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(message.error).toHaveBeenCalledWith('Failed to log request');
+      expect(message.error).toHaveBeenCalledWith('messages.error');
     });
   });
 
@@ -250,22 +251,22 @@ describe('ExtensionPointsOrganization', () => {
     ];
 
     renderWithProviders(<ExtensionPointsOrganization />, {
-      mocks: unknownUserMocks,
+      mocks: [...unknownUserMocks, unknownUserMocks[0]],
       initialEntries: ['/org/org-123/plugin-map'],
       path: '/org/:orgId/plugin-map',
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/Total requests: 0/i)).toBeInTheDocument();
+      expect(screen.getByText('table.totalRequests')).toBeInTheDocument();
     });
 
-    const button = screen.getByRole('button', { name: /Request RA1/i });
+    const button = screen.getByRole('button', {
+      name: 'organization.requestButton',
+    });
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(message.success).toHaveBeenCalledWith(
-        expect.stringContaining('66'),
-      );
+      expect(message.success).toHaveBeenCalledWith('messages.success');
     });
 
     vi.mocked(useLocalStorage).mockClear();
@@ -291,10 +292,13 @@ describe('ExtensionPointsOrganization', () => {
     });
 
     await screen.findAllByText('1');
-    const button = screen.getByRole('button', { name: /Request RA1/i });
+    const button = screen.getByRole('button', {
+      name: 'organization.requestButton',
+    });
     fireEvent.click(button);
 
-    await flushPromises();
-    expect(message.success).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(message.error).toHaveBeenCalledWith('messages.error');
+    });
   });
 });
