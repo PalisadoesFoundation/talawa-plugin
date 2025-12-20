@@ -57,8 +57,8 @@ jobs:
           # Get the base branch ref
           BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
 
-          # Get all changed files
-          ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | tr '\n' ' ')
+          # Get all changed files with quoting
+          ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | sed 's/^/"/; s/$/"/' | tr '\n' ' ')
           echo "all_changed_files=${ALL_CHANGED_FILES}" >> $GITHUB_OUTPUT
 
           # Filter for TS/TSX files
@@ -96,15 +96,11 @@ jobs:
 
       - name: Check for type errors
         if: steps.changed-files.outputs.any_ts_changed == 'true'
-        env:
-          TS_FILES: ${{ steps.changed-files.outputs.ts_changed_files }}
-        run: pnpm exec tsc-files --noEmit $TS_FILES
+        run: pnpm exec tsc-files --noEmit ${{ steps.changed-files.outputs.ts_changed_files }}
 
       - name: Check for linting errors in modified files
         if: steps.changed-files.outputs.any_ts_changed == 'true'
-        env:
-          TS_FILES: ${{ steps.changed-files.outputs.ts_changed_files }}
-        run: pnpm exec eslint -- $TS_FILES
+        run: pnpm exec eslint -- ${{ steps.changed-files.outputs.ts_changed_files }}
 
       - name: Check for TSDoc comments
         run: pnpm run check-tsdoc # Run the TSDoc check script
@@ -348,8 +344,8 @@ jobs:
           # Get the base branch ref
           BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
 
-          # Get all changed files
-          ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | tr '\n' ' ')
+          # Get all changed files with quoting
+          ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | sed 's/^/"/; s/$/"/' | tr '\n' ' ')
           echo "all_changed_files=${ALL_CHANGED_FILES}" >> $GITHUB_OUTPUT
 
       - name: Set up Python
@@ -376,8 +372,8 @@ jobs:
           # Get the base branch ref
           BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
 
-          # Get all changed files
-          ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | tr '\n' ' ')
+          # Get all changed files with quoting
+          ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | sed 's/^/"/; s/$/"/' | tr '\n' ' ')
           echo "all_changed_files=${ALL_CHANGED_FILES}" >> $GITHUB_OUTPUT
 
       - name: Set up Python
@@ -404,8 +400,8 @@ jobs:
           # Get the base branch ref
           BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
 
-          # Get all changed files
-          ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | tr '\n' ' ')
+          # Get all changed files with quoting
+          ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | sed 's/^/"/; s/$/"/' | tr '\n' ' ')
           echo "all_changed_files=${ALL_CHANGED_FILES}" >> $GITHUB_OUTPUT
 
       - name: Set up Python
