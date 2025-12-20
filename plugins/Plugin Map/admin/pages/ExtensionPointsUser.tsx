@@ -26,7 +26,7 @@ import useLocalStorage from 'utils/useLocalstorage';
 const { Title, Paragraph } = Typography;
 
 // GraphQL mutation for logging requests
-const LOG_PLUGIN_MAP_REQUEST = gql`
+export const LOG_PLUGIN_MAP_REQUEST = gql`
   mutation LogPluginMapRequest($input: PluginMapRequestInput!) {
     plugin_map_logPluginMapRequest(input: $input) {
       id
@@ -41,7 +41,7 @@ const LOG_PLUGIN_MAP_REQUEST = gql`
 `;
 
 // GraphQL query for fetching requests
-const GET_PLUGIN_MAP_REQUESTS = gql`
+export const GET_PLUGIN_MAP_REQUESTS = gql`
   query GetPluginMapRequests($input: GetPluginMapRequestsInput) {
     plugin_map_getPluginMapRequests(input: $input) {
       requests {

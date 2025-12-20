@@ -5,25 +5,91 @@ import { vi } from 'vitest';
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  observe() { }
+  unobserve() { }
+  disconnect() { }
 };
 
 // Mock GraphQL Builder
-export const mockBuilder = {
+export const mockBuilder: any = {
   queryType: vi.fn(() => mockBuilder),
   mutationType: vi.fn(() => mockBuilder),
   objectRef: vi.fn(() => ({
     implement: vi.fn(() => mockBuilder),
   })),
   objectType: vi.fn(() => mockBuilder),
-  inputType: vi.fn(() => mockBuilder),
+  inputType: vi.fn((_name, config) => {
+    if (config?.fields && typeof config.fields === 'function') {
+      config.fields({
+        field: vi.fn(() => mockBuilder),
+        arg: vi.fn(() => mockBuilder),
+        boolean: vi.fn(() => mockBuilder),
+        string: vi.fn(() => mockBuilder),
+        int: vi.fn(() => mockBuilder),
+        id: vi.fn(() => mockBuilder),
+      });
+    }
+    return mockBuilder;
+  }),
   inputRef: vi.fn(() => ({
-    implement: vi.fn(() => mockBuilder),
+    implement: vi.fn((config) => {
+      if (config?.fields && typeof config.fields === 'function') {
+        config.fields({
+          field: vi.fn(() => mockBuilder),
+          arg: vi.fn(() => mockBuilder),
+          boolean: vi.fn(() => mockBuilder),
+          string: vi.fn(() => mockBuilder),
+          int: vi.fn(() => mockBuilder),
+          id: vi.fn(() => mockBuilder),
+        });
+      }
+      return mockBuilder;
+    }),
   })),
   field: vi.fn(() => mockBuilder),
   fields: vi.fn(() => mockBuilder),
+  queryField: vi.fn((_name, cb) => {
+    if (typeof cb === 'function')
+      cb({
+        field: vi.fn(() => mockBuilder),
+        arg: vi.fn((config) => {
+          if (config?.type && typeof config.type === 'function') {
+            try {
+              config.type();
+            } catch {
+              // Ignore callback failure
+            }
+          }
+          return mockBuilder;
+        }),
+        boolean: vi.fn(() => mockBuilder),
+        string: vi.fn(() => mockBuilder),
+        int: vi.fn(() => mockBuilder),
+        id: vi.fn(() => mockBuilder),
+      });
+    return mockBuilder;
+  }),
+  mutationField: vi.fn((_name, cb) => {
+    if (typeof cb === 'function')
+      cb({
+        field: vi.fn(() => mockBuilder),
+        arg: vi.fn((config) => {
+          if (config?.type && typeof config.type === 'function') {
+            try {
+              config.type();
+            } catch {
+              // Ignore callback failure
+            }
+          }
+          return mockBuilder;
+        }),
+        boolean: vi.fn(() => mockBuilder),
+        string: vi.fn(() => mockBuilder),
+        int: vi.fn(() => mockBuilder),
+        id: vi.fn(() => mockBuilder),
+      });
+    return mockBuilder;
+  }),
 };
 
 vi.mock('~/src/graphql/builder', () => ({
@@ -40,7 +106,7 @@ export class MockTalawaGraphQLError extends Error {
   constructor(
     public error: {
       message?: string;
-      extensions: { code: string; [key: string]: any };
+      extensions: { code: string;[key: string]: any };
     },
   ) {
     super(error.message || 'An error occurred');

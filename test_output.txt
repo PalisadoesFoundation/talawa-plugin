@@ -1,0 +1,690 @@
+npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of npm.
+
+ RUN  v4.0.15 /home/anant/Desktop/gsoc/talawa-plugin
+
+stdout | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Loading and Initialization > should show loader then render form
+GQL: GetCurrentUser {}
+GQL: GetOrganizationInfo {
+  "orgId": "org-123"
+}
+GQL: GetRazorpayConfigPublic {}
+
+stderr | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Loading and Initialization > should show loader then render form
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stdout | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Loading and Initialization > should handle user load error
+GQL: GetCurrentUser {}
+GQL: GetOrganizationInfo {
+  "orgId": "org-123"
+}
+GQL: GetRazorpayConfigPublic {}
+
+stderr | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Loading and Initialization > should handle user load error
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+
+stdout | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Form Interaction > should update amount when typing
+GQL: GetCurrentUser {}
+GQL: GetOrganizationInfo {
+  "orgId": "org-123"
+}
+GQL: GetRazorpayConfigPublic {}
+
+stderr | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Form Interaction > should update amount when typing
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+
+stdout | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Form Interaction > should use quick amount buttons
+GQL: GetCurrentUser {}
+GQL: GetOrganizationInfo {
+  "orgId": "org-123"
+}
+GQL: GetRazorpayConfigPublic {}
+
+stderr | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Form Interaction > should use quick amount buttons
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+
+stdout | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Form Interaction > should change currency
+GQL: GetCurrentUser {}
+GQL: GetOrganizationInfo {
+  "orgId": "org-123"
+}
+GQL: GetRazorpayConfigPublic {}
+
+stderr | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Form Interaction > should change currency
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+
+stdout | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Validation > should validate empty amount
+GQL: GetCurrentUser {}
+GQL: GetOrganizationInfo {
+  "orgId": "org-123"
+}
+GQL: GetRazorpayConfigPublic {}
+
+stderr | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Validation > should validate empty amount
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+
+stdout | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Validation > should validate empty name
+GQL: GetCurrentUser {}
+GQL: GetOrganizationInfo {
+  "orgId": "org-123"
+}
+GQL: GetRazorpayConfigPublic {}
+
+stderr | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Validation > should validate empty name
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+
+stdout | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Validation > should validate empty email
+GQL: GetCurrentUser {}
+GQL: GetOrganizationInfo {
+  "orgId": "org-123"
+}
+GQL: GetRazorpayConfigPublic {}
+
+stderr | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Validation > should validate empty email
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+
+stdout | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Payment Flow > should execute payment successfully
+GQL: GetCurrentUser {}
+GQL: GetOrganizationInfo {
+  "orgId": "org-123"
+}
+GQL: GetRazorpayConfigPublic {}
+
+stderr | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Payment Flow > should execute payment successfully
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+
+stdout | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Payment Flow > should handle verification failure
+GQL: GetCurrentUser {}
+GQL: GetOrganizationInfo {
+  "orgId": "org-123"
+}
+GQL: GetRazorpayConfigPublic {}
+
+stderr | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Payment Flow > should handle verification failure
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+
+stdout | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Payment Flow > should handle modal dismissal
+GQL: GetCurrentUser {}
+GQL: GetOrganizationInfo {
+  "orgId": "org-123"
+}
+GQL: GetRazorpayConfigPublic {}
+
+stderr | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Payment Flow > should handle modal dismissal
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+
+stdout | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Cleanup > should cleanup script on unmount
+GQL: GetCurrentUser {}
+GQL: GetOrganizationInfo {
+  "orgId": "org-123"
+}
+GQL: GetRazorpayConfigPublic {}
+
+stderr | test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Cleanup > should cleanup script on unmount
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+The terminating link provided to `ApolloLink.execute` called `forward` instead of handling the request. This results in an observable that immediately completes and does not emit a value. Please provide a terminating link that properly handles the request.
+
+If you are using a split link, ensure each branch contains a terminating link that handles the request.
+
+ ❯ test/plugins/razorpay/admin/DonationForm.test.tsx (12 tests | 10 failed) 10100ms
+       × should show loader then render form 1039ms
+       ✓ should handle user load error 8ms
+       × should update amount when typing 1006ms
+       × should use quick amount buttons 1008ms
+       × should change currency 1005ms
+       × should validate empty amount 1005ms
+       × should validate empty name 1006ms
+       × should validate empty email 1005ms
+       × should execute payment successfully 1005ms
+       × should handle verification failure 1005ms
+       × should handle modal dismissal 1004ms
+       ✓ should cleanup script on unmount 4ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Loading and Initialization > should show loader then render form
+TestingLibraryElementError: Unable to find an element with the text: Test Organization. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+        [33mclass[39m=[32m"fade alert alert-danger show"[39m
+        [33mrole[39m=[32m"alert"[39m
+      [36m>[39m
+        [0mFailed to load organization information[0m
+        [0m: [0m
+        [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ❯ Proxy.waitForWrapper node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ test/plugins/razorpay/admin/DonationForm.test.tsx:127:13
+    125|       renderDonationForm();
+    126|       expect(screen.getByText('Loading...')).toBeInTheDocument();
+    127|       await waitFor(() => {
+       |             ^
+    128|         expect(screen.getByText('Test Organization')).toBeInTheDocumen…
+    129|       });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Form Interaction > should update amount when typing
+TestingLibraryElementError: Unable to find an element with the placeholder text of: 0.00
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ test/plugins/razorpay/admin/DonationForm.test.tsx:152:34
+    150|     it('should update amount when typing', async () => {
+    151|       renderDonationForm();
+    152|       const input = await screen.findByPlaceholderText('0.00');
+       |                                  ^
+    153|       await user.type(input, '500');
+    154|       expect(screen.getAllByText('₹500.00')).toHaveLength(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Form Interaction > should use quick amount buttons
+TestingLibraryElementError: Unable to find role="button" and name "₹500.00"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ test/plugins/razorpay/admin/DonationForm.test.tsx:159:32
+    157|     it('should use quick amount buttons', async () => {
+    158|       renderDonationForm();
+    159|       const btn = await screen.findByRole('button', { name: '₹500.00' …
+       |                                ^
+    160|       await user.click(btn);
+    161|       expect(screen.getByPlaceholderText('0.00')).toHaveValue(500);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Form Interaction > should change currency
+TestingLibraryElementError: Unable to find an element with the placeholder text of: 0.00
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ test/plugins/razorpay/admin/DonationForm.test.tsx:166:34
+    164|     it('should change currency', async () => {
+    165|       renderDonationForm();
+    166|       const input = await screen.findByPlaceholderText('0.00');
+       |                                  ^
+    167|       await user.type(input, '100');
+    168|       const select = screen.getByLabelText(/Currency/i);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Validation > should validate empty amount
+TestingLibraryElementError: Unable to find role="button" and name `/Donate/i`
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ test/plugins/razorpay/admin/DonationForm.test.tsx:179:35
+    177|     it('should validate empty amount', async () => {
+    178|       renderDonationForm();
+    179|       const submit = await screen.findByRole('button', { name: /Donate…
+       |                                   ^
+    180|       await user.click(submit);
+    181|       await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Pl…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Validation > should validate empty name
+TestingLibraryElementError: Unable to find an element with the placeholder text of: 0.00
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ test/plugins/razorpay/admin/DonationForm.test.tsx:186:34
+    184|     it('should validate empty name', async () => {
+    185|       renderDonationForm();
+    186|       const input = await screen.findByPlaceholderText('0.00');
+       |                                  ^
+    187|       await user.type(input, '100');
+    188|       const nameInput = screen.getByLabelText(/Full Name/i);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Validation > should validate empty email
+TestingLibraryElementError: Unable to find an element with the placeholder text of: 0.00
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ test/plugins/razorpay/admin/DonationForm.test.tsx:196:34
+    194|     it('should validate empty email', async () => {
+    195|       renderDonationForm();
+    196|       const input = await screen.findByPlaceholderText('0.00');
+       |                                  ^
+    197|       await user.type(input, '100');
+    198|       const emailInput = screen.getByLabelText(/Email Address/i);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Payment Flow > should execute payment successfully
+TestingLibraryElementError: Unable to find an element with the display value: John Doe.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+        [33mclass[39m=[32m"fade alert alert-danger show"[39m
+        [33mrole[39m=[32m"alert"[39m
+      [36m>[39m
+        [0mFailed to load organization information[0m
+        [0m: [0m
+        [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ❯ Proxy.waitForWrapper node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ test/plugins/razorpay/admin/DonationForm.test.tsx:231:13
+    229| 
+    230|       renderDonationForm(successMocks);
+    231|       await waitFor(() => {
+       |             ^
+    232|         expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument…
+    233|       });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Payment Flow > should handle verification failure
+TestingLibraryElementError: Unable to find an element with the display value: John Doe.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+        [33mclass[39m=[32m"fade alert alert-danger show"[39m
+        [33mrole[39m=[32m"alert"[39m
+      [36m>[39m
+        [0mFailed to load organization information[0m
+        [0m: [0m
+        [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ❯ Proxy.waitForWrapper node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ test/plugins/razorpay/admin/DonationForm.test.tsx:288:13
+    286| 
+    287|       renderDonationForm(failMocks);
+    288|       await waitFor(() => {
+       |             ^
+    289|         expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument…
+    290|       });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  test/plugins/razorpay/admin/DonationForm.test.tsx > DonationForm > Payment Flow > should handle modal dismissal
+TestingLibraryElementError: Unable to find an element with the placeholder text of: 0.00
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33maria-live[39m=[32m"polite"[39m
+      [33mclass[39m=[32m"fade alert alert-danger show"[39m
+      [33mrole[39m=[32m"alert"[39m
+    [36m>[39m
+      [0mFailed to load organization information[0m
+      [0m: [0m
+      [0mThe link chain completed without emitting a value. This is likely unintentional and should be updated to emit a value before completing.[0m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/.pnpm/@testing-library+dom@9.3.4/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ test/plugins/razorpay/admin/DonationForm.test.tsx:320:34
+    318| 
+    319|       renderDonationForm();
+    320|       const input = await screen.findByPlaceholderText('0.00');
+       |                                  ^
+    321|       await user.type(input, '100');
+    322|       await user.click(screen.getByRole('button', { name: /Donate/i })…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  10 failed | 2 passed (12)
+   Start at  16:25:23
+   Duration  10.97s (transform 112ms, setup 78ms, import 404ms, tests 10.10s, environment 305ms)
+
