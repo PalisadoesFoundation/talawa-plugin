@@ -18,8 +18,7 @@ import {
   Table,
   Tag,
 } from 'antd';
-// @ts-expect-error - Apollo Client v4 types issue
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client/react';
 import { gql } from 'graphql-tag';
 import { useParams, Navigate } from 'react-router-dom';
 import useLocalStorage from 'utils/useLocalstorage';
@@ -67,19 +66,19 @@ const ExtensionPointsOrganization: React.FC = () => {
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   // Move hooks before the early return to comply with rules-of-hooks
-  const [logRequest] = useMutation(LOG_PLUGIN_MAP_REQUEST);
+  const [logRequest] = useMutation<any>(LOG_PLUGIN_MAP_REQUEST);
 
   // Query to fetch requests for this extension point
   const {
     data: requestsData,
     loading: loadingRequests,
     refetch,
-  } = useQuery(GET_PLUGIN_MAP_REQUESTS, {
+  } = useQuery<any>(GET_PLUGIN_MAP_REQUESTS, {
     variables: {
       input: {
         extensionPoint: 'RA1',
         userRole: 'admin',
-        organizationId: orgId || '',
+        organizationId: orgId,
         userId: userId || 'unknown-user', // Filter by current user ID
       },
     },
@@ -89,12 +88,13 @@ const ExtensionPointsOrganization: React.FC = () => {
 
   // Refetch when a new request is logged
   useEffect(() => {
-    if (refetchTrigger > 0 && refetch) {
+    if (refetchTrigger > 0) {
       refetch();
     }
   }, [refetchTrigger, refetch]);
 
   if (!orgId) {
+    message.error('Organization not found — redirecting to home');
     return <Navigate to="/" replace />;
   }
 

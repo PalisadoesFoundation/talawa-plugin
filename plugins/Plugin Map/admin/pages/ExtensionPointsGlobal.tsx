@@ -17,8 +17,7 @@ import {
   Table,
   Tag,
 } from 'antd';
-// @ts-expect-error - Apollo Client v4 types issue
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client/react';
 import { gql } from 'graphql-tag';
 import useLocalStorage from 'utils/useLocalstorage';
 
@@ -59,7 +58,7 @@ const GET_PLUGIN_MAP_REQUESTS = gql`
 `;
 
 const ExtensionPointsGlobal: React.FC = () => {
-  const [logRequest] = useMutation(LOG_PLUGIN_MAP_REQUEST);
+  const [logRequest] = useMutation<any>(LOG_PLUGIN_MAP_REQUEST);
   const { getItem } = useLocalStorage();
   const userId = getItem('id') as string | null;
   const [refetchTrigger, setRefetchTrigger] = useState(0);
@@ -69,7 +68,7 @@ const ExtensionPointsGlobal: React.FC = () => {
     data: requestsData,
     loading: loadingRequests,
     refetch,
-  } = useQuery(GET_PLUGIN_MAP_REQUESTS, {
+  } = useQuery<any>(GET_PLUGIN_MAP_REQUESTS, {
     variables: {
       input: {
         extensionPoint: 'RU2',

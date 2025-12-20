@@ -160,10 +160,9 @@ export async function onLoad(context: IPluginContext): Promise<void> {
     }
   } catch (error) {
     if (context.logger?.warn) {
-      context.logger.warn(
-        'Failed to verify Razorpay plugin tables:',
-        error as any,
-      );
+      context.logger.warn('Failed to verify Razorpay plugin tables:', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }
@@ -208,11 +207,10 @@ export async function onActivate(context: IPluginContext): Promise<void> {
       context.logger.info('Razorpay configuration initialized');
     }
   } catch (error) {
-    if (context.logger?.warn) {
-      context.logger.warn(
-        'Failed to initialize Razorpay configuration:',
-        error as any,
-      );
+    if (context.logger?.error) {
+      context.logger.error('Failed to initialize Razorpay configuration:', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -226,7 +224,9 @@ export async function onActivate(context: IPluginContext): Promise<void> {
       }
     } catch (error) {
       if (context.logger?.error) {
-        context.logger.error('Failed to register GraphQL extensions:', error);
+        context.logger.error('Failed to register GraphQL extensions:', {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
   }
@@ -247,7 +247,7 @@ export async function onDeactivate(context: IPluginContext): Promise<void> {
     if (context.logger?.warn) {
       context.logger.warn(
         'Failed to handle plugin deactivation for Razorpay:',
-        error as any,
+        { error: error instanceof Error ? error.message : String(error) },
       );
     }
   }
@@ -260,7 +260,9 @@ export async function onUnload(context: IPluginContext): Promise<void> {
     }
   } catch (error) {
     if (context.logger?.error) {
-      context.logger.error('Error during Razorpay plugin unload:', error);
+      context.logger.error('Error during Razorpay plugin unload:', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }
@@ -288,7 +290,9 @@ export async function onPaymentCreated(
     }
   } catch (error) {
     if (context.logger?.error) {
-      context.logger.error('Error in onPaymentCreated:', error);
+      context.logger.error('Error in onPaymentCreated:', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }
@@ -333,7 +337,9 @@ export async function onPaymentCompleted(
     }
   } catch (error) {
     if (context.logger?.error) {
-      context.logger.error('Error in onPaymentCompleted:', error);
+      context.logger.error('Error in onPaymentCompleted:', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }
@@ -378,7 +384,9 @@ export async function onPaymentFailed(
     }
   } catch (error) {
     if (context.logger?.error) {
-      context.logger.error('Error in onPaymentFailed:', error);
+      context.logger.error('Error in onPaymentFailed:', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }

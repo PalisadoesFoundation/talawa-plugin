@@ -14,6 +14,7 @@ import {
   createMockRequest,
   flushPromises,
 } from './adminTestUtils';
+
 import useLocalStorage from 'utils/useLocalstorage';
 
 // Mock useLocalStorage
@@ -25,65 +26,15 @@ vi.mock('utils/useLocalstorage', () => ({
   })),
 }));
 
-// Aggressively mock antd components to avoid JSDOM CSS parsing issues with CSS variables
+// Aggressively mock antd components using shared helper
 vi.mock('antd', async () => {
   const actual = await vi.importActual<typeof import('antd')>('antd');
-  const MockComponent = ({ children, ...props }: any) => (
-    <div {...props}>{children}</div>
-  );
-  const MockTypography = ({ children, ...props }: any) => (
-    <div {...props}>{children}</div>
-  );
-  (MockTypography as any).Title = ({ children, ...props }: any) => (
-    <h2 {...props}>{children}</h2>
-  );
-  (MockTypography as any).Text = ({ children, ...props }: any) => (
-    <span {...props}>{children}</span>
-  );
-  (MockTypography as any).Paragraph = ({ children, ...props }: any) => (
-    <p {...props}>{children}</p>
-  );
-
+  const { createAntdMocks } =
+    await vi.importActual<typeof import('./antdMocks')>('./antdMocks');
   return {
     ...actual,
-    Button: ({ children, ...props }: any) => (
-      <button {...props}>{children}</button>
-    ),
-    Table: ({ dataSource, columns, pagination, ...props }: any) => (
-      <div {...props}>
-        <table>
-          <tbody>
-            {dataSource?.map((row: any, i: number) => (
-              <tr key={i}>
-                {columns?.map((col: any, j: number) => (
-                  <td key={j}>
-                    {col.render
-                      ? col.render(row[col.dataIndex], row)
-                      : row[col.dataIndex]}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {pagination?.showTotal && (
-          <div data-testid="pagination-total">
-            {pagination.showTotal(dataSource?.length || 0, [
-              1,
-              dataSource?.length || 0,
-            ])}
-          </div>
-        )}
-      </div>
-    ),
-    Tag: ({ children, ...props }: any) => <span {...props}>{children}</span>,
-    Card: MockComponent,
-    Space: MockComponent,
-    Row: MockComponent,
-    Col: MockComponent,
-    Typography: MockTypography,
-    Tooltip: ({ children, title }: any) => <div title={title}>{children}</div>,
-    Spin: () => <div data-testid="loading-spinner">Loading...</div>,
+    ...createAntdMocks(vi),
+    // Ensure message spy matches original shape while being mocked
     message: {
       ...actual.message,
       success: vi.fn(),
@@ -320,7 +271,14 @@ describe('ExtensionPointsDashboard', () => {
     const missingDataMock = {
       request: {
         query: LOG_PLUGIN_MAP_REQUEST,
-        variables: expect.anything(),
+        variables: {
+          input: {
+            extensionPoint: 'RA2',
+            userRole: 'admin',
+            organizationId: null,
+            userId: 'test-user-id',
+          },
+        },
       },
       result: {
         data: {
@@ -339,7 +297,7 @@ describe('ExtensionPointsDashboard', () => {
 
     // Should not show success message if data is null (line 103 branch)
     await flushPromises();
-    expect(message.success).not.valueOf(); // Using valueOf/toHaveBeenCalled etc
+    // expect(message.success).not.valueOf(); // Removed meaningless assertion
     expect(message.success).not.toHaveBeenCalled();
   });
 

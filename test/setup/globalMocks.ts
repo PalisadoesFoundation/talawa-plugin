@@ -56,8 +56,9 @@ export const mockBuilder: any = {
           if (config?.type && typeof config.type === 'function') {
             try {
               config.type();
-            } catch {
-              // Ignore callback failure
+            } catch (err: any) {
+              console.error('Error in inputType config callback:', err);
+              // Ignore callback failure but log it
             }
           }
           return mockBuilder;

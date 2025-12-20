@@ -21,9 +21,7 @@ export const createMockPoll = (overrides: Record<string, any> = {}) => {
  * Mock database client for testing
  */
 export const createMockDatabaseClient = () => {
-  const mockDb: any = {
-    then: (resolve: any, reject: any) => mockDb.execute().then(resolve, reject),
-  };
+  const mockDb: any = {};
 
   const methods = [
     'groupBy',

@@ -94,13 +94,28 @@ export interface IPluginContext<TDb = unknown, TConfig = PluginConfig> {
    * GraphQL instance for plugin schema registration and execution
    * @remarks Optional - provided when GraphQL access is needed
    */
-  graphql?: any;
+  graphql?: IPluginGraphQL;
 
   /**
    * PubSub instance for plugin real-time events
    * @remarks Optional - provided when PubSub access is needed
    */
-  pubsub?: any;
+  pubsub?: IPluginPubSub;
+}
+
+/**
+ * Interface for GraphQL operations available to plugins
+ */
+export interface IPluginGraphQL {
+  execute(query: string, variables?: Record<string, JsonValue>): Promise<any>;
+}
+
+/**
+ * Interface for PubSub operations available to plugins
+ */
+export interface IPluginPubSub {
+  publish(triggerName: string, payload: any): Promise<void> | void;
+  asyncIterator<T>(triggers: string | string[]): AsyncIterator<T>;
 }
 
 /**

@@ -36,22 +36,43 @@ describe('Plugin Map GraphQL Queries', () => {
 
     mockCtx.drizzleClient.select.mockReturnValue(mockChain);
 
-    // Customize the mock chain behavior to be awaitable and return arrays
-    // This handles cases where the chain ends at different points
-    mockChain.from.mockImplementation(() => mockChain);
-    mockChain.where.mockImplementation(() => mockChain);
-    mockChain.orderBy.mockImplementation(() => mockChain);
-    mockChain.limit.mockImplementation(() => mockChain);
+    // Customize the mock chain behavior to return Promises where appropriate
+    // mocking method chains: .from().where().orderBy().limit().offset()
 
-    // Make the mock chain thenable so it can be awaited at any point
-    (mockChain as any).then = (resolve: any) => resolve([]);
+    // Default resolve
+    const defaultResolve = Promise.resolve([]);
 
-    // For count queries specifically: select().from().where()
-    // We want it to resolve to [{ count: 0 }] by default
+    // Chain methods return the chain itself (synchronously)
+    mockChain.from.mockReturnValue(mockChain);
+    mockChain.where.mockReturnValue(mockChain);
+    mockChain.orderBy.mockReturnValue(mockChain);
+    mockChain.limit.mockReturnValue(mockChain);
+
+    // For offset (final link in many chains), return a Promise
+    mockChain.offset.mockReturnValue(defaultResolve);
+
+    // If a query ends without offset, we might need to mock that specific return value
+    // But since the query logic uses await on the chain, we need the *last called method* to return a Promise.
+    // The previous implementation used .then to catch-all.
+    // To replicate catch-all with standard mocks is harder.
+    // Instead we'll rely on specific mocks in tests or default "safe" Promise return from `offset`.
+
+    // Count query special handling:
     mockCtx.drizzleClient.select.mockImplementation((args: any) => {
       if (args && args.count) {
-        const countChain = { ...mockChain };
-        (countChain as any).then = (resolve: any) => resolve([{ count: 0 }]);
+        // Return a chain that resolves to count: 0 when awaited
+        // Since we can't easily guess which method is last, we make all methods return a Promise-like object?
+        // No, simpler to just return a Promise that resolves to [{count:0}] immediately?
+        // No, because .from() is called on it.
+
+        const countChain = {
+          from: vi.fn(),
+          where: vi.fn(),
+        };
+        const countResult = Promise.resolve([{ count: 0 }]);
+
+        countChain.from.mockReturnValue(countChain);
+        countChain.where.mockReturnValue(countResult); // Assuming it ends at where()
         return countChain;
       }
       return mockChain;
@@ -91,6 +112,7 @@ describe('Plugin Map GraphQL Queries', () => {
             }),
           }),
         })
+
         .mockReturnValueOnce({
           from: vi.fn().mockReturnValue({
             where: vi.fn().mockReturnValue({
@@ -104,7 +126,7 @@ describe('Plugin Map GraphQL Queries', () => {
         })
         .mockReturnValueOnce({
           from: vi.fn().mockReturnValue({
-            where: vi.fn().mockResolvedValue([{ count: 1 }]),
+            where: vi.fn().mockResolvedValue([{ count: 1 }]), // Ends at where()
           }),
         });
 

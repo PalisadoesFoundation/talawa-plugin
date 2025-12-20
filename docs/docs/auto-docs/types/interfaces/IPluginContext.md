@@ -78,7 +78,7 @@ May be undefined if the host system doesn't provide db access for this hook
 
 ### graphql?
 
-> `optional` **graphql**: `any`
+> `optional` **graphql**: [`IPluginGraphQL`](IPluginGraphQL.md)
 
 Defined in: [plugins/types.ts:97](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L97)
 
@@ -177,7 +177,7 @@ This property is required and always available.
 
 ### pubsub?
 
-> `optional` **pubsub**: `any`
+> `optional` **pubsub**: [`IPluginPubSub`](IPluginPubSub.md)
 
 Defined in: [plugins/types.ts:103](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L103)
 

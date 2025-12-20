@@ -4,7 +4,7 @@
 
 # Interface: IPluginLifecycle\<TDb, TConfig\>
 
-Defined in: [plugins/types.ts:167](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L167)
+Defined in: [plugins/types.ts:182](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L182)
 
 Plugin lifecycle interface
 
@@ -84,7 +84,7 @@ Type for plugin configuration
 
 > `optional` **onActivate**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:193](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L193)
+Defined in: [plugins/types.ts:208](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L208)
 
 Called when plugin is activated
 
@@ -119,7 +119,7 @@ Error if activation fails; message should be user-friendly
 
 > `optional` **onDeactivate**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:208](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L208)
+Defined in: [plugins/types.ts:223](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L223)
 
 Called when plugin is deactivated
 
@@ -150,7 +150,7 @@ Plugin context with db, logger, and config
 
 > `optional` **onInstall**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:233](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L233)
+Defined in: [plugins/types.ts:248](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L248)
 
 Called when plugin is first installed
 
@@ -185,7 +185,7 @@ Error if installation fails; message should describe what went wrong
 
 > `optional` **onLoad**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:177](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L177)
+Defined in: [plugins/types.ts:192](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L192)
 
 Called when plugin is loaded into memory
 
@@ -214,7 +214,7 @@ Error if loading fails; host will not proceed with activation
 
 > `optional` **onUninstall**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:247](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L247)
+Defined in: [plugins/types.ts:262](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L262)
 
 Called when plugin is uninstalled
 
@@ -244,7 +244,7 @@ Plugin context with db, logger, and config
 
 > `optional` **onUnload**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:217](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L217)
+Defined in: [plugins/types.ts:232](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L232)
 
 Called when plugin is unloaded from memory
 
@@ -268,7 +268,7 @@ Plugin context (some resources may already be unavailable)
 
 > `optional` **onUpdate**: (`fromVersion`, `toVersion`, `context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:275](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L275)
+Defined in: [plugins/types.ts:290](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L290)
 
 Called when plugin is updated from one version to another
 

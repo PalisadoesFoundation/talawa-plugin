@@ -15,6 +15,7 @@ import {
   createMockRequest,
   flushPromises,
 } from './adminTestUtils';
+
 import useLocalStorage from 'utils/useLocalstorage';
 
 // Mock useLocalStorage
@@ -27,59 +28,14 @@ vi.mock('utils/useLocalstorage', () => ({
 }));
 
 // Aggressively mock antd components
+// Aggressively mock antd components using shared helper
 vi.mock('antd', async () => {
   const actual = await vi.importActual<typeof import('antd')>('antd');
-  const MockComponent = ({ children, ...props }: any) => (
-    <div {...props}>{children}</div>
-  );
-  const MockTypography = ({ children, ...props }: any) => (
-    <div {...props}>{children}</div>
-  );
-  (MockTypography as any).Title = ({ children, ...props }: any) => (
-    <h2 {...props}>{children}</h2>
-  );
-  (MockTypography as any).Paragraph = ({ children, ...props }: any) => (
-    <p {...props}>{children}</p>
-  );
-
+  const { createAntdMocks } =
+    await vi.importActual<typeof import('./antdMocks')>('./antdMocks');
   return {
     ...actual,
-    Button: ({ children, ...props }: any) => (
-      <button {...props}>{children}</button>
-    ),
-    Table: ({ dataSource, columns, pagination, ...props }: any) => (
-      <div {...props}>
-        <table>
-          <tbody>
-            {dataSource?.map((row: any, i: number) => (
-              <tr key={i}>
-                {columns?.map((col: any, j: number) => (
-                  <td key={j}>
-                    {col.render
-                      ? col.render(row[col.dataIndex], row)
-                      : row[col.dataIndex]}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {pagination?.showTotal && (
-          <div data-testid="pagination-total">
-            {pagination.showTotal(dataSource?.length || 0, [
-              1,
-              dataSource?.length || 0,
-            ])}
-          </div>
-        )}
-      </div>
-    ),
-    Tag: ({ children, ...props }: any) => <span {...props}>{children}</span>,
-    Card: MockComponent,
-    Space: MockComponent,
-    Row: MockComponent,
-    Col: MockComponent,
-    Typography: MockTypography,
+    ...createAntdMocks(vi),
     message: {
       ...actual.message,
       success: vi.fn(),
@@ -128,10 +84,7 @@ describe('ExtensionPointsOrganization', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     cleanup();
-    vi.spyOn(window.localStorage, 'getItem').mockImplementation((key) => {
-      if (key === 'id') return 'test-user-id';
-      return null;
-    });
+    // UseLocalStorage is already mocked globally in this file, no need to spy on window.localStorage
   });
 
   it('should render the organization extension point for org-123', async () => {

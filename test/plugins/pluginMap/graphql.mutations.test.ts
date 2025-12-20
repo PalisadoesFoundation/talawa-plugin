@@ -7,26 +7,23 @@ import {
 } from '../../../plugins/Plugin Map/api/graphql/mutations';
 import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
 
-const mockCtx = {
-  currentClient: { isAuthenticated: true },
-  userId: 'user-1',
-  user: { id: 'user-1', isSuperAdmin: true },
-  drizzleClient: {
-    insert: vi.fn(),
-    delete: vi.fn(),
-    select: vi.fn(),
-  },
-  organizationId: 'org-1',
-  log: {
-    error: vi.fn(),
-    info: vi.fn(),
-  },
-};
+import { createMockPluginMapContext } from './utils/testUtils';
+
+let mockCtx: any;
 
 describe('Plugin Map GraphQL Mutations', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCtx.currentClient.isAuthenticated = true;
+    mockCtx = createMockPluginMapContext({
+      currentClient: { isAuthenticated: true, scopes: [] },
+      userId: 'user-1',
+      user: { id: 'user-1', isSuperAdmin: true } as any,
+      organizationId: 'org-1',
+    });
+
+    // Explicitly setup the drizzle mocks since createMockPluginMapContext provides basic mocks
+    // but this test relies on chain behavior defined below.
+    const mockDb = mockCtx.drizzleClient;
 
     // Simpler but robust chaining
     const mockChain = {
@@ -36,9 +33,9 @@ describe('Plugin Map GraphQL Mutations', () => {
       from: vi.fn().mockReturnThis(),
     };
 
-    mockCtx.drizzleClient.insert.mockReturnValue(mockChain);
-    mockCtx.drizzleClient.delete.mockReturnValue(mockChain);
-    mockCtx.drizzleClient.select.mockReturnValue(mockChain);
+    mockDb.insert.mockReturnValue(mockChain);
+    mockDb.delete.mockReturnValue(mockChain);
+    mockDb.select.mockReturnValue(mockChain);
 
     // For the count check specifically
     mockChain.from.mockResolvedValue([{ count: 5 }]);
@@ -164,6 +161,7 @@ describe('Plugin Map GraphQL Mutations', () => {
         mockCtx as any,
       );
       expect(result.success).toBe(true);
+      expect(result.clearedCount).toBeDefined(); // Polls don't return count usually but assuming we mock return
     });
 
     it('should throw error when unauthenticated', async () => {
