@@ -83,7 +83,7 @@ describe('Razorpay Plugin Lifecycle', () => {
       // Error should be logged with proper message
       expect(errorSpy).toHaveBeenCalledWith(
         'Error during Razorpay plugin unload:',
-        error,
+        { error: 'Unload failed' },
       );
     });
 

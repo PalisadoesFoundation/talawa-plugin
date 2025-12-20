@@ -86,6 +86,12 @@ describe('ExtensionPointsUser', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     cleanup();
+    // Reset useLocalStorage to default authenticated state
+    vi.mocked(useLocalStorage).mockReturnValue({
+      getItem: (key: string) => (key === 'id' ? 'test-user-id' : null),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    });
   });
 
   it('should render the dashboard for a specific organization', async () => {
@@ -290,7 +296,14 @@ describe('ExtensionPointsUser', () => {
     const missingDataMock = {
       request: {
         query: LOG_PLUGIN_MAP_REQUEST,
-        variables: expect.anything(),
+        variables: {
+          input: {
+            userId: 'user-1',
+            userRole: 'user',
+            organizationId: 'org-test',
+            extensionPoint: 'RU1',
+          },
+        },
       },
       result: {
         data: {

@@ -83,6 +83,12 @@ describe('ExtensionPointsGlobal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     cleanup();
+    // Reset useLocalStorage to default authenticated state
+    vi.mocked(useLocalStorage).mockReturnValue({
+      getItem: (key: string) => (key === 'id' ? 'test-user-id' : null),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    });
     // Set default userId
     vi.spyOn(window.localStorage, 'getItem').mockImplementation((key) => {
       if (key === 'id') return 'test-user-id';
@@ -149,7 +155,14 @@ describe('ExtensionPointsGlobal', () => {
     const errorLogMock = {
       request: {
         query: LOG_PLUGIN_MAP_REQUEST,
-        variables: expect.anything(),
+        variables: {
+          input: {
+            extensionPoint: 'RU2',
+            userRole: 'user',
+            organizationId: null,
+            userId: 'user-1',
+          },
+        },
       },
       error: new Error('Simulation Error'),
     };
@@ -253,7 +266,14 @@ describe('ExtensionPointsGlobal', () => {
     const missingDataMock = {
       request: {
         query: LOG_PLUGIN_MAP_REQUEST,
-        variables: expect.anything(),
+        variables: {
+          input: {
+            userId: 'user-1',
+            userRole: 'user',
+            organizationId: null,
+            extensionPoint: 'RU2',
+          },
+        },
       },
       result: {
         data: {

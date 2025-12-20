@@ -84,7 +84,12 @@ describe('ExtensionPointsOrganization', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     cleanup();
-    // UseLocalStorage is already mocked globally in this file, no need to spy on window.localStorage
+    // Reset useLocalStorage to default authenticated state
+    vi.mocked(useLocalStorage).mockReturnValue({
+      getItem: (key: string) => (key === 'id' ? 'test-user-id' : null),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    });
   });
 
   it('should render the organization extension point for org-123', async () => {
@@ -263,7 +268,7 @@ describe('ExtensionPointsOrganization', () => {
       );
     });
 
-    vi.mocked(useLocalStorage).mockRestore();
+    vi.mocked(useLocalStorage).mockClear();
   });
 
   it('should handle missing mutation data', async () => {

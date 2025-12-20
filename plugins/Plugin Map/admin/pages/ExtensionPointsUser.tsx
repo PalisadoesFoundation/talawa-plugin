@@ -59,8 +59,23 @@ export const GET_PLUGIN_MAP_REQUESTS = gql`
   }
 `;
 
+// Define exact response shape matching schema
+interface ILogPluginMapRequestResponse {
+  plugin_map_logPluginMapRequest: {
+    id: string;
+    pollNumber: number;
+    userId: string;
+    userRole: string;
+    organizationId: string | null;
+    extensionPoint: string;
+    createdAt: string;
+  } | null;
+}
+
 const ExtensionPointsUser: React.FC = () => {
-  const [logRequest] = useMutation<any>(LOG_PLUGIN_MAP_REQUEST);
+  const [logRequest] = useMutation<ILogPluginMapRequestResponse>(
+    LOG_PLUGIN_MAP_REQUEST,
+  );
   const { orgId } = useParams();
   const { getItem } = useLocalStorage();
   const userId = getItem('id') as string | null;
