@@ -8,75 +8,75 @@ import { render, RenderOptions, act } from '@testing-library/react';
  * Test wrapper for Admin components
  */
 const TestWrapper: React.FC<{
-    children: ReactNode;
-    mocks: MockedResponse[];
-    initialEntries?: string[];
-    path?: string;
+  children: ReactNode;
+  mocks: MockedResponse[];
+  initialEntries?: string[];
+  path?: string;
 }> = ({ children, mocks, initialEntries = ['/'], path = '/' }) => {
-    return (
-        <MockedProvider mocks={mocks} addTypename={false}>
-            <MemoryRouter initialEntries={initialEntries}>
-                <Routes>
-                    <Route path={path} element={children} />
-                </Routes>
-            </MemoryRouter>
-        </MockedProvider>
-    );
+  return (
+    <MockedProvider mocks={mocks}>
+      <MemoryRouter initialEntries={initialEntries}>
+        <Routes>
+          <Route path={path} element={children} />
+        </Routes>
+      </MemoryRouter>
+    </MockedProvider>
+  );
 };
 
 /**
  * Custom render function for Admin components
  */
 export const renderWithProviders = (
-    ui: React.ReactElement,
-    options: {
-        mocks?: MockedResponse[];
-        initialEntries?: string[];
-        path?: string;
-    } & Omit<RenderOptions, 'wrapper'> = {},
+  ui: React.ReactElement,
+  options: {
+    mocks?: MockedResponse[];
+    initialEntries?: string[];
+    path?: string;
+  } & Omit<RenderOptions, 'wrapper'> = {},
 ) => {
-    const { mocks = [], initialEntries, path, ...renderOptions } = options;
+  const { mocks = [], initialEntries, path, ...renderOptions } = options;
 
-    const Wrapper = ({ children }: { children: ReactNode }) => (
-        <TestWrapper mocks={mocks} initialEntries={initialEntries} path={path}>
-            {children}
-        </TestWrapper>
-    );
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <TestWrapper mocks={mocks} initialEntries={initialEntries} path={path}>
+      {children}
+    </TestWrapper>
+  );
 
-    return render(ui, { wrapper: Wrapper, ...renderOptions });
+  return render(ui, { wrapper: Wrapper, ...renderOptions });
 };
 
 /**
  * Mock data factories for Admin tests
  */
 export const createMockRequest = (overrides = {}) => ({
-    id: 'req-123',
-    pollNumber: 1,
-    userId: 'test-user-id',
-    userRole: 'admin',
-    organizationId: null,
-    extensionPoint: 'RA1',
-    createdAt: new Date().toISOString(),
-    __typename: 'PluginMapPoll',
-    ...overrides,
+  id: 'req-123',
+  pollNumber: 1,
+  userId: 'test-user-id',
+  userRole: 'admin',
+  organizationId: null,
+  extensionPoint: 'RA1',
+  createdAt: new Date().toISOString(),
+  __typename: 'PluginMapPoll',
+  ...overrides,
 });
 
 export const createMockExtensionPoint = (overrides = {}) => ({
-    id: 'RA1',
-    name: 'Admin Global Route',
-    description: 'Test description',
-    context: 'Global',
-    userRole: 'Admin',
-    features: ['Feature 1'],
-    __typename: 'ExtensionPoint',
-    ...overrides,
+  id: 'RA1',
+  name: 'Admin Global Route',
+  description: 'Test description',
+  context: 'Global',
+  userRole: 'Admin',
+  features: ['Feature 1'],
+  __typename: 'ExtensionPoint',
+  ...overrides,
 });
 
 /**
  * Flushes pending promises
  */
 export const flushPromises = async () => {
-    await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 0));
-    });
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
 };

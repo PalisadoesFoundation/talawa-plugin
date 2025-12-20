@@ -17,6 +17,7 @@ import {
   Table,
   Tag,
 } from 'antd';
+// @ts-expect-error - Apollo Client v4 types issue
 import { useMutation, useQuery } from '@apollo/client';
 import { gql } from 'graphql-tag';
 import useLocalStorage from 'utils/useLocalstorage';

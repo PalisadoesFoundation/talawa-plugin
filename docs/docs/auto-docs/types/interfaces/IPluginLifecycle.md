@@ -4,7 +4,7 @@
 
 # Interface: IPluginLifecycle\<TDb, TConfig\>
 
-Defined in: [plugins/types.ts:155](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L155)
+Defined in: [plugins/types.ts:178](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L178)
 
 Plugin lifecycle interface
 
@@ -56,7 +56,18 @@ const MyPlugin: IPluginLifecycle = {
       context.logger.warn('Plugin already active, skipping activation');
       return;
     }
-    // Perform activation...
+    try {
+      // Perform activation...
+    } catch (error) {
+      // context.logger is guaranteed to be present, so no optional chaining needed
+      context.logger.warn(
+        'Failed to verify Razorpay plugin tables:',
+        error as any,
+      );
+      // Depending on the severity, you might re-throw or handle gracefully
+      // For this example, we'll just log and return, implying a soft failure or warning.
+      return;
+    }
   },
   onDeactivate: async (context) => {
     // Cleanup resources...
@@ -84,7 +95,7 @@ Type for plugin configuration
 
 > `optional` **onActivate**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:181](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L181)
+Defined in: [plugins/types.ts:204](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L204)
 
 Called when plugin is activated
 
@@ -119,7 +130,7 @@ Error if activation fails; message should be user-friendly
 
 > `optional` **onDeactivate**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:196](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L196)
+Defined in: [plugins/types.ts:219](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L219)
 
 Called when plugin is deactivated
 
@@ -150,7 +161,7 @@ Plugin context with db, logger, and config
 
 > `optional` **onInstall**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:221](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L221)
+Defined in: [plugins/types.ts:244](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L244)
 
 Called when plugin is first installed
 
@@ -185,7 +196,7 @@ Error if installation fails; message should describe what went wrong
 
 > `optional` **onLoad**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:165](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L165)
+Defined in: [plugins/types.ts:188](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L188)
 
 Called when plugin is loaded into memory
 
@@ -214,7 +225,7 @@ Error if loading fails; host will not proceed with activation
 
 > `optional` **onUninstall**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:235](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L235)
+Defined in: [plugins/types.ts:258](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L258)
 
 Called when plugin is uninstalled
 
@@ -244,7 +255,7 @@ Plugin context with db, logger, and config
 
 > `optional` **onUnload**: (`context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:205](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L205)
+Defined in: [plugins/types.ts:228](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L228)
 
 Called when plugin is unloaded from memory
 
@@ -268,7 +279,7 @@ Plugin context (some resources may already be unavailable)
 
 > `optional` **onUpdate**: (`fromVersion`, `toVersion`, `context`) => `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:263](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L263)
+Defined in: [plugins/types.ts:286](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L286)
 
 Called when plugin is updated from one version to another
 

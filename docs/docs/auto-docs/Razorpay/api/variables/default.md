@@ -6,4 +6,4 @@
 
 > `const` **default**: [`IPluginLifecycle`](../../../types/interfaces/IPluginLifecycle.md)
 
-Defined in: [plugins/Razorpay/api/index.ts:697](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/index.ts#L697)
+Defined in: [plugins/Razorpay/api/index.ts:703](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Razorpay/api/index.ts#L703)

@@ -18,6 +18,7 @@ import {
   Table,
   Tag,
 } from 'antd';
+// @ts-expect-error - Apollo Client v4 types issue
 import { useMutation, useQuery } from '@apollo/client';
 import { gql } from 'graphql-tag';
 import { useParams, Navigate } from 'react-router-dom';
@@ -60,16 +61,13 @@ const GET_PLUGIN_MAP_REQUESTS = gql`
 `;
 
 const ExtensionPointsOrganization: React.FC = () => {
-  const [logRequest] = useMutation(LOG_PLUGIN_MAP_REQUEST);
   const { orgId } = useParams();
   const { getItem } = useLocalStorage();
   const userId = getItem('id') as string | null;
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
-  // Redirect if no orgId is available
-  if (!orgId) {
-    return <Navigate to="/" replace />;
-  }
+  // Move hooks before the early return to comply with rules-of-hooks
+  const [logRequest] = useMutation(LOG_PLUGIN_MAP_REQUEST);
 
   // Query to fetch requests for this extension point
   const {
@@ -81,19 +79,24 @@ const ExtensionPointsOrganization: React.FC = () => {
       input: {
         extensionPoint: 'RA1',
         userRole: 'admin',
-        organizationId: orgId,
+        organizationId: orgId || '',
         userId: userId || 'unknown-user', // Filter by current user ID
       },
     },
+    skip: !orgId,
     fetchPolicy: 'network-only',
   });
 
   // Refetch when a new request is logged
   useEffect(() => {
-    if (refetchTrigger > 0) {
+    if (refetchTrigger > 0 && refetch) {
       refetch();
     }
   }, [refetchTrigger, refetch]);
+
+  if (!orgId) {
+    return <Navigate to="/" replace />;
+  }
 
   const handlePollClick = async () => {
     try {

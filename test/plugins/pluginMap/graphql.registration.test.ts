@@ -4,14 +4,14 @@ import { registerPluginMapQueries } from '../../../plugins/Plugin Map/api/graphq
 import { mockBuilder } from '../../setup/globalMocks';
 
 describe('Plugin Map GraphQL Registration', () => {
-    it('should register all mutations', () => {
-        registerPluginMapMutations(mockBuilder as any);
-        expect(mockBuilder.mutationField).toHaveBeenCalled();
-    });
+  it('should register all mutations', () => {
+    registerPluginMapMutations(mockBuilder as any);
+    expect(mockBuilder.mutationField).toHaveBeenCalled();
+  });
 
-    it('should register all queries', () => {
-        registerPluginMapQueries(mockBuilder as any);
-        expect(mockBuilder.queryType).not.toHaveBeenCalled(); // registerPluginMapQueries doesn't call queryType directly usually, it uses queryField
-        expect(mockBuilder.queryField).toHaveBeenCalled();
-    });
+  it('should register all queries', () => {
+    registerPluginMapQueries(mockBuilder as any);
+    expect(mockBuilder.queryType).not.toHaveBeenCalled(); // registerPluginMapQueries doesn't call queryType directly usually, it uses queryField
+    expect(mockBuilder.queryField).toHaveBeenCalled();
+  });
 });

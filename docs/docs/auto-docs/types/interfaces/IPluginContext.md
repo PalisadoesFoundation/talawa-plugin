@@ -76,6 +76,20 @@ May be undefined if the host system doesn't provide db access for this hook
 
 ***
 
+### graphql?
+
+> `optional` **graphql**: `any`
+
+Defined in: [plugins/types.ts:97](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L97)
+
+GraphQL instance for plugin schema registration and execution
+
+#### Remarks
+
+Optional - provided when GraphQL access is needed
+
+***
+
 ### isActive?
 
 > `optional` **isActive**: `boolean`
@@ -158,3 +172,17 @@ Logger instance for plugin logging (use instead of console.*)
 
 Guaranteed to be present by the plugin host in all lifecycle hooks.
 This property is required and always available.
+
+***
+
+### pubsub?
+
+> `optional` **pubsub**: `any`
+
+Defined in: [plugins/types.ts:103](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L103)
+
+PubSub instance for plugin real-time events
+
+#### Remarks
+
+Optional - provided when PubSub access is needed

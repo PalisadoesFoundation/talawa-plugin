@@ -89,6 +89,18 @@ export interface IPluginContext<TDb = unknown, TConfig = PluginConfig> {
    * @remarks Plugins should check this before performing activation-only tasks
    */
   isActive?: boolean;
+
+  /**
+   * GraphQL instance for plugin schema registration and execution
+   * @remarks Optional - provided when GraphQL access is needed
+   */
+  graphql?: any;
+
+  /**
+   * PubSub instance for plugin real-time events
+   * @remarks Optional - provided when PubSub access is needed
+   */
+  pubsub?: any;
 }
 
 /**
@@ -141,7 +153,18 @@ export interface IPluginContext<TDb = unknown, TConfig = PluginConfig> {
  *       context.logger.warn('Plugin already active, skipping activation');
  *       return;
  *     }
- *     // Perform activation...
+ *     try {
+ *       // Perform activation...
+ *     } catch (error) {
+ *       // context.logger is guaranteed to be present, so no optional chaining needed
+ *       context.logger.warn(
+ *         'Failed to verify Razorpay plugin tables:',
+ *         error as any,
+ *       );
+ *       // Depending on the severity, you might re-throw or handle gracefully
+ *       // For this example, we'll just log and return, implying a soft failure or warning.
+ *       return;
+ *     }
  *   },
  *   onDeactivate: async (context) => {
  *     // Cleanup resources...

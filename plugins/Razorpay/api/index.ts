@@ -160,7 +160,10 @@ export async function onLoad(context: IPluginContext): Promise<void> {
     }
   } catch (error) {
     if (context.logger?.warn) {
-      context.logger.warn('Failed to verify Razorpay plugin tables:', error);
+      context.logger.warn(
+        'Failed to verify Razorpay plugin tables:',
+        error as any,
+      );
     }
   }
 }
@@ -205,10 +208,10 @@ export async function onActivate(context: IPluginContext): Promise<void> {
       context.logger.info('Razorpay configuration initialized');
     }
   } catch (error) {
-    if (context.logger?.error) {
-      context.logger.error(
+    if (context.logger?.warn) {
+      context.logger.warn(
         'Failed to initialize Razorpay configuration:',
-        error,
+        error as any,
       );
     }
   }
@@ -241,8 +244,11 @@ export async function onDeactivate(context: IPluginContext): Promise<void> {
       context.logger.info('Razorpay plugin cleanup completed');
     }
   } catch (error) {
-    if (context.logger?.error) {
-      context.logger.error('Failed to cleanup Razorpay plugin:', error);
+    if (context.logger?.warn) {
+      context.logger.warn(
+        'Failed to handle plugin deactivation for Razorpay:',
+        error as any,
+      );
     }
   }
 }

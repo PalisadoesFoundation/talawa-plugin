@@ -4,7 +4,7 @@
 
 # Class: PluginError
 
-Defined in: [plugins/types.ts:281](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L281)
+Defined in: [plugins/types.ts:304](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L304)
 
 Custom error class for plugin-related errors
 
@@ -27,7 +27,7 @@ throw new PluginError('Database connection required', 'Razorpay', 'onActivate');
 
 > **new PluginError**(`message`, `pluginName?`, `hook?`): `PluginError`
 
-Defined in: [plugins/types.ts:288](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L288)
+Defined in: [plugins/types.ts:311](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L311)
 
 #### Parameters
 
@@ -57,7 +57,7 @@ keyof [`IPluginLifecycle`](../interfaces/IPluginLifecycle.md)\<`unknown`, [`Plug
 
 > `readonly` `optional` **hook**: keyof [`IPluginLifecycle`](../interfaces/IPluginLifecycle.md)\<`unknown`, [`PluginConfig`](../type-aliases/PluginConfig.md)\>
 
-Defined in: [plugins/types.ts:286](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L286)
+Defined in: [plugins/types.ts:309](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L309)
 
 Lifecycle hook where the error occurred
 
@@ -67,6 +67,6 @@ Lifecycle hook where the error occurred
 
 > `readonly` `optional` **pluginName**: `string`
 
-Defined in: [plugins/types.ts:283](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L283)
+Defined in: [plugins/types.ts:306](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L306)
 
 Name of the plugin that threw the error
