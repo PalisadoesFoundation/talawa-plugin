@@ -6,4 +6,4 @@
 
 > `const` **ExtensionPointsGlobal**: `React.FC`
 
-Defined in: [plugins/Plugin Map/admin/pages/ExtensionPointsGlobal.tsx:39](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/admin/pages/ExtensionPointsGlobal.tsx#L39)
+Defined in: [plugins/Plugin Map/admin/pages/ExtensionPointsGlobal.tsx:38](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/admin/pages/ExtensionPointsGlobal.tsx#L38)

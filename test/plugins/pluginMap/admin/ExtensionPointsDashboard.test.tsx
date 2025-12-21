@@ -34,7 +34,7 @@ vi.mock('antd', async () => {
   };
 });
 
-// useLocalstorage is already mocked in reactTestSetup.ts
+// Local mock overrides default mock from reactTestSetup.ts for specific test cases
 
 const mockRequests = [
   createMockRequest({ id: 'req-1', pollNumber: 1, extensionPoint: 'RA2' }),

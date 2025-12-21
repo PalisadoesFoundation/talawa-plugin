@@ -40,7 +40,7 @@ vi.mock('antd', async () => {
   };
 });
 
-// useLocalstorage is already mocked in reactTestSetup.ts
+// Local mock overrides default mock from reactTestSetup.ts for specific test cases
 
 const mockRequests = [
   createMockRequest({
@@ -195,7 +195,7 @@ describe('ExtensionPointsUser', () => {
   it('should use unknown-user if userId is missing', async () => {
     // Mock useLocalStorage to return null for 'id'
     vi.mocked(useLocalStorage).mockReturnValue({
-      getItem: (key: string) => (key === 'id' ? null : null),
+      getItem: (_key: string) => null,
       setItem: vi.fn(),
       removeItem: vi.fn(),
     });
@@ -269,8 +269,6 @@ describe('ExtensionPointsUser', () => {
     await waitFor(() => {
       expect(message.success).toHaveBeenCalledWith('messages.success');
     });
-
-    vi.mocked(useLocalStorage).mockClear();
   });
 
   it('should handle missing mutation data', async () => {

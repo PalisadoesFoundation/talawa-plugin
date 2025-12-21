@@ -183,7 +183,7 @@ describe('ExtensionPointsGlobal', () => {
   it('should use unknown-user if userId is missing', async () => {
     // Mock useLocalStorage to return null for 'id'
     vi.mocked(useLocalStorage).mockReturnValue({
-      getItem: (key: string) => (key === 'id' ? null : null),
+      getItem: (_key: string) => null,
       setItem: vi.fn(),
       removeItem: vi.fn(),
     });

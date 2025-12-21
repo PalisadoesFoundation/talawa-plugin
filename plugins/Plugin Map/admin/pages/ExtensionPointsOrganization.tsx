@@ -18,8 +18,7 @@ import {
   Table,
   Tag,
 } from 'antd';
-// @ts-expect-error - Apollo Client v4 types issue
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client/react';
 
 import { useParams, Navigate } from 'react-router-dom';
 import useLocalStorage from 'utils/useLocalstorage';
