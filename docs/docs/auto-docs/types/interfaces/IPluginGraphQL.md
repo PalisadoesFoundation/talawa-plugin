@@ -12,9 +12,15 @@ Interface for GraphQL operations available to plugins
 
 ### execute()
 
-> **execute**(`query`, `variables?`): `Promise`\<`any`\>
+> **execute**\<`T`\>(`query`, `variables?`): `Promise`\<`T`\>
 
 Defined in: [plugins/types.ts:110](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L110)
+
+#### Type Parameters
+
+##### T
+
+`T` = `unknown`
 
 #### Parameters
 
@@ -28,4 +34,4 @@ Defined in: [plugins/types.ts:110](https://github.com/PalisadoesFoundation/talaw
 
 #### Returns
 
-`Promise`\<`any`\>
+`Promise`\<`T`\>

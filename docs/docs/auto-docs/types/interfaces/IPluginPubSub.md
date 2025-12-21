@@ -4,7 +4,7 @@
 
 # Interface: IPluginPubSub
 
-Defined in: [plugins/types.ts:116](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L116)
+Defined in: [plugins/types.ts:119](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L119)
 
 Interface for PubSub operations available to plugins
 
@@ -14,13 +14,13 @@ Interface for PubSub operations available to plugins
 
 > **asyncIterator**\<`T`\>(`triggers`): `AsyncIterator`\<`T`\>
 
-Defined in: [plugins/types.ts:118](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L118)
+Defined in: [plugins/types.ts:121](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L121)
 
 #### Type Parameters
 
 ##### T
 
-`T`
+`T` = `unknown`
 
 #### Parameters
 
@@ -36,9 +36,15 @@ Defined in: [plugins/types.ts:118](https://github.com/PalisadoesFoundation/talaw
 
 ### publish()
 
-> **publish**(`triggerName`, `payload`): `void` \| `Promise`\<`void`\>
+> **publish**\<`T`\>(`triggerName`, `payload`): `void` \| `Promise`\<`void`\>
 
-Defined in: [plugins/types.ts:117](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L117)
+Defined in: [plugins/types.ts:120](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/types.ts#L120)
+
+#### Type Parameters
+
+##### T
+
+`T` = `unknown`
 
 #### Parameters
 
@@ -48,7 +54,7 @@ Defined in: [plugins/types.ts:117](https://github.com/PalisadoesFoundation/talaw
 
 ##### payload
 
-`any`
+`T`
 
 #### Returns
 

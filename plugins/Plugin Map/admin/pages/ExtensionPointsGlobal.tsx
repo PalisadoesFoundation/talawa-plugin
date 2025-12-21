@@ -19,10 +19,14 @@ import {
 } from 'antd';
 // @ts-expect-error - Apollo Client v4 types issue
 import { useMutation, useQuery } from '@apollo/client';
-import { gql } from 'graphql-tag';
+
 import useLocalStorage from 'utils/useLocalstorage';
 import { useTranslation } from 'react-i18next';
 import '../utils/i18n';
+import {
+  GET_PLUGIN_MAP_REQUESTS,
+  LOG_PLUGIN_MAP_REQUEST,
+} from '../graphql/queries';
 import {
   IGetPluginMapRequestsResponse,
   IGetPluginMapRequestsVariables,
@@ -31,40 +35,6 @@ import {
 } from '../types';
 
 const { Title, Paragraph } = Typography;
-
-// GraphQL mutation for logging requests
-const LOG_PLUGIN_MAP_REQUEST = gql`
-  mutation LogPluginMapRequest($input: PluginMapRequestInput!) {
-    plugin_map_logPluginMapRequest(input: $input) {
-      id
-      pollNumber
-      userId
-      userRole
-      organizationId
-      extensionPoint
-      createdAt
-    }
-  }
-`;
-
-// GraphQL query for fetching requests
-const GET_PLUGIN_MAP_REQUESTS = gql`
-  query GetPluginMapRequests($input: GetPluginMapRequestsInput) {
-    plugin_map_getPluginMapRequests(input: $input) {
-      requests {
-        id
-        pollNumber
-        userId
-        userRole
-        organizationId
-        extensionPoint
-        createdAt
-      }
-      totalCount
-      hasMore
-    }
-  }
-`;
 
 const ExtensionPointsGlobal: React.FC = () => {
   const { t } = useTranslation('plugin-map');

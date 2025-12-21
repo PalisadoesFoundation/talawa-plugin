@@ -9,7 +9,7 @@ import ExtensionPointsGlobal from '../../../../plugins/Plugin Map/admin/pages/Ex
 import {
   GET_PLUGIN_MAP_REQUESTS,
   LOG_PLUGIN_MAP_REQUEST,
-} from '../../../../plugins/Plugin Map/admin/pages/ExtensionPointsDashboard';
+} from '../../../../plugins/Plugin Map/admin/graphql/queries';
 import { renderWithProviders, createMockRequest } from './adminTestUtils';
 
 import useLocalStorage from 'utils/useLocalstorage';

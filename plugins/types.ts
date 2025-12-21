@@ -107,15 +107,18 @@ export interface IPluginContext<TDb = unknown, TConfig = PluginConfig> {
  * Interface for GraphQL operations available to plugins
  */
 export interface IPluginGraphQL {
-  execute(query: string, variables?: Record<string, JsonValue>): Promise<any>;
+  execute<T = unknown>(
+    query: string,
+    variables?: Record<string, JsonValue>,
+  ): Promise<T>;
 }
 
 /**
  * Interface for PubSub operations available to plugins
  */
 export interface IPluginPubSub {
-  publish(triggerName: string, payload: any): Promise<void> | void;
-  asyncIterator<T>(triggers: string | string[]): AsyncIterator<T>;
+  publish<T = unknown>(triggerName: string, payload: T): Promise<void> | void;
+  asyncIterator<T = unknown>(triggers: string | string[]): AsyncIterator<T>;
 }
 
 /**
