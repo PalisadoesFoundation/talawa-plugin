@@ -297,8 +297,6 @@ describe('ExtensionPointsDashboard', () => {
     await waitFor(() => {
       expect(message.success).toHaveBeenCalledWith('messages.success');
     });
-
-    vi.mocked(useLocalStorage).mockClear();
   });
 
   it('should handle missing mutation data gracefully', async () => {
