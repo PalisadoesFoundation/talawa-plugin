@@ -130,7 +130,9 @@ const ExtensionPointsGlobal: React.FC = () => {
         message.error(t('messages.error'));
       }
     } catch (error) {
-      console.error('Error logging request:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error('Error logging request:', errorMessage);
       message.error(t('messages.error'));
     }
   };
@@ -210,6 +212,7 @@ const ExtensionPointsGlobal: React.FC = () => {
               </Paragraph>
 
               <Table
+                aria-label={t('global.requestHistory')}
                 columns={columns}
                 dataSource={
                   requestsData?.plugin_map_getPluginMapRequests.requests || []

@@ -18,7 +18,7 @@ import {
   Table,
   Tag,
 } from 'antd';
-import { useMutation, useQuery } from '@apollo/client'; // Import from @apollo/client
+import { useMutation, useQuery } from '@apollo/client/react';
 import { gql } from 'graphql-tag';
 import { useParams, Navigate } from 'react-router-dom';
 import useLocalStorage from 'utils/useLocalstorage';
@@ -139,7 +139,9 @@ const ExtensionPointsUser: React.FC = () => {
         message.error(t('messages.error'));
       }
     } catch (error) {
-      console.error('Error logging request:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error('Error logging request:', errorMessage);
       message.error(t('messages.error'));
     }
   };
@@ -218,6 +220,7 @@ const ExtensionPointsUser: React.FC = () => {
               </Paragraph>
 
               <Table
+                aria-label={t('user.requestHistory')}
                 columns={columns}
                 dataSource={
                   requestsData?.plugin_map_getPluginMapRequests.requests || []

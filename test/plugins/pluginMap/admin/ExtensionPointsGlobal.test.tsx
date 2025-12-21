@@ -86,10 +86,6 @@ describe('ExtensionPointsGlobal', () => {
       removeItem: vi.fn(),
     });
     // Set default userId
-    vi.spyOn(window.localStorage, 'getItem').mockImplementation((key) => {
-      if (key === 'id') return 'test-user-id';
-      return null;
-    });
   });
 
   it('should render the global extension point title', async () => {

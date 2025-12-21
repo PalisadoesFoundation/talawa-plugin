@@ -54,7 +54,13 @@ describe('MapIconInjector', () => {
     const badge = screen.getByText('RA1');
 
     fireEvent.mouseEnter(badge);
-    // Interaction triggered, covers logic lines
+
+    // Explicitly assert tooltip appearance
+    await screen.findByRole('tooltip', { hidden: true });
+    // Or if checking specific text from title:
+    expect(screen.getByRole('tooltip')).toHaveTextContent(
+      /Extension Point:\s*RA1/,
+    );
   });
 
   it('should handle small and large sizes', () => {
@@ -77,6 +83,8 @@ describe('MapIconInjector', () => {
     render(<MapIconInjector extensionPointId="RU1" />);
     const icon = screen.getByTestId('map-icon');
     const iconContainer = icon.parentElement;
+
+    expect(iconContainer).toBeInTheDocument();
 
     if (iconContainer) {
       fireEvent.mouseEnter(iconContainer);

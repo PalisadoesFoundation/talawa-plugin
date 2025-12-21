@@ -1,5 +1,5 @@
 // These mocks allow plugin tests to run standalone in talawa-plugin repo
-import { vi } from 'vitest';
+import { vi, type Mock } from 'vitest';
 
 // Debug log removed
 
@@ -10,8 +10,21 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
+interface MockBuilder {
+  queryType: Mock;
+  mutationType: Mock;
+  objectRef: Mock;
+  objectType: Mock;
+  inputType: Mock;
+  inputRef: Mock;
+  field: Mock;
+  fields: Mock;
+  queryField: Mock;
+  mutationField: Mock;
+}
+
 // Mock GraphQL Builder
-export const mockBuilder: any = {
+export const mockBuilder: MockBuilder = {
   queryType: vi.fn(() => mockBuilder),
   mutationType: vi.fn(() => mockBuilder),
   objectRef: vi.fn(() => ({

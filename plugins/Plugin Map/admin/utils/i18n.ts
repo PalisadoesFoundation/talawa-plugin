@@ -32,4 +32,13 @@ i18n
     },
   });
 
+// Handle locale loading errors
+i18n.on('failedLoading', (lng, ns, msg) => {
+  console.error(`Failed to load ${ns} for language ${lng}:`, msg);
+  // Fallback to default language if not already
+  if (lng !== 'en') {
+    i18n.changeLanguage('en');
+  }
+});
+
 export default i18n;

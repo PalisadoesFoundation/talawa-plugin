@@ -84,8 +84,6 @@ describe('ExtensionPointsDashboard', () => {
     });
   });
 
-  console.log('ExPointsDashboard:', ExtensionPointsDashboard);
-
   it('should render the dashboard title and description', async () => {
     renderWithProviders(<ExtensionPointsDashboard />, {
       mocks: standardMocks,

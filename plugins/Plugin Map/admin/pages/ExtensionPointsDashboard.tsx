@@ -129,7 +129,9 @@ const ExtensionPointsDashboard: React.FC = () => {
         message.error(t('messages.error'));
       }
     } catch (error) {
-      console.error('Error logging request:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error('Error logging request:', errorMessage);
       message.error(t('messages.error'));
     }
   };
@@ -218,6 +220,7 @@ const ExtensionPointsDashboard: React.FC = () => {
                 loading={loadingRequests}
                 pagination={{ pageSize: 5 }}
                 scroll={{ x: true }}
+                aria-label={t('dashboard.requestHistory')}
               />
             </Space>
           </Card>
