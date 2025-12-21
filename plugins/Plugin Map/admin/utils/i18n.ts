@@ -1,5 +1,15 @@
 /**
  * Internationalization (i18n) setup for Plugin Map
+ *
+ * NOTE: The configuration below uses `react: { useSuspense: true }`.
+ * Any component using `useTranslation` (e.g. `useTranslation('plugin-map')`)
+ * MUST be rendered within a React <Suspense> boundary to avoid unhandled promise errors
+ * (or "Suspended" errors) during locale loading.
+ *
+ * Recommended usage:
+ * <Suspense fallback={<div>Loading...</div>}>
+ *   <YourComponent />
+ * </Suspense>
  */
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';

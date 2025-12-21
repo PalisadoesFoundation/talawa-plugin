@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen, waitFor, fireEvent, cleanup } from '@testing-library/react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { message } from 'antd';
 import ExtensionPointsDashboard, {
   GET_PLUGIN_MAP_REQUESTS,
@@ -75,7 +75,6 @@ const standardMocks = [
 describe('ExtensionPointsDashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    cleanup();
     // Default to test-user-id
     vi.mocked(useLocalStorage).mockReturnValue({
       getItem: (key: string) => (key === 'id' ? 'test-user-id' : null),
