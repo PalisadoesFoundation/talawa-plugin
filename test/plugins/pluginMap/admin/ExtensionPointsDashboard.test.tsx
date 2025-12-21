@@ -30,12 +30,6 @@ vi.mock('antd', async () => {
   return {
     ...actual,
     ...createAntdMocks(vi),
-    // Ensure message spy matches original shape while being mocked
-    message: {
-      ...actual.message,
-      success: vi.fn(),
-      error: vi.fn(),
-    },
   };
 });
 
@@ -217,7 +211,7 @@ describe('ExtensionPointsDashboard', () => {
   it('should use unknown-user if userId is missing in localStorage', async () => {
     // Mock useLocalStorage to return null for 'id'
     vi.mocked(useLocalStorage).mockReturnValue({
-      getItem: (key: string) => (key === 'id' ? null : null),
+      getItem: () => null,
       setItem: vi.fn(),
       removeItem: vi.fn(),
     });
