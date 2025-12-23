@@ -6,7 +6,7 @@
 
 > **getPluginMapRequestsResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `hasMore`: `boolean`; `requests`: `any`; `totalCount`: `any`; \}\>
 
-Defined in: [plugins/Plugin Map/api/graphql/queries.ts:110](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/queries.ts#L110)
+Defined in: [plugins/Plugin Map/api/graphql/queries.ts:183](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/queries.ts#L183)
 
 Resolver to fetch plugin map request logs.
 

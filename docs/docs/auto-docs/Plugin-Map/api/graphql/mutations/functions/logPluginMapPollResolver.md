@@ -6,7 +6,7 @@
 
 > **logPluginMapPollResolver**(`_parent`, `args`, `ctx`): `Promise`\<`any`\>
 
-Defined in: [plugins/Plugin Map/api/graphql/mutations.ts:150](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/mutations.ts#L150)
+Defined in: [plugins/Plugin Map/api/graphql/mutations.ts:192](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/mutations.ts#L192)
 
 Resolver to log a new plugin map poll.
 

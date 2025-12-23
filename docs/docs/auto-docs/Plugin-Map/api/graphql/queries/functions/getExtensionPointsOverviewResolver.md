@@ -6,7 +6,7 @@
 
 > **getExtensionPointsOverviewResolver**(`_parent`, `_args`, `ctx`): `Promise`\<\{ `description`: `string`; `extensionPoints`: `object`[]; `totalCount`: `number`; \}\>
 
-Defined in: [plugins/Plugin Map/api/graphql/queries.ts:26](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/queries.ts#L26)
+Defined in: [plugins/Plugin Map/api/graphql/queries.ts:97](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/queries.ts#L97)
 
 Resolver to get an overview of all available extension points.
 

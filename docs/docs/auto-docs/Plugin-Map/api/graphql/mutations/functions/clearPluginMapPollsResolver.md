@@ -6,7 +6,7 @@
 
 > **clearPluginMapPollsResolver**(`_parent`, `_args`, `ctx`): `Promise`\<\{ `clearedCount`: `any`; `message`: `string`; `success`: `boolean`; \}\>
 
-Defined in: [plugins/Plugin Map/api/graphql/mutations.ts:229](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/mutations.ts#L229)
+Defined in: [plugins/Plugin Map/api/graphql/mutations.ts:240](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/mutations.ts#L240)
 
 Resolver to clear all logged plugin map polls.
 

@@ -6,7 +6,7 @@
 
 > **registerPluginMapQueries**(`builderInstance`): `void`
 
-Defined in: [plugins/Plugin Map/api/graphql/queries.ts:308](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/queries.ts#L308)
+Defined in: [plugins/Plugin Map/api/graphql/queries.ts:289](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/queries.ts#L289)
 
 Registers all Plugin Map queries with the GraphQL builder.
 

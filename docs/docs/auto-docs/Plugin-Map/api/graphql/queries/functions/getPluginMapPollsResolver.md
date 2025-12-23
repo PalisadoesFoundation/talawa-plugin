@@ -6,7 +6,7 @@
 
 > **getPluginMapPollsResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `hasMore`: `boolean`; `polls`: `any`; `totalCount`: `any`; \}\>
 
-Defined in: [plugins/Plugin Map/api/graphql/queries.ts:212](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/queries.ts#L212)
+Defined in: [plugins/Plugin Map/api/graphql/queries.ts:237](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/queries.ts#L237)
 
 Resolver to fetch all logged polls.
 

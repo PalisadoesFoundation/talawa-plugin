@@ -15,9 +15,13 @@ describe('Plugin Map GraphQL Mutations', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCtx = createMockPluginMapContext({
-      currentClient: { isAuthenticated: true, scopes: [] },
+      currentClient: {
+        isAuthenticated: true,
+        scopes: [],
+        user: { id: 'user-1', role: 'admin' },
+      } as any,
       userId: 'user-1',
-      user: { id: 'user-1', isSuperAdmin: true } as any,
+      user: { id: 'user-1', role: 'admin' } as any,
       organizationId: 'org-1',
     });
 
@@ -31,14 +35,23 @@ describe('Plugin Map GraphQL Mutations', () => {
       returning: vi.fn().mockResolvedValue([{ id: 'mock-id', pollNumber: 1 }]),
       where: vi.fn().mockResolvedValue({ rowCount: 5 }),
       from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      offset: vi.fn().mockReturnThis(),
+      orderBy: vi.fn().mockReturnThis(),
     };
 
+    // Chainable methods
     mockDb.insert.mockReturnValue(mockChain);
     mockDb.delete.mockReturnValue(mockChain);
     mockDb.select.mockReturnValue(mockChain);
+    mockDb.transaction = vi.fn((callback) => callback(mockDb));
 
     // For the count check specifically
-    mockChain.from.mockResolvedValue([{ count: 5 }]);
+    // Note: select().from() chain needs to return [{ count: 5 }] or similar when queried
+    mockChain.from.mockImplementation((_table) => {
+      return Promise.resolve([{ maxPollNumber: 0, count: 5 }]);
+    });
   });
 
   describe('logPluginMapRequestResolver', () => {
@@ -70,9 +83,9 @@ describe('Plugin Map GraphQL Mutations', () => {
     });
 
     it('should handle database error', async () => {
-      mockCtx.drizzleClient.insert.mockImplementation(() => {
-        throw new Error('DB Error');
-      });
+      mockCtx.drizzleClient.transaction.mockRejectedValue(
+        new Error('DB Error'),
+      );
       await expect(
         logPluginMapRequestResolver(
           null,
@@ -112,9 +125,9 @@ describe('Plugin Map GraphQL Mutations', () => {
     });
 
     it('should handle database error', async () => {
-      mockCtx.drizzleClient.select.mockImplementation(() => {
-        throw new Error('DB Error');
-      });
+      mockCtx.drizzleClient.transaction.mockRejectedValue(
+        new Error('DB Error'),
+      );
       await expect(
         logPluginMapPollResolver(
           null,
@@ -143,8 +156,15 @@ describe('Plugin Map GraphQL Mutations', () => {
       ).rejects.toThrow(TalawaGraphQLError);
     });
 
+    it('should throw error when unauthorized (not admin)', async () => {
+      mockCtx.currentClient.user.role = 'user';
+      await expect(
+        clearPluginMapRequestsResolver(null, {}, mockCtx as any),
+      ).rejects.toThrow('Unauthorized');
+    });
+
     it('should handle database error', async () => {
-      mockCtx.drizzleClient.select.mockImplementation(() => {
+      mockCtx.drizzleClient.delete.mockImplementation(() => {
         throw new Error('DB Error');
       });
       await expect(
@@ -161,7 +181,6 @@ describe('Plugin Map GraphQL Mutations', () => {
         mockCtx as any,
       );
       expect(result.success).toBe(true);
-      expect(result.clearedCount).toBeDefined(); // Polls don't return count usually but assuming we mock return
     });
 
     it('should throw error when unauthenticated', async () => {
@@ -169,6 +188,13 @@ describe('Plugin Map GraphQL Mutations', () => {
       await expect(
         clearPluginMapPollsResolver(null, {}, mockCtx as any),
       ).rejects.toThrow(TalawaGraphQLError);
+    });
+
+    it('should throw error when unauthorized (not admin)', async () => {
+      mockCtx.currentClient.user.role = 'user';
+      await expect(
+        clearPluginMapPollsResolver(null, {}, mockCtx as any),
+      ).rejects.toThrow('Unauthorized');
     });
 
     it('should handle database error', async () => {

@@ -11,6 +11,77 @@ import {
 } from './types';
 import { getPluginMapPollsInputSchema } from './inputs';
 
+// Shared helper to fetch and pagination polls
+async function fetchPollsInternal(
+  ctx: GraphQLContext,
+  filters: {
+    userId?: string | null;
+    userRole?: string | null;
+    organizationId?: string | null;
+    extensionPoint?: string | null;
+  },
+  logLabel: string,
+) {
+  try {
+    const whereConditions = [];
+
+    if (filters.userId) {
+      whereConditions.push(eq(pollsTable.userId, filters.userId));
+    }
+
+    if (filters.userRole) {
+      whereConditions.push(eq(pollsTable.userRole, filters.userRole));
+    }
+
+    if (filters.organizationId !== undefined) {
+      if (filters.organizationId === null) {
+        whereConditions.push(isNull(pollsTable.organizationId));
+      } else {
+        whereConditions.push(
+          eq(pollsTable.organizationId, filters.organizationId),
+        );
+      }
+    }
+
+    if (filters.extensionPoint) {
+      whereConditions.push(
+        eq(pollsTable.extensionPoint, filters.extensionPoint),
+      );
+    }
+
+    const limit = 50; // Fixed limit
+    const offset = 0; // Fixed offset - currently only first page supported by API for simplicity
+
+    const polls = await ctx.drizzleClient
+      .select()
+      .from(pollsTable)
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+      .orderBy(desc(pollsTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    // Get total count
+    const countResult = await ctx.drizzleClient
+      .select({ count: sql<number>`count(*)` })
+      .from(pollsTable)
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
+
+    const count = countResult[0]?.count || 0;
+
+    return {
+      items: polls,
+      totalCount: count,
+      hasMore: count > limit,
+    };
+  } catch (error) {
+    ctx.log?.error(`Error getting plugin map ${logLabel}:`, error);
+    throw new TalawaGraphQLError({
+      message: `Failed to fetch plugin map ${logLabel}`,
+      extensions: { code: 'unexpected' },
+    });
+  }
+}
+
 /**
  * Resolver to get an overview of all available extension points.
  *
@@ -30,6 +101,7 @@ export async function getExtensionPointsOverviewResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
@@ -90,6 +162,7 @@ export async function getExtensionPointsOverviewResolver(
   } catch (error) {
     ctx.log?.error('Error getting extension points overview:', error);
     throw new TalawaGraphQLError({
+      message: 'Failed to fetch overview',
       extensions: { code: 'unexpected' },
     });
   }
@@ -121,6 +194,7 @@ export async function getPluginMapRequestsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
@@ -135,67 +209,18 @@ export async function getPluginMapRequestsResolver(
   if (!success) {
     ctx.log?.error('Invalid arguments for getPluginMapRequests:', error);
     throw new TalawaGraphQLError({
+      message: 'Invalid arguments',
       extensions: { code: 'unexpected' },
     });
   }
 
-  try {
-    const whereConditions = [];
+  const result = await fetchPollsInternal(ctx, parsedArgs, 'requests');
 
-    if (parsedArgs.userId) {
-      whereConditions.push(eq(pollsTable.userId, parsedArgs.userId));
-    }
-
-    if (parsedArgs.userRole) {
-      whereConditions.push(eq(pollsTable.userRole, parsedArgs.userRole));
-    }
-
-    if (parsedArgs.organizationId !== undefined) {
-      if (parsedArgs.organizationId === null) {
-        whereConditions.push(isNull(pollsTable.organizationId));
-      } else {
-        whereConditions.push(
-          eq(pollsTable.organizationId, parsedArgs.organizationId),
-        );
-      }
-    }
-
-    if (parsedArgs.extensionPoint) {
-      whereConditions.push(
-        eq(pollsTable.extensionPoint, parsedArgs.extensionPoint),
-      );
-    }
-
-    const limit = 50; // Fixed limit
-    const offset = 0; // Fixed offset
-
-    const polls = await ctx.drizzleClient
-      .select()
-      .from(pollsTable)
-      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
-      .orderBy(desc(pollsTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-
-    // Get total count
-    const countResult = await ctx.drizzleClient
-      .select({ count: sql<number>`count(*)` })
-      .from(pollsTable)
-      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
-
-    const count = countResult[0]?.count || 0;
-
-    return {
-      requests: polls,
-      totalCount: count,
-      hasMore: false, // Since we're not using pagination
-    };
-  } catch (error) {
-    ctx.log?.error('Error getting plugin map requests:', error);
-    throw new TalawaGraphQLError({
-      extensions: { code: 'unexpected' },
-    });
-  }
+  return {
+    requests: result.items,
+    totalCount: result.totalCount,
+    hasMore: result.hasMore,
+  };
 }
 
 /**
@@ -222,6 +247,7 @@ export async function getPluginMapPollsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
@@ -236,63 +262,18 @@ export async function getPluginMapPollsResolver(
   if (!success) {
     ctx.log?.error('Invalid arguments for getPluginMapPolls:', error);
     throw new TalawaGraphQLError({
+      message: 'Invalid arguments',
       extensions: { code: 'unexpected' },
     });
   }
 
-  try {
-    const whereConditions = [];
+  const result = await fetchPollsInternal(ctx, parsedArgs, 'polls');
 
-    if (parsedArgs.userRole) {
-      whereConditions.push(eq(pollsTable.userRole, parsedArgs.userRole));
-    }
-
-    if (parsedArgs.organizationId !== undefined) {
-      if (parsedArgs.organizationId === null) {
-        whereConditions.push(isNull(pollsTable.organizationId));
-      } else {
-        whereConditions.push(
-          eq(pollsTable.organizationId, parsedArgs.organizationId),
-        );
-      }
-    }
-
-    if (parsedArgs.extensionPoint) {
-      whereConditions.push(
-        eq(pollsTable.extensionPoint, parsedArgs.extensionPoint),
-      );
-    }
-
-    const limit = 50; // Fixed limit
-    const offset = 0; // Fixed offset
-
-    const polls = await ctx.drizzleClient
-      .select()
-      .from(pollsTable)
-      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
-      .orderBy(desc(pollsTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-
-    // Get total count
-    const countResult = await ctx.drizzleClient
-      .select({ count: sql<number>`count(*)` })
-      .from(pollsTable)
-      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
-
-    const count = countResult[0]?.count || 0;
-
-    return {
-      polls,
-      totalCount: count,
-      hasMore: false, // Since we're not using pagination
-    };
-  } catch (error) {
-    ctx.log?.error('Error getting plugin map polls:', error);
-    throw new TalawaGraphQLError({
-      extensions: { code: 'unexpected' },
-    });
-  }
+  return {
+    polls: result.items,
+    totalCount: result.totalCount,
+    hasMore: result.hasMore,
+  };
 }
 
 /**

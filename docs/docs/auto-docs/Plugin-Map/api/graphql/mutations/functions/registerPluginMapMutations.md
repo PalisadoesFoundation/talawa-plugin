@@ -6,7 +6,7 @@
 
 > **registerPluginMapMutations**(`builderInstance`): `void`
 
-Defined in: [plugins/Plugin Map/api/graphql/mutations.ts:277](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/mutations.ts#L277)
+Defined in: [plugins/Plugin Map/api/graphql/mutations.ts:266](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/mutations.ts#L266)
 
 Registers all Plugin Map mutations with the GraphQL builder.
 

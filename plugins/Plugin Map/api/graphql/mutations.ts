@@ -7,6 +7,101 @@ import { pollsTable } from '../database/tables';
 import { PluginMapPollRef, ClearPollsResultRef } from './types';
 import { pluginMapPollInputSchema } from './inputs';
 
+// Shared helper for logging polls
+async function logPollInternal(
+  ctx: GraphQLContext,
+  parsedArgs: {
+    userId: string;
+    userRole: string;
+    organizationId?: string | null;
+    extensionPoint: string;
+  },
+  logLabel: string,
+) {
+  try {
+    return await ctx.drizzleClient.transaction(async (tx) => {
+      // Get the next poll number atomically within transaction
+      const maxPollResult = await tx
+        .select({
+          maxPollNumber: sql<number>`COALESCE(MAX(${pollsTable.pollNumber}), 0)`,
+        })
+        .from(pollsTable);
+
+      const maxPollNumber = maxPollResult[0]?.maxPollNumber || 0;
+      const nextPollNumber = maxPollNumber + 1;
+
+      // Insert the new poll
+      const [newPoll] = await tx
+        .insert(pollsTable)
+        .values({
+          pollNumber: nextPollNumber,
+          userId: parsedArgs.userId,
+          userRole: parsedArgs.userRole,
+          organizationId: parsedArgs.organizationId,
+          extensionPoint: parsedArgs.extensionPoint,
+        })
+        .returning();
+
+      ctx.log?.info(
+        `Plugin Map: Logged ${logLabel} ${nextPollNumber} from ${parsedArgs.extensionPoint} by ${parsedArgs.userRole} ${parsedArgs.userId}`,
+      );
+
+      return newPoll;
+    });
+  } catch (error) {
+    ctx.log?.error(`Error logging plugin map ${logLabel}:`, error);
+    throw new TalawaGraphQLError({
+      message: `Failed to log plugin map ${logLabel}`,
+      extensions: { code: 'unexpected' },
+    });
+  }
+}
+
+// Shared helper for clearing polls
+async function clearPollsInternal(ctx: GraphQLContext, logLabel: string) {
+  // Ensure only admins can clear logs
+  // Note: Check role property availability or strictly check if role is 'superuser' or similar if 'administrator' is not standard.
+  // Using 'superuser' and 'admin' as common conventions.
+  const user = ctx.currentClient.user;
+  const isAdmin =
+    user?.role === 'superuser' ||
+    user?.role === 'admin' ||
+    user?.role === 'administrator';
+
+  if (!isAdmin) {
+    throw new TalawaGraphQLError({
+      message: 'Unauthorized: Only admins can clear logs',
+      extensions: { code: 'unauthorized_action' },
+    });
+  }
+
+  try {
+    // Get count before deletion
+    const countResult = await ctx.drizzleClient
+      .select({ count: sql<number>`count(*)` })
+      .from(pollsTable);
+
+    const count = countResult[0]?.count || 0;
+
+    // Delete all polls
+    await ctx.drizzleClient.delete(pollsTable);
+
+    ctx.log?.info(`Plugin Map: Cleared ${count} logged ${logLabel}s`);
+
+    return {
+      success: true,
+      clearedCount: count,
+      message: `Cleared ${count} ${logLabel}s`,
+    };
+  } catch (error) {
+    ctx.log?.error(`Error clearing plugin map ${logLabel}s:`, error);
+    throw new TalawaGraphQLError({
+      message: `Failed to clear plugin map ${logLabel}s`,
+      extensions: { code: 'unexpected' },
+    });
+  }
+}
+
 /**
  * Resolver to log a new plugin map request.
  *
@@ -33,6 +128,7 @@ export async function logPluginMapRequestResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
@@ -46,44 +142,12 @@ export async function logPluginMapRequestResolver(
   if (!success) {
     ctx.log?.error('Invalid arguments for logPluginMapRequest:', error);
     throw new TalawaGraphQLError({
+      message: 'Invalid arguments',
       extensions: { code: 'unexpected' },
     });
   }
 
-  try {
-    // Get the next poll number
-    const maxPollResult = await ctx.drizzleClient
-      .select({
-        maxPollNumber: sql<number>`COALESCE(MAX(${pollsTable.pollNumber}), 0)`,
-      })
-      .from(pollsTable);
-
-    const maxPollNumber = maxPollResult[0]?.maxPollNumber || 0;
-    const nextPollNumber = maxPollNumber + 1;
-
-    // Insert the new poll
-    const [newPoll] = await ctx.drizzleClient
-      .insert(pollsTable)
-      .values({
-        pollNumber: nextPollNumber,
-        userId: parsedArgs.userId,
-        userRole: parsedArgs.userRole,
-        organizationId: parsedArgs.organizationId,
-        extensionPoint: parsedArgs.extensionPoint,
-      })
-      .returning();
-
-    ctx.log?.info(
-      `Plugin Map: Logged request ${nextPollNumber} from ${parsedArgs.extensionPoint} by ${parsedArgs.userRole} ${parsedArgs.userId}`,
-    );
-
-    return newPoll;
-  } catch (error) {
-    ctx.log?.error('Error logging plugin map request:', error);
-    throw new TalawaGraphQLError({
-      extensions: { code: 'unexpected' },
-    });
-  }
+  return logPollInternal(ctx, parsedArgs, 'request');
 }
 
 /**
@@ -105,34 +169,12 @@ export async function clearPluginMapRequestsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
 
-  try {
-    // Get count before deletion
-    const countResult = await ctx.drizzleClient
-      .select({ count: sql<number>`count(*)` })
-      .from(pollsTable);
-
-    const count = countResult[0]?.count || 0;
-
-    // Delete all polls
-    await ctx.drizzleClient.delete(pollsTable);
-
-    ctx.log?.info(`Plugin Map: Cleared ${count} logged requests`);
-
-    return {
-      success: true,
-      clearedCount: count,
-      message: `Cleared ${count} requests`,
-    };
-  } catch (error) {
-    ctx.log?.error('Error clearing plugin map requests:', error);
-    throw new TalawaGraphQLError({
-      extensions: { code: 'unexpected' },
-    });
-  }
+  return clearPollsInternal(ctx, 'request');
 }
 
 /**
@@ -161,6 +203,7 @@ export async function logPluginMapPollResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
@@ -174,44 +217,12 @@ export async function logPluginMapPollResolver(
   if (!success) {
     ctx.log?.error('Invalid arguments for logPluginMapPoll:', error);
     throw new TalawaGraphQLError({
+      message: 'Invalid arguments',
       extensions: { code: 'unexpected' },
     });
   }
 
-  try {
-    // Get the next poll number
-    const maxPollResult = await ctx.drizzleClient
-      .select({
-        maxPollNumber: sql<number>`COALESCE(MAX(${pollsTable.pollNumber}), 0)`,
-      })
-      .from(pollsTable);
-
-    const maxPollNumber = maxPollResult[0]?.maxPollNumber || 0;
-    const nextPollNumber = maxPollNumber + 1;
-
-    // Insert the new poll
-    const [newPoll] = await ctx.drizzleClient
-      .insert(pollsTable)
-      .values({
-        pollNumber: nextPollNumber,
-        userId: parsedArgs.userId,
-        userRole: parsedArgs.userRole,
-        organizationId: parsedArgs.organizationId,
-        extensionPoint: parsedArgs.extensionPoint,
-      })
-      .returning();
-
-    ctx.log?.info(
-      `Plugin Map: Logged poll ${nextPollNumber} from ${parsedArgs.extensionPoint} by ${parsedArgs.userRole} ${parsedArgs.userId}`,
-    );
-
-    return newPoll;
-  } catch (error) {
-    ctx.log?.error('Error logging plugin map poll:', error);
-    throw new TalawaGraphQLError({
-      extensions: { code: 'unexpected' },
-    });
-  }
+  return logPollInternal(ctx, parsedArgs, 'poll');
 }
 
 /**
@@ -233,34 +244,12 @@ export async function clearPluginMapPollsResolver(
 ) {
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
 
-  try {
-    // Get count before deletion
-    const countResult = await ctx.drizzleClient
-      .select({ count: sql<number>`count(*)` })
-      .from(pollsTable);
-
-    const count = countResult[0]?.count || 0;
-
-    // Delete all polls
-    await ctx.drizzleClient.delete(pollsTable);
-
-    ctx.log?.info(`Plugin Map: Cleared ${count} logged polls`);
-
-    return {
-      success: true,
-      clearedCount: count,
-      message: `Cleared ${count} polls`,
-    };
-  } catch (error) {
-    ctx.log?.error('Error clearing plugin map polls:', error);
-    throw new TalawaGraphQLError({
-      extensions: { code: 'unexpected' },
-    });
-  }
+  return clearPollsInternal(ctx, 'poll');
 }
 
 /**
