@@ -6,7 +6,12 @@
 
 > **getPluginMapRequestsResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `hasMore`: `boolean`; `requests`: `any`; `totalCount`: `any`; \}\>
 
-Defined in: [plugins/Plugin Map/api/graphql/queries.ts:88](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/queries.ts#L88)
+Defined in: [plugins/Plugin Map/api/graphql/queries.ts:110](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/queries.ts#L110)
+
+Resolver to fetch plugin map request logs.
+
+Allows filtering by user ID, role, organization, and extension point.
+This function serves as the primary data fetcher for the admin dashboard.
 
 ## Parameters
 
@@ -14,7 +19,11 @@ Defined in: [plugins/Plugin Map/api/graphql/queries.ts:88](https://github.com/Pa
 
 `unknown`
 
+The parent resolver (unused).
+
 ### args
+
+The arguments containing filter criteria.
 
 #### input?
 
@@ -40,6 +49,14 @@ Defined in: [plugins/Plugin Map/api/graphql/queries.ts:88](https://github.com/Pa
 
 `GraphQLContext`
 
+The GraphQL context.
+
 ## Returns
 
 `Promise`\<\{ `hasMore`: `boolean`; `requests`: `any`; `totalCount`: `any`; \}\>
+
+A paginated list of request logs.
+
+## Throws
+
+If the user is unauthenticated or arguments are invalid.

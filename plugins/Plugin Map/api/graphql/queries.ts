@@ -1,5 +1,5 @@
 import { desc, eq, sql, and, isNull } from 'drizzle-orm';
-import { z } from 'zod';
+
 import { builder } from '~/src/graphql/builder';
 import type { GraphQLContext } from '~/src/graphql/context';
 import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
@@ -11,7 +11,18 @@ import {
 } from './types';
 import { getPluginMapPollsInputSchema } from './inputs';
 
-// Get extension points overview
+/**
+ * Resolver to get an overview of all available extension points.
+ *
+ * This provides static metadata about the extension points supported by the plugin,
+ * describing their context, role requirements, and features.
+ *
+ * @param _parent - The parent resolver (unused).
+ * @param _args - The arguments (unused).
+ * @param ctx - The GraphQL context.
+ * @returns An extension points overview object.
+ * @throws {TalawaGraphQLError} If the user is unauthenticated.
+ */
 export async function getExtensionPointsOverviewResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
@@ -84,7 +95,18 @@ export async function getExtensionPointsOverviewResolver(
   }
 }
 
-// Get plugin map requests (alias for getPluginMapPolls)
+/**
+ * Resolver to fetch plugin map request logs.
+ *
+ * Allows filtering by user ID, role, organization, and extension point.
+ * This function serves as the primary data fetcher for the admin dashboard.
+ *
+ * @param _parent - The parent resolver (unused).
+ * @param args - The arguments containing filter criteria.
+ * @param ctx - The GraphQL context.
+ * @returns A paginated list of request logs.
+ * @throws {TalawaGraphQLError} If the user is unauthenticated or arguments are invalid.
+ */
 export async function getPluginMapRequestsResolver(
   _parent: unknown,
   args: {
@@ -176,7 +198,17 @@ export async function getPluginMapRequestsResolver(
   }
 }
 
-// Get all logged polls
+/**
+ * Resolver to fetch all logged polls.
+ *
+ * Similar to `getPluginMapRequestsResolver`, but exposed as a generic poll fetcher.
+ *
+ * @param _parent - The parent resolver (unused).
+ * @param args - The arguments containing filter criteria.
+ * @param ctx - The GraphQL context.
+ * @returns A paginated list of polls.
+ * @throws {TalawaGraphQLError} If the user is unauthenticated or arguments are invalid.
+ */
 export async function getPluginMapPollsResolver(
   _parent: unknown,
   args: {
@@ -263,7 +295,16 @@ export async function getPluginMapPollsResolver(
   }
 }
 
-// Register all Plugin Map queries with the builder
+/**
+ * Registers all Plugin Map queries with the GraphQL builder.
+ *
+ * This function exposes the following queries:
+ * - `getExtensionPointsOverview`: Metadata about extension points.
+ * - `getPluginMapRequests`: Fetches interaction logs.
+ * - `getPluginMapPolls`: Fetches generic poll logs.
+ *
+ * @param builderInstance - The Pothos schema builder instance.
+ */
 export function registerPluginMapQueries(
   builderInstance: typeof builder,
 ): void {

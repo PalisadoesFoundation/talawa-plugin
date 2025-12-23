@@ -6,7 +6,11 @@
 
 > **getPluginMapPollsResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `hasMore`: `boolean`; `polls`: `any`; `totalCount`: `any`; \}\>
 
-Defined in: [plugins/Plugin Map/api/graphql/queries.ts:180](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/queries.ts#L180)
+Defined in: [plugins/Plugin Map/api/graphql/queries.ts:212](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/Plugin Map/api/graphql/queries.ts#L212)
+
+Resolver to fetch all logged polls.
+
+Similar to `getPluginMapRequestsResolver`, but exposed as a generic poll fetcher.
 
 ## Parameters
 
@@ -14,7 +18,11 @@ Defined in: [plugins/Plugin Map/api/graphql/queries.ts:180](https://github.com/P
 
 `unknown`
 
+The parent resolver (unused).
+
 ### args
+
+The arguments containing filter criteria.
 
 #### input?
 
@@ -36,6 +44,14 @@ Defined in: [plugins/Plugin Map/api/graphql/queries.ts:180](https://github.com/P
 
 `GraphQLContext`
 
+The GraphQL context.
+
 ## Returns
 
 `Promise`\<\{ `hasMore`: `boolean`; `polls`: `any`; `totalCount`: `any`; \}\>
+
+A paginated list of polls.
+
+## Throws
+
+If the user is unauthenticated or arguments are invalid.

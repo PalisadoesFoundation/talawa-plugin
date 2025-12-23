@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { z } from 'zod';
+
 import { builder } from '~/src/graphql/builder';
 import type { GraphQLContext } from '~/src/graphql/context';
 import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
@@ -7,7 +7,18 @@ import { pollsTable } from '../database/tables';
 import { PluginMapPollRef, ClearPollsResultRef } from './types';
 import { pluginMapPollInputSchema } from './inputs';
 
-// Log a new request from admin or user context (alias for logPluginMapPoll)
+/**
+ * Resolver to log a new plugin map request.
+ *
+ * This function handles requests from both admin and user contexts,
+ * logging the interaction details into the database.
+ *
+ * @param _parent - The parent resolver (unused).
+ * @param args - The arguments containing the request input.
+ * @param ctx - The GraphQL context containing database client and authentication info.
+ * @returns The newly created poll record.
+ * @throws {TalawaGraphQLError} If the user is unauthenticated or arguments are invalid.
+ */
 export async function logPluginMapRequestResolver(
   _parent: unknown,
   args: {
@@ -75,7 +86,18 @@ export async function logPluginMapRequestResolver(
   }
 }
 
-// Clear all logged requests (alias for clearPluginMapPolls)
+/**
+ * Resolver to clear all logged plugin map requests.
+ *
+ * This function deletes all records from the polls table, effectively resetting
+ * the plugin map request logs.
+ *
+ * @param _parent - The parent resolver (unused).
+ * @param _args - The arguments (unused).
+ * @param ctx - The GraphQL context.
+ * @returns An object indicating success and the count of cleared records.
+ * @throws {TalawaGraphQLError} If the user is unauthenticated.
+ */
 export async function clearPluginMapRequestsResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
@@ -113,7 +135,18 @@ export async function clearPluginMapRequestsResolver(
   }
 }
 
-// Log a new poll from any of the 4 contexts
+/**
+ * Resolver to log a new plugin map poll.
+ *
+ * This serves as an alias or alternate entry point for logging polls, particularly
+ * for internal or test usage.
+ *
+ * @param _parent - The parent resolver (unused).
+ * @param args - The arguments containing the poll input.
+ * @param ctx - The GraphQL context.
+ * @returns The newly created poll record.
+ * @throws {TalawaGraphQLError} If the user is unauthenticated or arguments are invalid.
+ */
 export async function logPluginMapPollResolver(
   _parent: unknown,
   args: {
@@ -181,7 +214,18 @@ export async function logPluginMapPollResolver(
   }
 }
 
-// Clear all logged polls
+/**
+ * Resolver to clear all logged plugin map polls.
+ *
+ * Distinct from `clearPluginMapRequestsResolver` only in name/schema exposure,
+ * intended for clearing generic poll logs.
+ *
+ * @param _parent - The parent resolver (unused).
+ * @param _args - The arguments (unused).
+ * @param ctx - The GraphQL context.
+ * @returns An object indicating success and the count of cleared records.
+ * @throws {TalawaGraphQLError} If the user is unauthenticated.
+ */
 export async function clearPluginMapPollsResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
@@ -219,7 +263,17 @@ export async function clearPluginMapPollsResolver(
   }
 }
 
-// Register all Plugin Map mutations with the builder
+/**
+ * Registers all Plugin Map mutations with the GraphQL builder.
+ *
+ * This function exposes the following mutations:
+ * - `logPluginMapRequest`: Logs user/admin interaction.
+ * - `clearPluginMapRequests`: Clears interaction logs.
+ * - `logPluginMapPoll`: Logs generic polls.
+ * - `clearPluginMapPolls`: Clears generic poll logs.
+ *
+ * @param builderInstance - The Pothos schema builder instance.
+ */
 export function registerPluginMapMutations(
   builderInstance: typeof builder,
 ): void {
