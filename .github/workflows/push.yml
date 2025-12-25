@@ -48,7 +48,7 @@ jobs:
           pnpm run test:coverage
 
       - name: Present and upload coverage to Codecov as ${{env.CODECOV_UNIQUE_NAME}}
-        if: matrix.node-version == '24.11.1'
+        if: always() && matrix.node-version == '24.11.1'
         uses: codecov/codecov-action@v5
         with:
           name: '${{env.CODECOV_UNIQUE_NAME}}'
