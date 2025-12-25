@@ -58,7 +58,6 @@ jobs:
           exclude: 'docs/'
           gcov_ignore: 'docs/'
           files: ./coverage/vitest/lcov.info
-          flags: vitest
 
   Test-Npm:
     if: ${{ github.actor != 'dependabot[bot]' }}
