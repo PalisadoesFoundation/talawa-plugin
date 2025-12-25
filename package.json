@@ -5,6 +5,9 @@
     "url": "https://github.com/PalisadoesFoundation/talawa-plugin/issues"
   },
   "description": "Microkernel-based plugin system for extending Talawa with modular features across API, Admin, and Mobile.",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "devDependencies": {
     "@ant-design/icons": "^6.1.0",
     "@apollo/client": "^4.0.10",
