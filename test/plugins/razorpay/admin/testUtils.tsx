@@ -66,7 +66,7 @@ import {
   GET_USER_TRANSACTION_STATS,
   GET_ORG_TRANSACTIONS,
   GET_ORG_TRANSACTION_STATS,
-} from '../../../../plugins/Razorpay/admin/graphql/queries';
+} from '../../../../plugins/razorpay/admin/graphql/queries';
 
 export {
   GET_CURRENT_USER,

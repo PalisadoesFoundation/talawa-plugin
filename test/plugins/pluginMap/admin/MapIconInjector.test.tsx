@@ -4,7 +4,7 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import MapIconInjector from '../../../../plugins/Plugin Map/admin/injector/MapIconInjector';
+import MapIconInjector from '../../../../plugins/pluginMap/admin/injector/MapIconInjector';
 
 // Mock EnvironmentOutlined and TransactionOutlined to avoid complex SVG structures in tests
 vi.mock('@ant-design/icons', async () => {

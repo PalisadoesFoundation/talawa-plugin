@@ -4,7 +4,7 @@ import {
   clearPluginMapRequestsResolver,
   logPluginMapPollResolver,
   clearPluginMapPollsResolver,
-} from '../../../plugins/Plugin Map/api/graphql/mutations';
+} from '../../../plugins/pluginMap/api/graphql/mutations';
 import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
 
 import { createMockPluginMapContext } from './utils/testUtils';

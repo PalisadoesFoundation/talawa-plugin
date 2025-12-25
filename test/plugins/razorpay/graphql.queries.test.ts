@@ -5,7 +5,7 @@ import {
   getUserTransactionsResolver,
   getOrganizationTransactionStatsResolver,
   getUserTransactionStatsResolver,
-} from '../../../plugins/Razorpay/api/graphql/queries';
+} from '../../../plugins/razorpay/api/graphql/queries';
 import { expectTransaction, expectConfig } from './graphql.queries.helpers';
 import {
   createMockRazorpayContext,

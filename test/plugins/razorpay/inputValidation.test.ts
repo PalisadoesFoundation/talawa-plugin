@@ -4,7 +4,7 @@ import {
   razorpayOrderInputSchema,
   razorpayPaymentInputSchema,
   razorpayVerificationInputSchema,
-} from '../../../plugins/Razorpay/api/graphql/inputs';
+} from '../../../plugins/razorpay/api/graphql/inputs';
 
 describe('Razorpay Input Validation', () => {
   describe('razorpayConfigInputSchema', () => {

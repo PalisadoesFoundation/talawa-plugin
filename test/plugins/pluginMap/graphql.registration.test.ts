@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { registerPluginMapMutations } from '../../../plugins/Plugin Map/api/graphql/mutations';
-import { registerPluginMapQueries } from '../../../plugins/Plugin Map/api/graphql/queries';
+import { registerPluginMapMutations } from '../../../plugins/pluginMap/api/graphql/mutations';
+import { registerPluginMapQueries } from '../../../plugins/pluginMap/api/graphql/queries';
 import { mockBuilder } from '../../setup/globalMocks';
 
 describe('Plugin Map GraphQL Registration', () => {

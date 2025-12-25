@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as lifecycle from '../../../plugins/Plugin Map/api/index';
+import * as lifecycle from '../../../plugins/pluginMap/api/index';
 
 describe('Plugin Map Lifecycle Hooks', () => {
   let mockContext: any;

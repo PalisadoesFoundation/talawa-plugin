@@ -3,7 +3,7 @@ import {
   handleRazorpayWebhook,
   type PluginRequest,
   type PluginReply,
-} from '../../../plugins/Razorpay/api/index';
+} from '../../../plugins/razorpay/api/index';
 import {
   createMockRazorpayContext,
   createMockConfig,
@@ -16,7 +16,7 @@ import {
   configTable,
   ordersTable,
   transactionsTable,
-} from '../../../plugins/Razorpay/api/database/tables';
+} from '../../../plugins/razorpay/api/database/tables';
 
 // Define a strict mock type for Reply that satisfies PluginReply
 interface TestReply extends PluginReply {

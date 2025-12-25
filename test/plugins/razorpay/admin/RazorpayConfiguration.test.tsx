@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MockedResponse } from '@apollo/client/testing';
-import RazorpayConfiguration from '../../../../plugins/Razorpay/admin/pages/RazorpayConfiguration';
+import RazorpayConfiguration from '../../../../plugins/razorpay/admin/pages/RazorpayConfiguration';
 import {
   renderWithProviders,
   createMockRazorpayConfig,

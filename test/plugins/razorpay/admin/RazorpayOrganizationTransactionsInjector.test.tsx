@@ -8,7 +8,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { MockedResponse } from '@apollo/client/testing';
-import RazorpayOrganizationTransactionsInjector from '../../../../plugins/Razorpay/admin/injector/RazorpayOrganizationTransactionsInjector';
+import RazorpayOrganizationTransactionsInjector from '../../../../plugins/razorpay/admin/injector/RazorpayOrganizationTransactionsInjector';
 import {
   renderWithProviders,
   createMockTransaction,

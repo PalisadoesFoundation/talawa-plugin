@@ -5,11 +5,11 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor, fireEvent, cleanup } from '@testing-library/react';
 import { message } from 'antd';
-import ExtensionPointsUser from '../../../../plugins/Plugin Map/admin/pages/ExtensionPointsUser';
+import ExtensionPointsUser from '../../../../plugins/pluginMap/admin/pages/ExtensionPointsUser';
 import {
   GET_PLUGIN_MAP_REQUESTS,
   LOG_PLUGIN_MAP_REQUEST,
-} from '../../../../plugins/Plugin Map/admin/graphql/queries';
+} from '../../../../plugins/pluginMap/admin/graphql/queries';
 import { renderWithProviders, createMockRequest } from './adminTestUtils';
 
 import useLocalStorage from 'utils/useLocalstorage';

@@ -1,10 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { RazorpayService } from '../../../plugins/Razorpay/api/services/razorpayService';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { RazorpayService } from '../../../plugins/razorpay/api/services/razorpayService';
 // Removed unused imports: updateRazorpayConfigResolver, createPaymentOrderResolver
 import {
   createMockRazorpayContext,
   createMockConfig,
-  createMockRazorpayInstance,
   createMockRazorpayOrder,
 } from './utils/mockRazorpay';
 import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';

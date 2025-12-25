@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { RazorpayService } from '../../../plugins/Razorpay/api/services/razorpayService';
+import { RazorpayService } from '../../../plugins/razorpay/api/services/razorpayService';
 
 // Mock fetch
 global.fetch = vi.fn(() =>
@@ -45,7 +45,7 @@ describe('RazorpayService', () => {
     // Create service with constructor injection
     // This allows most tests to work with the mock directly
     const { RazorpayService: CurrentRazorpayService } = await import(
-      '../../../plugins/Razorpay/api/services/razorpayService'
+      '../../../plugins/razorpay/api/services/razorpayService'
     );
     service = new CurrentRazorpayService(mockContext, mockRazorpayInstance);
 
@@ -81,7 +81,7 @@ describe('RazorpayService', () => {
     // so they can test the initialization logic (Drizzle lookups, etc.)
     beforeEach(async () => {
       const { RazorpayService: CurrentRazorpayService } = await import(
-        '../../../plugins/Razorpay/api/services/razorpayService'
+        '../../../plugins/razorpay/api/services/razorpayService'
       );
       service = new CurrentRazorpayService(mockContext);
     });
@@ -168,7 +168,7 @@ describe('RazorpayService', () => {
     it('should initialize if razorpay instance is null', async () => {
       // Force reset service to ensure no mock instance
       const { RazorpayService: CurrentRazorpayService } = await import(
-        '../../../plugins/Razorpay/api/services/razorpayService'
+        '../../../plugins/razorpay/api/services/razorpayService'
       );
       service = new CurrentRazorpayService(mockContext);
 

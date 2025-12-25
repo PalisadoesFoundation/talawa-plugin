@@ -8,7 +8,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { MockedResponse } from '@apollo/client/testing';
-import DonationForm from '../../../../plugins/Razorpay/admin/pages/DonationForm';
+import DonationForm from '../../../../plugins/razorpay/admin/pages/DonationForm';
 import {
   renderWithProviders,
   createMockUser,

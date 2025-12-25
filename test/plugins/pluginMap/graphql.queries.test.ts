@@ -3,7 +3,7 @@ import {
   getExtensionPointsOverviewResolver,
   getPluginMapRequestsResolver,
   getPluginMapPollsResolver,
-} from '../../../plugins/Plugin Map/api/graphql/queries';
+} from '../../../plugins/pluginMap/api/graphql/queries';
 import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
 
 const mockCtx = {
