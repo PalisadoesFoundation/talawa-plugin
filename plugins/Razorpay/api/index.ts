@@ -160,7 +160,9 @@ export async function onLoad(context: IPluginContext): Promise<void> {
     }
   } catch (error) {
     if (context.logger?.warn) {
-      context.logger.warn('Failed to verify Razorpay plugin tables:', error);
+      context.logger.warn('Failed to verify Razorpay plugin tables:', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }
@@ -206,10 +208,9 @@ export async function onActivate(context: IPluginContext): Promise<void> {
     }
   } catch (error) {
     if (context.logger?.error) {
-      context.logger.error(
-        'Failed to initialize Razorpay configuration:',
-        error,
-      );
+      context.logger.error('Failed to initialize Razorpay configuration:', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -223,7 +224,9 @@ export async function onActivate(context: IPluginContext): Promise<void> {
       }
     } catch (error) {
       if (context.logger?.error) {
-        context.logger.error('Failed to register GraphQL extensions:', error);
+        context.logger.error('Failed to register GraphQL extensions:', {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
   }
@@ -241,8 +244,11 @@ export async function onDeactivate(context: IPluginContext): Promise<void> {
       context.logger.info('Razorpay plugin cleanup completed');
     }
   } catch (error) {
-    if (context.logger?.error) {
-      context.logger.error('Failed to cleanup Razorpay plugin:', error);
+    if (context.logger?.warn) {
+      context.logger.warn(
+        'Failed to handle plugin deactivation for Razorpay:',
+        { error: error instanceof Error ? error.message : String(error) },
+      );
     }
   }
 }
@@ -254,7 +260,9 @@ export async function onUnload(context: IPluginContext): Promise<void> {
     }
   } catch (error) {
     if (context.logger?.error) {
-      context.logger.error('Error during Razorpay plugin unload:', error);
+      context.logger.error('Error during Razorpay plugin unload:', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }
@@ -282,7 +290,9 @@ export async function onPaymentCreated(
     }
   } catch (error) {
     if (context.logger?.error) {
-      context.logger.error('Error in onPaymentCreated:', error);
+      context.logger.error('Error in onPaymentCreated:', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }
@@ -327,7 +337,9 @@ export async function onPaymentCompleted(
     }
   } catch (error) {
     if (context.logger?.error) {
-      context.logger.error('Error in onPaymentCompleted:', error);
+      context.logger.error('Error in onPaymentCompleted:', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }
@@ -372,7 +384,9 @@ export async function onPaymentFailed(
     }
   } catch (error) {
     if (context.logger?.error) {
-      context.logger.error('Error in onPaymentFailed:', error);
+      context.logger.error('Error in onPaymentFailed:', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }

@@ -1,0 +1,104 @@
+import React from 'react';
+import { vi } from 'vitest';
+
+export type VitestUtils = typeof vi;
+
+interface CommonProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
+  children?: React.ReactNode;
+  title?: React.ReactNode;
+}
+
+interface TableProps extends CommonProps {
+  dataSource?: any[];
+  columns?: any[];
+  pagination?: any;
+}
+
+export const createAntdMocks = (viInstance: VitestUtils) => {
+  const MockComponent = ({ children, title, ...props }: CommonProps) => (
+    <div {...(props as any)}>
+      {' '}
+      {children} {title}{' '}
+    </div>
+  );
+  const MockTypography = ({ children, ...props }: CommonProps) => (
+    <div {...(props as any)}> {children} </div>
+  );
+  (MockTypography as any).Title = ({ children, ...props }: CommonProps) => (
+    <h2 {...(props as any)}> {children} </h2>
+  );
+  (MockTypography as any).Text = ({ children, ...props }: CommonProps) => (
+    <span {...(props as any)}> {children} </span>
+  );
+  (MockTypography as any).Paragraph = ({ children, ...props }: CommonProps) => (
+    <p {...(props as any)}> {children} </p>
+  );
+
+  return {
+    Button: ({
+      children,
+      ...props
+    }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+      <button {...props}> {children} </button>
+    ),
+    Table: ({ dataSource, columns, pagination, ...props }: TableProps) => (
+      <div {...(props as any)}>
+        <table>
+          <thead>
+            <tr>
+              {columns?.map((col: any, j: number) => (
+                <th key={j}>{col.title}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {dataSource?.map((row: any, i: number) => (
+              <tr key={i}>
+                {columns?.map((col: any, j: number) => (
+                  <td key={j}>
+                    {col.render
+                      ? col.render(row[col.dataIndex], row)
+                      : row[col.dataIndex]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {pagination?.showTotal && (
+          <div data-testid="pagination-total">
+            {pagination.showTotal(dataSource?.length || 0, [
+              1,
+              dataSource?.length || 0,
+            ])}
+          </div>
+        )}
+      </div>
+    ),
+    Tag: ({ children, ...props }: CommonProps) => (
+      <span {...(props as any)}> {children} </span>
+    ),
+    Card: ({ title, children, ...props }: CommonProps) => (
+      <div {...(props as any)}>
+        {title && <div className="ant-card-head-title">{title}</div>}
+        {children}
+      </div>
+    ),
+    Space: MockComponent,
+    Row: MockComponent,
+    Col: MockComponent,
+    Typography: MockTypography,
+    Tooltip: ({ children, title }: CommonProps) => (
+      <div title={typeof title === 'string' ? title : undefined}>
+        {' '}
+        {children}{' '}
+      </div>
+    ),
+    Spin: () => <div data-testid="loading-spinner"> Loading...</div>,
+    message: {
+      success: viInstance.fn(),
+      error: viInstance.fn(),
+    },
+  };
+};

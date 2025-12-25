@@ -28,3 +28,12 @@ declare module '~/src/graphql/context' {
 declare module '~/src/graphql/builder' {
   export const builder: any;
 }
+
+declare module 'utils/useLocalstorage' {
+  const useLocalStorage: () => {
+    getItem: (key: string) => string | null;
+    setItem: (key: string, value: string) => void;
+    removeItem: (key: string) => void;
+  };
+  export default useLocalStorage;
+}

@@ -1,5 +1,5 @@
 // These mocks allow plugin tests to run standalone in talawa-plugin repo
-import { vi } from 'vitest';
+import { vi, type Mock } from 'vitest';
 
 // Debug log removed
 
@@ -10,20 +10,101 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
+interface MockBuilder {
+  queryType: Mock;
+  mutationType: Mock;
+  objectRef: Mock;
+  objectType: Mock;
+  inputType: Mock;
+  inputRef: Mock;
+  field: Mock;
+  fields: Mock;
+  queryField: Mock;
+  mutationField: Mock;
+}
+
 // Mock GraphQL Builder
-export const mockBuilder = {
+export const mockBuilder: MockBuilder = {
   queryType: vi.fn(() => mockBuilder),
   mutationType: vi.fn(() => mockBuilder),
   objectRef: vi.fn(() => ({
     implement: vi.fn(() => mockBuilder),
   })),
   objectType: vi.fn(() => mockBuilder),
-  inputType: vi.fn(() => mockBuilder),
+  inputType: vi.fn((_name, config) => {
+    if (config?.fields && typeof config.fields === 'function') {
+      config.fields({
+        field: vi.fn(() => mockBuilder),
+        arg: vi.fn(() => mockBuilder),
+        boolean: vi.fn(() => mockBuilder),
+        string: vi.fn(() => mockBuilder),
+        int: vi.fn(() => mockBuilder),
+        id: vi.fn(() => mockBuilder),
+      });
+    }
+    return mockBuilder;
+  }),
   inputRef: vi.fn(() => ({
-    implement: vi.fn(() => mockBuilder),
+    implement: vi.fn((config) => {
+      if (config?.fields && typeof config.fields === 'function') {
+        config.fields({
+          field: vi.fn(() => mockBuilder),
+          arg: vi.fn(() => mockBuilder),
+          boolean: vi.fn(() => mockBuilder),
+          string: vi.fn(() => mockBuilder),
+          int: vi.fn(() => mockBuilder),
+          id: vi.fn(() => mockBuilder),
+        });
+      }
+      return mockBuilder;
+    }),
   })),
   field: vi.fn(() => mockBuilder),
   fields: vi.fn(() => mockBuilder),
+  queryField: vi.fn((_name, cb) => {
+    if (typeof cb === 'function')
+      cb({
+        field: vi.fn(() => mockBuilder),
+        arg: vi.fn((config) => {
+          if (config?.type && typeof config.type === 'function') {
+            try {
+              config.type();
+            } catch (err: any) {
+              console.error('Error in inputType config callback:', err);
+              // Ignore callback failure but log it
+            }
+          }
+          return mockBuilder;
+        }),
+        boolean: vi.fn(() => mockBuilder),
+        string: vi.fn(() => mockBuilder),
+        int: vi.fn(() => mockBuilder),
+        id: vi.fn(() => mockBuilder),
+      });
+    return mockBuilder;
+  }),
+  mutationField: vi.fn((_name, cb) => {
+    if (typeof cb === 'function')
+      cb({
+        field: vi.fn(() => mockBuilder),
+        arg: vi.fn((config) => {
+          if (config?.type && typeof config.type === 'function') {
+            try {
+              config.type();
+            } catch (err: any) {
+              console.error('Error in inputType config callback:', err);
+              // Ignore callback failure but log it
+            }
+          }
+          return mockBuilder;
+        }),
+        boolean: vi.fn(() => mockBuilder),
+        string: vi.fn(() => mockBuilder),
+        int: vi.fn(() => mockBuilder),
+        id: vi.fn(() => mockBuilder),
+      });
+    return mockBuilder;
+  }),
 };
 
 vi.mock('~/src/graphql/builder', () => ({

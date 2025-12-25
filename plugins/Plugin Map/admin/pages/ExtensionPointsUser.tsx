@@ -18,75 +18,58 @@ import {
   Table,
   Tag,
 } from 'antd';
-import { useMutation, useQuery } from '@apollo/client';
-import { gql } from 'graphql-tag';
+import { useMutation, useQuery } from '@apollo/client/react';
+
 import { useParams, Navigate } from 'react-router-dom';
 import useLocalStorage from 'utils/useLocalstorage';
+import { useTranslation } from 'react-i18next';
+import '../utils/i18n';
+import {
+  GET_PLUGIN_MAP_REQUESTS,
+  LOG_PLUGIN_MAP_REQUEST,
+} from '../graphql/queries';
+import {
+  IGetPluginMapRequestsResponse,
+  IGetPluginMapRequestsVariables,
+  ILogPluginMapRequestResponse,
+  ILogPluginMapRequestVariables,
+} from '../types';
 
 const { Title, Paragraph } = Typography;
 
-// GraphQL mutation for logging requests
-const LOG_PLUGIN_MAP_REQUEST = gql`
-  mutation LogPluginMapRequest($input: PluginMapRequestInput!) {
-    plugin_map_logPluginMapRequest(input: $input) {
-      id
-      pollNumber
-      userId
-      userRole
-      organizationId
-      extensionPoint
-      createdAt
-    }
-  }
-`;
-
-// GraphQL query for fetching requests
-const GET_PLUGIN_MAP_REQUESTS = gql`
-  query GetPluginMapRequests($input: GetPluginMapRequestsInput) {
-    plugin_map_getPluginMapRequests(input: $input) {
-      requests {
-        id
-        pollNumber
-        userId
-        userRole
-        organizationId
-        extensionPoint
-        createdAt
-      }
-      totalCount
-      hasMore
-    }
-  }
-`;
-
 const ExtensionPointsUser: React.FC = () => {
-  const [logRequest] = useMutation(LOG_PLUGIN_MAP_REQUEST);
+  const { t } = useTranslation('plugin-map');
   const { orgId } = useParams();
   const { getItem } = useLocalStorage();
   const userId = getItem('id') as string | null;
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
-  // Redirect if no orgId is available
-  if (!orgId) {
-    return <Navigate to="/" replace />;
-  }
+  // Move hooks before the early return to comply with rules-of-hooks
+  const [logRequest] = useMutation<
+    ILogPluginMapRequestResponse,
+    ILogPluginMapRequestVariables
+  >(LOG_PLUGIN_MAP_REQUEST);
 
   // Query to fetch requests for this extension point
   const {
     data: requestsData,
     loading: loadingRequests,
     refetch,
-  } = useQuery(GET_PLUGIN_MAP_REQUESTS, {
-    variables: {
-      input: {
-        extensionPoint: 'RU1',
-        userRole: 'user',
-        organizationId: orgId,
-        userId: userId || 'unknown-user', // Filter by current user ID
+  } = useQuery<IGetPluginMapRequestsResponse, IGetPluginMapRequestsVariables>(
+    GET_PLUGIN_MAP_REQUESTS,
+    {
+      variables: {
+        input: {
+          extensionPoint: 'RU1',
+          userRole: 'user',
+          organizationId: orgId,
+          userId: userId || 'unknown-user', // Filter by current user ID
+        },
       },
+      skip: !orgId,
+      fetchPolicy: 'network-only',
     },
-    fetchPolicy: 'network-only',
-  });
+  );
 
   // Refetch when a new request is logged
   useEffect(() => {
@@ -95,6 +78,11 @@ const ExtensionPointsUser: React.FC = () => {
     }
   }, [refetchTrigger, refetch]);
 
+  if (!orgId) {
+    message.error(t('user.redirectError'));
+    return <Navigate to="/" replace />;
+  }
+
   const handlePollClick = async () => {
     try {
       const result = await logRequest({
@@ -102,7 +90,7 @@ const ExtensionPointsUser: React.FC = () => {
           input: {
             userId: userId || 'unknown-user', // Use actual user ID from localStorage
             userRole: 'user',
-            organizationId: orgId, // Use actual orgId from route params
+            organizationId: orgId,
             extensionPoint: 'RU1',
           },
         },
@@ -110,121 +98,107 @@ const ExtensionPointsUser: React.FC = () => {
 
       if (result.data?.plugin_map_logPluginMapRequest) {
         message.success(
-          `Request ${result.data.plugin_map_logPluginMapRequest.pollNumber} logged successfully from RU1`,
+          t('messages.success', {
+            pollNumber: result.data.plugin_map_logPluginMapRequest.pollNumber,
+            extensionPoint:
+              result.data.plugin_map_logPluginMapRequest.extensionPoint,
+          }),
         );
-        // Trigger refetch to update the history
         setRefetchTrigger((prev) => prev + 1);
+      } else {
+        message.error(t('messages.error'));
       }
     } catch (error) {
-      console.error('Error logging request:', error);
-      message.error('Failed to log request');
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error('Error logging request:', errorMessage);
+      message.error(t('messages.error'));
     }
   };
 
   // Table columns for request history
   const columns = [
     {
-      title: 'Request #',
+      title: t('table.pollNumber'),
       dataIndex: 'pollNumber',
       key: 'pollNumber',
-      width: 100,
     },
     {
-      title: 'User ID',
+      title: t('table.userId'),
       dataIndex: 'userId',
       key: 'userId',
-      width: 150,
-      ellipsis: true,
     },
     {
-      title: 'User Role',
+      title: t('table.userRole'),
       dataIndex: 'userRole',
       key: 'userRole',
-      width: 100,
-      render: (userRole: string) => (
-        <Tag color={userRole === 'admin' ? 'red' : 'blue'}>{userRole}</Tag>
-      ),
+      render: (role: string) => <Tag color="blue">{role}</Tag>,
     },
     {
-      title: 'Extension Point',
-      dataIndex: 'extensionPoint',
-      key: 'extensionPoint',
-      width: 120,
-      render: (extensionPoint: string) => (
-        <Tag color="green">{extensionPoint}</Tag>
-      ),
-    },
-    {
-      title: 'Organization',
+      title: t('table.orgId'),
       dataIndex: 'organizationId',
       key: 'organizationId',
-      width: 150,
-      render: (orgId: string | null) => <span>{orgId || 'Global'}</span>,
+      render: (id: string | null) => (id ? <Tag color="green">{id}</Tag> : '-'),
     },
     {
-      title: 'Created At',
+      title: t('table.extensionPoint'),
+      dataIndex: 'extensionPoint',
+      key: 'extensionPoint',
+      render: (point: string) => <Tag color="purple">{point}</Tag>,
+    },
+    {
+      title: t('table.createdAt'),
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 180,
-      render: (createdAt: string) => (
-        <span>{new Date(createdAt).toLocaleString()}</span>
-      ),
+      render: (date: string) => new Date(date).toLocaleString(),
     },
   ];
 
-  const requests =
-    requestsData?.plugin_map_getPluginMapRequests?.requests || [];
-
   return (
-    <div style={{ padding: '24px' }}>
-      <Title level={2}>RU1 - User Organization Extension Point</Title>
-      <Paragraph>
-        This page represents the RU1 extension point - User Organization Route.
-        This is a user organization route that provides user functionality
-        within a specific organization.
-      </Paragraph>
+    <div style={{ padding: 24 }}>
+      <Title level={2}>{t('user.title')}</Title>
+      <Paragraph>{t('user.description')}</Paragraph>
 
       <Row gutter={[16, 16]}>
         <Col span={24}>
-          <Card title="Test Request System" style={{ marginBottom: '16px' }}>
+          <Card
+            title={t('user.testRequestSystem')}
+            style={{ marginBottom: 16 }}
+          >
             <Space direction="vertical" style={{ width: '100%' }}>
-              <Paragraph>
-                Click the button below to test the request system for RU1
-                extension point.
-              </Paragraph>
-
-              <Button type="primary" onClick={handlePollClick}>
-                Request RU1 (User Organization)
+              <Paragraph>{t('user.clickBelow')}</Paragraph>
+              <Button
+                type="primary"
+                onClick={handlePollClick}
+                aria-label={t('user.requestButton')}
+              >
+                {t('user.requestButton')}
               </Button>
             </Space>
           </Card>
         </Col>
 
         <Col span={24}>
-          <Card
-            title="Request History (RU1 - User Organization)"
-            style={{ marginBottom: '16px' }}
-          >
+          <Card title={t('user.requestHistory')} style={{ marginBottom: 16 }}>
             <Space direction="vertical" style={{ width: '100%' }}>
               <Paragraph>
-                Recent requests logged for this extension point. Total requests:{' '}
-                {requestsData?.plugin_map_getPluginMapRequests?.totalCount || 0}
+                {t('table.totalRequests', {
+                  count:
+                    requestsData?.plugin_map_getPluginMapRequests.totalCount ||
+                    0,
+                })}
               </Paragraph>
 
               <Table
+                aria-label={t('user.requestHistory')}
                 columns={columns}
-                dataSource={requests}
+                dataSource={
+                  requestsData?.plugin_map_getPluginMapRequests.requests || []
+                }
                 loading={loadingRequests}
                 rowKey="id"
-                pagination={{
-                  pageSize: 10,
-                  showSizeChanger: true,
-                  showQuickJumper: true,
-                  showTotal: (total, range) =>
-                    `${range[0]}-${range[1]} of ${total} requests`,
-                }}
-                scroll={{ x: 800 }}
-                size="small"
+                pagination={{ pageSize: 5 }}
+                scroll={{ x: true }}
               />
             </Space>
           </Card>
@@ -237,22 +211,43 @@ const ExtensionPointsUser: React.FC = () => {
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '16px',
+                    padding: 16,
                     background: '#f8f9fa',
-                    borderRadius: '6px',
+                    borderRadius: 6,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: '14px',
+                      fontSize: 14,
                       color: '#666',
-                      marginBottom: '4px',
+                      marginBottom: 4,
                     }}
                   >
-                    Extension ID
+                    {t('info.extensionId')}
                   </div>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                    RU1
+                  <div style={{ fontSize: 16, fontWeight: 'bold' }}>RU1</div>
+                </div>
+              </Col>
+              <Col span={6}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: 16,
+                    background: '#f8f9fa',
+                    borderRadius: 6,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 14,
+                      color: '#666',
+                      marginBottom: 4,
+                    }}
+                  >
+                    {t('info.type')}
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 'bold' }}>
+                    {t('info.userOrgRoute')}
                   </div>
                 </div>
               </Col>
@@ -260,22 +255,22 @@ const ExtensionPointsUser: React.FC = () => {
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '16px',
+                    padding: 16,
                     background: '#f8f9fa',
-                    borderRadius: '6px',
+                    borderRadius: 6,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: '14px',
+                      fontSize: 14,
                       color: '#666',
-                      marginBottom: '4px',
+                      marginBottom: 4,
                     }}
                   >
-                    Type
+                    {t('info.accessLevel')}
                   </div>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                    Organization Route
+                  <div style={{ fontSize: 16, fontWeight: 'bold' }}>
+                    {t('info.orgUsers')}
                   </div>
                 </div>
               </Col>
@@ -283,44 +278,21 @@ const ExtensionPointsUser: React.FC = () => {
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '16px',
+                    padding: 16,
                     background: '#f8f9fa',
-                    borderRadius: '6px',
+                    borderRadius: 6,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: '14px',
+                      fontSize: 14,
                       color: '#666',
-                      marginBottom: '4px',
+                      marginBottom: 4,
                     }}
                   >
-                    Access Level
+                    {t('info.organization')}
                   </div>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                    User Only
-                  </div>
-                </div>
-              </Col>
-              <Col span={6}>
-                <div
-                  style={{
-                    textAlign: 'center',
-                    padding: '16px',
-                    background: '#f8f9fa',
-                    borderRadius: '6px',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '14px',
-                      color: '#666',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    Organization
-                  </div>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                  <div style={{ fontSize: 16, fontWeight: 'bold' }}>
                     {orgId}
                   </div>
                 </div>
@@ -328,17 +300,14 @@ const ExtensionPointsUser: React.FC = () => {
             </Row>
             <div
               style={{
-                marginTop: '16px',
-                padding: '16px',
+                marginTop: 16,
+                padding: 16,
                 background: '#f0f8ff',
-                borderRadius: '6px',
+                borderRadius: 6,
                 border: '1px solid #d6e4ff',
               }}
             >
-              <strong>Note:</strong> This extension point provides
-              organization-specific user capabilities. Plugins can access
-              organization data and provide features for organization members
-              within the current organization context.
+              <strong>{t('info.note')}</strong> {t('info.orgUserDesc')}
             </div>
           </Card>
         </Col>
