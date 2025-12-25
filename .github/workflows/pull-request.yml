@@ -494,6 +494,7 @@ jobs:
           exclude: 'docs/'
           files: ./coverage/vitest/lcov.info
           flags: vitest
+          commit_parent: ${{ github.event.pull_request.base.sha }}
 
       - name: Test acceptable level of code coverage
         uses: VeryGoodOpenSource/very_good_coverage@v3

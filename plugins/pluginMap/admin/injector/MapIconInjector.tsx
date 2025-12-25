@@ -10,7 +10,6 @@ import { Badge, Tooltip, Card, Typography, Space } from 'antd';
 import {
   EnvironmentOutlined,
   AppstoreOutlined,
-  _CreditCardOutlined,
   TransactionOutlined,
 } from '@ant-design/icons';
 
