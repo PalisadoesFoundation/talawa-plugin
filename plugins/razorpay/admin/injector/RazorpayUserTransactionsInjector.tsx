@@ -89,7 +89,7 @@ interface RazorpayUserTransaction {
 
 const RazorpayUserTransactionsInjector: React.FC = () => {
   const { t, i18n } = useTranslation('razorpay');
-  const { orgId } = useParams<{ orgId: string }>();
+  const { orgId } = useParams<{ orgId?: string }>();
   const { getItem } = useLocalStorage();
   const userId = getItem('id') as string | null;
 
@@ -204,7 +204,7 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
             icon={<EyeOutlined />}
             onClick={() => handleViewDetails(record)}
             size="small"
-            aria-label={t('transactions.viewDetailsAriaLabel')}
+            aria-label={t('transactions.userTransactions.viewDetailsAriaLabel')}
           >
             {t('transactions.viewButton')}
           </Button>
@@ -213,9 +213,11 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
             icon={<DownloadOutlined />}
             onClick={() => handleDownloadReceipt(record)}
             size="small"
-            aria-label={t('transactions.downloadReceiptAriaLabel')}
+            aria-label={t(
+              'transactions.userTransactions.downloadReceiptAriaLabel',
+            )}
           >
-            {t('transactions.receiptButton')}
+            {t('transactions.userTransactions.receiptButton')}
           </Button>
         </Space>
       ),
@@ -226,9 +228,12 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
     return (
       <Card>
         <div style={{ textAlign: 'center', padding: '40px' }}>
-          <Spin size="large" aria-label={t('transactions.loading')} />
+          <Spin
+            size="large"
+            aria-label={t('transactions.userTransactions.loading')}
+          />
           <div style={{ marginTop: '16px' }}>
-            <Text>{t('transactions.loading')}</Text>
+            <Text>{t('transactions.userTransactions.loading')}</Text>
           </div>
         </div>
       </Card>
@@ -258,11 +263,11 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
             aria-hidden="true"
           />
           <Title level={4} style={{ margin: 0 }}>
-            {t('transactions.userTitle')}
+            {t('transactions.userTransactions.title')}
           </Title>
         </Space>
         <Text type="secondary" style={{ display: 'block', marginTop: '8px' }}>
-          {t('transactions.userSubtitle')}
+          {t('transactions.userTransactions.subtitle')}
         </Text>
       </div>
 

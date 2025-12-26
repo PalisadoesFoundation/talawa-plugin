@@ -141,17 +141,19 @@ if (typeof window !== 'undefined') {
         'Viewing details for transaction: {{id}}',
       'transactions.messages.downloadingReceipt':
         'Downloading receipt for transaction: {{id}}',
-      'transactions.loading': 'Loading Razorpay transactions...',
+      'transactions.userTransactions.loading':
+        'Loading Razorpay transactions...',
+      'transactions.userTransactions.title': 'Razorpay Transactions',
+      'transactions.userTransactions.subtitle':
+        'Your payment transactions processed through Razorpay',
+      'transactions.userTransactions.receiptButton': 'Receipt',
+      'transactions.userTransactions.viewDetailsAriaLabel':
+        'View transaction details',
+      'transactions.userTransactions.downloadReceiptAriaLabel':
+        'Download receipt for transaction',
       'transactions.userTransactions.errorPrefix':
         'Error loading transactions:',
-      'transactions.userTitle': 'Razorpay Transactions',
-      'transactions.userSubtitle':
-        'Your payment transactions processed through Razorpay',
-      'transactions.receiptButton': 'Receipt',
       'transactions.viewButton': 'View',
-      'transactions.viewDetailsAriaLabel': 'View transaction details',
-      'transactions.downloadReceiptAriaLabel':
-        'Download receipt for transaction',
 
       // Common
       'common.loading': 'Loading...',

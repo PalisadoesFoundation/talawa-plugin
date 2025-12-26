@@ -167,15 +167,15 @@
       "loadOrgFailed": "Error loading transactions"
     },
     "loadingOrg": "Loading Razorpay organization transactions...",
-    "loading": "Loading Razorpay transactions...",
     "userTransactions": {
-      "errorPrefix": "Error loading transactions:"
-    },
-    "userTitle": "Razorpay Transactions",
-    "userSubtitle": "Your payment transactions processed through Razorpay",
-    "receiptButton": "Receipt",
-    "viewDetailsAriaLabel": "View transaction details",
-    "downloadReceiptAriaLabel": "Download receipt for transaction"
+      "loading": "Loading Razorpay transactions...",
+      "errorPrefix": "Error loading transactions:",
+      "title": "Razorpay Transactions",
+      "subtitle": "Your payment transactions processed through Razorpay",
+      "receiptButton": "Receipt",
+      "viewDetailsAriaLabel": "View transaction details",
+      "downloadReceiptAriaLabel": "Download receipt for transaction"
+    }
   },
   "common": {
     "loading": "Loading...",
