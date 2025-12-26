@@ -235,8 +235,10 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
     return (
       <Card>
         <div style={{ textAlign: 'center', padding: '40px' }}>
-          <Text type="danger" role="alert">
-            {t('transactions.errorLoading')} {transactionsError.message}
+          <Text type="danger" role="alert" aria-live="polite">
+            {/* Note: errorPrefix includes trailing colon for concatenating error details */}
+            {t('transactions.userTransactions.errorPrefix')}{' '}
+            {transactionsError.message}
           </Text>
         </div>
       </Card>

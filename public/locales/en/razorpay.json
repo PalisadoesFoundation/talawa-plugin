@@ -164,7 +164,9 @@
     },
     "loadingOrg": "Loading Razorpay organization transactions...",
     "loading": "Loading Razorpay transactions...",
-    "errorLoading": "Error loading transactions:",
+    "userTransactions": {
+      "errorPrefix": "Error loading transactions:"
+    },
     "userTitle": "Razorpay Transactions",
     "userSubtitle": "Your payment transactions processed through Razorpay",
     "receiptButton": "Receipt",

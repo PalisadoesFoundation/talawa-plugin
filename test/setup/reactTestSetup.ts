@@ -136,7 +136,8 @@ if (typeof window !== 'undefined') {
       'transactions.table.date': 'Date',
       'transactions.table.actions': 'Actions',
       'transactions.loading': 'Loading Razorpay transactions...',
-      'transactions.errorLoading': 'Error loading transactions:',
+      'transactions.userTransactions.errorPrefix':
+        'Error loading transactions:',
       'transactions.userTitle': 'Razorpay Transactions',
       'transactions.userSubtitle':
         'Your payment transactions processed through Razorpay',

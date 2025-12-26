@@ -29,19 +29,9 @@ function isCamelCase(str) {
     // camelCase should:
     // - Start with lowercase letter
     // - Only contain letters and numbers
-    // - Not have consecutive uppercase letters (PascalCase check)
     const camelCaseRegex = /^[a-z][a-zA-Z0-9]*$/;
 
-    if (!camelCaseRegex.test(str)) {
-        return false;
-    }
-
-    // Check for PascalCase (starts with uppercase)
-    if (/^[A-Z]/.test(str)) {
-        return false;
-    }
-
-    return true;
+    return camelCaseRegex.test(str);
 }
 
 /**
