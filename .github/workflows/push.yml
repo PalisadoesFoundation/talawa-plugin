@@ -20,13 +20,22 @@ env:
   CODECOV_UNIQUE_NAME: CODECOV_UNIQUE_NAME-${{ github.run_id }}-${{ github.run_number }}
 
 jobs:
+  Merge-Conflict-Check:
+    runs-on: ubuntu-latest
+    name: Find merge conflicts
+    steps:
+      - uses: actions/checkout@v4
+      - name: Merge conflict finder
+        uses: olivernybroe/action-conflict-finder@v4.1
+
   Code-Coverage:
     if: ${{ github.actor != 'dependabot[bot]' }}
     name: Test and Calculate Code Coverage
+    needs: [Merge-Conflict-Check]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 24.11.1]
+        node-version: [24.x]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,7 +45,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.4.1
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -47,8 +56,12 @@ jobs:
         run: |
           pnpm run test:coverage
 
+      #######################################################################
+      # DO NOT DELETE ANY references to env.CODECOV_UNIQUE_NAME in this
+      # section. They are required for accurate calculations
+      #######################################################################
       - name: Present and upload coverage to Codecov as ${{env.CODECOV_UNIQUE_NAME}}
-        if: matrix.node-version == '24.11.1'
+        if: always()
         uses: codecov/codecov-action@v5
         with:
           name: '${{env.CODECOV_UNIQUE_NAME}}'
@@ -58,24 +71,3 @@ jobs:
           exclude: 'docs/'
           gcov_ignore: 'docs/'
           files: ./coverage/vitest/lcov.info
-          flags: vitest
-
-  Test-Npm:
-    if: ${{ github.actor != 'dependabot[bot]' }}
-    name: Test with npm@11
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24.11.1
-          check-latest: false
-
-      - name: Install npm@11
-        run: npm install -g npm@11
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Tests
-        run: npm test

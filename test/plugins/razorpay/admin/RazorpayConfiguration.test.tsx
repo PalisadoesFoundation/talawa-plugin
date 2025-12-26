@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MockedResponse } from '@apollo/client/testing';
-import RazorpayConfiguration from '../../../../plugins/Razorpay/admin/pages/RazorpayConfiguration';
+import RazorpayConfiguration from '../../../../plugins/razorpay/admin/pages/RazorpayConfiguration';
 import {
   renderWithProviders,
   createMockRazorpayConfig,
@@ -31,29 +31,6 @@ vi.mock('react-toastify', () => ({
     error: vi.fn(),
     info: vi.fn(),
   },
-}));
-
-// Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'configuration.title': 'Razorpay Configuration',
-        'configuration.form.keyIdPlaceholder': 'Enter Razorpay Key ID',
-        'configuration.form.keySecretPlaceholder': 'Enter your key secret',
-        'configuration.form.yes': 'Enabled',
-        'configuration.actions.showSecret': 'Show secret',
-        'configuration.actions.hideSecret': 'Hide secret',
-        'configuration.form.saveButton': 'Save Configuration',
-        'configuration.success.saved':
-          'Razorpay configuration saved successfully!',
-        'configuration.actions.test': 'Test with Dummy Payment',
-        'configuration.success.testSetup':
-          'Setup test successful! Razorpay configuration is working correctly.',
-      };
-      return translations[key] || key;
-    },
-  }),
 }));
 
 // Standard Mocks
@@ -97,11 +74,17 @@ describe('RazorpayConfiguration', () => {
         mocks: standardMocks,
       });
 
+      // Wait for component to load first
       await waitFor(() => {
         expect(
           screen.getByPlaceholderText('Enter your key secret'),
-        ).toHaveAttribute('type', 'password');
+        ).toBeInTheDocument();
       });
+
+      // Verify password type initially
+      expect(
+        screen.getByPlaceholderText('Enter your key secret'),
+      ).toHaveAttribute('type', 'password');
 
       const toggleBtns = screen.getAllByRole('button', {
         name: /Show secret/i,
@@ -195,6 +178,7 @@ describe('RazorpayConfiguration', () => {
         mocks: standardMocks,
       });
 
+      // Wait for component to load first
       await waitFor(() => {
         expect(
           screen.getByRole('button', { name: /Test with Dummy Payment/i }),

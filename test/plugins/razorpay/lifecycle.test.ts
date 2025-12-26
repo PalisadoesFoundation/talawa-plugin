@@ -4,7 +4,7 @@ import RazorpayPlugin, {
   onActivate,
   onDeactivate,
   onUnload,
-} from '../../../plugins/Razorpay/api/index';
+} from '../../../plugins/razorpay/api/index';
 import { createMockRazorpayContext } from './utils/mockRazorpay';
 
 describe('Razorpay Plugin Lifecycle', () => {

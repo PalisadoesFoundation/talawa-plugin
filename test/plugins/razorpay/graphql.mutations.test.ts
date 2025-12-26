@@ -7,7 +7,7 @@ import {
   initiatePaymentResolver,
   verifyPaymentResolver,
   testRazorpaySetupResolver,
-} from '../../../plugins/Razorpay/api/graphql/mutations';
+} from '../../../plugins/razorpay/api/graphql/mutations';
 import {
   createMockRazorpayContext,
   createMockTransaction,

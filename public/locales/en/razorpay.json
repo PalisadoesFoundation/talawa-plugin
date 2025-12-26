@@ -142,6 +142,10 @@
       "actions": "Actions",
       "pagination": "{{start}}-{{end}} of {{total}} transactions"
     },
+    "messages": {
+      "viewingDetails": "Viewing details for transaction: {{id}}",
+      "downloadingReceipt": "Downloading receipt for transaction: {{id}}"
+    },
     "stats": {
       "totalAmount": "Total Amount",
       "totalTransactions": "Total Transactions",
@@ -162,11 +166,21 @@
       "loadFailed": "Failed to load transaction data",
       "loadOrgFailed": "Error loading transactions"
     },
-    "loadingOrg": "Loading Razorpay organization transactions..."
+    "loadingOrg": "Loading Razorpay organization transactions...",
+    "userTransactions": {
+      "loading": "Loading Razorpay transactions...",
+      "errorPrefix": "Error loading transactions:",
+      "title": "Razorpay Transactions",
+      "subtitle": "Your payment transactions processed through Razorpay",
+      "receiptButton": "Receipt",
+      "viewDetailsAriaLabel": "View transaction details",
+      "downloadReceiptAriaLabel": "Download receipt for transaction"
+    }
   },
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",
+    "notAvailable": "N/A",
     "retry": "Retry",
     "cancel": "Cancel",
     "back": "Back",

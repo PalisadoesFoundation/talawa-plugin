@@ -308,7 +308,7 @@ describe('Real Plugin Manifest Validation', () => {
   describe('Razorpay Plugin Manifests', () => {
     const manifestPath = join(
       process.cwd(),
-      'plugins/Razorpay/admin/manifest.json',
+      'plugins/razorpay/admin/manifest.json',
     );
 
     it.skipIf(!existsSync(manifestPath))(
@@ -339,7 +339,7 @@ describe('Real Plugin Manifest Validation', () => {
 
     const apiManifestPath = join(
       process.cwd(),
-      'plugins/Razorpay/api/manifest.json',
+      'plugins/razorpay/api/manifest.json',
     );
 
     it.skipIf(!existsSync(apiManifestPath))(
@@ -368,7 +368,7 @@ describe('Real Plugin Manifest Validation', () => {
   describe('Plugin Map Manifests', () => {
     const pluginMapAdminPath = join(
       process.cwd(),
-      'plugins/Plugin Map/admin/manifest.json',
+      'plugins/pluginMap/admin/manifest.json',
     );
 
     it.skipIf(!existsSync(pluginMapAdminPath))(
@@ -393,7 +393,7 @@ describe('Real Plugin Manifest Validation', () => {
 
     const pluginMapApiPath = join(
       process.cwd(),
-      'plugins/Plugin Map/api/manifest.json',
+      'plugins/pluginMap/api/manifest.json',
     );
 
     it.skipIf(!existsSync(pluginMapApiPath))(
