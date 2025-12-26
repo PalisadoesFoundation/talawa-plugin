@@ -67,22 +67,26 @@ const standardMocks: MockedResponse[] = [
   },
 ];
 
+// Helper function to render UserTransactions with standard mocks and routing
+const renderUserTransactions = (mocks = standardMocks) => {
+  renderWithProviders(<UserTransactions />, {
+    mocks,
+    initialEntries: ['/user/razorpay/my-transactions'],
+    path: '/user/razorpay/my-transactions',
+  });
+};
+
 describe('UserTransactions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('Loading State', () => {
-    it('should show loading state while fetching transactions', async () => {
-      renderWithProviders(<UserTransactions />, {
-        mocks: standardMocks,
-        initialEntries: ['/user/razorpay/my-transactions'],
-        path: '/user/razorpay/my-transactions',
-      });
+    it('should show loading state while fetching transactions', () => {
+      renderUserTransactions();
 
-      // The key is to match what the component actually renders.
       // Verify loading state
-      expect(screen.getByText('common.loading')).toBeInTheDocument();
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
   });
 

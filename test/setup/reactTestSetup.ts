@@ -118,9 +118,13 @@ if (typeof window !== 'undefined') {
       'configuration.form.liveMode': 'Live Mode',
       'configuration.actions.test': 'Test with Dummy Payment',
       'configuration.actions.testing': 'Testing...',
+      'configuration.actions.showSecret': 'Show secret',
+      'configuration.actions.hideSecret': 'Hide secret',
       'configuration.help.title': '📚 Help & Resources',
       'configuration.success.saved':
         'Razorpay configuration saved successfully!',
+      'configuration.success.testSetup':
+        'Setup test successful! Razorpay configuration is working correctly.',
       'configuration.error.loadFailed': 'Failed to load configuration',
       'configuration.error.saveFailed': 'Failed to save configuration',
 

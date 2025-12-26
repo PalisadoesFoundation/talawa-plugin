@@ -74,11 +74,17 @@ describe('RazorpayConfiguration', () => {
         mocks: standardMocks,
       });
 
+      // Wait for component to load first
       await waitFor(() => {
         expect(
           screen.getByPlaceholderText('Enter your key secret'),
-        ).toHaveAttribute('type', 'password');
+        ).toBeInTheDocument();
       });
+
+      // Verify password type initially
+      expect(
+        screen.getByPlaceholderText('Enter your key secret'),
+      ).toHaveAttribute('type', 'password');
 
       const toggleBtns = screen.getAllByRole('button', {
         name: /Show secret/i,
@@ -172,6 +178,7 @@ describe('RazorpayConfiguration', () => {
         mocks: standardMocks,
       });
 
+      // Wait for component to load first
       await waitFor(() => {
         expect(
           screen.getByRole('button', { name: /Test with Dummy Payment/i }),
