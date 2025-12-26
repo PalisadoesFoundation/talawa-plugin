@@ -26,6 +26,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { useParams } from 'react-router-dom';
 import useLocalStorage from 'utils/useLocalstorage';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 
@@ -87,7 +88,8 @@ interface RazorpayUserTransaction {
 }
 
 const RazorpayUserTransactionsInjector: React.FC = () => {
-  const { orgId } = useParams();
+  const { t } = useTranslation('razorpay');
+  const { orgId } = useParams<{ orgId: string }>();
   const { getItem } = useLocalStorage();
   const userId = getItem('id') as string | null;
 
@@ -149,7 +151,7 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
 
   const columns: ColumnsType<RazorpayUserTransaction> = [
     {
-      title: 'Transaction ID',
+      title: t('transactions.table.id'),
       dataIndex: 'paymentId',
       key: 'paymentId',
       render: (paymentId: string) => (
@@ -159,7 +161,7 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
       ),
     },
     {
-      title: 'Amount',
+      title: t('transactions.table.amount'),
       dataIndex: 'amount',
       key: 'amount',
       render: (amount: number, record: RazorpayUserTransaction) => (
@@ -169,7 +171,7 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
       ),
     },
     {
-      title: 'Status',
+      title: t('transactions.table.status'),
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
@@ -177,19 +179,19 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
       ),
     },
     {
-      title: 'Payment Method',
+      title: t('transactions.table.method'),
       dataIndex: 'method',
       key: 'method',
       render: (method: string) => method || 'N/A',
     },
     {
-      title: 'Date',
+      title: t('transactions.table.date'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (date: string) => formatDate(date),
     },
     {
-      title: 'Actions',
+      title: t('transactions.table.actions'),
       key: 'actions',
       render: (_, record: RazorpayUserTransaction) => (
         <Space size="small">
@@ -198,16 +200,18 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
             icon={<EyeOutlined />}
             onClick={() => handleViewDetails(record)}
             size="small"
+            aria-label={t('transactions.viewDetailsAriaLabel')}
           >
-            View
+            {t('transactions.viewButton')}
           </Button>
           <Button
             type="link"
             icon={<DownloadOutlined />}
             onClick={() => handleDownloadReceipt(record)}
             size="small"
+            aria-label={t('transactions.downloadReceiptAriaLabel')}
           >
-            Receipt
+            {t('transactions.receiptButton')}
           </Button>
         </Space>
       ),
@@ -218,9 +222,9 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
     return (
       <Card>
         <div style={{ textAlign: 'center', padding: '40px' }}>
-          <Spin size="large" />
+          <Spin size="large" aria-label={t('transactions.loading')} />
           <div style={{ marginTop: '16px' }}>
-            <Text>Loading Razorpay transactions...</Text>
+            <Text>{t('transactions.loading')}</Text>
           </div>
         </div>
       </Card>
@@ -231,8 +235,8 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
     return (
       <Card>
         <div style={{ textAlign: 'center', padding: '40px' }}>
-          <Text type="danger">
-            Error loading transactions: {transactionsError.message}
+          <Text type="danger" role="alert">
+            {t('transactions.errorLoading')} {transactionsError.message}
           </Text>
         </div>
       </Card>
@@ -243,13 +247,17 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
     <Card>
       <div style={{ marginBottom: '16px' }}>
         <Space align="center">
-          <CreditCardOutlined style={{ fontSize: '20px', color: '#1890ff' }} />
+          <CreditCardOutlined
+            style={{ fontSize: '20px', color: '#1890ff' }}
+            aria-label={t('transactions.userTitle')}
+            role="img"
+          />
           <Title level={4} style={{ margin: 0 }}>
-            Razorpay Transactions
+            {t('transactions.userTitle')}
           </Title>
         </Space>
-        <Text type="secondary" style={{ display: 'block', marginTop: '4px' }}>
-          Your payment transactions processed through Razorpay
+        <Text type="secondary" style={{ display: 'block', marginTop: '8px' }}>
+          {t('transactions.userSubtitle')}
         </Text>
       </div>
 

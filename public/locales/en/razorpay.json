@@ -162,7 +162,14 @@
       "loadFailed": "Failed to load transaction data",
       "loadOrgFailed": "Error loading transactions"
     },
-    "loadingOrg": "Loading Razorpay organization transactions..."
+    "loadingOrg": "Loading Razorpay organization transactions...",
+    "loading": "Loading Razorpay transactions...",
+    "errorLoading": "Error loading transactions:",
+    "userTitle": "Razorpay Transactions",
+    "userSubtitle": "Your payment transactions processed through Razorpay",
+    "receiptButton": "Receipt",
+    "viewDetailsAriaLabel": "View transaction details",
+    "downloadReceiptAriaLabel": "Download receipt for transaction"
   },
   "common": {
     "loading": "Loading...",

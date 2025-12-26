@@ -3,6 +3,8 @@ import { MockedResponse } from '@apollo/client/testing';
 import { MockedProvider } from '@apollo/client/testing/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { render, RenderOptions, act } from '@testing-library/react';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../../../../utils/i18nForTests';
 
 /**
  * Test wrapper for Admin components
@@ -14,13 +16,15 @@ const TestWrapper: React.FC<{
   path?: string;
 }> = ({ children, mocks, initialEntries = ['/'], path = '/' }) => {
   return (
-    <MockedProvider mocks={mocks}>
-      <MemoryRouter initialEntries={initialEntries}>
-        <Routes>
-          <Route path={path} element={children} />
-        </Routes>
-      </MemoryRouter>
-    </MockedProvider>
+    <I18nextProvider i18n={i18n}>
+      <MockedProvider mocks={mocks}>
+        <MemoryRouter initialEntries={initialEntries}>
+          <Routes>
+            <Route path={path} element={children} />
+          </Routes>
+        </MemoryRouter>
+      </MockedProvider>
+    </I18nextProvider>
   );
 };
 

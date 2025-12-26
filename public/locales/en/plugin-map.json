@@ -68,5 +68,12 @@
     "dashboardDesc": "This extension point provides administrative capabilities at the global level. Plugins can add widgets and data visualizations here.",
     "orgAdminDesc": "This extension point provides organization-specific administrative capabilities. Plugins can access organization data and manage features within the current organization context.",
     "orgUserDesc": "This extension point provides organization-specific features for regular users. Plugins can offer tools and content relevant to the organization members."
+  },
+  "injector": {
+    "paymentTitle": "Payment Provider Transactions",
+    "paymentDescription": "Browse transactions made using the following payment provider",
+    "extensionPoint": "Extension Point: {{id}} - Transaction Display Area",
+    "supportText": "This location supports component injection via the Plugin Map system. Developers can inject custom components here using the {{id}} extension point.",
+    "badge": "Plugin Map Extension Point"
   }
 }

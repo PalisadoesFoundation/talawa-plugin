@@ -12,6 +12,7 @@ import {
   AppstoreOutlined,
   TransactionOutlined,
 } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 const { Text, Title } = Typography;
 
@@ -28,6 +29,8 @@ const MapIconInjector: React.FC<MapIconInjectorProps> = ({
   size = 'default',
   showBadge = true,
 }) => {
+  const { t } = useTranslation('plugin-map');
+
   // For G1 extension point, render a full-width transaction block
   if (extensionPointId === 'G1') {
     return (
@@ -51,14 +54,14 @@ const MapIconInjector: React.FC<MapIconInjectorProps> = ({
                 fontSize: '32px',
                 color: '#1890ff',
               }}
+              aria-label={t('injector.paymentTitle')}
+              role="img"
             />
             <div>
               <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
-                Payment Provider Transactions
+                {t('injector.paymentTitle')}
               </Title>
-              <Text type="secondary">
-                Browse transactions made using the following payment provider
-              </Text>
+              <Text type="secondary">{t('injector.paymentDescription')}</Text>
             </div>
           </Space>
 
@@ -71,8 +74,11 @@ const MapIconInjector: React.FC<MapIconInjectorProps> = ({
             }}
           >
             <Text style={{ fontSize: '14px', color: '#1890ff' }}>
-              <AppstoreOutlined style={{ marginRight: '8px' }} />
-              Extension Point: {extensionPointId} - Transaction Display Area
+              <AppstoreOutlined
+                style={{ marginRight: '8px' }}
+                aria-hidden="true"
+              />
+              {t('injector.extensionPoint', { id: extensionPointId })}
             </Text>
           </div>
         </Space>
@@ -96,16 +102,14 @@ const MapIconInjector: React.FC<MapIconInjectorProps> = ({
     return (
       <div>
         <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
-          Extension Point: {extensionPointId}
+          {t('injector.extensionPoint', { id: extensionPointId })}
         </div>
         <div style={{ fontSize: '12px' }}>
-          This location supports component injection via the Plugin Map system.
-          Developers can inject custom components here using the{' '}
-          {extensionPointId} extension point.
+          {t('injector.supportText', { id: extensionPointId })}
         </div>
         <div style={{ fontSize: '11px', marginTop: '8px', opacity: 0.8 }}>
-          <AppstoreOutlined style={{ marginRight: '4px' }} />
-          Plugin Map Extension Point
+          <AppstoreOutlined style={{ marginRight: '4px' }} aria-hidden="true" />
+          {t('injector.badge')}
         </div>
       </div>
     );
@@ -138,6 +142,8 @@ const MapIconInjector: React.FC<MapIconInjectorProps> = ({
           color: '#1890ff',
           ...getIconSize(),
         }}
+        aria-label={t('injector.badge')}
+        role="img"
       />
     </div>
   );

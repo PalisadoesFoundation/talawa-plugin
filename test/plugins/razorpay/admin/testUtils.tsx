@@ -6,6 +6,8 @@ const { MemoryRouter, Routes, Route } = RRD;
 import { render, RenderOptions, act } from '@testing-library/react';
 import { InMemoryCache } from '@apollo/client';
 import type { DocumentNode } from 'graphql';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../../../../utils/i18nForTests';
 
 /**
  * Test wrapper that provides Apollo MockedProvider and MemoryRouter
@@ -20,13 +22,15 @@ const TestWrapper: React.FC<{
   const cache = new InMemoryCache();
 
   return (
-    <MockedProvider mocks={mocks} cache={cache}>
-      <MemoryRouter initialEntries={initialEntries}>
-        <Routes>
-          <Route path={path} element={children} />
-        </Routes>
-      </MemoryRouter>
-    </MockedProvider>
+    <I18nextProvider i18n={i18n}>
+      <MockedProvider mocks={mocks} cache={cache}>
+        <MemoryRouter initialEntries={initialEntries}>
+          <Routes>
+            <Route path={path} element={children} />
+          </Routes>
+        </MemoryRouter>
+      </MockedProvider>
+    </I18nextProvider>
   );
 };
 
