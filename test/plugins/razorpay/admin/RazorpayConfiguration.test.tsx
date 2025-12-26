@@ -33,29 +33,6 @@ vi.mock('react-toastify', () => ({
   },
 }));
 
-// Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'configuration.title': 'Razorpay Configuration',
-        'configuration.form.keyIdPlaceholder': 'Enter Razorpay Key ID',
-        'configuration.form.keySecretPlaceholder': 'Enter your key secret',
-        'configuration.form.yes': 'Enabled',
-        'configuration.actions.showSecret': 'Show secret',
-        'configuration.actions.hideSecret': 'Hide secret',
-        'configuration.form.saveButton': 'Save Configuration',
-        'configuration.success.saved':
-          'Razorpay configuration saved successfully!',
-        'configuration.actions.test': 'Test with Dummy Payment',
-        'configuration.success.testSetup':
-          'Setup test successful! Razorpay configuration is working correctly.',
-      };
-      return translations[key] || key;
-    },
-  }),
-}));
-
 // Standard Mocks
 const standardMocks: MockedResponse[] = [
   createRazorpayConfigQueryMock(mockConfig),

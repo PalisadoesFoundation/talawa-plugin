@@ -43,22 +43,128 @@ if (typeof window !== 'undefined') {
   vi.mock('react-i18next', async () => {
     const actual =
       await vi.importActual<typeof import('react-i18next')>('react-i18next');
+
+    // Translation map for English (complete set from JSON files)
+    const translations: Record<string, string> = {
+      // Plugin Map translations
+      'injector.paymentTitle': 'Payment Provider Transactions',
+      'injector.paymentDescription':
+        'Browse transactions made using the following payment provider',
+      'injector.extensionPoint':
+        'Extension Point: {{id}} - Transaction Display Area',
+      'injector.supportText':
+        'This location supports component injection via the Plugin Map system. Developers can inject custom components here using the {{id}} extension point.',
+      'injector.badge': 'Plugin Map Extension Point',
+
+      // Razorpay - Donation
+      'donation.title': 'Make a Donation',
+      'donation.subtitle': 'Support {{orgName}} with your contribution',
+      'donation.form.amountLabel': 'Donation Amount',
+      'donation.form.amountPlaceholder': '0.00',
+      'donation.form.currencyLabel': 'Currency',
+      'donation.form.quickAmounts': 'Quick Amounts',
+      'donation.form.donorInfoTitle': 'Your Information',
+      'donation.form.fullNameLabel': 'Full Name',
+      'donation.form.fullNamePlaceholder': 'Enter your full name',
+      'donation.form.fullNameRequired': 'Full Name *',
+      'donation.form.emailLabel': 'Email Address',
+      'donation.form.emailPlaceholder': 'Enter your email',
+      'donation.form.emailRequired': 'Email Address *',
+      'donation.form.phoneLabel': 'Phone Number',
+      'donation.form.phoneOptional': 'Phone Number (Optional)',
+      'donation.form.phonePlaceholder': 'Enter your phone number',
+      'donation.form.descriptionLabel': 'Message',
+      'donation.form.descriptionPlaceholder': 'Add a message (optional)',
+      'donation.form.submit': 'Donate Now',
+      'donation.form.processing': 'Processing...',
+      'donation.form.submitButton': 'Donate {{amount}}',
+      'donation.form.submitButtonDefault': 'Donate',
+      'donation.validation.amountRequired': 'Please enter a valid amount',
+      'donation.validation.amountMinimum': 'Amount must be at least {{min}}',
+      'donation.validation.nameRequired': 'Please enter your name',
+      'donation.validation.emailRequired': 'Please enter your email',
+      'donation.validation.emailInvalid': 'Please enter a valid email address',
+      'donation.error.configNotEnabled':
+        'Razorpay is not configured or enabled. Please contact the administrator.',
+      'donation.error.loadUserFailed':
+        'Failed to load user data. Please refresh the page.',
+      'donation.error.loadOrgFailed': 'Failed to load organization information',
+      'donation.error.orderFailed': 'Failed to create payment order',
+      'donation.error.paymentFailed': 'Payment failed',
+      'donation.error.systemUnavailable': 'Payment System Not Available',
+
+      // Razorpay - Configuration
+      'configuration.title': 'Razorpay Configuration',
+      'configuration.subtitle':
+        'Configure your Razorpay payment gateway settings',
+      'configuration.sections.credentials': '🔑 API Credentials',
+      'configuration.sections.settings': '⚙️ Settings',
+      'configuration.form.keyIdLabel': 'Key ID',
+      'configuration.form.keyIdPlaceholder': 'Enter Razorpay Key ID',
+      'configuration.form.keySecretLabel': 'Key Secret',
+      'configuration.form.keySecretPlaceholder': 'Enter your key secret',
+      'configuration.form.webhookSecretLabel': 'Webhook Secret',
+      'configuration.form.webhookSecretPlaceholder':
+        'Enter your webhook secret',
+      'configuration.form.enabledLabel': 'Enable Razorpay',
+      'configuration.form.testModeLabel': 'Test Mode',
+      'configuration.form.currencyLabel': 'Default Currency',
+      'configuration.form.descriptionLabel': 'Default Description',
+      'configuration.form.saveButton': 'Save Configuration',
+      'configuration.form.saving': 'Saving...',
+      'configuration.form.yes': 'Enabled',
+      'configuration.form.no': 'Disabled',
+      'configuration.form.testMode': 'Test Mode',
+      'configuration.form.liveMode': 'Live Mode',
+      'configuration.actions.test': 'Test with Dummy Payment',
+      'configuration.actions.testing': 'Testing...',
+      'configuration.help.title': '📚 Help & Resources',
+      'configuration.success.saved':
+        'Razorpay configuration saved successfully!',
+      'configuration.error.loadFailed': 'Failed to load configuration',
+      'configuration.error.saveFailed': 'Failed to save configuration',
+
+      // Razorpay - Transactions
+      'transactions.table.id': 'Transaction ID',
+      'transactions.table.amount': 'Amount',
+      'transactions.table.status': 'Status',
+      'transactions.table.method': 'Payment Method',
+      'transactions.table.date': 'Date',
+      'transactions.table.actions': 'Actions',
+      'transactions.loading': 'Loading Razorpay transactions...',
+      'transactions.errorLoading': 'Error loading transactions:',
+      'transactions.userTitle': 'Razorpay Transactions',
+      'transactions.userSubtitle':
+        'Your payment transactions processed through Razorpay',
+      'transactions.receiptButton': 'Receipt',
+      'transactions.viewButton': 'View',
+      'transactions.viewDetailsAriaLabel': 'View transaction details',
+      'transactions.downloadReceiptAriaLabel':
+        'Download receipt for transaction',
+
+      // Common
+      'common.loading': 'Loading...',
+      'common.error': 'An error occurred',
+    };
+
     return {
       ...actual,
       useTranslation: () => ({
         t: (key: string, options?: Record<string, unknown>) => {
+          let translation = translations[key] || key;
+
           // Simple interpolation support for {{variable}} syntax
           if (typeof options === 'object' && options !== null) {
-            return Object.keys(options).reduce(
+            translation = Object.keys(options).reduce(
               (result, optionKey) =>
                 result.replace(
-                  new RegExp(`{{${optionKey}}}`, 'g'),
+                  new RegExp(`\\{\\{${optionKey}\\}\\}`, 'g'),
                   String(options[optionKey]),
                 ),
-              key,
+              translation,
             );
           }
-          return key;
+          return translation;
         },
         i18n: {
           changeLanguage: vi.fn(),
