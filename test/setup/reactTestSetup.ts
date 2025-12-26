@@ -158,6 +158,7 @@ if (typeof window !== 'undefined') {
       // Common
       'common.loading': 'Loading...',
       'common.error': 'An error occurred',
+      'common.notAvailable': 'N/A',
     };
 
     return {

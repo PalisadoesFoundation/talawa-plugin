@@ -126,7 +126,10 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
   };
 
   const formatAmount = (amount: number, currency: string) => {
-    return `${currency} ${(amount / 100).toFixed(2)}`;
+    return new Intl.NumberFormat(i18n.language, {
+      style: 'currency',
+      currency: currency,
+    }).format(amount / 100);
   };
 
   const formatDate = (dateString: string) => {
@@ -160,7 +163,7 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
       key: 'paymentId',
       render: (paymentId: string) => (
         <Text code style={{ fontSize: '12px' }}>
-          {paymentId || 'N/A'}
+          {paymentId || t('common.notAvailable')}
         </Text>
       ),
     },
@@ -170,7 +173,9 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
       key: 'amount',
       render: (amount: number, record: RazorpayUserTransaction) => (
         <Text strong>
-          {amount ? formatAmount(amount, record.currency) : 'N/A'}
+          {amount
+            ? formatAmount(amount, record.currency)
+            : t('common.notAvailable')}
         </Text>
       ),
     },
@@ -179,14 +184,18 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
-        <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
+        <Tag color={getStatusColor(status)}>
+          {t(`transactions.status.${status}`, {
+            defaultValue: status.toUpperCase(),
+          })}
+        </Tag>
       ),
     },
     {
       title: t('transactions.table.method'),
       dataIndex: 'method',
       key: 'method',
-      render: (method: string) => method || 'N/A',
+      render: (method: string) => method || t('common.notAvailable'),
     },
     {
       title: t('transactions.table.date'),

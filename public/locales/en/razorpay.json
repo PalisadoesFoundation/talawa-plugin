@@ -180,6 +180,7 @@
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",
+    "notAvailable": "N/A",
     "retry": "Retry",
     "cancel": "Cancel",
     "back": "Back",
