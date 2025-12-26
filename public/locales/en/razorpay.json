@@ -142,6 +142,10 @@
       "actions": "Actions",
       "pagination": "{{start}}-{{end}} of {{total}} transactions"
     },
+    "messages": {
+      "viewingDetails": "Viewing details for transaction: {{id}}",
+      "downloadingReceipt": "Downloading receipt for transaction: {{id}}"
+    },
     "stats": {
       "totalAmount": "Total Amount",
       "totalTransactions": "Total Transactions",

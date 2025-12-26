@@ -135,6 +135,12 @@ if (typeof window !== 'undefined') {
       'transactions.table.method': 'Payment Method',
       'transactions.table.date': 'Date',
       'transactions.table.actions': 'Actions',
+      'transactions.table.pagination':
+        '{{start}}-{{end}} of {{total}} transactions',
+      'transactions.messages.viewingDetails':
+        'Viewing details for transaction: {{id}}',
+      'transactions.messages.downloadingReceipt':
+        'Downloading receipt for transaction: {{id}}',
       'transactions.loading': 'Loading Razorpay transactions...',
       'transactions.userTransactions.errorPrefix':
         'Error loading transactions:',

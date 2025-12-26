@@ -88,7 +88,7 @@ interface RazorpayUserTransaction {
 }
 
 const RazorpayUserTransactionsInjector: React.FC = () => {
-  const { t } = useTranslation('razorpay');
+  const { t, i18n } = useTranslation('razorpay');
   const { orgId } = useParams<{ orgId: string }>();
   const { getItem } = useLocalStorage();
   const userId = getItem('id') as string | null;
@@ -130,7 +130,7 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
+    return new Date(dateString).toLocaleDateString(i18n.language, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -140,12 +140,16 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
   };
 
   const handleViewDetails = (transaction: RazorpayUserTransaction) => {
-    message.info(`Viewing details for transaction: ${transaction.id}`);
+    message.info(
+      t('transactions.messages.viewingDetails', { id: transaction.id }),
+    );
     // In a real implementation, this would open a modal or navigate to details
   };
 
   const handleDownloadReceipt = (transaction: RazorpayUserTransaction) => {
-    message.success(`Downloading receipt for transaction: ${transaction.id}`);
+    message.success(
+      t('transactions.messages.downloadingReceipt', { id: transaction.id }),
+    );
     // In a real implementation, this would download the receipt
   };
 
@@ -251,8 +255,7 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
         <Space align="center">
           <CreditCardOutlined
             style={{ fontSize: '20px', color: '#1890ff' }}
-            aria-label={t('transactions.userTitle')}
-            role="img"
+            aria-hidden="true"
           />
           <Title level={4} style={{ margin: 0 }}>
             {t('transactions.userTitle')}
@@ -272,7 +275,11 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
           showSizeChanger: true,
           showQuickJumper: true,
           showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} transactions`,
+            t('transactions.table.pagination', {
+              start: range[0],
+              end: range[1],
+              total,
+            }),
         }}
         scroll={{ x: 800 }}
       />
