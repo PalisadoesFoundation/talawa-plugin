@@ -1,10 +1,15 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// Initialize i18n for tests with inline resources
-i18n.use(initReactI18next).init({
+// Create a separate i18n instance for testing to avoid conflicts
+const i18nForTests = i18n.createInstance();
+
+// Initialize synchronously for tests
+i18nForTests.use(initReactI18next).init({
   lng: 'en',
   fallbackLng: 'en',
+  debug: false,
+  initImmediate: false, // Important: makes init synchronous
   resources: {
     en: {
       'plugin-map': {
@@ -45,4 +50,4 @@ i18n.use(initReactI18next).init({
   },
 });
 
-export default i18n;
+export default i18nForTests;

@@ -40,19 +40,36 @@ if (typeof window !== 'undefined') {
   }));
 
   // Mock react-i18next
-  vi.mock('react-i18next', () => ({
-    useTranslation: () => ({
-      t: (key: string) => key,
-      i18n: {
-        changeLanguage: vi.fn(),
-        language: 'en',
-      },
-    }),
-    initReactI18next: {
-      type: '3rdParty',
-      init: vi.fn(),
-    },
-  }));
+  vi.mock('react-i18next', async () => {
+    const actual =
+      await vi.importActual<typeof import('react-i18next')>('react-i18next');
+    return {
+      ...actual,
+      useTranslation: () => ({
+        t: (key: string, options?: Record<string, unknown>) => {
+          // Simple interpolation support for {{variable}} syntax
+          if (typeof options === 'object' && options !== null) {
+            return Object.keys(options).reduce(
+              (result, optionKey) =>
+                result.replace(
+                  new RegExp(`{{${optionKey}}}`, 'g'),
+                  String(options[optionKey]),
+                ),
+              key,
+            );
+          }
+          return key;
+        },
+        i18n: {
+          changeLanguage: vi.fn(),
+          language: 'en',
+        },
+      }),
+      // Use real I18nextProvider from actual implementation
+      I18nextProvider: actual.I18nextProvider,
+      initReactI18next: actual.initReactI18next,
+    };
+  });
 
   // Mock useLocalstorage hook
   vi.mock('utils/useLocalstorage', () => ({
