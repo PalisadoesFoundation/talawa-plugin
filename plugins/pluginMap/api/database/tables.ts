@@ -25,10 +25,3 @@ export const pollsTable = pgTable('plugin_map_polls', {
   extensionPoint: text('extension_point').notNull(), // Frontend sends the extension point ID (RA1, RA2, etc.)
   createdAt: timestamp('created_at').defaultNow(),
 });
-
-// Debug exports to help with module loading
-export const __debug = {
-  tables: {
-    pollsTable,
-  },
-};
