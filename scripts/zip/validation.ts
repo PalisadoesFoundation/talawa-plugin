@@ -3,6 +3,12 @@ import { existsSync, readdirSync } from 'node:fs';
 import { execSync, execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 
+/**
+ * Runs platform and plugin-specific validation tests before packaging
+ * @param pluginName - Name of the plugin to validate (must match [A-Za-z0-9_-]+)
+ * @param skipTests - If true, allows packaging without plugin tests (with deprecation warning)
+ * @throws {Error} If plugin name is invalid, platform tests fail, or required plugin tests fail
+ */
 export async function runValidationTests(
   pluginName: string,
   skipTests = false,
