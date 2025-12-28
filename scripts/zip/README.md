@@ -152,9 +152,10 @@ The zip script implements multiple layers of security to protect against common 
 - **Mitigates**: Arbitrary command execution, shell injection attacks
 
 ### Cross-Platform File Operations
-- **APIs Used**: Node.js \`fs\` module (\`cpSync\`, \`rmSync\`, \`mkdirSync\`) instead of shell commands
-- **Replaces**: Unix-specific commands like \`cp -r\`, \`rm -rf\`
+- **APIs Used**: Node.js `fs` module (`cpSync`, `copyFileSync`, `rmSync`, `mkdirSync`) and `fast-glob` for file finding
+- **Replaces**: Unix-specific commands like `cp -r`, `rm -rf`, `find`
 - **Benefits**: Works on Windows, macOS, and Linux without security risks
+- **Implementation**: All file operations are handled by Node.js built-ins or safe libraries, ensuring consistent behavior across OSs
 
 ### Path Security
 - **Normalization**: Uses \`path.join()\` and \`path.resolve()\` for all path operations
