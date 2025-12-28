@@ -181,9 +181,12 @@ describe('ExtensionPointsGlobal', () => {
   });
 
   it('should use unknown-user if userId is missing', async () => {
-    // Mock useLocalStorage to return null for 'id'
+    // Force useLocalStorage to return null
+    // We achieve this by overriding the mock for this specific test
+    // Note: The global mock at the top of the file handles "id" -> "test-user-id"
+    // Here we need to override the implementation for this test run.
     vi.mocked(useLocalStorage).mockReturnValue({
-      getItem: (_key: string) => null,
+      getItem: () => null,
       setItem: vi.fn(),
       removeItem: vi.fn(),
     });

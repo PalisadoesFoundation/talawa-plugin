@@ -29,7 +29,8 @@ vi.mock('@clack/prompts', () => ({
 // Import the function under test
 // Note: We use relative path from test file to source file
 // scripts/zip/validation.ts is the new home for this logic
-import { runValidationTests } from '../../../../scripts/zip/validation.ts';
+// @ts-expect-error: Validation script is not in build scope
+import { runValidationTests } from '../../../../scripts/zip/validation';
 
 describe('Zip Script - restoreBackup()', () => {
   let testDir: string;
@@ -91,7 +92,7 @@ describe('Zip Script - runValidationTests()', () => {
   beforeEach(() => {
     testPluginName = 'testPlugin';
     testPluginDir = join(process.cwd(), 'test', 'plugins', testPluginName);
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   afterEach(() => {
@@ -111,7 +112,10 @@ describe('Zip Script - runValidationTests()', () => {
         writeFileSync(join(dir, 'example.test.ts'), '');
 
         try {
-          await expect(runValidationTests(name, false)).resolves.not.toThrow();
+          // Promise resolves undefined implies success
+          await expect(
+            runValidationTests(name, false),
+          ).resolves.toBeUndefined();
         } finally {
           rmSync(dir, { recursive: true, force: true });
         }
@@ -190,6 +194,48 @@ describe('Zip Script - runValidationTests()', () => {
     });
   });
 
+  describe('Error Handling', () => {
+    it('should throw PluginTestError when plugin tests fail', async () => {
+      // Setup successful platform tests
+      vi.mocked(childProcess.execFileSync)
+        .mockImplementationOnce(() => Buffer.from('')) // Platform tests pass
+        .mockImplementationOnce(() => {
+          throw new Error('Vitest failed');
+        }); // Plugin tests fail
+
+      // Plugin test file existence check
+      mkdirSync(testPluginDir, { recursive: true });
+      writeFileSync(join(testPluginDir, 'example.test.ts'), '');
+
+      await expect(runValidationTests(testPluginName, false)).rejects.toThrow(
+        /Plugin-specific tests failed/,
+      );
+
+      // Verify it was called twice (platform + plugin)
+      expect(childProcess.execFileSync).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw descriptive error when platform tests fail', async () => {
+      vi.mocked(childProcess.execFileSync).mockImplementationOnce(() => {
+        throw new Error('Platform validation failed');
+      });
+
+      await expect(runValidationTests(testPluginName, false)).rejects.toThrow(
+        /Platform validation tests failed/,
+      );
+    });
+
+    it('should throw unknown error for non-Error throws', async () => {
+      vi.mocked(childProcess.execFileSync).mockImplementationOnce(() => {
+        throw 'String error';
+      });
+
+      await expect(runValidationTests(testPluginName, false)).rejects.toThrow(
+        /Validation failed with unknown error/,
+      );
+    });
+  });
+
   describe('Skip Tests Flag Behavior', () => {
     it('should allow packaging without tests when skip flag is set', async () => {
       // Create dir strictly without tests
@@ -201,10 +247,12 @@ describe('Zip Script - runValidationTests()', () => {
 
       await expect(
         runValidationTests(testPluginName, true),
-      ).resolves.not.toThrow();
+      ).resolves.toBeUndefined();
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('DEPRECATION WARNING'),
+        expect.stringContaining(
+          `[DEPRECATION WARNING] Plugin "${testPluginName}" has no test files.`,
+        ),
       );
     });
 

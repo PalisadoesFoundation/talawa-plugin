@@ -6,7 +6,7 @@
   },
   "description": "Microkernel-based plugin system for extending Talawa with modular features across API, Admin, and Mobile.",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.1.0"
   },
   "devDependencies": {
     "@ant-design/icons": "^6.1.0",
@@ -90,7 +90,7 @@
       "husky"
     ]
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "init-plugin": "tsx ./scripts/init/index.ts",
     "zip-plugin": "tsx ./scripts/zip/index.ts",
