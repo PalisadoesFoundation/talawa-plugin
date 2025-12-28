@@ -5,9 +5,14 @@ import {
   mkdirSync,
   readdirSync,
   statSync,
+  rmSync,
+  writeFileSync,
+  type Stats,
 } from 'node:fs';
 import { join, sep } from 'node:path';
+import { execSync } from 'node:child_process';
 import archiver from 'archiver';
+import type { ArchiveWarning } from './types.js';
 
 interface PluginInfo {
   name: string;
@@ -109,16 +114,10 @@ function listFilesRecursive(
   return out;
 }
 
-export async function compileForProduction(
+export function compileForProduction(
   plugin: PluginInfo,
   skipTypeCheck: boolean = false,
 ): Promise<void> {
-  const { execSync } = await import('node:child_process');
-  const { existsSync, rmSync, mkdirSync, readdirSync } = await import(
-    'node:fs'
-  );
-  const { join } = await import('node:path');
-
   // Create backup of original plugin
   const backupPath = `${plugin.path}.backup`;
   if (existsSync(backupPath)) {
@@ -158,7 +157,6 @@ export async function compileForProduction(
       };
 
       // Write temporary tsconfig
-      const { writeFileSync } = await import('node:fs');
       writeFileSync(
         adminTsConfig,
         JSON.stringify(adminTsConfigContent, null, 2),
@@ -279,7 +277,6 @@ export async function compileForProduction(
       };
 
       // Write temporary tsconfig
-      const { writeFileSync } = await import('node:fs');
       writeFileSync(apiTsConfig, JSON.stringify(apiTsConfigContent, null, 2));
 
       try {
@@ -375,6 +372,7 @@ export async function compileForProduction(
     rmSync(backupPath, { recursive: true, force: true });
     throw error;
   }
+  return Promise.resolve(); // Ensure it returns a Promise<void> as per the signature
 }
 
 export async function createProductionZip(
@@ -438,17 +436,15 @@ export async function createProductionZip(
     forceZip64: false,
   });
 
-  interface ArchiveWarning {
-    code?: string;
-    message: string;
-  }
-
   const done = new Promise<void>((resolve, reject) => {
     out.on('close', () => resolve());
     out.on('error', reject);
     archive.on('warning', (err: ArchiveWarning) => {
       if (err?.code === 'ENOENT') {
-        console.warn('Archive warning:', err);
+        console.warn(
+          '[Archive] Skipping missing file:',
+          err.message || 'Unknown file',
+        );
       } else {
         reject(err);
       }
@@ -464,8 +460,8 @@ export async function createProductionZip(
     const mtime = new Date(Math.floor(mtimeMs / 1000) * 1000);
     archive.file(f.fsPath, {
       name: f.zipPath.replace(/\\/g, '/'),
-      // arch never handles stats internally; use broader cast to avoid type incompatibilities
-      stats: { ...f.stats, mtime } as unknown as never,
+      // Use Partial<Stats> to allow mtime override while satisfying archiver's type requirements
+      stats: { ...f.stats, mtime } as Partial<Stats> as Stats | undefined,
       // keep compression on to avoid "uncompressed content" issues
     });
   }

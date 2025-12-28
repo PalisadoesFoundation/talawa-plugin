@@ -124,7 +124,8 @@ pnpm zip-plugin --skip-tests
 SKIP_TESTS=true pnpm zip-plugin
 ```
 
-**Warning**: When using `--skip-tests`, you will see a deprecation warning. Support for untested plugins will be removed in future versions.
+
+⚠️ **DEPRECATION WARNING**: Support for untested plugins will be removed in **version 3.0.0** (scheduled for Q2 2026). All plugins MUST have dedicated test files before this date. When using \`--skip-tests\`, you will see a deprecation notice. Plan to add tests to your plugin ASAP.
 
 ### Error Messages
 
@@ -132,13 +133,34 @@ The script provides clear error messages to help you understand validation failu
 
 - **Platform tests failed**: Issues with core platform validation
 - **Plugin-specific tests failed**: Issues with your plugin's test suite
-- **No test files found**: Plugin lacks dedicated tests (add tests or use `--skip-tests`)
+- **No test files found**: Plugin lacks dedicated tests (add tests or use \`--skip-tests\`)
 
 ## Security Features
 
-- **Plugin name validation**: Only alphanumeric characters, hyphens, and underscores allowed
-- **Command injection prevention**: Uses safe child_process APIs with argument arrays
-- **Cross-platform compatibility**: Uses Node.js file system APIs instead of shell commands
+The zip script implements multiple layers of security to protect against common vulnerabilities:
+
+### Plugin Name Validation
+- **Pattern**: Strict whitelist regex \`/^[A-Za-z0-9_-]+$/\`
+- **Enforcement**: Validated before test execution and zip creation
+- **Rejects**: Special characters, path traversal attempts (\`../\`), shell metacharacters
+- **Logged**: Invalid attempts are blocked and error messages include context
+
+### Command Injection Prevention
+- **Implementation**: Uses \`child_process.execFileSync()\` with argument arrays instead of shell interpolation
+- **Safe APIs**: Never constructs shell commands from user input
+- **Example**: \`execFileSync('pnpm', ['exec', 'vitest', 'run', \`test/plugins/\${pluginName}/\`])\` 
+- **Mitigates**: Arbitrary command execution, shell injection attacks
+
+### Cross-Platform File Operations
+- **APIs Used**: Node.js \`fs\` module (\`cpSync\`, \`rmSync\`, \`mkdirSync\`) instead of shell commands
+- **Replaces**: Unix-specific commands like \`cp -r\`, \`rm -rf\`
+- **Benefits**: Works on Windows, macOS, and Linux without security risks
+
+### Path Security
+- **Normalization**: Uses \`path.join()\` and \`path.resolve()\` for all path operations
+- **Validation**: Ensures all paths remain within expected plugin directories
+- **Prevents**: Directory traversal attacks, symlink attacks
+- **Verification**: Validates file paths before archiving
 
 ## Example Workflow
 

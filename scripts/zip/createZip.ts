@@ -11,6 +11,8 @@ import { dirname, join, sep } from 'node:path';
 import archiver from 'archiver';
 import { validateManifest } from '../utils/validateManifest';
 import { validateExtensionPoints } from '../utils/validateExtensionPoints';
+import type { Stats } from 'node:fs';
+import type { ArchiveWarning } from './types.js';
 
 interface PluginInfo {
   name: string;
@@ -116,145 +118,137 @@ export async function createZip(
   const pluginId = await getPluginId(plugin.path);
   const zipFileName = `${pluginId}-${buildType}.zip`;
 
-  return new Promise((resolve, reject) => {
-    const zipOutputDir = join(process.cwd(), 'plugin-zips');
-    if (!existsSync(zipOutputDir)) {
-      mkdirSync(zipOutputDir, { recursive: true });
-    }
-    const zipPath = join(zipOutputDir, zipFileName);
+  const zipOutputDir = join(process.cwd(), 'plugin-zips');
+  if (!existsSync(zipOutputDir)) {
+    mkdirSync(zipOutputDir, { recursive: true });
+  }
+  const zipPath = join(zipOutputDir, zipFileName);
 
-    // Validate Manifest and Extension Points
-    const manifestPaths = [
-      join(plugin.path, 'manifest.json'),
-      join(plugin.path, 'admin', 'manifest.json'),
-      join(plugin.path, 'api', 'manifest.json'),
-    ];
+  // Validate Manifest and Extension Points
+  const manifestPaths = [
+    join(plugin.path, 'manifest.json'),
+    join(plugin.path, 'admin', 'manifest.json'),
+    join(plugin.path, 'api', 'manifest.json'),
+  ];
 
-    let manifestFound = false;
+  let manifestFound = false;
 
-    // Create async IIFE to handle async validation inside Promise
-    (async () => {
-      try {
-        for (const manifestPath of manifestPaths) {
-          if (existsSync(manifestPath)) {
-            manifestFound = true;
-            const content = readFileSync(manifestPath, 'utf-8');
-            const manifest = JSON.parse(content);
+  try {
+    for (const manifestPath of manifestPaths) {
+      if (existsSync(manifestPath)) {
+        manifestFound = true;
+        const content = readFileSync(manifestPath, 'utf-8');
+        const manifest = JSON.parse(content);
 
-            console.log(`Validating manifest: ${manifestPath}`);
+        console.log(`Validating manifest: ${manifestPath}`);
 
-            // 1. Basic Manifest Validation
-            const manifestResult = validateManifest(manifest);
-            if (!manifestResult.valid) {
-              throw new Error(
-                `Manifest validation failed for ${manifestPath}:\n${manifestResult.errors.join('\n')}`,
-              );
-            }
-
-            // 2. Extension Point Validation
-            const extensionResult = await validateExtensionPoints(
-              manifest,
-              dirname(manifestPath),
-            );
-            if (!extensionResult.valid) {
-              throw new Error(
-                `Extension point validation failed for ${manifestPath}:\n${extensionResult.errors.join('\n')}`,
-              );
-            }
-          }
-        }
-
-        if (!manifestFound) {
-          console.warn(
-            `Warning: No manifest.json found in ${plugin.path} (checked root, admin, api)`,
+        // 1. Basic Manifest Validation
+        const manifestResult = validateManifest(manifest);
+        if (!manifestResult.valid) {
+          throw new Error(
+            `Manifest validation failed for ${manifestPath}:\n${manifestResult.errors.join('\n')}`,
           );
         }
 
-        // Prepare list of files deterministically
-        const files: Array<{
-          fsPath: string;
-          zipPath: string;
-          stats: ReturnType<typeof statSync>;
-        }> = [];
-
-        // Optional: include only selected subtrees
-        if (plugin.hasAdmin && existsSync(join(plugin.path, 'admin'))) {
-          files.push(
-            ...listFilesRecursive(join(plugin.path, 'admin'), 'admin'),
+        // 2. Extension Point Validation
+        const extensionResult = await validateExtensionPoints(
+          manifest,
+          dirname(manifestPath),
+        );
+        if (!extensionResult.valid) {
+          throw new Error(
+            `Extension point validation failed for ${manifestPath}:\n${extensionResult.errors.join('\n')}`,
           );
         }
-        if (plugin.hasApi && existsSync(join(plugin.path, 'api'))) {
-          files.push(...listFilesRecursive(join(plugin.path, 'api'), 'api'));
-        }
-
-        // Top-level files we explicitly include
-        for (const top of ['manifest.json', 'README.md', 'package.json']) {
-          const p = join(plugin.path, top);
-          if (existsSync(p)) {
-            const stats = statSync(p);
-            files.push({ fsPath: p, zipPath: top, stats });
-          }
-        }
-
-        const output = createWriteStream(zipPath);
-
-        const archive = archiver('zip', {
-          zlib: { level: 9 }, // max compression but broadly compatible
-          store: false, // compress entries (no "stored" entries)
-          forceZip64: false, // avoid ZIP64 unless absolutely needed
-          // comment: 'Talawa plugin package', // optional
-        });
-
-        interface ArchiveWarning {
-          code?: string;
-          message: string;
-        }
-
-        const done = new Promise<void>((resolveClose, rejectClose) => {
-          output.on('close', () => resolveClose());
-          output.on('error', rejectClose);
-          archive.on('warning', (err: ArchiveWarning) => {
-            if (err?.code !== 'ENOENT') {
-              rejectClose(err);
-            }
-          });
-          archive.on('error', rejectClose);
-        });
-
-        archive.pipe(output);
-
-        // Add files with known stats → prevents “data descriptor” streaming headers.
-        for (const f of files) {
-          if (!f.stats) continue; // Skip files without stats
-
-          // Normalize mtime to seconds (avoid extended precision extra fields)
-          const mtimeMs = Number(f.stats.mtimeMs);
-          const mtime = new Date(Math.floor(mtimeMs / 1000) * 1000);
-          archive.file(f.fsPath, {
-            name: f.zipPath.replace(/\\/g, '/'),
-            stats: {
-              ...f.stats,
-              mtime,
-              // archiver handles stats internally; use broader cast
-            } as unknown as never,
-          });
-        }
-
-        // Finalize & wait
-        archive.finalize();
-
-        await done;
-
-        console.log(`Zip created: ${zipFileName}`);
-        console.log(`Size: ${(archive.pointer() / 1024 / 1024).toFixed(2)} MB`);
-
-        await validateZipFile(zipPath);
-
-        resolve();
-      } catch (e) {
-        console.error('Archive finalize/validate error:', e);
-        reject(e);
       }
-    })();
-  });
+    }
+
+    if (!manifestFound) {
+      console.warn(
+        `Warning: No manifest.json found in ${plugin.path} (checked root, admin, api)`,
+      );
+    }
+
+    // Prepare list of files deterministically
+    const files: Array<{
+      fsPath: string;
+      zipPath: string;
+      stats: ReturnType<typeof statSync>;
+    }> = [];
+
+    // Optional: include only selected subtrees
+    if (plugin.hasAdmin && existsSync(join(plugin.path, 'admin'))) {
+      files.push(...listFilesRecursive(join(plugin.path, 'admin'), 'admin'));
+    }
+    if (plugin.hasApi && existsSync(join(plugin.path, 'api'))) {
+      files.push(...listFilesRecursive(join(plugin.path, 'api'), 'api'));
+    }
+
+    // Top-level files we explicitly include
+    for (const top of ['manifest.json', 'README.md', 'package.json']) {
+      const p = join(plugin.path, top);
+      if (existsSync(p)) {
+        const stats = statSync(p);
+        files.push({ fsPath: p, zipPath: top, stats });
+      }
+    }
+
+    const output = createWriteStream(zipPath);
+
+    const archive = archiver('zip', {
+      zlib: { level: 9 }, // max compression but broadly compatible
+      store: false, // compress entries (no "stored" entries)
+      forceZip64: false, // avoid ZIP64 unless absolutely needed
+      // comment: 'Talawa plugin package', // optional
+    });
+
+    // Create Promise to wait for archive completion
+    const done = new Promise<void>((resolveClose, rejectClose) => {
+      output.on('close', () => resolveClose());
+      output.on('error', rejectClose);
+      archive.on('warning', (err: ArchiveWarning) => {
+        if (err?.code === 'ENOENT') {
+          console.warn(
+            '[Archive] Skipping missing file during zip creation:',
+            err.message || 'Unknown file',
+          );
+        } else {
+          rejectClose(err);
+        }
+      });
+      archive.on('error', rejectClose);
+    });
+
+    archive.pipe(output);
+
+    // Add files with known stats → prevents “data descriptor” streaming headers.
+    for (const f of files) {
+      if (!f.stats) continue; // Skip files without stats
+
+      // Normalize mtime to seconds (avoid extended precision extra fields)
+      const mtimeMs = Number(f.stats.mtimeMs);
+      const mtime = new Date(Math.floor(mtimeMs / 1000) * 1000);
+      archive.file(f.fsPath, {
+        name: f.zipPath.replace(/\\/g, '/'),
+        stats: {
+          ...f.stats,
+          mtime,
+          // Use Partial<Stats> to allow mtime override while satisfying archiver's type requirements
+        } as Partial<Stats> as Stats | undefined,
+      });
+    }
+
+    // Finalize & wait
+    archive.finalize();
+
+    await done;
+
+    console.log(`Zip created: ${zipFileName}`);
+    console.log(`Size: ${(archive.pointer() / 1024 / 1024).toFixed(2)} MB`);
+
+    await validateZipFile(zipPath);
+  } catch (e) {
+    console.error('Archive finalize/validate error:', e);
+    throw e; // Re-throw the error to be caught by the caller of createZip
+  }
 }
