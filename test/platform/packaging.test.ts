@@ -18,11 +18,14 @@ let mockArchiverError: Error | null = null;
 let mockArchiverWarning: unknown | null = null;
 
 vi.mock('archiver', async () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const actual = await vi.importActual<any>('archiver');
+  const actual = await vi.importActual<{
+    default: (
+      format: string,
+      options: import('archiver').ArchiverOptions,
+    ) => import('archiver').Archiver;
+  }>('archiver');
   return {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    default: (format: string, options: any) => {
+    default: (format: string, options: import('archiver').ArchiverOptions) => {
       const archive = actual.default(format, options);
       // Hook into finalize to trigger errors if set
       const originalFinalize = archive.finalize.bind(archive);
