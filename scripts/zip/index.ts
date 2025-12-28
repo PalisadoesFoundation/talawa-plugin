@@ -71,7 +71,7 @@ async function runValidationTests(pluginName: string): Promise<void> {
       const { readdirSync } = await import('node:fs');
       const files = readdirSync(pluginTestPath, { recursive: true });
       hasTestFiles = files.some(
-        (file: any) =>
+        (file: string | Buffer) =>
           typeof file === 'string' &&
           (file.endsWith('.test.ts') ||
             file.endsWith('.test.tsx') ||
