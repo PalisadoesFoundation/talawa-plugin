@@ -51,7 +51,10 @@ async function getAvailablePlugins(): Promise<PluginInfo[]> {
   return plugins;
 }
 
-async function runValidationTests(pluginName: string): Promise<void> {
+async function runValidationTests(
+  pluginName: string,
+  skipTests = false,
+): Promise<void> {
   const s = spinner();
 
   try {
@@ -68,7 +71,6 @@ async function runValidationTests(pluginName: string): Promise<void> {
     // Check if directory exists AND contains test files
     let hasTestFiles = false;
     if (existsSync(pluginTestPath)) {
-      const { readdirSync } = await import('node:fs');
       const files = readdirSync(pluginTestPath, { recursive: true });
       hasTestFiles = files.some(
         (file: string | Buffer) =>
@@ -87,10 +89,23 @@ async function runValidationTests(pluginName: string): Promise<void> {
         { stdio: 'inherit' },
       );
       s.stop(`${pluginName} plugin tests passed`);
+    } else if (skipTests) {
+      // Graceful fallback for legacy plugins
+      s.stop('No test files found');
+      console.warn(
+        `\n[DEPRECATION WARNING] Plugin "${pluginName}" has no test files.`,
+      );
+      console.warn(
+        `Packaging is allowed due to --skip-tests flag or SKIP_TESTS env var.`,
+      );
+      console.warn(
+        `Please add tests before the next release. Support for untested plugins will be removed in future versions.\n`,
+      );
+      return;
     } else {
       s.stop('No test files found');
       throw new Error(
-        `No test files found for ${pluginName} plugin at ${pluginTestPath}.\nPlease add tests before packaging this plugin.`,
+        `No test files found for ${pluginName} plugin at ${pluginTestPath}.\nPlease add tests before packaging this plugin.\nTo package anyway (not recommended), use --skip-tests flag or set SKIP_TESTS=true env var.`,
       );
     }
   } catch (error) {
@@ -106,6 +121,17 @@ async function runValidationTests(pluginName: string): Promise<void> {
 
 async function main() {
   intro(`${bold('Talawa Plugin Zipper')}`);
+
+  // Check for skip tests flag from CLI args or env var
+  const skipTests =
+    process.argv.includes('--skip-tests') || process.env.SKIP_TESTS === 'true';
+
+  if (skipTests) {
+    console.warn(
+      '\n[WARNING] Test validation will be skipped for plugins without tests.',
+    );
+    console.warn('This is not recommended for production use.\n');
+  }
 
   try {
     // Get available plugins
@@ -176,7 +202,7 @@ async function main() {
     }
 
     // Run validation tests before creating zip
-    await runValidationTests(selectedPluginName as string);
+    await runValidationTests(selectedPluginName as string, skipTests);
 
     // Create zip
     const zipSpinner = spinner();
