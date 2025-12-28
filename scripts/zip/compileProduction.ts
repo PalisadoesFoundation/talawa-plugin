@@ -121,7 +121,7 @@ export async function compileForProduction(
   plugin: PluginInfo,
   skipTypeCheck: boolean = false,
 ): Promise<void> {
-  // Create backup of original plugin using cross-platform API
+  // Create backup of original plugin
   const backupPath = `${plugin.path}.backup`;
   if (existsSync(backupPath)) {
     rmSync(backupPath, { recursive: true, force: true });
@@ -167,7 +167,6 @@ export async function compileForProduction(
 
       try {
         // Compile admin TypeScript files
-        // Compile admin TypeScript files
         console.log('Compiling admin module: npx tsc');
 
         try {
@@ -183,7 +182,6 @@ export async function compileForProduction(
               mkdirSync(distPath, { recursive: true });
             }
             // Copy TypeScript files as JavaScript (fallback)
-            // Copy TypeScript files as JavaScript using fast-glob
             const tsFiles = await fg(['**/*.ts', '**/*.tsx'], {
               cwd: adminPath,
               ignore: ['node_modules/**', 'dist/**'],
@@ -246,7 +244,6 @@ export async function compileForProduction(
                 }
                 moveFiles(srcPath, destPath);
               } else {
-                // Copy file using cross-platform API
                 copyFileSync(srcPath, destPath);
               }
             }
@@ -332,7 +329,6 @@ export async function compileForProduction(
               mkdirSync(distPath, { recursive: true });
             }
             // Copy TypeScript files as JavaScript (fallback)
-            // Copy TypeScript files as JavaScript using fast-glob
             const tsFiles = await fg(['**/*.ts'], {
               cwd: apiPath,
               ignore: ['node_modules/**', 'dist/**'],
@@ -383,7 +379,6 @@ export async function compileForProduction(
                 }
                 moveFiles(srcPath, destPath);
               } else {
-                // Copy file using cross-platform API
                 copyFileSync(srcPath, destPath);
               }
             }
@@ -421,7 +416,7 @@ export async function compileForProduction(
       `TypeScript compilation completed successfully${skipTypeCheck ? ' (type checking skipped)' : ''}`,
     );
   } catch (error) {
-    // Restore original files on error using cross-platform API
+    // Restore original files on error
     console.error('Compilation failed, restoring original files...');
     rmSync(plugin.path, { recursive: true, force: true });
     cpSync(backupPath, plugin.path, { recursive: true });

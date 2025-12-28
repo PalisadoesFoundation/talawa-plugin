@@ -202,7 +202,6 @@ export async function createZip(
       // comment: 'Talawa plugin package', // optional
     });
 
-    // Create Promise to wait for archive completion
     const done = new Promise<void>((resolveClose, rejectClose) => {
       output.on('close', () => resolveClose());
       output.on('error', rejectClose);

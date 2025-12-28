@@ -11,8 +11,7 @@ import {
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-// We'll need to test the functions, but they're not exported
-// So we'll test them indirectly through their effects or import/mock them
+// Tests for internal logic via side effects
 
 describe('Zip Script - restoreBackup()', () => {
   let testDir: string;
@@ -48,7 +47,6 @@ describe('Zip Script - restoreBackup()', () => {
     // We can simulate this logic directly for the unit test since the function isn't exported
     // Logic from compileProduction.ts:
     if (existsSync(backupPath)) {
-      // cpSync(backupPath, plugin.path, { recursive: true }); // We'd use this if available
       // For test purposes, we'll implement the restoration logic to match what the script does
       // This is effectively asserting that the "restoration logic" works as expected
       const { cpSync } = await import('node:fs');
