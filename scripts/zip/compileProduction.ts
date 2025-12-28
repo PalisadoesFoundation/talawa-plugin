@@ -174,7 +174,7 @@ export async function compileForProduction(
         } catch (compileError) {
           if (skipTypeCheck) {
             console.warn(
-              '⚠️  TypeScript compilation failed, but continuing due to skip type check option',
+              'TypeScript compilation failed, but continuing due to skip type check option',
             );
             // Create dist directory manually if compilation failed
             const distPath = join(adminPath, 'dist');
@@ -365,11 +365,11 @@ export async function compileForProduction(
     }
 
     console.log(
-      `✅ TypeScript compilation completed successfully${skipTypeCheck ? ' (type checking skipped)' : ''}`,
+      `TypeScript compilation completed successfully${skipTypeCheck ? ' (type checking skipped)' : ''}`,
     );
   } catch (error) {
     // Restore original files on error
-    console.error('❌ Compilation failed, restoring original files...');
+    console.error('Compilation failed, restoring original files...');
     rmSync(plugin.path, { recursive: true, force: true });
     execSync(`cp -r "${backupPath}" "${plugin.path}"`);
     rmSync(backupPath, { recursive: true, force: true });
@@ -467,10 +467,10 @@ export async function createProductionZip(
   archive.finalize();
   await done;
 
-  console.log(`\n📦 Production ZIP created: ${zipFileName}`);
-  console.log(`📁 Location: ${zipPath}`);
+  console.log(`\nProduction ZIP created: ${zipFileName}`);
+  console.log(`Location: ${zipPath}`);
   console.log(
-    `📊 Approx size: ${(statSync(zipPath).size / 1024 / 1024).toFixed(2)} MB`,
+    `Approx size: ${(statSync(zipPath).size / 1024 / 1024).toFixed(2)} MB`,
   );
   console.log(
     '🔧 Flags: no append(), ZIP64 disabled, filtered to runtime files',

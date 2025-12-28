@@ -240,10 +240,8 @@ export async function createZip(
     try {
       await done;
 
-      console.log(`📦 Zip created: ${zipFileName}`);
-      console.log(
-        `📊 Size: ${(archive.pointer() / 1024 / 1024).toFixed(2)} MB`,
-      );
+      console.log(`Zip created: ${zipFileName}`);
+      console.log(`Size: ${(archive.pointer() / 1024 / 1024).toFixed(2)} MB`);
 
       await validateZipFile(zipPath);
     } catch (e) {

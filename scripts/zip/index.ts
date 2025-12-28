@@ -64,7 +64,23 @@ async function runValidationTests(pluginName: string): Promise<void> {
 
     // Check if plugin-specific tests exist
     const pluginTestPath = join('test', 'plugins', pluginName);
+
+    // Check if directory exists AND contains test files
+    let hasTestFiles = false;
     if (existsSync(pluginTestPath)) {
+      const { readdirSync } = await import('node:fs');
+      const files = readdirSync(pluginTestPath, { recursive: true });
+      hasTestFiles = files.some(
+        (file: any) =>
+          typeof file === 'string' &&
+          (file.endsWith('.test.ts') ||
+            file.endsWith('.test.tsx') ||
+            file.endsWith('.spec.ts') ||
+            file.endsWith('.spec.tsx')),
+      );
+    }
+
+    if (hasTestFiles) {
       s.start(`Running ${pluginName} plugin tests...`);
       execSync(
         `pnpm exec vitest run test/plugins/${pluginName}/ --reporter=verbose`,
@@ -72,12 +88,16 @@ async function runValidationTests(pluginName: string): Promise<void> {
       );
       s.stop(`${pluginName} plugin tests passed`);
     } else {
-      console.warn(
-        `\n⚠️  Warning: No tests found for ${pluginName} plugin at ${pluginTestPath}`,
+      s.stop('No test files found');
+      throw new Error(
+        `No test files found for ${pluginName} plugin at ${pluginTestPath}.\nPlease add tests before packaging this plugin.`,
       );
     }
-  } catch {
+  } catch (error) {
     s.stop('Validation tests failed');
+    if (error instanceof Error) {
+      throw error;
+    }
     throw new Error(
       'Platform validation failed - cannot create plugin zip. Please fix test failures and try again.',
     );
