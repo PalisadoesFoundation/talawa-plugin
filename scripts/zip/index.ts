@@ -50,6 +50,20 @@ async function getAvailablePlugins(): Promise<PluginInfo[]> {
   return plugins;
 }
 
+/**
+ * Restores plugin files from backup after production build
+ * @param pluginPath - Absolute path to the plugin directory
+ */
+function restoreBackup(pluginPath: string): void {
+  const backupPath = `${pluginPath}.backup`;
+
+  if (existsSync(backupPath)) {
+    rmSync(pluginPath, { recursive: true, force: true });
+    cpSync(backupPath, pluginPath, { recursive: true });
+    rmSync(backupPath, { recursive: true, force: true });
+  }
+}
+
 async function runValidationTests(
   pluginName: string,
   skipTests = false,
@@ -84,24 +98,32 @@ async function runValidationTests(
     if (hasTestFiles) {
       // Validate pluginName to prevent command injection
       if (!/^[A-Za-z0-9_-]+$/.test(pluginName)) {
+        s.stop('Invalid plugin name');
         throw new Error(
           `Invalid plugin name "${pluginName}". Plugin names must only contain letters, numbers, hyphens, and underscores.`,
         );
       }
 
       s.start(`Running ${pluginName} plugin tests...`);
-      execFileSync(
-        'pnpm',
-        [
-          'exec',
-          'vitest',
-          'run',
-          `test/plugins/${pluginName}/`,
-          '--reporter=verbose',
-        ],
-        { stdio: 'inherit' },
-      );
-      s.stop(`${pluginName} plugin tests passed`);
+      try {
+        execFileSync(
+          'pnpm',
+          [
+            'exec',
+            'vitest',
+            'run',
+            `test/plugins/${pluginName}/`,
+            '--reporter=verbose',
+          ],
+          { stdio: 'inherit' },
+        );
+        s.stop(`${pluginName} plugin tests passed`);
+      } catch (error) {
+        s.stop(`${pluginName} plugin tests failed`);
+        throw new Error(
+          `Plugin-specific tests failed for "${pluginName}". ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
     } else if (skipTests) {
       // Graceful fallback for legacy plugins
       s.stop('No test files found');
@@ -122,12 +144,17 @@ async function runValidationTests(
       );
     }
   } catch (error) {
-    s.stop('Validation tests failed');
+    s.stop('Validation failed');
+    // Re-throw with more context if this is a platform test failure
     if (error instanceof Error) {
+      // If error message doesn't already mention plugin-specific tests, it's platform tests
+      if (!error.message.includes('Plugin-specific tests')) {
+        throw new Error(`Platform validation tests failed. ${error.message}`);
+      }
       throw error;
     }
     throw new Error(
-      'Platform validation failed - cannot create plugin zip. Please fix test failures and try again.',
+      'Validation failed with unknown error. Please check test output above.',
     );
   }
 }
@@ -233,13 +260,7 @@ async function main() {
         await createZip(selectedPlugin, false);
 
         // Restore original TypeScript files
-        const backupPath = `${selectedPlugin.path}.backup`;
-
-        if (existsSync(backupPath)) {
-          rmSync(selectedPlugin.path, { recursive: true, force: true });
-          cpSync(backupPath, selectedPlugin.path, { recursive: true });
-          rmSync(backupPath, { recursive: true, force: true });
-        }
+        restoreBackup(selectedPlugin.path);
       }
 
       zipSpinner.stop(`${selectedPluginName} zipped successfully!`);
@@ -254,19 +275,14 @@ async function main() {
 
       // Restore original files on error for production builds
       if (!isDevelopment) {
-        const backupPath = `${selectedPlugin.path}.backup`;
-
-        if (existsSync(backupPath)) {
-          rmSync(selectedPlugin.path, { recursive: true, force: true });
-          cpSync(backupPath, selectedPlugin.path, { recursive: true });
-          rmSync(backupPath, { recursive: true, force: true });
-        }
+        restoreBackup(selectedPlugin.path);
       }
 
       outro('Failed to create plugin zip');
     }
   } catch (err: unknown) {
     console.error('Error:', err);
+    outro('Operation failed. See error above for details.');
     process.exitCode = 1;
   }
 }
