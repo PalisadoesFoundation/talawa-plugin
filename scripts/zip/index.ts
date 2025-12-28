@@ -9,7 +9,8 @@ import {
 } from '@clack/prompts';
 import bold from 'chalk';
 import green from 'chalk';
-import { readdirSync, existsSync, mkdirSync } from 'node:fs';
+import { readdirSync, existsSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 import { join } from 'node:path';
 import { createZip } from './createZip.js';
 import { compileForProduction } from './compileProduction.js';
@@ -48,6 +49,39 @@ async function getAvailablePlugins(): Promise<PluginInfo[]> {
   }
 
   return plugins;
+}
+
+async function runValidationTests(pluginName: string): Promise<void> {
+  const s = spinner();
+
+  try {
+    // Run platform validation tests
+    s.start('Running platform validation tests...');
+    execSync('pnpm exec vitest run test/platform/ --reporter=verbose', {
+      stdio: 'inherit',
+    });
+    s.stop('Platform validation tests passed');
+
+    // Check if plugin-specific tests exist
+    const pluginTestPath = join('test', 'plugins', pluginName);
+    if (existsSync(pluginTestPath)) {
+      s.start(`Running ${pluginName} plugin tests...`);
+      execSync(
+        `pnpm exec vitest run test/plugins/${pluginName}/ --reporter=verbose`,
+        { stdio: 'inherit' },
+      );
+      s.stop(`${pluginName} plugin tests passed`);
+    } else {
+      console.warn(
+        `\n⚠️  Warning: No tests found for ${pluginName} plugin at ${pluginTestPath}`,
+      );
+    }
+  } catch {
+    s.stop('Validation tests failed');
+    throw new Error(
+      'Platform validation failed - cannot create plugin zip. Please fix test failures and try again.',
+    );
+  }
 }
 
 async function main() {
@@ -120,6 +154,9 @@ async function main() {
 
       skipTypeCheck = typeCheckResponse;
     }
+
+    // Run validation tests before creating zip
+    await runValidationTests(selectedPluginName as string);
 
     // Create zip
     const zipSpinner = spinner();

@@ -141,7 +141,8 @@ export async function validateExtensionPoints(
       const extIdent = extName ?? ext.id ?? `index ${i}`;
 
       // 1. Schema Validation
-      if (!extName) {
+      // Check if name is missing, empty, or not a string
+      if (!extName || typeof extName !== 'string') {
         if (pointId === 'admin:menu') {
           errors.push(
             `Missing "name" (or "title") in extension point "${pointId}"`,
