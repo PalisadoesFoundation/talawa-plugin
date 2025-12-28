@@ -1,17 +1,34 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   existsSync,
   mkdirSync,
   writeFileSync,
   rmSync,
   mkdtempSync,
-  readdirSync,
   readFileSync,
 } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import * as childProcess from 'node:child_process';
 
-// Tests for internal logic via side effects
+// Mock child_process to prevent actual execution during tests
+vi.mock('node:child_process', () => ({
+  execSync: vi.fn(),
+  execFileSync: vi.fn(),
+}));
+
+// Mock @clack/prompts spinner since runValidationTests uses it
+vi.mock('@clack/prompts', () => ({
+  spinner: () => ({
+    start: vi.fn(),
+    stop: vi.fn(),
+  }),
+}));
+
+// Import the function under test
+// Note: We use relative path from test file to source file
+// scripts/zip/validation.ts is the new home for this logic
+import { runValidationTests } from '../../../../scripts/zip/validation.ts';
 
 describe('Zip Script - restoreBackup()', () => {
   let testDir: string;
@@ -43,12 +60,9 @@ describe('Zip Script - restoreBackup()', () => {
     // Simulate failure by removing plugin dir
     rmSync(pluginPath, { recursive: true, force: true });
 
-    // In a real scenario, this would be triggered by the compilation failure handler
-    // We can simulate this logic directly for the unit test since the function isn't exported
-    // Logic from compileProduction.ts:
+    // Simulate compilation failure handler logic
     if (existsSync(backupPath)) {
-      // For test purposes, we'll implement the restoration logic to match what the script does
-      // This is effectively asserting that the "restoration logic" works as expected
+      // Logic mirrors what compilesProduction does: cpSync(backupPath, pluginPath)
       const { cpSync } = await import('node:fs');
       cpSync(backupPath, pluginPath, { recursive: true });
     }
@@ -61,15 +75,9 @@ describe('Zip Script - restoreBackup()', () => {
   });
 
   it('should handle case when backup does not exist', () => {
-    // Create plugin directory
     mkdirSync(pluginPath, { recursive: true });
-    writeFileSync(join(pluginPath, 'file.txt'), 'content');
-
     // Backup doesn't exist
     expect(existsSync(backupPath)).toBe(false);
-
-    // Logic from compileProduction: if (!existsSync(backupPath)) do nothing
-    // So plugin path should remain untouched
     expect(existsSync(pluginPath)).toBe(true);
   });
 
@@ -78,187 +86,137 @@ describe('Zip Script - restoreBackup()', () => {
 
 describe('Zip Script - runValidationTests()', () => {
   let testPluginName: string;
-  let testPluginTestDir: string;
+  let testPluginDir: string;
 
   beforeEach(() => {
     testPluginName = 'testPlugin';
-    testPluginTestDir = join(process.cwd(), 'test', 'plugins', testPluginName);
+    testPluginDir = join(process.cwd(), 'test', 'plugins', testPluginName);
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    if (existsSync(testPluginTestDir)) {
-      rmSync(testPluginTestDir, { recursive: true, force: true });
+    if (existsSync(testPluginDir)) {
+      rmSync(testPluginDir, { recursive: true, force: true });
     }
+    vi.restoreAllMocks();
   });
 
   describe('Plugin Name Validation', () => {
-    it('should accept valid plugin names', () => {
-      const validNames = [
-        'myPlugin',
-        'my-plugin',
-        'my_plugin',
-        'Plugin123',
-        'PLUGIN',
-      ];
+    it('should accept valid plugin names', async () => {
+      const validNames = ['valid-name', 'valid_name', 'ValidName123'];
 
-      validNames.forEach((name) => {
-        const pattern = /^[A-Za-z0-9_-]+$/;
-        expect(pattern.test(name)).toBe(true);
-      });
+      for (const name of validNames) {
+        const dir = join(process.cwd(), 'test', 'plugins', name);
+        mkdirSync(dir, { recursive: true });
+        writeFileSync(join(dir, 'example.test.ts'), '');
+
+        try {
+          await expect(runValidationTests(name, false)).resolves.not.toThrow();
+        } finally {
+          rmSync(dir, { recursive: true, force: true });
+        }
+      }
     });
 
-    it('should reject invalid plugin names with special characters', () => {
+    it('should reject invalid plugin names', async () => {
+      // We don't even need files to exist for this check if checking happens before file check?
+      // Looking at code, it checks files first. So let's create files.
+      mkdirSync(testPluginDir, { recursive: true });
+      writeFileSync(join(testPluginDir, 'example.test.ts'), '');
+
       const invalidNames = [
+        'test/plugin',
+        'test\\plugin', // Backslash
+        'test plugin',
         '../../../etc/passwd',
-        'my plugin',
-        'my.plugin',
-        'my/plugin',
-        'my\\\\plugin',
-        'my;plugin',
-        'my`plugin`',
-        'my$plugin',
         'plugin!',
-        'plugin@',
       ];
 
-      invalidNames.forEach((name) => {
-        const pattern = /^[A-Za-z0-9_-]+$/;
-        expect(pattern.test(name)).toBe(false);
-      });
-    });
-
-    it('should reject empty plugin names', () => {
-      const pattern = /^[A-Za-z0-9_-]+$/;
-      expect(pattern.test('')).toBe(false);
+      for (const name of invalidNames) {
+        await expect(runValidationTests(name, false)).rejects.toThrow(
+          /Invalid plugin name/,
+        );
+      }
     });
   });
 
-  describe('Test File Detection', () => {
-    it('should detect .test.ts files', () => {
-      mkdirSync(testPluginTestDir, { recursive: true });
-      writeFileSync(join(testPluginTestDir, 'example.test.ts'), '');
+  describe('Test File Detection & Execution', () => {
+    it('should detect tests and execute vitest', async () => {
+      mkdirSync(testPluginDir, { recursive: true });
+      writeFileSync(join(testPluginDir, 'my.test.ts'), '');
 
-      const files = readdirSync(testPluginTestDir, { recursive: true });
-      const hasTestFiles = files.some(
-        (file: string | Buffer) =>
-          typeof file === 'string' && file.endsWith('.test.ts'),
+      await runValidationTests(testPluginName, false);
+
+      expect(childProcess.execSync).toHaveBeenCalledWith(
+        expect.stringContaining('test/platform/'),
+        expect.any(Object),
       );
-
-      expect(hasTestFiles).toBe(true);
+      expect(childProcess.execFileSync).toHaveBeenCalledWith(
+        'pnpm',
+        expect.arrayContaining([
+          'exec',
+          'vitest',
+          'run',
+          expect.stringContaining(testPluginName),
+        ]),
+        expect.any(Object),
+      );
     });
 
-    it('should detect .test.tsx files', () => {
-      mkdirSync(testPluginTestDir, { recursive: true });
-      writeFileSync(join(testPluginTestDir, 'component.test.tsx'), '');
+    it('should handle nested test directories', async () => {
+      const nested = join(testPluginDir, 'sub', 'folder');
+      mkdirSync(nested, { recursive: true });
+      writeFileSync(join(nested, 'deep.spec.tsx'), '');
 
-      const files = readdirSync(testPluginTestDir, { recursive: true });
-      const hasTestFiles = files.some(
-        (file: string | Buffer) =>
-          typeof file === 'string' && file.endsWith('.test.tsx'),
-      );
+      await runValidationTests(testPluginName, false);
 
-      expect(hasTestFiles).toBe(true);
+      expect(childProcess.execFileSync).toHaveBeenCalled();
     });
 
-    it('should detect .spec.ts files', () => {
-      mkdirSync(testPluginTestDir, { recursive: true });
-      writeFileSync(join(testPluginTestDir, 'example.spec.ts'), '');
+    it('should ignore non-test files', async () => {
+      mkdirSync(testPluginDir, { recursive: true });
+      writeFileSync(join(testPluginDir, 'index.ts'), '');
+      writeFileSync(join(testPluginDir, 'README.md'), '');
 
-      const files = readdirSync(testPluginTestDir, { recursive: true });
-      const hasTestFiles = files.some(
-        (file: string | Buffer) =>
-          typeof file === 'string' && file.endsWith('.spec.ts'),
+      // Should throw because no tests found
+      await expect(runValidationTests(testPluginName, false)).rejects.toThrow(
+        /No test files found/,
       );
 
-      expect(hasTestFiles).toBe(true);
-    });
-
-    it('should not detect non-test files', () => {
-      mkdirSync(testPluginTestDir, { recursive: true });
-      writeFileSync(join(testPluginTestDir, 'index.ts'), '');
-      writeFileSync(join(testPluginTestDir, 'types.ts'), '');
-      writeFileSync(join(testPluginTestDir, 'README.md'), '');
-
-      const files = readdirSync(testPluginTestDir, { recursive: true });
-      const hasTestFiles = files.some(
-        (file: string | Buffer) =>
-          typeof file === 'string' &&
-          (file.endsWith('.test.ts') ||
-            file.endsWith('.test.tsx') ||
-            file.endsWith('.spec.ts') ||
-            file.endsWith('.spec.tsx')),
-      );
-
-      expect(hasTestFiles).toBe(false);
-    });
-
-    it('should handle nested test directories', () => {
-      const nestedDir = join(testPluginTestDir, 'nested', 'deep');
-      mkdirSync(nestedDir, { recursive: true });
-      writeFileSync(join(nestedDir, 'nested.test.ts'), '');
-
-      const files = readdirSync(testPluginTestDir, { recursive: true });
-      const hasTestFiles = files.some(
-        (file: string | Buffer) =>
-          typeof file === 'string' && file.endsWith('.test.ts'),
-      );
-
-      expect(hasTestFiles).toBe(true);
-    });
-
-    it('should return false when test directory does not exist', () => {
-      const nonExistentDir = join(
-        process.cwd(),
-        'test',
-        'plugins',
-        'nonExistentPlugin',
-      );
-      expect(existsSync(nonExistentDir)).toBe(false);
+      // Should NOT have run plugin tests
+      expect(childProcess.execFileSync).not.toHaveBeenCalled();
     });
   });
 
   describe('Skip Tests Flag Behavior', () => {
-    it('should allow packaging without tests when skip flag is set', () => {
-      // Logic from scripts/zip/index.ts
-      const skipTests = true;
-      const hasTestFiles = false;
+    it('should allow packaging without tests when skip flag is set', async () => {
+      // Create dir strictly without tests
+      mkdirSync(testPluginDir, { recursive: true });
+      writeFileSync(join(testPluginDir, 'index.ts'), '');
 
-      // Logic: if skipTests is true and no test files, should not throw
-      const shouldThrow = !skipTests && !hasTestFiles;
-      expect(shouldThrow).toBe(false);
+      // Should not throw, should just warn (which we can catch via spy or just ensure no throw)
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await expect(
+        runValidationTests(testPluginName, true),
+      ).resolves.not.toThrow();
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('DEPRECATION WARNING'),
+      );
     });
 
-    it('should block packaging without tests when skip flag is not set', () => {
-      const skipTests = false;
-      const hasTestFiles = false;
+    it('should block packaging without tests when skip flag is NOT set', async () => {
+      mkdirSync(testPluginDir, { recursive: true });
+      writeFileSync(join(testPluginDir, 'index.ts'), '');
 
-      // Logic: if skipTests is false and no test files, should throw
-      const shouldThrow = !skipTests && !hasTestFiles;
-      expect(shouldThrow).toBe(true);
-    });
-
-    it('should always run tests when test files exist regardless of skip flag', () => {
-      const hasTestFiles = true;
-
-      // When files exist, we run tests
-      expect(hasTestFiles).toBe(true);
+      await expect(runValidationTests(testPluginName, false)).rejects.toThrow(
+        /No test files found/,
+      );
     });
   });
 });
 
 describe('Zip Script - Integration Behavior', () => {
-  it('should validate plugin name before running tests', () => {
-    const invalidPluginName = '../../../malicious';
-    const pattern = /^[A-Za-z0-9_-]+$/;
-
-    expect(pattern.test(invalidPluginName)).toBe(false);
-  });
-
-  it('should execute platform tests before plugin tests', () => {
-    // This would verify the test execution order
-    const testOrder = ['platform', 'plugin'];
-    expect(testOrder[0]).toBe('platform');
-  });
-
-  it.todo('should restore backup on compilation failure');
+  it.todo('should execute platform tests before plugin tests'); // Marked as todo as requested
 });

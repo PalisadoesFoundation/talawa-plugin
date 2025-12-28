@@ -1,4 +1,4 @@
-// scripts/zip/createProdZip.ts
+// scripts/zip/compileProduction.ts
 import {
   createWriteStream,
   existsSync,
