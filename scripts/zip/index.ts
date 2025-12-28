@@ -7,10 +7,9 @@ import {
   confirm,
   spinner,
 } from '@clack/prompts';
-import bold from 'chalk';
-import green from 'chalk';
-import { readdirSync, existsSync } from 'node:fs';
-import { execSync } from 'node:child_process';
+import chalk from 'chalk';
+import { readdirSync, existsSync, rmSync, cpSync } from 'node:fs';
+import { execSync, execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { createZip } from './createZip.js';
 import { compileForProduction } from './compileProduction.js';
@@ -83,9 +82,23 @@ async function runValidationTests(
     }
 
     if (hasTestFiles) {
+      // Validate pluginName to prevent command injection
+      if (!/^[A-Za-z0-9_-]+$/.test(pluginName)) {
+        throw new Error(
+          `Invalid plugin name "${pluginName}". Plugin names must only contain letters, numbers, hyphens, and underscores.`,
+        );
+      }
+
       s.start(`Running ${pluginName} plugin tests...`);
-      execSync(
-        `pnpm exec vitest run test/plugins/${pluginName}/ --reporter=verbose`,
+      execFileSync(
+        'pnpm',
+        [
+          'exec',
+          'vitest',
+          'run',
+          `test/plugins/${pluginName}/`,
+          '--reporter=verbose',
+        ],
         { stdio: 'inherit' },
       );
       s.stop(`${pluginName} plugin tests passed`);
@@ -120,7 +133,7 @@ async function runValidationTests(
 }
 
 async function main() {
-  intro(`${bold('Talawa Plugin Zipper')}`);
+  intro(chalk.bold('Talawa Plugin Zipper'));
 
   // Check for skip tests flag from CLI args or env var
   const skipTests =
@@ -220,20 +233,18 @@ async function main() {
         await createZip(selectedPlugin, false);
 
         // Restore original TypeScript files
-        const { execSync } = await import('node:child_process');
-        const { existsSync, rmSync } = await import('node:fs');
         const backupPath = `${selectedPlugin.path}.backup`;
 
         if (existsSync(backupPath)) {
           rmSync(selectedPlugin.path, { recursive: true, force: true });
-          execSync(`cp -r "${backupPath}" "${selectedPlugin.path}"`);
+          cpSync(backupPath, selectedPlugin.path, { recursive: true });
           rmSync(backupPath, { recursive: true, force: true });
         }
       }
 
       zipSpinner.stop(`${selectedPluginName} zipped successfully!`);
       outro(
-        green(
+        chalk.green(
           `Plugin "${selectedPluginName}" has been zipped as ${isDevelopment ? 'development' : 'production'} build.`,
         ),
       );
@@ -243,13 +254,11 @@ async function main() {
 
       // Restore original files on error for production builds
       if (!isDevelopment) {
-        const { execSync } = await import('node:child_process');
-        const { existsSync, rmSync } = await import('node:fs');
         const backupPath = `${selectedPlugin.path}.backup`;
 
         if (existsSync(backupPath)) {
           rmSync(selectedPlugin.path, { recursive: true, force: true });
-          execSync(`cp -r "${backupPath}" "${selectedPlugin.path}"`);
+          cpSync(backupPath, selectedPlugin.path, { recursive: true });
           rmSync(backupPath, { recursive: true, force: true });
         }
       }
