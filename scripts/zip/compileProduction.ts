@@ -114,10 +114,10 @@ export async function compileForProduction(
   skipTypeCheck: boolean = false,
 ): Promise<void> {
   const { execSync } = await import('node:child_process');
-  const { existsSync, rmSync, mkdirSync, readdirSync, statSync } = await import(
+  const { existsSync, rmSync, mkdirSync, readdirSync } = await import(
     'node:fs'
   );
-  const { join, extname, basename, dirname } = await import('node:path');
+  const { join } = await import('node:path');
 
   // Create backup of original plugin
   const backupPath = `${plugin.path}.backup`;
@@ -438,10 +438,15 @@ export async function createProductionZip(
     forceZip64: false,
   });
 
+  interface ArchiveWarning {
+    code?: string;
+    message: string;
+  }
+
   const done = new Promise<void>((resolve, reject) => {
     out.on('close', () => resolve());
     out.on('error', reject);
-    archive.on('warning', (err: any) => {
+    archive.on('warning', (err: ArchiveWarning) => {
       if (err?.code === 'ENOENT') {
         console.warn('Archive warning:', err);
       } else {
@@ -459,7 +464,8 @@ export async function createProductionZip(
     const mtime = new Date(Math.floor(mtimeMs / 1000) * 1000);
     archive.file(f.fsPath, {
       name: f.zipPath.replace(/\\/g, '/'),
-      stats: { ...f.stats, mtime } as any,
+      // arch never handles stats internally; use broader cast to avoid type incompatibilities
+      stats: { ...f.stats, mtime } as unknown as never,
       // keep compression on to avoid "uncompressed content" issues
     });
   }

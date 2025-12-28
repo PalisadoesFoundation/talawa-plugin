@@ -7,7 +7,7 @@ import {
   statSync,
   readdirSync,
 } from 'node:fs';
-import { join, relative, sep, dirname } from 'node:path';
+import { dirname, join, sep } from 'node:path';
 import archiver from 'archiver';
 import { validateManifest } from '../utils/validateManifest';
 import { validateExtensionPoints } from '../utils/validateExtensionPoints';
@@ -112,6 +112,7 @@ export async function createZip(
   plugin: PluginInfo,
   isDevelopment: boolean,
 ): Promise<void> {
+  // eslint-disable-next-line no-async-promise-executor -- Intentional: getPluginId is async and needs to run before Promise setup
   return new Promise(async (resolve, reject) => {
     const buildType = isDevelopment ? 'dev' : 'prod';
 
@@ -205,11 +206,16 @@ export async function createZip(
       // comment: 'Talawa plugin package', // optional
     });
 
+    interface ArchiveWarning {
+      code?: string;
+      message: string;
+    }
+
     const done = new Promise<void>((resolveClose, rejectClose) => {
       output.on('close', () => resolveClose());
       output.on('error', rejectClose);
-      archive.on('warning', (err) => {
-        if ((err as any)?.code !== 'ENOENT') {
+      archive.on('warning', (err: ArchiveWarning) => {
+        if (err?.code !== 'ENOENT') {
           rejectClose(err);
         }
       });
@@ -230,7 +236,8 @@ export async function createZip(
         stats: {
           ...f.stats,
           mtime,
-        } as any,
+          // archiver handles stats internally; use broader cast
+        } as unknown as never,
       });
     }
 

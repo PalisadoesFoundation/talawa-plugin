@@ -82,3 +82,79 @@ The script determines the plugin ID for zip naming by checking manifest files in
 - Original files are restored after zipping
 - Backup files are created during the process for safety
 - The script handles both Admin (React/JSX) and API (Node.js) compilation settings
+
+## Test Requirements
+
+**IMPORTANT**: The zip script enforces strict quality gates to ensure plugin reliability.
+
+### Validation Process
+
+Before creating any plugin zip file, the script automatically:
+
+1. **Runs Platform Tests**: Executes all validation tests in `test/platform/` to ensure the plugin meets platform requirements
+2. **Checks for Plugin Tests**: Searches for test files in `test/plugins/{plugin-name}/`
+3. **Runs Plugin Tests**: If test files exist, executes them to validate plugin-specific functionality
+
+### Test File Requirements
+
+For a plugin to be packaged, it **must** have dedicated test files in `test/plugins/{plugin-name}/`.
+
+Accepted test file patterns:
+- `*.test.ts`
+- `*.test.tsx`
+- `*.spec.ts`
+- `*.spec.tsx`
+
+### Validation Failures
+
+Packaging will be **blocked** if:
+- Platform validation tests fail
+- Plugin-specific tests fail
+- No test files are found for the plugin
+
+### Skip Tests Option (Legacy Plugins)
+
+For legacy plugins without tests (not recommended for production), you can bypass test requirements:
+
+```bash
+# Using CLI flag
+pnpm zip-plugin --skip-tests
+
+# Using environment variable
+SKIP_TESTS=true pnpm zip-plugin
+```
+
+**Warning**: When using `--skip-tests`, you will see a deprecation warning. Support for untested plugins will be removed in future versions.
+
+### Error Messages
+
+The script provides clear error messages to help you understand validation failures:
+
+- **Platform tests failed**: Issues with core platform validation
+- **Plugin-specific tests failed**: Issues with your plugin's test suite
+- **No test files found**: Plugin lacks dedicated tests (add tests or use `--skip-tests`)
+
+## Security Features
+
+- **Plugin name validation**: Only alphanumeric characters, hyphens, and underscores allowed
+- **Command injection prevention**: Uses safe child_process APIs with argument arrays
+- **Cross-platform compatibility**: Uses Node.js file system APIs instead of shell commands
+
+## Example Workflow
+
+```bash
+# 1. Add tests for your plugin
+mkdir -p test/plugins/myPlugin
+touch test/plugins/myPlugin/lifecycle.test.ts
+
+# 2. Write your tests
+# ... code your tests ...
+
+# 3. Run the zip script
+pnpm zip-plugin
+
+# 4. Select your plugin from the list
+# 5. Choose development or production build
+# 6. Tests run automatically
+# 7. Zip file created in plugin-zips/
+```
