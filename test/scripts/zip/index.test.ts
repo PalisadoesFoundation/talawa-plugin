@@ -6,6 +6,7 @@ import {
   rmSync,
   mkdtempSync,
   readFileSync,
+  cpSync,
 } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -63,7 +64,6 @@ describe('Zip Script - restoreBackup()', () => {
     // Simulate compilation failure handler logic
     if (existsSync(backupPath)) {
       // Logic mirrors what compilesProduction does: cpSync(backupPath, pluginPath)
-      const { cpSync } = await import('node:fs');
       cpSync(backupPath, pluginPath, { recursive: true });
     }
 
@@ -119,11 +119,6 @@ describe('Zip Script - runValidationTests()', () => {
     });
 
     it('should reject invalid plugin names', async () => {
-      // We don't even need files to exist for this check if checking happens before file check?
-      // Looking at code, it checks files first. So let's create files.
-      mkdirSync(testPluginDir, { recursive: true });
-      writeFileSync(join(testPluginDir, 'example.test.ts'), '');
-
       const invalidNames = [
         'test/plugin',
         'test\\plugin', // Backslash
@@ -147,8 +142,9 @@ describe('Zip Script - runValidationTests()', () => {
 
       await runValidationTests(testPluginName, false);
 
-      expect(childProcess.execSync).toHaveBeenCalledWith(
-        expect.stringContaining('test/platform/'),
+      expect(childProcess.execFileSync).toHaveBeenCalledWith(
+        'pnpm',
+        expect.arrayContaining(['exec', 'vitest', 'run', 'test/platform/']),
         expect.any(Object),
       );
       expect(childProcess.execFileSync).toHaveBeenCalledWith(
@@ -184,7 +180,13 @@ describe('Zip Script - runValidationTests()', () => {
       );
 
       // Should NOT have run plugin tests
-      expect(childProcess.execFileSync).not.toHaveBeenCalled();
+      // Should have run platform tests but NOT plugin tests
+      expect(childProcess.execFileSync).toHaveBeenCalledTimes(1);
+      expect(childProcess.execFileSync).toHaveBeenCalledWith(
+        'pnpm',
+        expect.arrayContaining(['exec', 'vitest', 'run', 'test/platform/']),
+        expect.any(Object),
+      );
     });
   });
 

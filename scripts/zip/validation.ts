@@ -1,7 +1,14 @@
 import { spinner } from '@clack/prompts';
 import { existsSync, readdirSync } from 'node:fs';
-import { execSync, execFileSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
+
+export class PluginTestError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PluginTestError';
+  }
+}
 
 /**
  * Runs platform and plugin-specific validation tests before packaging
@@ -26,9 +33,11 @@ export async function runValidationTests(
 
     // Run platform validation tests
     s.start('Running platform validation tests...');
-    execSync('pnpm exec vitest run test/platform/ --reporter=verbose', {
-      stdio: 'inherit',
-    });
+    execFileSync(
+      'pnpm',
+      ['exec', 'vitest', 'run', 'test/platform/', '--reporter=verbose'],
+      { stdio: 'inherit' },
+    );
     s.stop('Platform validation tests passed');
 
     // Check if plugin-specific tests exist
@@ -65,7 +74,7 @@ export async function runValidationTests(
         s.stop(`${pluginName} plugin tests passed`);
       } catch (error) {
         s.stop(`${pluginName} plugin tests failed`);
-        throw new Error(
+        throw new PluginTestError(
           `Plugin-specific tests failed for "${pluginName}". ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
       }
@@ -90,13 +99,14 @@ export async function runValidationTests(
     }
   } catch (error) {
     s.stop('Validation failed');
+
+    if (error instanceof PluginTestError) {
+      throw error;
+    }
+
     // Re-throw with more context if this is a platform test failure
     if (error instanceof Error) {
-      // If error message doesn't already mention plugin-specific tests, it's platform tests
-      if (!error.message.includes('Plugin-specific tests')) {
-        throw new Error(`Platform validation tests failed. ${error.message}`);
-      }
-      throw error;
+      throw new Error(`Platform validation tests failed. ${error.message}`);
     }
     throw new Error(
       'Validation failed with unknown error. Please check test output above.',
