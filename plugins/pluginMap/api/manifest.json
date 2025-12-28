@@ -32,12 +32,14 @@
     ],
     "hooks": [
       {
+        "name": "pluginMapActivatedHook",
         "type": "post",
         "event": "plugin:activated",
         "handler": "onPluginActivated",
         "description": "Handle plugin activation events"
       },
       {
+        "name": "pluginMapDeactivatedHook",
         "type": "post",
         "event": "plugin:deactivated",
         "handler": "onPluginDeactivated",

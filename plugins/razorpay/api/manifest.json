@@ -44,18 +44,21 @@
     ],
     "hooks": [
       {
+        "name": "razorpayPaymentCreatedHook",
         "type": "post",
         "event": "payment:created",
         "handler": "onPaymentCreated",
         "description": "Handle payment creation events"
       },
       {
+        "name": "razorpayPaymentCompletedHook",
         "type": "post",
         "event": "payment:completed",
         "handler": "onPaymentCompleted",
         "description": "Handle payment completion events"
       },
       {
+        "name": "razorpayPaymentFailedHook",
         "type": "post",
         "event": "payment:failed",
         "handler": "onPaymentFailed",
@@ -64,6 +67,7 @@
     ],
     "webhooks": [
       {
+        "name": "razorpayWebhook",
         "path": "/",
         "handler": "handleRazorpayWebhook",
         "method": "POST"
