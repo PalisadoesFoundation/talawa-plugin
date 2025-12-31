@@ -7,10 +7,12 @@ import {
   statSync,
   readdirSync,
 } from 'node:fs';
-import { join, relative, sep, dirname } from 'node:path';
+import { dirname, join, sep } from 'node:path';
 import archiver from 'archiver';
 import { validateManifest } from '../utils/validateManifest';
 import { validateExtensionPoints } from '../utils/validateExtensionPoints';
+import type { Stats } from 'node:fs';
+import type { ArchiveWarning } from './types.js';
 
 interface PluginInfo {
   name: string;
@@ -112,56 +114,51 @@ export async function createZip(
   plugin: PluginInfo,
   isDevelopment: boolean,
 ): Promise<void> {
-  return new Promise(async (resolve, reject) => {
-    const buildType = isDevelopment ? 'dev' : 'prod';
+  const buildType = isDevelopment ? 'dev' : 'prod';
+  const pluginId = await getPluginId(plugin.path);
+  const zipFileName = `${pluginId}-${buildType}.zip`;
 
-    const pluginId = await getPluginId(plugin.path);
-    const zipFileName = `${pluginId}-${buildType}.zip`;
+  const zipOutputDir = join(process.cwd(), 'plugin-zips');
+  if (!existsSync(zipOutputDir)) {
+    mkdirSync(zipOutputDir, { recursive: true });
+  }
+  const zipPath = join(zipOutputDir, zipFileName);
 
-    const zipOutputDir = join(process.cwd(), 'plugin-zips');
-    if (!existsSync(zipOutputDir)) {
-      mkdirSync(zipOutputDir, { recursive: true });
-    }
-    const zipPath = join(zipOutputDir, zipFileName);
+  // Validate Manifest and Extension Points
+  const manifestPaths = [
+    join(plugin.path, 'manifest.json'),
+    join(plugin.path, 'admin', 'manifest.json'),
+    join(plugin.path, 'api', 'manifest.json'),
+  ];
 
-    // Validate Manifest and Extension Points
-    const manifestPaths = [
-      join(plugin.path, 'manifest.json'),
-      join(plugin.path, 'admin', 'manifest.json'),
-      join(plugin.path, 'api', 'manifest.json'),
-    ];
+  let manifestFound = false;
 
-    let manifestFound = false;
-
+  try {
     for (const manifestPath of manifestPaths) {
       if (existsSync(manifestPath)) {
         manifestFound = true;
-        try {
-          const content = readFileSync(manifestPath, 'utf-8');
-          const manifest = JSON.parse(content);
+        const content = readFileSync(manifestPath, 'utf-8');
+        const manifest = JSON.parse(content);
 
-          console.log(`Validating manifest: ${manifestPath}`);
+        console.log(`Validating manifest: ${manifestPath}`);
 
-          // 1. Basic Manifest Validation
-          const manifestResult = validateManifest(manifest);
-          if (!manifestResult.valid) {
-            throw new Error(
-              `Manifest validation failed for ${manifestPath}:\n${manifestResult.errors.join('\n')}`,
-            );
-          }
-
-          // 2. Extension Point Validation
-          const extensionResult = await validateExtensionPoints(
-            manifest,
-            dirname(manifestPath),
+        // 1. Basic Manifest Validation
+        const manifestResult = validateManifest(manifest);
+        if (!manifestResult.valid) {
+          throw new Error(
+            `Manifest validation failed for ${manifestPath}:\n${manifestResult.errors.join('\n')}`,
           );
-          if (!extensionResult.valid) {
-            throw new Error(
-              `Extension point validation failed for ${manifestPath}:\n${extensionResult.errors.join('\n')}`,
-            );
-          }
-        } catch (e) {
-          return reject(e);
+        }
+
+        // 2. Extension Point Validation
+        const extensionResult = await validateExtensionPoints(
+          manifest,
+          dirname(manifestPath),
+        );
+        if (!extensionResult.valid) {
+          throw new Error(
+            `Extension point validation failed for ${manifestPath}:\n${extensionResult.errors.join('\n')}`,
+          );
         }
       }
     }
@@ -208,8 +205,13 @@ export async function createZip(
     const done = new Promise<void>((resolveClose, rejectClose) => {
       output.on('close', () => resolveClose());
       output.on('error', rejectClose);
-      archive.on('warning', (err) => {
-        if ((err as any)?.code !== 'ENOENT') {
+      archive.on('warning', (err: ArchiveWarning) => {
+        if (err?.code === 'ENOENT') {
+          console.warn(
+            '[Archive] Skipping missing file during zip creation:',
+            err.message || 'Unknown file',
+          );
+        } else {
           rejectClose(err);
         }
       });
@@ -230,27 +232,22 @@ export async function createZip(
         stats: {
           ...f.stats,
           mtime,
-        } as any,
+          // Use Partial<Stats> to allow mtime override while satisfying archiver's type requirements
+        } as Partial<Stats> as Stats | undefined,
       });
     }
 
     // Finalize & wait
     archive.finalize();
 
-    try {
-      await done;
+    await done;
 
-      console.log(`📦 Zip created: ${zipFileName}`);
-      console.log(
-        `📊 Size: ${(archive.pointer() / 1024 / 1024).toFixed(2)} MB`,
-      );
+    console.log(`Zip created: ${zipFileName}`);
+    console.log(`Size: ${(archive.pointer() / 1024 / 1024).toFixed(2)} MB`);
 
-      await validateZipFile(zipPath);
-    } catch (e) {
-      console.error('Archive finalize/validate error:', e);
-      return reject(e);
-    }
-
-    resolve();
-  });
+    await validateZipFile(zipPath);
+  } catch (e) {
+    console.error('Archive finalize/validate error:', e);
+    throw e; // Re-throw the error to be caught by the caller of createZip
+  }
 }

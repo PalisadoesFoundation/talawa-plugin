@@ -6,7 +6,6 @@ import {
   mkdirSync,
   writeFileSync,
   mkdtempSync,
-  createWriteStream,
 } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -16,12 +15,17 @@ import { validManifest } from '../utils/fixtures';
 
 // Mock archiver for error injection
 let mockArchiverError: Error | null = null;
-let mockArchiverWarning: any | null = null;
+let mockArchiverWarning: unknown | null = null;
 
 vi.mock('archiver', async () => {
-  const actual = await vi.importActual<any>('archiver');
+  const actual = await vi.importActual<{
+    default: (
+      format: string,
+      options: import('archiver').ArchiverOptions,
+    ) => import('archiver').Archiver;
+  }>('archiver');
   return {
-    default: (format: string, options: any) => {
+    default: (format: string, options: import('archiver').ArchiverOptions) => {
       const archive = actual.default(format, options);
       // Hook into finalize to trigger errors if set
       const originalFinalize = archive.finalize.bind(archive);
@@ -68,6 +72,12 @@ describe('Plugin Packager', () => {
         extensionPoints: {},
         description: 'Test plugin for packaging',
       }),
+    );
+
+    // Add a file with sufficient size to prevent "zip too small" errors
+    writeFileSync(
+      join(adminDir, 'dummy.txt'),
+      'x'.repeat(200), // 200 bytes
     );
 
     // Create API module
