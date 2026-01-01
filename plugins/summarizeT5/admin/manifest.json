@@ -9,12 +9,14 @@
   "extensionPoints": {
     "G3": [
       {
+        "name": "summarizeT5ButtonG3Widget",
         "injector": "SummarizeButton",
         "description": "AI Summarize button for organization posts"
       }
     ],
     "G4": [
       {
+        "name": "summarizeT5ButtonG4Widget",
         "injector": "SummarizeButton",
         "description": "AI Summarize button for user portal posts"
       }

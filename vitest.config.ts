@@ -94,10 +94,10 @@ export default defineConfig({
         '**/setupTests.ts',
       ],
       thresholds: {
-        lines: 60,
-        functions: 60,
-        branches: 50,
-        statements: 60,
+        lines: 80,
+        functions: 70,
+        branches: 78,
+        statements: 80,
       },
     },
     // Test timeouts - configurable via env vars

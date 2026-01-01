@@ -39,7 +39,7 @@ describe('validateExtensionPoints - Utilities & General', () => {
     const manifest: PluginManifest = {
       ...validManifest,
       extensionPoints: {
-        'api:graphql': 'not-an-array' as any,
+        'api:graphql': 'not-an-array' as unknown as never[],
       },
     };
 
@@ -53,7 +53,7 @@ describe('validateExtensionPoints - Utilities & General', () => {
   it('should invalidate if extensionPoints is an array', async () => {
     const manifest: PluginManifest = {
       ...validManifest,
-      extensionPoints: [] as any,
+      extensionPoints: [] as unknown as Record<string, unknown[]>,
     };
 
     const result = await validateExtensionPoints(manifest, mockPluginRoot);
@@ -71,7 +71,12 @@ describe('validateExtensionPoints - Utilities & General', () => {
             name: 'myQuery',
             builderDefinition: 'myQuery',
             // Missing file field
-          } as any,
+          } as unknown as {
+            type: string;
+            name: string;
+            file: string;
+            builderDefinition: string;
+          },
         ],
       },
     };
@@ -95,7 +100,12 @@ describe('validateExtensionPoints - Utilities & General', () => {
             file: 'query.ts',
             builderDefinition: 'myQuery',
             // Missing name field
-          } as any,
+          } as unknown as {
+            type: string;
+            name: string;
+            file: string;
+            builderDefinition: string;
+          },
         ],
       },
     };
@@ -223,7 +233,11 @@ describe('validateExtensionPoints - Utilities & General', () => {
               title: 12345, // Non-string title
               path: '/some/path',
             },
-          ] as any,
+          ] as unknown as Array<{
+            name?: string;
+            title?: string | number;
+            path: string;
+          }>,
         },
       } as unknown as PluginManifest;
 
@@ -261,8 +275,8 @@ describe('validateExtensionPoints - Utilities & General', () => {
               name: 'my-api',
               type: 'query',
               file: 123, // Invalid
-            },
-          ] as any,
+            } as unknown as { name: string; type: string; file: unknown },
+          ],
         },
       } as unknown as PluginManifest;
 
@@ -282,8 +296,13 @@ describe('validateExtensionPoints - Utilities & General', () => {
               type: 'query',
               file: 'api.ts',
               builderDefinition: 123, // Invalid
+            } as unknown as {
+              name: string;
+              type: string;
+              file: string;
+              builderDefinition: unknown;
             },
-          ] as any,
+          ],
         },
       } as unknown as PluginManifest;
 
@@ -386,8 +405,8 @@ describe('validateExtensionPoints - Utilities & General', () => {
               name: 'my-api',
               type: 'query',
               file: 0, // Falsy non-string
-            },
-          ] as any,
+            } as unknown as { name: string; type: string; file: unknown },
+          ],
         },
       } as unknown as PluginManifest;
 
@@ -461,6 +480,93 @@ describe('validateExtensionPoints - Utilities & General', () => {
       const result = await validateExtensionPoints(manifest, mockPluginRoot);
       expect(result.valid).toBe(false);
       expect(result.errors).toContain('Missing "file" for extension "my-api"');
+    });
+
+    it('should invalidate duplicate name values across different extension points', async () => {
+      const manifest: PluginManifest = {
+        ...validManifest,
+        extensionPoints: {
+          G1: [
+            {
+              name: 'duplicateName',
+              injector: 'MyInjector1',
+            },
+          ],
+          G2: [
+            {
+              name: 'duplicateName', // Same name as in G1
+              injector: 'MyInjector2',
+            },
+          ],
+        },
+      };
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(
+        'Duplicate extension name "duplicateName" found in "G2" (already defined in "G1")',
+      );
+    });
+
+    it('should invalidate non-string name field types', async () => {
+      const manifest = {
+        extensionPoints: {
+          G1: [
+            {
+              name: 123, // Invalid: number instead of string
+              injector: 'MyInjector',
+            } as unknown as { name: unknown; injector: string },
+          ],
+        },
+      } as unknown as PluginManifest;
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Missing "name" in extension point "G1"');
+    });
+
+    it('should invalidate empty string name values', async () => {
+      const manifest: PluginManifest = {
+        ...validManifest,
+        extensionPoints: {
+          G1: [
+            {
+              name: '', // Invalid: empty string
+              injector: 'MyInjector',
+            },
+          ],
+        },
+      };
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Missing "name" in extension point "G1"');
+    });
+
+    it('should handle admin:menu with both name and title missing when title is array', async () => {
+      const manifest = {
+        extensionPoints: {
+          'admin:menu': [
+            {
+              // No name
+              title: ['invalid', 'array'], // Non-string title
+              path: '/some/path',
+              icon: 'icon',
+            } as unknown as {
+              name?: string;
+              title?: unknown;
+              path: string;
+              icon: string;
+            },
+          ],
+        },
+      } as unknown as PluginManifest;
+
+      const result = await validateExtensionPoints(manifest, mockPluginRoot);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(
+        'Missing "name" (or "title") in extension point "admin:menu"',
+      );
     });
   });
 });
