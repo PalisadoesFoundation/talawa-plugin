@@ -42,7 +42,7 @@
     "graphql-tag": "^2.12.6",
     "husky": "^9.1.7",
     "jsdom": "^27.3.0",
-    "knip": "^5.67.0",
+    "knip": "^5.78.0",
     "lint-staged": "^16.2.7",
     "prettier": "^3.6.2",
     "react": "^18",
