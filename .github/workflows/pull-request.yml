@@ -90,9 +90,11 @@ jobs:
         if: steps.changed-files.outputs.only_changed != 'true'
         run: pnpm run format:check
 
-      - name: Run formatting if check fails
+      - name: Suggest running format:fix
         if: failure()
-        run: pnpm run format:fix
+        run: |
+          echo "::error::Formatting check failed. Please run 'pnpm run format:fix' locally and commit the changes."
+          exit 1
 
       - name: Check for type errors
         if: steps.changed-files.outputs.any_ts_changed == 'true'
