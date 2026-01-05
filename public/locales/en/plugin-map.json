@@ -1,79 +1,75 @@
 {
-  "dashboard": {
-    "title": "Extension Points Dashboard",
-    "description": "This component displays all available extension points in the Talawa Admin Panel from a global admin perspective, helping developers understand the full ecosystem.",
-    "requestButton": "Request RA2 (Admin Dashboard)",
-    "requestHistory": "Request History (RA2 - Admin Dashboard)",
-    "testRequestSystem": "Test Request System",
-    "clickBelow": "Click the button below to test the request system for RA2 extension point."
-  },
   "global": {
-    "title": "Global Plugin Map Dashboard",
-    "description": "This component displays all available extension points in the Talawa Admin Panel from a global user perspective, helping developers understand the full ecosystem.",
-    "requestButton": "Request RU2 (Global User)",
-    "requestHistory": "Request History (RU2 - Global User)",
+    "title": "Extension Points - Global Routes",
+    "description": "This page demonstrates the RU2 (Global User Routes) extension point. All authenticated users can access this route globally.",
     "testRequestSystem": "Test Request System",
-    "clickBelow": "Click the button below to test the request system for RU2 extension point."
+    "clickBelow": "Click the button below to log a test request for this extension point:",
+    "requestButton": "Log Test Request",
+    "requestHistory": "Request History"
   },
-  "organization": {
-    "title": "RA1 - Admin Organization Extension Point",
-    "description": "This page represents the RA1 extension point - Admin Organization Route. This is an admin organization route that provides admin functionality within a specific organization.",
-    "requestButton": "Request RA1 (Admin Organization)",
-    "requestHistory": "Request History (RA1 - Admin Organization)",
+  "dashboard": {
+    "title": "Extension Points - Admin Dashboard",
+    "description": "This page demonstrates the RA2 (Admin Dashboard Routes) extension point. Only administrators can access this route globally.",
     "testRequestSystem": "Test Request System",
-    "clickBelow": "Click the button below to test the request system for RA1 extension point.",
-    "redirectError": "Organization not found — redirecting to home"
+    "clickBelow": "Click the button below to log a test request for this extension point:",
+    "requestButton": "Log Test Request",
+    "requestHistory": "Request History"
   },
   "user": {
-    "title": "RU1 - User Organization Extension Point",
-    "description": "This page represents the RU1 extension point - User Organization Route. This is a user organization route that provides functionality accessible to member users within a specific organization.",
-    "requestButton": "Request RU1 (User Organization)",
-    "requestHistory": "Request History (RU1 - User Organization)",
+    "title": "Extension Points - User Organization Routes",
+    "description": "This page demonstrates the RU1 (User Organization Routes) extension point. Organization members can access this route within their organization.",
     "testRequestSystem": "Test Request System",
-    "clickBelow": "Click the button below to test the request system for RU1 extension point.",
-    "redirectError": "Organization not found — redirecting to home"
+    "clickBelow": "Click the button below to log a test request for this extension point:",
+    "requestButton": "Log Test Request",
+    "requestHistory": "Request History",
+    "redirectError": "Organization ID is required to access this page. Redirecting to home..."
+  },
+  "organization": {
+    "title": "Extension Points - Organization Admin Routes",
+    "description": "This page demonstrates the RA1 (Admin Organization Routes) extension point. Organization administrators can access this route within their organization.",
+    "testRequestSystem": "Test Request System",
+    "clickBelow": "Click the button below to log a test request for this extension point:",
+    "requestButton": "Log Test Request",
+    "requestHistory": "Request History",
+    "redirectError": "Organization ID is required to access this page. Redirecting to home..."
   },
   "table": {
     "pollNumber": "Poll Number",
     "userId": "User ID",
     "userRole": "User Role",
-    "orgId": "Org ID",
+    "orgId": "Organization ID",
     "extensionPoint": "Extension Point",
     "createdAt": "Created At",
-    "action": "Action",
-    "totalRequests": "Total requests: {{count}}",
-    "view": "View"
-  },
-  "messages": {
-    "success": "Request {{pollNumber}} logged successfully from {{extensionPoint}}",
-    "error": "Failed to log request"
+    "totalRequests": "Total Requests: {{count}}"
   },
   "info": {
     "extensionId": "Extension ID",
     "type": "Type",
+    "globalRoute": "Global Route",
+    "adminDashboard": "Admin Dashboard",
+    "userOrgRoute": "User Org Route",
+    "orgRoute": "Org Admin Route",
     "accessLevel": "Access Level",
+    "allAuthUsers": "All Authenticated Users",
+    "adminsOnly": "Admins Only (Global)",
+    "adminOnly": "Admin Only",
+    "orgUsers": "Organization Users",
     "organization": "Organization",
     "note": "Note:",
-    "globalUser": "Global User",
-    "globalRoute": "Global Route",
-    "allAuthUsers": "All Authenticated Users",
-    "globalAdmin": "Global Admin",
-    "adminDashboard": "Admin Dashboard",
-    "adminsOnly": "Admins Only",
-    "orgRoute": "Organization Route",
-    "adminOnly": "Admin Only",
-    "userOrgRoute": "User Organization Route",
-    "orgUsers": "Organization Users",
-    "globalDesc": "This extension point relies on global user context and is available throughout the application for authenticated users.",
-    "dashboardDesc": "This extension point provides administrative capabilities at the global level. Plugins can add widgets and data visualizations here.",
-    "orgAdminDesc": "This extension point provides organization-specific administrative capabilities. Plugins can access organization data and manage features within the current organization context.",
-    "orgUserDesc": "This extension point provides organization-specific features for regular users. Plugins can offer tools and content relevant to the organization members."
+    "globalDesc": "This route is accessible to all authenticated users globally, regardless of organization membership.",
+    "dashboardDesc": "This route is accessible to administrators in the global admin dashboard.",
+    "orgUserDesc": "This route is organization-specific and accessible to users who are members of the organization.",
+    "orgAdminDesc": "This route is organization-specific and accessible only to administrators of this organization."
+  },
+  "messages": {
+    "success": "Successfully logged request #{{pollNumber}} for extension point {{extensionPoint}}!",
+    "error": "Failed to log request. Please try again."
   },
   "injector": {
-    "paymentTitle": "Payment Provider Transactions",
-    "paymentDescription": "Browse transactions made using the following payment provider",
-    "extensionPoint": "Extension Point: {{id}} - Transaction Display Area",
-    "supportText": "This location supports component injection via the Plugin Map system. Developers can inject custom components here using the {{id}} extension point.",
-    "badge": "Plugin Map Extension Point"
+    "paymentTitle": "Plugin Map G1 Extension Point",
+    "paymentDescription": "This is a demonstration of the G1 (Global Widget) extension point",
+    "extensionPoint": "Extension Point: {{id}}",
+    "supportText": "Plugin supports this extension point {{id}}",
+    "badge": "Plugin Map Extension Point Indicator"
   }
 }

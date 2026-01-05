@@ -21,25 +21,23 @@ import MapIconInjector from './injector/MapIconInjector';
 // Plugin lifecycle implementation
 const PluginMapLifecycle: IPluginLifecycle = {
   onActivate: async () => {
-    console.log('[onActivateHook] Plugin Map plugin activated');
+    // Plugin Map plugin activated
   },
 
   onDeactivate: async () => {
-    console.log('[onDeactivateHook] Plugin Map plugin deactivated');
+    // Plugin Map plugin deactivated
   },
 
   onInstall: async () => {
-    console.log('[onInstallHook] Plugin Map plugin installed');
+    // Plugin Map plugin installed
   },
 
   onUninstall: async () => {
-    console.log('[onUninstallHook] Plugin Map plugin uninstalled');
+    // Plugin Map plugin uninstalled
   },
 
-  onUpdate: async (fromVersion: string, toVersion: string) => {
-    console.log(
-      `[onUpdateHook] Plugin Map plugin updated from ${fromVersion} to ${toVersion}`,
-    );
+  onUpdate: async (_fromVersion: string, _toVersion: string) => {
+    // Plugin Map plugin updated
   },
 };
 
