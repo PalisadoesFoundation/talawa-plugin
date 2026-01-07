@@ -243,6 +243,7 @@ jobs:
             'ISSUE_GUIDELINES.md$'
             'PR_GUIDELINES.md$'
             'README.md$'
+            './*.md$'
             '.*.pem$'
             '.*.key$'
             '.*.cert$'
