@@ -7,7 +7,9 @@
 
 import fs from 'fs';
 import path from 'path';
+import path from 'path';
 import { spawnSync } from 'child_process';
+import { fileURLToPath } from 'url';
 
 const SRC_DIRS = [
     path.join(process.cwd(), 'src'),
@@ -112,7 +114,7 @@ const NON_USER_VISIBLE_ATTRS = [
 
 const POSIX_SEP = path.posix.sep;
 
-const parseArgs = (args) => {
+export const parseArgs = (args) => {
     const files = [];
     let diffOnly = false;
     let staged = false;
@@ -150,9 +152,9 @@ const parseArgs = (args) => {
     return { files, diffOnly, staged, base, head };
 };
 
-const stripDiffPrefix = (filePath) => filePath.replace(/^[ab]\//, '');
+export const stripDiffPrefix = (filePath) => filePath.replace(/^[ab]\//, '');
 
-const parseUnifiedDiff = (diffText) => {
+export const parseUnifiedDiff = (diffText) => {
     const filesToLines = new Map();
     let currentFile = null;
     let newLineNum = 0;
@@ -205,7 +207,7 @@ const parseUnifiedDiff = (diffText) => {
     return filesToLines;
 };
 
-const getDiffLineMap = ({ staged, files, base, head }) => {
+export const getDiffLineMap = ({ staged, files, base, head }) => {
     const args = ['diff', '-U0'];
     if (staged) args.push('--cached');
     if (!staged && base && head) args.push(`${base}...${head}`);
@@ -223,7 +225,7 @@ const getDiffLineMap = ({ staged, files, base, head }) => {
     return parseUnifiedDiff(result.stdout || '');
 };
 
-const isUnderSrc = (filePath) =>
+export const isUnderSrc = (filePath) =>
     SRC_DIRS.some((dir) => filePath === dir || filePath.startsWith(`${dir}${path.sep}`));
 
 /**
@@ -233,7 +235,7 @@ const isUnderSrc = (filePath) =>
  * @param {string} dir - The directory path to traverse
  * @returns {string[]} Array of absolute file paths found in the directory tree
  */
-const walk = (dir) => {
+export const walk = (dir) => {
     let entries;
     try {
         entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -260,7 +262,7 @@ const walk = (dir) => {
  * @param {string} filePath - The file path to check
  * @returns {boolean} True if the file should be analyzed, false otherwise
  */
-const shouldAnalyzeFile = (filePath) => {
+export const shouldAnalyzeFile = (filePath) => {
     const ext = path.extname(filePath);
     if (!FILE_EXTENSIONS.includes(ext)) return false;
 
@@ -281,7 +283,7 @@ const shouldAnalyzeFile = (filePath) => {
  * @param {string} content - The source code content to process
  * @returns {string} The content with comments removed, line numbers preserved
  */
-const stripComments = (content) => {
+export const stripComments = (content) => {
     let output = '';
     let i = 0;
     const len = content.length;
@@ -380,7 +382,7 @@ const stripComments = (content) => {
  * @param {number} lineIndex - Zero-based index of the line to check
  * @returns {boolean} True if the line should be ignored, false otherwise
  */
-const hasIgnoreComment = (originalLines, lineIndex) => {
+export const hasIgnoreComment = (originalLines, lineIndex) => {
     // Check current line
     if (lineIndex < originalLines.length) {
         const currentLine = originalLines[lineIndex];
@@ -406,7 +408,7 @@ const hasIgnoreComment = (originalLines, lineIndex) => {
  * @param {string} text - The text to analyze
  * @returns {number} The number of words found
  */
-const countWords = (text) => {
+export const countWords = (text) => {
     // Unicode-aware word detection: sequences of letters in any script
     const words = text.match(/\p{L}+/gu);
     return words ? words.length : 0;
@@ -420,7 +422,7 @@ const countWords = (text) => {
  * @param {string} text - The text to check
  * @returns {boolean} True if the text looks like a URL, false otherwise
  */
-const looksLikeUrl = (text) => {
+export const looksLikeUrl = (text) => {
     const trimmed = text.trim();
     // Check for URLs starting with http://, https://, /, data:, or common URL patterns
     if (/^(https?:\/\/|\/|data:)/i.test(trimmed)) return true;
@@ -445,7 +447,7 @@ const looksLikeUrl = (text) => {
  * @param {string} text - The text to check
  * @returns {boolean} True if the text looks like a date format, false otherwise
  */
-const looksLikeDateFormat = (text) => {
+export const looksLikeDateFormat = (text) => {
     const trimmed = text.trim();
     // Common date format patterns
     const dateFormatPatterns = [
@@ -464,7 +466,7 @@ const looksLikeDateFormat = (text) => {
  * @param {string} text - The text to check
  * @returns {boolean} True if the text looks like a regex pattern, false otherwise
  */
-const looksLikeRegexPattern = (text) => {
+export const looksLikeRegexPattern = (text) => {
     const trimmed = text.trim();
     // Only pure regex syntax (no alphabetic characters)
     if (/^[.*+?^${}()|[\]\\\/\-]+$/.test(trimmed)) return true;
@@ -491,7 +493,7 @@ const looksLikeRegexPattern = (text) => {
  * @param {number} matchIndex - The character index where the match starts in the line
  * @returns {boolean} True if the match is in a skip context, false otherwise
  */
-const isInSkipContext = (line, matchIndex) => {
+export const isInSkipContext = (line, matchIndex) => {
     const beforeMatch = line.substring(0, matchIndex);
     const afterMatch = line.substring(matchIndex);
 
@@ -566,7 +568,7 @@ const isInSkipContext = (line, matchIndex) => {
  * @param {string} text - The text to check
  * @returns {boolean} True if the string is allowed (skip it), false if it should be flagged
  */
-const isAllowedString = (text) => {
+export const isAllowedString = (text) => {
     const value = text.trim();
     if (!value) return true;
     if (value.includes('${')) {
@@ -588,7 +590,7 @@ const isAllowedString = (text) => {
  * @param {string} filePath - The file path to convert
  * @returns {string} The path with POSIX-style separators
  */
-const toPosixPath = (filePath) => filePath.split(path.sep).join(POSIX_SEP);
+export const toPosixPath = (filePath) => filePath.split(path.sep).join(POSIX_SEP);
 
 /**
  * Extracts the attribute name from a line of code at a specific position.
@@ -600,7 +602,7 @@ const toPosixPath = (filePath) => filePath.split(path.sep).join(POSIX_SEP);
  * @param {number} matchIndex - The character index to look backwards from
  * @returns {string|null} The lowercase attribute name, or null if no attribute found
  */
-const getAttributeName = (line, matchIndex) => {
+export const getAttributeName = (line, matchIndex) => {
     // Look backwards from the match to find the attribute name
     const beforeMatch = line.substring(0, matchIndex);
     // Find all attribute assignments and get the last one before the match
@@ -633,7 +635,7 @@ const getAttributeName = (line, matchIndex) => {
  * @returns {Array<{line: number, text: string}>} Array of violations found,
  *          each containing the line number and the violating text
  */
-const collectViolations = (filePath, lineFilter = null) => {
+export const collectViolations = (filePath, lineFilter = null) => {
     let content;
     try {
         content = fs.readFileSync(filePath, 'utf-8');
@@ -837,7 +839,7 @@ const collectViolations = (filePath, lineFilter = null) => {
  * Collects violations from all applicable files and outputs results.
  * Exits with code 0 if no violations found, or code 1 if violations exist.
  */
-const main = () => {
+export const main = () => {
     const {
         files: cliFiles,
         diffOnly,
@@ -931,4 +933,6 @@ const main = () => {
     process.exit(1);
 };
 
-main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    main();
+}
