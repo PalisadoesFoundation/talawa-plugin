@@ -111,6 +111,13 @@ const NON_USER_VISIBLE_ATTRS = [
     'aria-colindextext',
 ];
 
+const NON_USER_VISIBLE_ATTR_PATTERN = new RegExp(
+    `\\b(${NON_USER_VISIBLE_ATTRS.map((attr) =>
+        attr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    ).join('|')})\\s*=\\s*['"\`{]`,
+    'i'
+);
+
 const POSIX_SEP = path.posix.sep;
 
 export const parseArgs = (args) => {
@@ -119,9 +126,20 @@ export const parseArgs = (args) => {
     let staged = false;
     let base = null;
     let head = null;
+    const errors = [];
+
+    const ALLOWED_FLAGS = ['--staged', '--diff', '--diff-only', '--base', '--head'];
 
     for (let i = 0; i < args.length; i += 1) {
         const arg = args[i];
+
+        if (arg.startsWith('--')) {
+            const flagName = arg.split('=')[0];
+            if (!ALLOWED_FLAGS.includes(flagName)) {
+                errors.push(`Unknown flag: ${flagName}`);
+                continue;
+            }
+        }
 
         if (arg === '--staged') {
             diffOnly = true;
@@ -135,17 +153,37 @@ export const parseArgs = (args) => {
         if (arg === '--base' || arg.startsWith('--base=')) {
             const value = arg === '--base' ? args[i + 1] : arg.split('=')[1];
             if (arg === '--base' && args[i + 1] !== undefined) i += 1;
-            if (value) base = value;
+
+            if (!value) {
+                errors.push('Option --base requires a value');
+                continue;
+            }
+            base = value;
             continue;
         }
         if (arg === '--head' || arg.startsWith('--head=')) {
             const value = arg === '--head' ? args[i + 1] : arg.split('=')[1];
             if (arg === '--head' && args[i + 1] !== undefined) i += 1;
-            if (value) head = value;
+
+            if (!value) {
+                errors.push('Option --head requires a value');
+                continue;
+            }
+            head = value;
             continue;
         }
 
         files.push(arg);
+    }
+
+    if ((base && !head) || (!base && head)) {
+        errors.push('Compare mode requires both --base and --head to be set');
+    }
+
+    if (errors.length > 0) {
+        console.error('Argument Validation Errors:');
+        errors.forEach((err) => console.error(`- ${err}`));
+        process.exit(1);
     }
 
     return { files, diffOnly, staged, base, head };
@@ -215,10 +253,23 @@ export const getDiffLineMap = ({ staged, files, base, head }) => {
     }
 
     const result = spawnSync('git', args, { encoding: 'utf-8' });
-    if (result.error || result.status > 1) {
-        const details =
-            result.error?.message || result.stderr?.trim() || 'git diff failed';
-        throw new Error(details);
+
+    if (result.error) {
+        if (result.error.code === 'ENOENT') {
+            throw new Error(`git not found: ${result.error.message}`);
+        }
+        throw new Error(`git error: ${result.error.message}`);
+    }
+
+    if (result.status > 1 || result.stderr) {
+        // git diff can exit with 1 if there are differences, but here we expect output.
+        // However, git diff --exit-code exits with 1. Standard git diff exits with 0?
+        // Actually `git diff` exits with 0 usually unless --exit-code is used.
+        // If stderr has content, treat as error? Or strict check status?
+        // Original code checked result.status > 1.
+        if (result.status > 1 || (result.status !== 0 && result.stderr)) {
+            throw new Error(`git error: ${result.stderr?.trim() || 'git diff failed'}`);
+        }
     }
 
     return parseUnifiedDiff(result.stdout || '');
@@ -245,6 +296,11 @@ export const walk = (dir) => {
     const files = [];
     for (const entry of entries) {
         const resolved = path.join(dir, entry.name);
+
+        if (entry.isSymbolicLink()) {
+            continue;
+        }
+
         if (entry.isDirectory()) {
             files.push(...walk(resolved));
         } else {
@@ -728,12 +784,7 @@ export const collectViolations = (filePath, lineFilter = null) => {
             // This is a fallback for cases where getAttributeName might not work perfectly
             // Check for any non-user-visible attribute assignment before the template literal
             // Pattern: attributeName = { or attributeName = " or attributeName = '
-            const hasNonUserVisibleAttr = NON_USER_VISIBLE_ATTRS.some((attr) => {
-                // Escape special regex characters in attribute name
-                const escapedAttr = attr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                const pattern = new RegExp(`\\b${escapedAttr}\\s*=\\s*['"\`{]`, 'i');
-                return pattern.test(beforeMatch);
-            });
+            const hasNonUserVisibleAttr = NON_USER_VISIBLE_ATTR_PATTERN.test(beforeMatch);
 
             // Also check if the template literal content looks like CSS classes
             // and the line contains className (heuristic for className template literals)

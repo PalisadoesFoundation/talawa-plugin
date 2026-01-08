@@ -13,6 +13,19 @@ describe('check-i18n', () => {
     });
 
     describe('parseArgs', () => {
+        let exitSpy;
+        let consoleSpy;
+
+        beforeEach(() => {
+            exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { });
+            consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+        });
+
+        afterEach(() => {
+            exitSpy.mockRestore();
+            consoleSpy.mockRestore();
+        });
+
         it('should parse files argument', () => {
             const args = ['file1.ts', 'file2.tsx'];
             const result = checkI18n.parseArgs(args);
@@ -38,6 +51,24 @@ describe('check-i18n', () => {
             const result = checkI18n.parseArgs(args);
             expect(result.base).toBe('main');
             expect(result.head).toBe('feat');
+        });
+
+        it('should exit on unknown flag', () => {
+            checkI18n.parseArgs(['--unknown']);
+            expect(exitSpy).toHaveBeenCalledWith(1);
+            expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Unknown flag'));
+        });
+
+        it('should exit if base or head is missing value', () => {
+            checkI18n.parseArgs(['--base']);
+            expect(exitSpy).toHaveBeenCalledWith(1);
+            expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Option --base requires a value'));
+        });
+
+        it('should exit if only one of base/head is provided', () => {
+            checkI18n.parseArgs(['--base=main']);
+            expect(exitSpy).toHaveBeenCalledWith(1);
+            expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Compare mode requires both'));
         });
     });
 
@@ -77,7 +108,12 @@ describe('check-i18n', () => {
 
             it('should throw on git error', () => {
                 spawnSync.mockReturnValue({ status: 2, stderr: 'error' });
-                expect(() => checkI18n.getDiffLineMap({ staged: false, files: [] })).toThrow('error');
+                expect(() => checkI18n.getDiffLineMap({ staged: false, files: [] })).toThrow('git error: error');
+            });
+
+            it('should throw specific error if git missing', () => {
+                spawnSync.mockReturnValue({ error: { code: 'ENOENT', message: 'spawn missing' } });
+                expect(() => checkI18n.getDiffLineMap({ staged: false, files: [] })).toThrow('git not found: spawn missing');
             });
         });
     });
@@ -99,16 +135,16 @@ describe('check-i18n', () => {
         describe('walk', () => {
             it('should recursively find files', () => {
                 fs.readdirSync.mockReturnValue([
-                    { name: 'file.ts', isDirectory: () => false },
-                    { name: 'dir', isDirectory: () => true }
+                    { name: 'file.ts', isDirectory: () => false, isSymbolicLink: () => false },
+                    { name: 'dir', isDirectory: () => true, isSymbolicLink: () => false }
                 ]);
                 // Mock second call for subdirectory
                 fs.readdirSync.mockReturnValueOnce([
-                    { name: 'file.ts', isDirectory: () => false },
-                    { name: 'dir', isDirectory: () => true }
+                    { name: 'file.ts', isDirectory: () => false, isSymbolicLink: () => false },
+                    { name: 'dir', isDirectory: () => true, isSymbolicLink: () => false }
                 ])
                     .mockReturnValueOnce([
-                        { name: 'subfile.ts', isDirectory: () => false }
+                        { name: 'subfile.ts', isDirectory: () => false, isSymbolicLink: () => false }
                     ]);
 
                 const files = checkI18n.walk('/root');
@@ -200,7 +236,7 @@ describe('check-i18n', () => {
                 expect(checkI18n.isAllowedString('${var}')).toBe(true); // No words
                 expect(checkI18n.isAllowedString('https://url.com')).toBe(true);
             });
-            it('should disallowed normal words', () => {
+            it('should disallow normal words', () => {
                 expect(checkI18n.isAllowedString('Hello')).toBe(false);
                 expect(checkI18n.isAllowedString('${var} Hello')).toBe(false);
             });
@@ -277,24 +313,18 @@ describe('check-i18n', () => {
             expect(violations[0].text).toBe('Hello');
         });
 
-        it('should respect line filter', () => {
-            vi.spyOn(fs, 'readFileSync').mockReturnValue('Line 1\nLine 2');
-            const filter = new Set([1]);
-            // Mock where Line 2 has violation if checked
-            // Actually collectViolations checks for JSX/attrs mainly.
-            // Let's allow simple text if the heuristics flag it.
-            // Wait, plain text outside JSX tags isn't checked by the script logic!
-            // Script checks: JSX text nodes (>text<), template literals, attributes.
-
-            // Should test filter preventing checking logic on line 2.
-            vi.spyOn(fs, 'readFileSync').mockReturnValue('<div>Ok</div>\n<div>Fail</div>');
-            const violations = checkI18n.collectViolations('file.tsx', new Set([1]));
-            // Provided line 1 is clean (or has violation).
-            // Let's say both have "Fail".
+        it('should respect line filter - only check filtered lines', () => {
             vi.spyOn(fs, 'readFileSync').mockReturnValue('<div>Fail1</div>\n<div>Fail2</div>');
-            const violations2 = checkI18n.collectViolations('file.tsx', new Set([1]));
-            expect(violations2).toHaveLength(1);
-            expect(violations2[0].line).toBe(1);
+            const violations = checkI18n.collectViolations('file.tsx', new Set([1]));
+            expect(violations).toHaveLength(1);
+            expect(violations[0].line).toBe(1);
+            expect(violations[0].text).toBe('Fail1');
+        });
+
+        it('should detect all violations when no line filter provided', () => {
+            vi.spyOn(fs, 'readFileSync').mockReturnValue('<div>Fail1</div>\n<div>Fail2</div>');
+            const violations = checkI18n.collectViolations('file.tsx', null);
+            expect(violations).toHaveLength(2);
         });
     });
 });
