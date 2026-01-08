@@ -21,7 +21,7 @@ interface PluginInfo {
   hasApi: boolean;
 }
 
-async function getPluginId(pluginPath: string): Promise<string> {
+export async function getPluginId(pluginPath: string): Promise<string> {
   const tryManifest = (p: string) => {
     if (!existsSync(p)) return null;
     try {
@@ -42,7 +42,7 @@ async function getPluginId(pluginPath: string): Promise<string> {
   );
 }
 
-async function validateZipFile(zipPath: string): Promise<void> {
+export async function validateZipFile(zipPath: string): Promise<void> {
   try {
     const stats = statSync(zipPath);
     if (stats.size < 100)
@@ -56,7 +56,11 @@ async function validateZipFile(zipPath: string): Promise<void> {
 const IGNORE_BASENAMES = new Set(['.DS_Store', 'Thumbs.db']);
 const IGNORE_DIRS = new Set(['__MACOSX', '.git', '.svn', '.hg']);
 
-function shouldIgnore(fullPath: string, base: string, isDir: boolean): boolean {
+export function shouldIgnore(
+  fullPath: string,
+  base: string,
+  isDir: boolean,
+): boolean {
   if (isDir && IGNORE_DIRS.has(base)) return true;
   if (!isDir && IGNORE_BASENAMES.has(base)) return true;
   return false;
