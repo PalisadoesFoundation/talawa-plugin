@@ -141,7 +141,7 @@ def find_translation_tags(source: str | Path) -> set[str]:
 
     # Find all t('key') calls
     tags = re.findall(
-        r"(?:(?:\bi18n)\.)?\bt\(\s*['\"]([^'\" \n]+)['\"]",
+        r"(?:(?:\bi18n)\.)?\bt\(\s*['\"`]([^'\"`\n]+)['\"`]",
         content,
     )
 

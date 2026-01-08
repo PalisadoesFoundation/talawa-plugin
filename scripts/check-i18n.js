@@ -133,13 +133,13 @@ const parseArgs = (args) => {
         }
         if (arg === '--base' || arg.startsWith('--base=')) {
             const value = arg === '--base' ? args[i + 1] : arg.split('=')[1];
-            if (arg === '--base') i += 1;
+            if (arg === '--base' && args[i + 1] !== undefined) i += 1;
             if (value) base = value;
             continue;
         }
         if (arg === '--head' || arg.startsWith('--head=')) {
             const value = arg === '--head' ? args[i + 1] : arg.split('=')[1];
-            if (arg === '--head') i += 1;
+            if (arg === '--head' && args[i + 1] !== undefined) i += 1;
             if (value) head = value;
             continue;
         }
@@ -277,12 +277,68 @@ const shouldAnalyzeFile = (filePath) => {
  * @param {string} content - The source code content to process
  * @returns {string} The content with comments removed, line numbers preserved
  */
-const stripComments = (content) =>
-    content
-        // block comments – strip text but preserve newlines so line numbers stay stable
-        .replace(/\/\*[\s\S]*?\*\//g, (match) => match.replace(/[^\n]/g, ''))
-        // line comments – drop everything after `//` but keep leading whitespace/newline
-        .replace(/(^|\s)\/\/.*$/gm, '$1');
+const stripComments = (content) => {
+    let output = '';
+    let i = 0;
+    const len = content.length;
+    let mode = 'code'; // 'code', 'singleQuote', 'doubleQuote', 'template', 'lineComment', 'blockComment'
+
+    while (i < len) {
+        const char = content[i];
+        const nextChar = content[i + 1];
+
+        if (mode === 'code') {
+            if (char === '/' && nextChar === '/') {
+                mode = 'lineComment';
+                i++;
+            } else if (char === '/' && nextChar === '*') {
+                mode = 'blockComment';
+                i++;
+            } else if (char === "'") {
+                mode = 'singleQuote';
+                output += char;
+            } else if (char === '"') {
+                mode = 'doubleQuote';
+                output += char;
+            } else if (char === '`') {
+                mode = 'template';
+                output += char;
+            } else {
+                output += char;
+            }
+        } else if (mode === 'lineComment') {
+            if (char === '\n') {
+                mode = 'code';
+                output += char;
+            }
+        } else if (mode === 'blockComment') {
+            if (char === '\n') {
+                output += char; // Preserve newlines
+            }
+            if (char === '*' && nextChar === '/') {
+                mode = 'code';
+                i++;
+            }
+        } else if (mode === 'singleQuote') {
+            output += char;
+            if (char === "'" && content[i - 1] !== '\\') {
+                mode = 'code';
+            }
+        } else if (mode === 'doubleQuote') {
+            output += char;
+            if (char === '"' && content[i - 1] !== '\\') {
+                mode = 'code';
+            }
+        } else if (mode === 'template') {
+            output += char;
+            if (char === '`' && content[i - 1] !== '\\') {
+                mode = 'code';
+            }
+        }
+        i++;
+    }
+    return output;
+};
 
 /**
  * Checks if a specific line should be ignored based on i18n-ignore directives.

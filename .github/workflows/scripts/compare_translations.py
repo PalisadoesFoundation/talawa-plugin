@@ -138,15 +138,19 @@ def load_translation(filepath):
         with open(filepath, encoding="utf-8") as file:
             content = file.read()
             if not content.strip():
-                raise ValueError(f"File {filepath} is empty.")
+                print(
+                    f"Warning: File {filepath} is empty",
+                    file=sys.stderr,
+                )
+                return {}
             translation = json.loads(content)
             flattened_translation = flatten_json(translation)
     except json.JSONDecodeError as e:
-        # Return empty dict if file exists but is invalid JSON (or handle as error)
-        # For robustness, we raise to let the caller handle or crash
-        raise ValueError(
-            f"Error decoding JSON from file {filepath}: {e}"
-        ) from e
+        print(
+            f"Warning: Error decoding JSON from file {filepath}: {e}",
+            file=sys.stderr,
+        )
+        return {}
     except FileNotFoundError:
         return {}
     else:
