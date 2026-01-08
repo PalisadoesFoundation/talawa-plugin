@@ -219,7 +219,8 @@ Directory containing translation files(relative to the root directory).""",
 
     if not os.path.exists(args.directory):
         print(
-            f"Error: The specified directory '{args.directory}' does not exist.",
+            f"Error: The specified directory '{args.directory}' "
+            "does not exist.",
             file=sys.stderr,
         )
         sys.exit(1)

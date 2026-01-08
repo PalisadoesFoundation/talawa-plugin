@@ -2,11 +2,29 @@
 
 from __future__ import annotations
 
+# standard imports
 import argparse
+import ast
 import json
 import re
 import sys
 from pathlib import Path
+
+# Add excluding logic for generated files and tests
+EXCLUDE_DIRS = {
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    ".git",
+    "public",
+}
+
+
+class ConfigurationError(Exception):
+    """Exception raised for configuration errors."""
+
+    pass
 
 
 def get_keys(data: dict, prefix: str = "") -> set[str]:
