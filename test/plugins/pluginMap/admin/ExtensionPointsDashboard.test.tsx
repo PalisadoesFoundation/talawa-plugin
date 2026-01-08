@@ -159,6 +159,7 @@ describe('ExtensionPointsDashboard', () => {
     };
 
     renderWithProviders(<ExtensionPointsDashboard />, {
+      // standardMocks appears twice: initial GET_PLUGIN_MAP_REQUESTS query + refetch after LOG_PLUGIN_MAP_REQUEST mutation
       mocks: [...standardMocks, logMock, ...standardMocks],
     });
 

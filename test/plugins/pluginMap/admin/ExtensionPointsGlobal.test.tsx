@@ -245,6 +245,7 @@ describe('ExtensionPointsGlobal', () => {
     ];
 
     renderWithProviders(<ExtensionPointsGlobal />, {
+      // unknownUserMocks[0] duplicated for refetch after mutation
       mocks: [...unknownUserMocks, unknownUserMocks[0]],
     });
 

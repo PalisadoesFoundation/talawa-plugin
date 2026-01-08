@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-// @ts-expect-error: Script is not in build scope
+
 import {
   validateZipFile,
   shouldIgnore,
@@ -115,10 +115,7 @@ describe('createZip Unit Tests', () => {
     it('should handle invalid manifest json gracefully', async () => {
       vi.mocked(fs.existsSync).mockReturnValue(true);
       vi.mocked(fs.readFileSync).mockReturnValue('invalid json');
-      // Should try next path or fallback
-      // If root manifest invalid, it calls tryManifest ('.../manifest.json') -> returns null.
-      // Then checks admin...
-      // Let's assume all manifests are invalid json.
+      // Ensure invalid manifest JSON is ignored and fallback logic is used
       await expect(getPluginId('/plugin')).resolves.toBe('plugin');
     });
   });

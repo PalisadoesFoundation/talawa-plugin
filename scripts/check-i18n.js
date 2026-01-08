@@ -118,6 +118,15 @@ const NON_USER_VISIBLE_ATTR_PATTERN = new RegExp(
     'i'
 );
 
+const COMMON_CSS_PATTERNS = [
+    /\b(btn|primary|secondary|danger|warning|info|success|lg|sm|md|xl|container|wrapper|flex|grid|row|col)\b/i,
+    /\b(m-|p-|d-|text-|bg-|border-|rounded|shadow|hover|active|disabled|shimmer|mx-|my-|px-|py-|ms-|me-|mt-|mb-|pt-|pb-|ps-|pe-)\d*/i,
+    /\b(fi\s+fi-|fa\s+fa-)/i, // Font icons: "fi fi-xx" or "fa fa-xx"
+    /\$\{styles\.\w+\}/, // CSS modules
+    /\?\s*['"`]?\w+['"`]?\s*:/, // Ternary operators in className (conditional classes)
+    /\w+\s*===\s*['"`]?\w+['"`]?\s*\?/, // Conditional checks
+];
+
 const POSIX_SEP = path.posix.sep;
 
 export const parseArgs = (args) => {
@@ -261,15 +270,8 @@ export const getDiffLineMap = ({ staged, files, base, head }) => {
         throw new Error(`git error: ${result.error.message}`);
     }
 
-    if (result.status > 1 || result.stderr) {
-        // git diff can exit with 1 if there are differences, but here we expect output.
-        // However, git diff --exit-code exits with 1. Standard git diff exits with 0?
-        // Actually `git diff` exits with 0 usually unless --exit-code is used.
-        // If stderr has content, treat as error? Or strict check status?
-        // Original code checked result.status > 1.
-        if (result.status > 1 || (result.status !== 0 && result.stderr)) {
-            throw new Error(`git error: ${result.stderr?.trim() || 'git diff failed'}`);
-        }
+    if (result.status !== 0) {
+        throw new Error(`git error: ${result.stderr?.trim() || 'git diff failed'}`);
     }
 
     return parseUnifiedDiff(result.stdout || '');
@@ -673,6 +675,105 @@ export const getAttributeName = (line, matchIndex) => {
     return null;
 };
 
+export const detectJsxTextViolations = (line, lineNumber, violations) => {
+    // JSX Text Nodes: >Text<
+    const jsxRegex = />([^<>{}]+)</g;
+    let match;
+    while ((match = jsxRegex.exec(line)) !== null) {
+        const text = match[1];
+        const matchIndex = match.index;
+
+        if (isInSkipContext(line, matchIndex)) {
+            continue;
+        }
+
+        if (!isAllowedString(text)) {
+            violations.push({ line: lineNumber, text });
+        }
+    }
+};
+
+export const detectTemplateLiteralViolations = (line, lineNumber, violations) => {
+    // Template Literals: `Text`
+    const templateRegex = /`([^`]*)`/g;
+    let match;
+    while ((match = templateRegex.exec(line)) !== null) {
+        const fullText = match[1];
+        const matchIndex = match.index;
+        const beforeMatch = line.substring(0, matchIndex);
+
+        if (!fullText.trim()) continue;
+
+        // Skip styled-components, graphql, css
+        if (/styled(\.\w+|\([^)]+\))?\s*$/.test(beforeMatch)) continue;
+        if (/(css|gql)\s*$/.test(beforeMatch)) continue;
+
+        // Skip tests
+        if (/(it|test|describe|context)\s*\(\s*$/.test(beforeMatch)) continue;
+
+        if (isInSkipContext(line, matchIndex)) continue;
+
+        const attributeName = getAttributeName(line, matchIndex);
+
+        // Skip non-user-visible attributes
+        if (attributeName && NON_USER_VISIBLE_ATTRS.includes(attributeName)) continue;
+
+        // Fallback check for attribute assignment
+        const hasNonUserVisibleAttr = NON_USER_VISIBLE_ATTR_PATTERN.test(beforeMatch);
+        if (hasNonUserVisibleAttr) continue;
+
+        // CSS class heuristics
+        const looksLikeCssClasses =
+            /className/i.test(beforeMatch) &&
+            COMMON_CSS_PATTERNS.some((pattern) => pattern.test(fullText));
+
+        if (looksLikeCssClasses) continue;
+
+        // Strip variables
+        let staticText = fullText;
+        staticText = staticText.replace(/\$\{[^`]*`[^`]*`[^}]*\}/g, '');
+        staticText = staticText.replace(/\$\{[^}]*\}/g, '');
+        staticText = staticText.trim();
+
+        if (looksLikeUrl(staticText) || looksLikeUrl(fullText)) continue;
+        if (looksLikeDateFormat(staticText) || looksLikeDateFormat(fullText)) continue;
+
+        if (staticText && !isAllowedString(staticText)) {
+            violations.push({ line: lineNumber, text: fullText });
+        }
+    }
+};
+
+export const detectAttributeViolations = (line, lineNumber, violations) => {
+    const attrRegex = new RegExp(
+        `\\b(${USER_VISIBLE_ATTRS.join('|')})\\s*=\\s*(['"\`])((?:\\\\.|(?!\\2)[^\\\\])*)\\2`,
+        'gi',
+    );
+    let attrMatch;
+    while ((attrMatch = attrRegex.exec(line)) !== null) {
+        const text = attrMatch[3];
+        const matchIndex = attrMatch.index;
+
+        if (isInSkipContext(line, matchIndex)) continue;
+
+        if (!isAllowedString(text)) {
+            violations.push({ line: lineNumber, text });
+        }
+    }
+};
+
+export const detectToastViolations = (line, lineNumber, violations) => {
+    const toastRegex =
+        /toast\.(error|success|warning|info)\s*\(\s*(['"`])((?:\\.|(?!\2).)*?)\2/gi;
+    let toastMatch;
+    while ((toastMatch = toastRegex.exec(line)) !== null) {
+        const text = toastMatch[3];
+        if (!isAllowedString(text)) {
+            violations.push({ line: lineNumber, text });
+        }
+    }
+};
+
 /**
  * Scans a file for non-internationalized user-visible text violations.
  * Detects hardcoded text in:
@@ -722,162 +823,10 @@ export const collectViolations = (filePath, lineFilter = null) => {
             return;
         }
 
-        // JSX Text Nodes: >Text<
-        // Match text between tags that isn't all whitespace
-        // Capture groups:
-        // 1. Prefix: characters before the text (like >)
-        // 2. Text: the actual text content
-        const jsxRegex = />([^<>{}]+)</g;
-        let match;
-        while ((match = jsxRegex.exec(line)) !== null) {
-            const text = match[1];
-            const matchIndex = match.index;
-
-            // Skip if in a context that should be ignored
-            if (isInSkipContext(line, matchIndex)) {
-                continue;
-            }
-
-            if (!isAllowedString(text)) {
-                violations.push({ line: lineNumber, text });
-            }
-        }
-
-        // Template Literals: `Text`
-        // Match text inside backticks
-        // Capture groups:
-        // 1. The literal content inside backticks
-        const templateRegex = /`([^`]*)`/g;
-        while ((match = templateRegex.exec(line)) !== null) {
-            const fullText = match[1];
-            const matchIndex = match.index;
-            // Get text before the template literal starts
-            const beforeMatch = line.substring(0, matchIndex);
-
-            // Skip empty template literals or those that contain only variable references
-            if (!fullText.trim()) continue;
-
-            // Special check for styled-components (e.g., styled.div`)
-            // Or graphql queries (gql`)
-            // Or css props (css`)
-            if (/styled(\.\w+|\([^)]+\))?\s*$/.test(beforeMatch)) {
-                continue;
-            }
-            if (/(css|gql)\s*$/.test(beforeMatch)) {
-                continue;
-            }
-
-            // Skip if it looks like a test description (it('...', ...))
-            if (/(it|test|describe|context)\s*\(\s*$/.test(beforeMatch)) {
-                continue;
-            }
-
-            // Skip if in a context that should be ignored
-            if (isInSkipContext(line, matchIndex)) {
-                continue;
-            }
-
-            // Check what attribute this template literal is in
-            const attributeName = getAttributeName(line, matchIndex);
-
-            // Also check if the line contains className=, style=, to=, etc. before this match
-            // This is a fallback for cases where getAttributeName might not work perfectly
-            // Check for any non-user-visible attribute assignment before the template literal
-            // Pattern: attributeName = { or attributeName = " or attributeName = '
-            const hasNonUserVisibleAttr = NON_USER_VISIBLE_ATTR_PATTERN.test(beforeMatch);
-
-            // Also check if the template literal content looks like CSS classes
-            // and the line contains className (heuristic for className template literals)
-            // Expanded to include common CSS utility classes and patterns
-            const commonCssPatterns = [
-                /\b(btn|primary|secondary|danger|warning|info|success|lg|sm|md|xl|container|wrapper|flex|grid|row|col)\b/i,
-                /\b(m-|p-|d-|text-|bg-|border-|rounded|shadow|hover|active|disabled|shimmer|mx-|my-|px-|py-|ms-|me-|mt-|mb-|pt-|pb-|ps-|pe-)\d*/i,
-                /\b(fi\s+fi-|fa\s+fa-)/i, // Font icons: "fi fi-xx" or "fa fa-xx"
-                /\$\{styles\.\w+\}/, // CSS modules
-                /\?\s*['"`]?\w+['"`]?\s*:/, // Ternary operators in className (conditional classes)
-                /\w+\s*===\s*['"`]?\w+['"`]?\s*\?/, // Conditional checks
-            ];
-            const looksLikeCssClasses =
-                /className/i.test(beforeMatch) &&
-                commonCssPatterns.some((pattern) => pattern.test(fullText));
-
-            // Skip if it's in a non-user-visible attribute
-            if (attributeName && NON_USER_VISIBLE_ATTRS.includes(attributeName)) {
-                continue;
-            }
-
-            // Also skip if we detected a non-user-visible attribute in the line
-            if (hasNonUserVisibleAttr) {
-                continue;
-            }
-
-            // Skip if it looks like CSS classes in a className attribute
-            if (looksLikeCssClasses) {
-                continue;
-            }
-
-            // Strip out variables FIRST (including nested template literals)
-            // Remove ${...} patterns, but be careful with nested backticks
-            let staticText = fullText;
-            // Remove nested template literals ${`...`}
-            staticText = staticText.replace(/\$\{[^`]*`[^`]*`[^}]*\}/g, '');
-            // Remove simple ${var} patterns
-            staticText = staticText.replace(/\$\{[^}]*\}/g, '');
-            staticText = staticText.trim();
-
-            // If it's a URL-like pattern, allow it
-            if (looksLikeUrl(staticText) || looksLikeUrl(fullText)) {
-                continue;
-            }
-
-            // If it's a date format pattern, allow it
-            if (looksLikeDateFormat(staticText) || looksLikeDateFormat(fullText)) {
-                continue;
-            }
-
-            if (staticText && !isAllowedString(staticText)) {
-                violations.push({ line: lineNumber, text: fullText });
-            }
-        }
-
-        // Attribute values likely user-visible
-        const attrRegex = new RegExp(
-            // Allow empty strings and basic escaped characters
-            `\\b(${USER_VISIBLE_ATTRS.join('|')})\\s*=\\s*(['"\`])((?:\\\\.|(?!\\2)[^\\\\])*)\\2`,
-            'gi',
-        );
-        let attrMatch;
-        while ((attrMatch = attrRegex.exec(line)) !== null) {
-            const text = attrMatch[3];
-            const matchIndex = attrMatch.index;
-
-            // Skip if in a context that should be ignored
-            if (isInSkipContext(line, matchIndex)) {
-                continue;
-            }
-
-            if (!isAllowedString(text)) {
-                violations.push({ line: lineNumber, text });
-            }
-        }
-
-        // Toast messages
-        const toastRegex =
-            /toast\.(error|success|warning|info)\s*\(\s*(['"`])((?:\\.|(?!\2).)*?)\2/gi;
-        let toastMatch;
-        while ((toastMatch = toastRegex.exec(line)) !== null) {
-            const text = toastMatch[3];
-            if (!isAllowedString(text)) {
-                violations.push({ line: lineNumber, text });
-            }
-        }
-
-        // Note: We intentionally skip generic string literal checks to reduce
-        // false positives on class names, test IDs, inline styles, and
-        // non-UI/internal strings. Detection focuses on:
-        // - JSX text nodes
-        // - User-visible attributes (placeholder, title, aria-label, alt, label)
-        // - Toast messages
+        detectJsxTextViolations(line, lineNumber, violations);
+        detectTemplateLiteralViolations(line, lineNumber, violations);
+        detectAttributeViolations(line, lineNumber, violations);
+        detectToastViolations(line, lineNumber, violations);
     });
 
     return violations;

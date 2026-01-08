@@ -103,7 +103,15 @@ describe('check-i18n', () => {
             it('should return map on success', () => {
                 spawnSync.mockReturnValue({ status: 0, stdout: sampleDiff });
                 const map = checkI18n.getDiffLineMap({ staged: false, files: [], base: null, head: null });
-                expect(map.size).toBeGreaterThan(0);
+
+                const file1 = path.resolve(process.cwd(), 'src/file1.ts');
+                const file2 = path.resolve(process.cwd(), 'src/file2.ts');
+
+                expect(map.size).toBe(2);
+                expect(map.has(file1)).toBe(true);
+                expect(Array.from(map.get(file1))).toEqual([11, 12]);
+                expect(map.has(file2)).toBe(true);
+                expect(Array.from(map.get(file2))).toEqual([5]);
             });
 
             it('should throw on git error', () => {
@@ -270,11 +278,9 @@ describe('check-i18n', () => {
                 expect(checkI18n.isInSkipContext(line, line.indexOf('"YYYY"'))).toBe(true);
             });
             it('should skip TS type definitions', () => {
+                // Testing that Type annotations like ": string =" are skipped
+                // Matches regex: /\w+\s*:\s*\w+\s*[=,;]/
                 const line = 'const x: string = "text";';
-                // Wait, logic checks for ": Type =>" or similar.
-                // Simple assignment ": string =" might be skipped?
-                // Let's check regex: /\\w+\\s*:\\s*\\w+\\s*[=,;]/
-                // "x: string =" matches.
                 expect(checkI18n.isInSkipContext(line, line.indexOf('string'))).toBe(true);
             });
         });
