@@ -112,11 +112,22 @@ describe('Plugin Map i18n utils', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     failedLoadingHandler!('en', 'plugin-map', 'Error 1');
-    expect(consoleSpy).toHaveBeenCalledTimes(1);
-    expect(i18nModule.default.changeLanguage).not.toHaveBeenCalled();
 
     failedLoadingHandler!('en', 'plugin-map', 'Error 2');
     expect(consoleSpy).toHaveBeenCalledTimes(2);
     expect(i18nModule.default.changeLanguage).not.toHaveBeenCalled();
+  });
+
+  it('should handle runtime null arguments gracefully', () => {
+    vi.clearAllMocks();
+    // Test Case: Null (cast to test runtime null handling per CodeRabbit feedback)
+    // If language is null/undefined (not 'en'), it triggers fallback to 'en'.
+    failedLoadingHandler!(
+      null as unknown as string,
+      undefined as unknown as string,
+      undefined as unknown as string,
+    );
+
+    expect(i18nModule.default.changeLanguage).toHaveBeenCalledWith('en');
   });
 });

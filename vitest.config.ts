@@ -45,6 +45,10 @@ export default defineConfig({
           './__mocks__/apollo-client-proxy.ts',
         ),
       },
+      {
+        find: '~',
+        replacement: path.resolve(__dirname, './'),
+      },
     ],
   },
   test: {

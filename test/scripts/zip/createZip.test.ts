@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-// @ts-expect-error: Script is not in build scope
+
 import {
   validateZipFile,
   shouldIgnore,
   getPluginId,
-} from '../../../../scripts/zip/createZip';
+} from '~/scripts/zip/createZip';
 import * as fs from 'node:fs';
 
 vi.mock('node:fs', async (importOriginal) => {
@@ -107,6 +107,16 @@ describe('createZip Unit Tests', () => {
 
     it('should fallback to folder name if no manifest found', async () => {
       vi.mocked(fs.existsSync).mockReturnValue(false);
+      await expect(getPluginId('/path/to/fallback-plugin')).resolves.toBe(
+        'fallback-plugin',
+      );
+    });
+
+    it('should fallback to folder name if manifest missing pluginId', async () => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFileSync).mockReturnValue(
+        JSON.stringify({ someField: 'value' }),
+      );
       await expect(getPluginId('/path/to/fallback-plugin')).resolves.toBe(
         'fallback-plugin',
       );

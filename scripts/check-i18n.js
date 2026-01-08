@@ -142,6 +142,9 @@ class CacheManager {
                 this.cache = JSON.parse(fs.readFileSync(this.cacheFile, 'utf-8'));
             }
         } catch (e) {
+            if (process.env.DEBUG) {
+                console.warn(`Failed to load i18n cache: ${e.message}`);
+            }
             this.cache = {}; // Reset on error
         }
     }
@@ -150,6 +153,9 @@ class CacheManager {
         try {
             fs.writeFileSync(this.cacheFile, JSON.stringify(this.cache, null, 2));
         } catch (e) {
+            if (process.env.DEBUG) {
+                console.warn(`Failed to save i18n cache: ${e.message}`);
+            }
             // Ignore write errors
         }
     }
@@ -196,6 +202,7 @@ const scanLine = (line, lineNumber, violations, types = new Set(['jsx', 'templat
         const matchIndex = match.index;
 
         if (groups.jsxText && types.has('jsx')) {
+            // --- Handing JSX Text: >Text< ---
             const text = groups.jsxText;
             // Match index logic needs adjustment because regex matched '>text<' but text starts at index + 1
             // Or we rely on sub-captures.
@@ -212,47 +219,56 @@ const scanLine = (line, lineNumber, violations, types = new Set(['jsx', 'templat
             if (!isAllowedString(text)) violations.push({ line: lineNumber, text });
         }
         else if (groups.templateText && types.has('template')) {
-            const fullText = groups.templateText; // This is CONTENT. match[0] is `content`.
-            // Wait, `regex` was ``/`([^`]*)`/g``. 
-            // match[1] was content. 
-            // groups.templateText is content.
-            // match.index is start of backtick.
-
-            // Logic from detectTemplateLiteralViolations:
-            const beforeMatch = line.substring(0, matchIndex);
-
-            if (!fullText.trim()) continue;
-            if (/styled(\.\w+|\([^)]+\))?\s*$/.test(beforeMatch)) continue;
-            if (/(css|gql)\s*$/.test(beforeMatch)) continue;
-            if (/(it|test|describe|context)\s*\(\s*$/.test(beforeMatch)) continue;
-            if (isInSkipContext(line, matchIndex)) continue;
-
-            const attributeName = getAttributeName(line, matchIndex);
-            if (attributeName && NON_USER_VISIBLE_ATTRS.includes(attributeName)) continue;
-            if (NON_USER_VISIBLE_ATTR_PATTERN.test(beforeMatch)) continue;
-
-            const looksLikeCssClasses = /className/i.test(beforeMatch) && COMMON_CSS_PATTERNS.some(p => p.test(fullText));
-            if (looksLikeCssClasses) continue;
-
-            let staticText = fullText.replace(/\$\{[^`]*`[^`]*`[^}]*\}/g, '').replace(/\$\{[^}]*\}/g, '').trim();
-            if (looksLikeUrl(staticText) || looksLikeUrl(fullText)) continue;
-            if (looksLikeDateFormat(staticText) || looksLikeDateFormat(fullText)) continue;
-
-            if (staticText && !isAllowedString(staticText)) {
-                violations.push({ line: lineNumber, text: fullText });
-            }
+            // --- Handling Template Literals: `Text` ---
+            const fullText = groups.templateText;
+            validateTemplateLiteral(line, matchIndex, fullText, lineNumber, violations);
         }
         else if (groups.attrText && types.has('attribute')) {
+            // --- Handling Attributes: attr="Value" ---
             const text = groups.attrText;
+            // match.index is start of `attr="val"`. 
+            // match end is end of quote.
+            // We pass matchIndex.
             if (isInSkipContext(line, matchIndex)) continue;
             if (!isAllowedString(text)) violations.push({ line: lineNumber, text });
         }
         else if (groups.toastText && types.has('toast')) {
+            // --- Handling Toasts: toast.method("Message") ---
             const text = groups.toastText;
             if (!isAllowedString(text)) violations.push({ line: lineNumber, text });
         }
     }
 }
+
+/**
+ * Validates template literals for i18n violations.
+ * Extracts complexity from scanLine.
+ */
+const validateTemplateLiteral = (line, matchIndex, fullText, lineNumber, violations) => {
+    // Logic from scanLine/detectTemplateLiteralViolations:
+    const beforeMatch = line.substring(0, matchIndex);
+
+    if (!fullText.trim()) return;
+    if (/styled(\.\w+|\([^)]+\))?\s*$/.test(beforeMatch)) return;
+    if (/(css|gql)\s*$/.test(beforeMatch)) return;
+    if (/(it|test|describe|context)\s*\(\s*$/.test(beforeMatch)) return;
+    if (isInSkipContext(line, matchIndex)) return;
+
+    const attributeName = getAttributeName(line, matchIndex);
+    if (attributeName && NON_USER_VISIBLE_ATTRS.includes(attributeName)) return;
+    if (NON_USER_VISIBLE_ATTR_PATTERN.test(beforeMatch)) return;
+
+    const looksLikeCssClasses = /className/i.test(beforeMatch) && COMMON_CSS_PATTERNS.some(p => p.test(fullText));
+    if (looksLikeCssClasses) return;
+
+    let staticText = fullText.replace(/\$\{[^`]*`[^`]*`[^}]*\}/g, '').replace(/\$\{[^}]*\}/g, '').trim();
+    if (looksLikeUrl(staticText) || looksLikeUrl(fullText)) return;
+    if (looksLikeDateFormat(staticText) || looksLikeDateFormat(fullText)) return;
+
+    if (staticText && !isAllowedString(staticText)) {
+        violations.push({ line: lineNumber, text: fullText });
+    }
+};
 
 export const parseArgs = (args) => {
     const files = [];
@@ -461,6 +477,11 @@ export const shouldAnalyzeFile = (filePath) => {
  * Note: This state machine parser handles standard strings and template literals,
  * but does not track nested template expressions (e.g. `foo ${`bar`} baz`).
  * Comments inside nested template strings may be incorrectly stripped.
+ * 
+ * WARNING: Nested template support is limited!
+ * Using nested templates like `${`...`}` may strictly confuse the parser and lead
+ * to stripping valid code or failing to strip comments.
+ * Avoid complex nesting in scanned files or inspect results manually.
  *
  * @param {string} content - The source code content to process
  * @returns {string} The content with comments removed, line numbers preserved
