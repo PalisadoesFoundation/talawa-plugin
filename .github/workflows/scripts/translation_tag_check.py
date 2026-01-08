@@ -146,6 +146,10 @@ def find_translation_tags(source: str | Path) -> set[str]:
 
     result = set()
     for tag in tags:
+        # Ignore dynamic keys (template interpolations)
+        if "${" in tag:
+            continue
+
         # Remove namespace prefix if present (e.g., "translation:key" -> "key")
         clean_tag = tag.split(":")[-1]
 

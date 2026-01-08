@@ -163,7 +163,8 @@ def check_translations(directory):
 
     if not os.path.exists(default_language_dir):
         print(
-            f"Error: Default language directory '{default_language_dir}' does not exist."
+            f"Error: Default language directory '{default_language_dir}' "
+            "does not exist."
         )
         sys.exit(1)
 
