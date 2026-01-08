@@ -7,10 +7,7 @@ import {
   afterEach,
   type Mock,
 } from 'vitest';
-import {
-  RazorpayService,
-  type RazorpayWebhookData,
-} from '../../../plugins/razorpay/api/services/razorpayService';
+import { RazorpayService } from '../../../plugins/razorpay/api/services/razorpayService';
 import type { GraphQLContext } from '~/src/graphql/context';
 
 // Mock fetch
@@ -485,9 +482,7 @@ describe('RazorpayService', () => {
 
       const webhookData = createMockWebhookData('payment.captured');
 
-      await service.processWebhook(
-        webhookData as unknown as RazorpayWebhookData,
-      );
+      await service.processWebhook(webhookData);
 
       expect(mockContext.drizzleClient.insert).toHaveBeenCalled();
       expect(mockContext.drizzleClient.update).toHaveBeenCalled();
@@ -507,9 +502,7 @@ describe('RazorpayService', () => {
 
       const webhookData = createMockWebhookData('payment.captured');
 
-      await service.processWebhook(
-        webhookData as unknown as RazorpayWebhookData,
-      );
+      await service.processWebhook(webhookData);
 
       expect(mockContext.drizzleClient.update).toHaveBeenCalledTimes(2); // Once for transaction, once for order
     });
@@ -520,9 +513,9 @@ describe('RazorpayService', () => {
 
       const webhookData = createMockWebhookData('payment.captured');
 
-      await expect(
-        service.processWebhook(webhookData as unknown as RazorpayWebhookData),
-      ).rejects.toThrow('Order not found');
+      await expect(service.processWebhook(webhookData)).rejects.toThrow(
+        'Order not found',
+      );
     });
 
     it('should handle payment.failed webhook', async () => {
@@ -538,9 +531,7 @@ describe('RazorpayService', () => {
         error_description: 'Payment failed',
       });
 
-      await service.processWebhook(
-        webhookData as unknown as RazorpayWebhookData,
-      );
+      await service.processWebhook(webhookData);
 
       expect(mockContext.drizzleClient.insert).toHaveBeenCalled();
     });
