@@ -159,7 +159,7 @@ describe('ExtensionPointsDashboard', () => {
     };
 
     renderWithProviders(<ExtensionPointsDashboard />, {
-      mocks: [...standardMocks, logMock],
+      mocks: [...standardMocks, logMock, ...standardMocks],
     });
 
     // Wait for initial load
@@ -271,7 +271,7 @@ describe('ExtensionPointsDashboard', () => {
     ];
 
     renderWithProviders(<ExtensionPointsDashboard />, {
-      mocks: unknownUserMocks,
+      mocks: [...unknownUserMocks, unknownUserMocks[0]],
     });
 
     // We can't query by text with interpolation easily with the simple mock

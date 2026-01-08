@@ -139,7 +139,7 @@ describe('ExtensionPointsGlobal', () => {
     };
 
     renderWithProviders(<ExtensionPointsGlobal />, {
-      mocks: [...standardMocks, logMock],
+      mocks: [...standardMocks, logMock, ...standardMocks],
     });
 
     await screen.findAllByText('1');
@@ -245,7 +245,7 @@ describe('ExtensionPointsGlobal', () => {
     ];
 
     renderWithProviders(<ExtensionPointsGlobal />, {
-      mocks: unknownUserMocks,
+      mocks: [...unknownUserMocks, unknownUserMocks[0]],
     });
 
     await waitFor(() => {
