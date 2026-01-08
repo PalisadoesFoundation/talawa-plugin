@@ -61,9 +61,7 @@ def load_locale_keys(locales_dir: str | Path) -> set[str]:
     # Dynamic loading of all JSON files instead of hardcoded list
     for path in base.glob("*.json"):
         try:
-            keys.update(
-                get_keys(json.loads(path.read_text(encoding="utf-8")))
-            )
+            keys.update(get_keys(json.loads(path.read_text(encoding="utf-8"))))
         except (json.JSONDecodeError, OSError) as exc:
             print(
                 f"Warning: Failed to parse {path}: {exc}",
@@ -131,9 +129,7 @@ def find_translation_tags(source: str | Path) -> set[str]:
     # Note: This assumes single keyPrefix per file. Files with multiple
     # components using different keyPrefixes may have inaccurate results.
     if len(all_prefixes) > 1:
-        file_name = (
-            str(source) if isinstance(source, Path) else "source"
-        )
+        file_name = str(source) if isinstance(source, Path) else "source"
         print(
             f"Warning: Multiple keyPrefixes found in {file_name}. "
             f"Using first: '{all_prefixes[0]}'. "
@@ -214,7 +210,7 @@ def get_target_files(
             if dir_path.exists() and dir_path.is_dir():
                 targets.extend(dir_path.rglob("*"))
                 found_source = True
-        
+
         if not found_source:
             raise FileNotFoundError(
                 "Default 'src' or 'plugins' directory not found"

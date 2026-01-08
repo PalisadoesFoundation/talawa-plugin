@@ -167,21 +167,29 @@ def check_translations(directory):
         None
     """
     default_language_dir = os.path.join(directory, "en")
-    
+
     if not os.path.exists(default_language_dir):
-        print(f"Error: Default language directory '{default_language_dir}' does not exist.")
+        print(
+            f"Error: Default language directory '{default_language_dir}' does not exist."
+        )
         sys.exit(1)
 
     # Dynamic file detection instead of hardcoded list
-    default_files = [f for f in os.listdir(default_language_dir) if f.endswith('.json')]
-    
+    default_files = [
+        f for f in os.listdir(default_language_dir) if f.endswith(".json")
+    ]
+
     default_translations = {}
     for file in default_files:
         file_path = os.path.join(default_language_dir, file)
         default_translations[file] = load_translation(file_path)
 
-    languages = [d for d in os.listdir(directory) if os.path.isdir(os.path.join(directory, d))]
-    
+    languages = [
+        d
+        for d in os.listdir(directory)
+        if os.path.isdir(os.path.join(directory, d))
+    ]
+
     if "en" in languages:
         languages.remove("en")  # Exclude default language directory
 
@@ -192,7 +200,7 @@ def check_translations(directory):
         for file in default_files:
             default_translation = default_translations[file]
             other_file_path = os.path.join(language_dir, file)
-            
+
             if not os.path.exists(other_file_path):
                 print(f"File {language}/{file} is missing.")
                 error_found = True
