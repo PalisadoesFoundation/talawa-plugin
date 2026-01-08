@@ -7,7 +7,6 @@
 
 import fs from 'fs';
 import path from 'path';
-import path from 'path';
 import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
@@ -508,7 +507,7 @@ export const isInSkipContext = (line, matchIndex) => {
     }
 
     // Skip GraphQL queries (gql`...`)
-    if (/gql\s*`/.test(beforeMatch)) {
+    if (/gql\s*$/.test(beforeMatch)) {
         return true;
     }
 
