@@ -1,53 +1,14 @@
-"""Script to encourage more efficient coding practices.
+"""Compare implementation of translation keys across different locales.
 
-Methodology:
-
-    Utility for comparing translations between default and other languages.
-
-    This module defines a function to compare two translations
-    and print any missing keys in the other language's translation.
-
-Attributes:
-    FileTranslation : Named tuple to represent a combination
-                        of file and missing translations.
-
-        Fields:
-            - file (str): The file name.
-            - missing_translations (list): List of missing translations.
-
-Functions:
-    compare_translations(default_translation, other_translation):
-        Compare two translations and print missing keys.
-
-     load_translation(filepath):
-        Load translation from a file.
-
-    check_translations():
-        Load the default translation and compare it with other translations.
-
-     main():
-        The main function to run the script.
-        Parses command-line arguments, checks for the
-        existence of the specified directory, and then
-        calls check_translations with the provided or default directory.
-
+This script compares the default English translation file (en.json) with
+other locale translation files to identify missing keys or keys that
+do not exist in the source.
 
 Usage:
-    This script can be executed to check and print missing
-    translations in other languages based on the default English translation.
+    python compare_translations.py --directory <path_to_locales>
 
 Example:
-    python compare_translations.py
-
-Note:
-    This script complies with our python3 coding and documentation standards
-    and should be used as a reference guide. It complies with:
-
-        1) Pylint
-        2) Pydocstyle
-        3) Pycodestyle
-        4) Flake8
-
+    python compare_translations.py --directory public/locales
 """
 
 # standard imports
@@ -145,6 +106,10 @@ def load_translation(filepath):
         )
         return {}
     except FileNotFoundError:
+        print(
+            f"Warning: File {filepath} not found.",
+            file=sys.stderr,
+        )
         return {}
     else:
         return flattened_translation
@@ -164,7 +129,8 @@ def check_translations(directory):
     if not os.path.exists(default_language_dir):
         print(
             f"Error: Default language directory '{default_language_dir}' "
-            "does not exist."
+            "does not exist.",
+            file=sys.stderr,
         )
         sys.exit(1)
 
@@ -196,7 +162,7 @@ def check_translations(directory):
             other_file_path = os.path.join(language_dir, file)
 
             if not os.path.exists(other_file_path):
-                print(f"File {language}/{file} is missing.")
+                print(f"File {language}/{file} is missing.", file=sys.stderr)
                 error_found = True
                 continue
 
@@ -253,7 +219,8 @@ Directory containing translation files(relative to the root directory).""",
 
     if not os.path.exists(args.directory):
         print(
-            f"Error: The specified directory '{args.directory}' does not exist."
+            f"Error: The specified directory '{args.directory}' does not exist.",
+            file=sys.stderr,
         )
         sys.exit(1)
 

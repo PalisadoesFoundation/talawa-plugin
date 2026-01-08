@@ -273,6 +273,10 @@ const shouldAnalyzeFile = (filePath) => {
  * Removes JavaScript/TypeScript comments from source code while preserving
  * line numbers (replaces block comment content with newlines).
  * This ensures that line numbers in violation reports remain accurate.
+ * 
+ * Note: This state machine parser handles standard strings and template literals,
+ * but does not track nested template expressions (e.g. `foo ${`bar`} baz`).
+ * Comments inside nested template strings may be incorrectly stripped.
  *
  * @param {string} content - The source code content to process
  * @returns {string} The content with comments removed, line numbers preserved
@@ -875,14 +879,13 @@ const main = () => {
         // Walk all source directories
         const allFiles =
             cliFiles.length > 0
-                ? cliFiles
+                ? cliFiles.map((file) => path.resolve(process.cwd(), file))
                 : SRC_DIRS.flatMap(dir =>
                     fs.existsSync(dir)
-                        ? walk(dir).map((p) => path.relative(process.cwd(), p))
+                        ? walk(dir)
                         : []
                 );
         targets = allFiles
-            .map((file) => path.resolve(process.cwd(), file))
             .filter((file) => fs.existsSync(file))
             .filter((file) => shouldAnalyzeFile(file));
     }

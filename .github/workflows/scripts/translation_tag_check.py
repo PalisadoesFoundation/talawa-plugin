@@ -216,7 +216,7 @@ def get_target_files(
                 found_source = True
 
         if not found_source:
-            raise FileNotFoundError(
+            raise ConfigurationError(
                 "Default 'src' or 'plugins' directory not found"
             )
 
