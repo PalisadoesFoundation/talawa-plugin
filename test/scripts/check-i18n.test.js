@@ -327,4 +327,57 @@ describe('check-i18n', () => {
             expect(violations).toHaveLength(2);
         });
     });
+
+    describe('main', () => {
+        let originalArgv;
+        let consoleLogSpy;
+        let consoleErrorSpy;
+        let exitSpy;
+
+        beforeEach(() => {
+            originalArgv = process.argv;
+            consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
+            consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+            exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { });
+        });
+
+        afterEach(() => {
+            process.argv = originalArgv;
+            vi.restoreAllMocks();
+        });
+
+        it('should exit 0 if no source dirs', () => {
+            process.argv = ['node', 'script'];
+            vi.spyOn(fs, 'existsSync').mockReturnValue(false);
+
+            checkI18n.main();
+
+            expect(exitSpy).toHaveBeenCalledWith(0);
+            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('No source directories'));
+        });
+
+        it('should exit 0 if no files found', () => {
+            process.argv = ['node', 'script'];
+            vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+            vi.spyOn(fs, 'readdirSync').mockReturnValue([]);
+
+            checkI18n.main();
+
+            expect(exitSpy).toHaveBeenCalledWith(0);
+            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('No files to scan'));
+        });
+
+        it('should exit 1 if violations found', () => {
+            process.argv = ['node', 'script'];
+            vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+            vi.spyOn(fs, 'readdirSync').mockReturnValue([{ name: 'file.js', isDirectory: () => false, isSymbolicLink: () => false }]);
+            vi.spyOn(fs, 'readFileSync').mockReturnValue('<div>Hardcoded</div>');
+            vi.spyOn(fs, 'statSync').mockReturnValue({ isDirectory: () => false });
+
+            checkI18n.main();
+
+            expect(exitSpy).toHaveBeenCalledWith(1);
+            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('contain non-internationalized'));
+        });
+    });
 });
