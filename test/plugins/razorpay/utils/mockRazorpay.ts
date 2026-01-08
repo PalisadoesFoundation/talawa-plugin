@@ -230,6 +230,7 @@ export const createMockDatabaseClient = () => {
       | ((callback: (tx: unknown) => unknown) => unknown);
   };
 
+  // biome-ignore lint/suspicious/noThenProperty: Intentional thenable for database mock
   const mockDb: MockDb = {
     // The "then" method is required to make the mock object "thenable" (Promise-like),
     // allowing it to be awaited directly in the application code (e.g. await db.select()...).
@@ -237,7 +238,10 @@ export const createMockDatabaseClient = () => {
     then: (
       resolve: (value: unknown) => void,
       reject: (reason?: unknown) => void,
-    ) => (mockDb.execute() as Promise<unknown>).then(resolve, reject),
+    ) =>
+      (
+        mockDb.execute as unknown as (...args: unknown[]) => Promise<unknown>
+      )().then(resolve, reject),
   } as MockDb;
 
   const methods = [
