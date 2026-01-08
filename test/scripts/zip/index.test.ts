@@ -81,8 +81,6 @@ describe('Zip Script - restoreBackup()', () => {
     expect(existsSync(backupPath)).toBe(false);
     expect(existsSync(pluginPath)).toBe(true);
   });
-
-  it.todo('should handle file operation errors gracefully');
 });
 
 describe('Zip Script - runValidationTests()', () => {
@@ -265,8 +263,28 @@ describe('Zip Script - runValidationTests()', () => {
       );
     });
   });
-});
+  it('should execute platform tests before plugin tests', async () => {
+    // Setup mocks for success
+    vi.mocked(childProcess.execFileSync).mockReturnValue(Buffer.from(''));
 
-describe('Zip Script - Integration Behavior', () => {
-  it.todo('should execute platform tests before plugin tests'); // Marked as todo as requested
+    // Create valid plugin test file
+    mkdirSync(testPluginDir, { recursive: true });
+    writeFileSync(join(testPluginDir, 'example.test.ts'), '');
+
+    await runValidationTests(testPluginName, false);
+
+    const calls = vi.mocked(childProcess.execFileSync).mock.calls;
+    expect(calls.length).toBeGreaterThanOrEqual(2);
+
+    // Verify first call is platform tests
+    const firstCallArgs = calls[0][1] as string[];
+    expect(firstCallArgs).toEqual(expect.arrayContaining(['test/platform/']));
+
+    // Verify subsequent call is plugin tests
+    const pluginCallFound = calls.slice(1).some((call) => {
+      const args = call[1] as string[];
+      return args.some((arg) => arg.includes(testPluginName));
+    });
+    expect(pluginCallFound).toBe(true);
+  });
 });

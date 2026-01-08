@@ -6,7 +6,7 @@
 
 > **onUnload**(`context`): `Promise`\<`void`\>
 
-Defined in: [plugins/razorpay/api/index.ts:256](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/razorpay/api/index.ts#L256)
+Defined in: [plugins/razorpay/api/index.ts:255](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/razorpay/api/index.ts#L255)
 
 ## Parameters
 

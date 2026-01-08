@@ -159,7 +159,8 @@ describe('ExtensionPointsDashboard', () => {
     };
 
     renderWithProviders(<ExtensionPointsDashboard />, {
-      mocks: [...standardMocks, logMock],
+      // standardMocks appears twice: initial GET_PLUGIN_MAP_REQUESTS query + refetch after LOG_PLUGIN_MAP_REQUEST mutation
+      mocks: [...standardMocks, logMock, ...standardMocks],
     });
 
     // Wait for initial load
@@ -271,7 +272,8 @@ describe('ExtensionPointsDashboard', () => {
     ];
 
     renderWithProviders(<ExtensionPointsDashboard />, {
-      mocks: unknownUserMocks,
+      // unknownUserMocks[0] duplicated to simulate refetch after mutation
+      mocks: [...unknownUserMocks, unknownUserMocks[0]],
     });
 
     // We can't query by text with interpolation easily with the simple mock
