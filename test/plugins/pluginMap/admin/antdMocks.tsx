@@ -3,8 +3,10 @@ import { vi } from 'vitest';
 
 export type VitestUtils = typeof vi;
 
-interface CommonProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
+interface CommonProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'title'
+> {
   children?: React.ReactNode;
   title?: React.ReactNode;
 }

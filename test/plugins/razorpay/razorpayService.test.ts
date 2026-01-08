@@ -44,9 +44,8 @@ describe('RazorpayService', () => {
 
     // Create service with constructor injection
     // This allows most tests to work with the mock directly
-    const { RazorpayService: CurrentRazorpayService } = await import(
-      '../../../plugins/razorpay/api/services/razorpayService'
-    );
+    const { RazorpayService: CurrentRazorpayService } =
+      await import('../../../plugins/razorpay/api/services/razorpayService');
     service = new CurrentRazorpayService(mockContext, mockRazorpayInstance);
 
     // Set up default mock implementation for drizzleClient
@@ -80,9 +79,8 @@ describe('RazorpayService', () => {
     // Initialize tests need a clean service WITHOUT mock injection
     // so they can test the initialization logic (Drizzle lookups, etc.)
     beforeEach(async () => {
-      const { RazorpayService: CurrentRazorpayService } = await import(
-        '../../../plugins/razorpay/api/services/razorpayService'
-      );
+      const { RazorpayService: CurrentRazorpayService } =
+        await import('../../../plugins/razorpay/api/services/razorpayService');
       service = new CurrentRazorpayService(mockContext);
     });
 
@@ -167,9 +165,8 @@ describe('RazorpayService', () => {
 
     it('should initialize if razorpay instance is null', async () => {
       // Force reset service to ensure no mock instance
-      const { RazorpayService: CurrentRazorpayService } = await import(
-        '../../../plugins/razorpay/api/services/razorpayService'
-      );
+      const { RazorpayService: CurrentRazorpayService } =
+        await import('../../../plugins/razorpay/api/services/razorpayService');
       service = new CurrentRazorpayService(mockContext);
 
       const mockConfig = createMockConfig();
