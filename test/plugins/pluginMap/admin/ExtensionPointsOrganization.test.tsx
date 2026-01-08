@@ -274,7 +274,14 @@ describe('ExtensionPointsOrganization', () => {
     const missingDataMock = {
       request: {
         query: LOG_PLUGIN_MAP_REQUEST,
-        variables: expect.anything(),
+        variables: {
+          input: {
+            userId: 'test-user-id',
+            userRole: 'admin',
+            organizationId: 'org-123',
+            extensionPoint: 'RA1',
+          },
+        },
       },
       result: {
         data: {
