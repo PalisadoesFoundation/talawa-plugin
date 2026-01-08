@@ -84,9 +84,11 @@ describe('Plugin Map i18n utils', () => {
     expect(i18nModule.default.changeLanguage).toHaveBeenCalledWith('en');
 
     // Test Case: Null (simulated by casting)
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    failedLoadingHandler!(null, 'plugin-map', 'Null Lang Error');
+    failedLoadingHandler!(
+      null as unknown as string,
+      'plugin-map',
+      'Null Lang Error',
+    );
     expect(i18nModule.default.changeLanguage).toHaveBeenCalledWith('en');
 
     expect(i18nModule.default.changeLanguage).toHaveBeenCalledTimes(2);
