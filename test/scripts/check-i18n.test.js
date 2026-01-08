@@ -142,18 +142,24 @@ describe('check-i18n', () => {
 
         describe('walk', () => {
             it('should recursively find files', () => {
-                fs.readdirSync.mockReturnValue([
-                    { name: 'file.ts', isDirectory: () => false, isSymbolicLink: () => false },
-                    { name: 'dir', isDirectory: () => true, isSymbolicLink: () => false }
-                ]);
-                // Mock second call for subdirectory
-                fs.readdirSync.mockReturnValueOnce([
-                    { name: 'file.ts', isDirectory: () => false, isSymbolicLink: () => false },
-                    { name: 'dir', isDirectory: () => true, isSymbolicLink: () => false }
-                ])
-                    .mockReturnValueOnce([
-                        { name: 'subfile.ts', isDirectory: () => false, isSymbolicLink: () => false }
-                    ]);
+                fs.readdirSync.mockImplementation((dir) => {
+                    if (dir === '/root') {
+                        return [
+                            { name: 'file.ts', isDirectory: () => false, isSymbolicLink: () => false },
+                            { name: 'dir', isDirectory: () => true, isSymbolicLink: () => false },
+                        ];
+                    }
+                    if (dir === '/root/dir') {
+                        return [
+                            {
+                                name: 'subfile.ts',
+                                isDirectory: () => false,
+                                isSymbolicLink: () => false,
+                            },
+                        ];
+                    }
+                    return [];
+                });
 
                 const files = checkI18n.walk('/root');
                 expect(files).toEqual(['/root/file.ts', '/root/dir/subfile.ts']);

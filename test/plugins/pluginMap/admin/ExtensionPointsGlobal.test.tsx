@@ -139,6 +139,8 @@ describe('ExtensionPointsGlobal', () => {
     };
 
     renderWithProviders(<ExtensionPointsGlobal />, {
+      // standardMocks duplicated to trigger refetch-after-mutation (mirrors ExtensionPointsDashboard)
+      // logMock intentionally inserted between duplicates
       mocks: [...standardMocks, logMock, ...standardMocks],
     });
 

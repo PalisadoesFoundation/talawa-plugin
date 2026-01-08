@@ -129,6 +129,131 @@ const COMMON_CSS_PATTERNS = [
 
 const POSIX_SEP = path.posix.sep;
 
+class CacheManager {
+    constructor() {
+        this.cacheFile = path.join(process.cwd(), '.i18n-cache.json');
+        this.cache = {};
+        this.load();
+    }
+
+    load() {
+        try {
+            if (fs.existsSync(this.cacheFile)) {
+                this.cache = JSON.parse(fs.readFileSync(this.cacheFile, 'utf-8'));
+            }
+        } catch (e) {
+            this.cache = {}; // Reset on error
+        }
+    }
+
+    save() {
+        try {
+            fs.writeFileSync(this.cacheFile, JSON.stringify(this.cache, null, 2));
+        } catch (e) {
+            // Ignore write errors
+        }
+    }
+
+    get(filePath, mtimeMs) {
+        const entry = this.cache[filePath];
+        if (entry && entry.mtime === mtimeMs) {
+            return entry.violations;
+        }
+        return null;
+    }
+
+    set(filePath, mtimeMs, violations) {
+        this.cache[filePath] = { mtime: mtimeMs, violations };
+    }
+}
+
+// Consolidated Regex for Single-Pass Scanning
+// Note: Named groups make dispatching easier
+const JSX_PATTERN = /(?<jsx>>(?<jsxText>[^<>{}]+)<)/.source;
+const TEMPLATE_PATTERN = /(?<template>`(?<templateText>[^`]*)`)/.source;
+// Attributes: match whole k="v" structure
+// Note: We use the join of USER_VISIBLE_ATTRS.
+const ATTR_PATTERN = `\\b(?<attrName>${USER_VISIBLE_ATTRS.join('|')})\\s*=\\s*(?<attrQuote>['"\`])(?<attrText>(?:\\\\.|(?!\\k<attrQuote>)[^\\\\])*)\\k<attrQuote>`;
+const TOAST_PATTERN = /toast\.(?<toastType>error|success|warning|info)\s*\(\s*(?<toastQuote>['"`])(?<toastText>(?:\\.|(?!\k<toastQuote>).)*?)\k<toastQuote>/.source;
+
+const COMBINED_REGEX = new RegExp(
+    [JSX_PATTERN, TEMPLATE_PATTERN, ATTR_PATTERN, TOAST_PATTERN].join('|'),
+    'gi'
+);
+
+const scanLine = (line, lineNumber, violations, types = new Set(['jsx', 'template', 'attribute', 'toast'])) => {
+    // Reset lastIndex for global regex reused or new instance? 
+    // Creating new RegExp per line is expensive. Using global instance is tricky with loops.
+    // For single line, we can just use loop.
+    // BUT regex has state (lastIndex) if global.
+    // We should create a clone or reset it.
+    // Or simpler: COMBINED_REGEX is const. We must reset lastIndex = 0 before use.
+    COMBINED_REGEX.lastIndex = 0;
+
+    let match;
+    while ((match = COMBINED_REGEX.exec(line)) !== null) {
+        const groups = match.groups;
+        const matchIndex = match.index;
+
+        if (groups.jsxText && types.has('jsx')) {
+            const text = groups.jsxText;
+            // Match index logic needs adjustment because regex matched '>text<' but text starts at index + 1
+            // Or we rely on sub-captures.
+            // match.index points to start of '>'.
+            // text starts at match.index + (match[0].indexOf(text) or just 1 usually).
+            // Let's use specific logic.
+            // Actually `isInSkipContext` takes matchIndex. For JSX it's the text position? 
+            // Existing code used `match.index` of `>text<` regex, which starts at `>`.
+            // `isInSkipContext` check passed `match.index`.
+            // So passing match.index (start of >) is correct for `isInSkipContext` logic?
+            // Actually `isInSkipContext` checks `beforeMatch`.
+            // If we consistently pass the start of the match (e.g. `>`), it works.
+            if (isInSkipContext(line, matchIndex)) continue;
+            if (!isAllowedString(text)) violations.push({ line: lineNumber, text });
+        }
+        else if (groups.templateText && types.has('template')) {
+            const fullText = groups.templateText; // This is CONTENT. match[0] is `content`.
+            // Wait, `regex` was ``/`([^`]*)`/g``. 
+            // match[1] was content. 
+            // groups.templateText is content.
+            // match.index is start of backtick.
+
+            // Logic from detectTemplateLiteralViolations:
+            const beforeMatch = line.substring(0, matchIndex);
+
+            if (!fullText.trim()) continue;
+            if (/styled(\.\w+|\([^)]+\))?\s*$/.test(beforeMatch)) continue;
+            if (/(css|gql)\s*$/.test(beforeMatch)) continue;
+            if (/(it|test|describe|context)\s*\(\s*$/.test(beforeMatch)) continue;
+            if (isInSkipContext(line, matchIndex)) continue;
+
+            const attributeName = getAttributeName(line, matchIndex);
+            if (attributeName && NON_USER_VISIBLE_ATTRS.includes(attributeName)) continue;
+            if (NON_USER_VISIBLE_ATTR_PATTERN.test(beforeMatch)) continue;
+
+            const looksLikeCssClasses = /className/i.test(beforeMatch) && COMMON_CSS_PATTERNS.some(p => p.test(fullText));
+            if (looksLikeCssClasses) continue;
+
+            let staticText = fullText.replace(/\$\{[^`]*`[^`]*`[^}]*\}/g, '').replace(/\$\{[^}]*\}/g, '').trim();
+            if (looksLikeUrl(staticText) || looksLikeUrl(fullText)) continue;
+            if (looksLikeDateFormat(staticText) || looksLikeDateFormat(fullText)) continue;
+
+            if (staticText && !isAllowedString(staticText)) {
+                violations.push({ line: lineNumber, text: fullText });
+            }
+        }
+        else if (groups.attrText && types.has('attribute')) {
+            const text = groups.attrText;
+            if (isInSkipContext(line, matchIndex)) continue;
+            if (!isAllowedString(text)) violations.push({ line: lineNumber, text });
+        }
+        else if (groups.toastText && types.has('toast')) {
+            const text = groups.toastText;
+            if (!isAllowedString(text)) violations.push({ line: lineNumber, text });
+        }
+    }
+}
+
 export const parseArgs = (args) => {
     const files = [];
     let diffOnly = false;
@@ -676,102 +801,19 @@ export const getAttributeName = (line, matchIndex) => {
 };
 
 export const detectJsxTextViolations = (line, lineNumber, violations) => {
-    // JSX Text Nodes: >Text<
-    const jsxRegex = />([^<>{}]+)</g;
-    let match;
-    while ((match = jsxRegex.exec(line)) !== null) {
-        const text = match[1];
-        const matchIndex = match.index;
-
-        if (isInSkipContext(line, matchIndex)) {
-            continue;
-        }
-
-        if (!isAllowedString(text)) {
-            violations.push({ line: lineNumber, text });
-        }
-    }
+    scanLine(line, lineNumber, violations, new Set(['jsx']));
 };
 
 export const detectTemplateLiteralViolations = (line, lineNumber, violations) => {
-    // Template Literals: `Text`
-    const templateRegex = /`([^`]*)`/g;
-    let match;
-    while ((match = templateRegex.exec(line)) !== null) {
-        const fullText = match[1];
-        const matchIndex = match.index;
-        const beforeMatch = line.substring(0, matchIndex);
-
-        if (!fullText.trim()) continue;
-
-        // Skip styled-components, graphql, css
-        if (/styled(\.\w+|\([^)]+\))?\s*$/.test(beforeMatch)) continue;
-        if (/(css|gql)\s*$/.test(beforeMatch)) continue;
-
-        // Skip tests
-        if (/(it|test|describe|context)\s*\(\s*$/.test(beforeMatch)) continue;
-
-        if (isInSkipContext(line, matchIndex)) continue;
-
-        const attributeName = getAttributeName(line, matchIndex);
-
-        // Skip non-user-visible attributes
-        if (attributeName && NON_USER_VISIBLE_ATTRS.includes(attributeName)) continue;
-
-        // Fallback check for attribute assignment
-        const hasNonUserVisibleAttr = NON_USER_VISIBLE_ATTR_PATTERN.test(beforeMatch);
-        if (hasNonUserVisibleAttr) continue;
-
-        // CSS class heuristics
-        const looksLikeCssClasses =
-            /className/i.test(beforeMatch) &&
-            COMMON_CSS_PATTERNS.some((pattern) => pattern.test(fullText));
-
-        if (looksLikeCssClasses) continue;
-
-        // Strip variables
-        let staticText = fullText;
-        staticText = staticText.replace(/\$\{[^`]*`[^`]*`[^}]*\}/g, '');
-        staticText = staticText.replace(/\$\{[^}]*\}/g, '');
-        staticText = staticText.trim();
-
-        if (looksLikeUrl(staticText) || looksLikeUrl(fullText)) continue;
-        if (looksLikeDateFormat(staticText) || looksLikeDateFormat(fullText)) continue;
-
-        if (staticText && !isAllowedString(staticText)) {
-            violations.push({ line: lineNumber, text: fullText });
-        }
-    }
+    scanLine(line, lineNumber, violations, new Set(['template']));
 };
 
 export const detectAttributeViolations = (line, lineNumber, violations) => {
-    const attrRegex = new RegExp(
-        `\\b(${USER_VISIBLE_ATTRS.join('|')})\\s*=\\s*(['"\`])((?:\\\\.|(?!\\2)[^\\\\])*)\\2`,
-        'gi',
-    );
-    let attrMatch;
-    while ((attrMatch = attrRegex.exec(line)) !== null) {
-        const text = attrMatch[3];
-        const matchIndex = attrMatch.index;
-
-        if (isInSkipContext(line, matchIndex)) continue;
-
-        if (!isAllowedString(text)) {
-            violations.push({ line: lineNumber, text });
-        }
-    }
+    scanLine(line, lineNumber, violations, new Set(['attribute']));
 };
 
 export const detectToastViolations = (line, lineNumber, violations) => {
-    const toastRegex =
-        /toast\.(error|success|warning|info)\s*\(\s*(['"`])((?:\\.|(?!\2).)*?)\2/gi;
-    let toastMatch;
-    while ((toastMatch = toastRegex.exec(line)) !== null) {
-        const text = toastMatch[3];
-        if (!isAllowedString(text)) {
-            violations.push({ line: lineNumber, text });
-        }
-    }
+    scanLine(line, lineNumber, violations, new Set(['toast']));
 };
 
 /**
@@ -791,7 +833,22 @@ export const detectToastViolations = (line, lineNumber, violations) => {
  * @returns {Array<{line: number, text: string}>} Array of violations found,
  *          each containing the line number and the violating text
  */
-export const collectViolations = (filePath, lineFilter = null) => {
+export const collectViolations = (filePath, lineFilter = null, cacheManager = null) => {
+    // Check Cache
+    let mtimeMs = 0;
+    if (cacheManager) {
+        try {
+            const stats = fs.statSync(filePath);
+            mtimeMs = stats.mtimeMs;
+            const cached = cacheManager.get(filePath, mtimeMs);
+            if (cached && !lineFilter) {
+                return cached;
+            }
+        } catch (e) {
+            // Ignore stat error, file might not exist or readable
+        }
+    }
+
     let content;
     try {
         content = fs.readFileSync(filePath, 'utf-8');
@@ -818,16 +875,18 @@ export const collectViolations = (filePath, lineFilter = null) => {
             return;
         }
 
-        // Skip lines with ignore comments
+        // Skip lines with ignore comments - Early Exit
         if (hasIgnoreComment(lines, index)) {
             return;
         }
 
-        detectJsxTextViolations(line, lineNumber, violations);
-        detectTemplateLiteralViolations(line, lineNumber, violations);
-        detectAttributeViolations(line, lineNumber, violations);
-        detectToastViolations(line, lineNumber, violations);
+        // Single Pass Scan
+        scanLine(line, lineNumber, violations);
     });
+
+    if (cacheManager && !lineFilter && mtimeMs > 0) {
+        cacheManager.set(filePath, mtimeMs, violations);
+    }
 
     return violations;
 };
@@ -901,14 +960,22 @@ export const main = () => {
     }
 
     const results = {};
+    const cacheManager = new CacheManager();
 
     for (const file of targets) {
         const lineFilter = diffOnly ? changedLinesByFile.get(file) : null;
-        const violations = collectViolations(file, lineFilter);
+        // Pass cacheManager only if not diffOnly (or always, but collectViolations handles logic)
+        // Actually if diffOnly, we might not want to write cache for filtered lines?
+        // collectViolations logic: if (lineFilter) don't save cache.
+        // So passing cacheManager is safe.
+        const violations = collectViolations(file, lineFilter, cacheManager);
         if (violations.length) {
             results[file] = violations;
         }
     }
+
+    // Save cache if we used it
+    cacheManager.save();
 
     const filesWithIssues = Object.keys(results);
     if (!filesWithIssues.length) {

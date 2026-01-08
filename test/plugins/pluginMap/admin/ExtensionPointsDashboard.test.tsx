@@ -272,6 +272,7 @@ describe('ExtensionPointsDashboard', () => {
     ];
 
     renderWithProviders(<ExtensionPointsDashboard />, {
+      // unknownUserMocks[0] duplicated to simulate refetch after mutation
       mocks: [...unknownUserMocks, unknownUserMocks[0]],
     });
 
