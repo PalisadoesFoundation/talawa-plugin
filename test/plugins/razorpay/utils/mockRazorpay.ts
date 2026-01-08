@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, type Mock } from 'vitest';
 import type { GraphQLContext } from '~/src/graphql/context';
 import type { RazorpayWebhookData } from '~/plugins/razorpay/api/services/razorpayService';
 import crypto from 'node:crypto';
@@ -215,13 +215,14 @@ export const createMockDatabaseClient = () => {
       resolve: (value: unknown) => void,
       reject: (reason?: unknown) => void,
     ) => Promise<unknown>;
-    execute: ReturnType<typeof vi.fn>;
-    returning: ReturnType<typeof vi.fn>;
-    transaction:
-      | ReturnType<typeof vi.fn>
-      | ((callback: (tx: unknown) => unknown) => unknown);
+    execute: Mock<(...args: unknown[]) => Promise<unknown>>;
+    returning: Mock<(...args: unknown[]) => Promise<unknown>>;
+    transaction: Mock<
+      (callback: (tx: unknown) => Promise<unknown>) => Promise<unknown>
+    >;
     [key: string]:
-      | ReturnType<typeof vi.fn>
+      | Mock<(...args: unknown[]) => unknown>
+      | Mock<(callback: (tx: unknown) => Promise<unknown>) => Promise<unknown>>
       | ((...args: unknown[]) => unknown)
       | ((
           resolve: (value: unknown) => void,
@@ -238,10 +239,7 @@ export const createMockDatabaseClient = () => {
     then: (
       resolve: (value: unknown) => void,
       reject: (reason?: unknown) => void,
-    ) =>
-      (
-        mockDb.execute as unknown as (...args: unknown[]) => Promise<unknown>
-      )().then(resolve, reject),
+    ) => mockDb.execute().then(resolve, reject),
   } as MockDb;
 
   const methods = [
@@ -271,7 +269,7 @@ export const createMockDatabaseClient = () => {
   // Mock transaction method
   mockDb.transaction = vi.fn((callback) =>
     callback(mockDb),
-  ) as unknown as MockDb['transaction'];
+  ) as MockDb['transaction'];
 
   return mockDb;
 };
@@ -304,12 +302,12 @@ export const createMockRazorpayContext = (
     },
     isAdmin: true,
     token: 'mock-jwt-token',
-    db: mockDb as unknown,
+    db: mockDb,
     currentClient: {
       isAuthenticated: true,
       scopes: ['api:access'],
     },
-    drizzleClient: mockDb as unknown,
+    drizzleClient: mockDb,
     log: {
       info: vi.fn(),
       error: vi.fn(),
