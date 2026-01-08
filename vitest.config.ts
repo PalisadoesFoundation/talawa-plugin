@@ -46,6 +46,10 @@ export default defineConfig({
         ),
       },
       {
+        find: /^~\/(.*)$/,
+        replacement: path.resolve(__dirname, './$1'),
+      },
+      {
         find: '~',
         replacement: path.resolve(__dirname, './'),
       },
