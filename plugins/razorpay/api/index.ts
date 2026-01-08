@@ -139,9 +139,8 @@ export async function onLoad(context: IPluginContext): Promise<void> {
 
   // Initialize plugin tables if they don't exist
   try {
-    const { configTable, transactionsTable, ordersTable } = await import(
-      './database/tables'
-    );
+    const { configTable, transactionsTable, ordersTable } =
+      await import('./database/tables');
 
     // Check if tables exist by trying to query them
     if (
@@ -591,9 +590,8 @@ export async function handleRazorpayWebhook(
     }
 
     // Process webhook directly with database access
-    const { ordersTable, transactionsTable } = await import(
-      './database/tables'
-    );
+    const { ordersTable, transactionsTable } =
+      await import('./database/tables');
 
     // Get order details to get userId and other info
     const orderDetails = await pluginContext.db
