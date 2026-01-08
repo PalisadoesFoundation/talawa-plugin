@@ -595,3 +595,43 @@ jobs:
         run: |
           source venv/bin/activate
           python .github/workflows/scripts/check_docstrings.py --directories .github plugins scripts
+
+  Translation-Compliance:
+    name: Check Translation Compliance
+    runs-on: ubuntu-latest
+    needs: [Code-Quality-Checks]
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 10.4.1
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Compare Translations
+        run: python .github/workflows/scripts/compare_translations.py --directory public/locales
+
+      - name: Check Translation Tags
+        run: python .github/workflows/scripts/translation_tag_check.py --locales-dir public/locales/en --directories src plugins
+
+      - name: Check for Hardcoded Strings
+        continue-on-error: true
+        run: pnpm run check-i18n

@@ -99,6 +99,7 @@
     "lint:fix": "npm run validate:plugins && eslint --fix \"**/*.{ts,tsx}\"",
     "format:fix": "prettier --write \"**/*.{ts,tsx,json,json5,scss,css,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,json,json5,scss,css,yaml,yml}\"",
+    "check-i18n": "node scripts/check-i18n.js",
     "check-tsdoc": "node .github/workflows/scripts/check-tsdoc.js",
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "postgenerate-docs": "find docs/docs/auto-docs -name 'README.md' -delete && node scripts/docs/fix-repo-url.js",
