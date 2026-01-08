@@ -321,18 +321,44 @@ const stripComments = (content) => {
             }
         } else if (mode === 'singleQuote') {
             output += char;
-            if (char === "'" && content[i - 1] !== '\\') {
-                mode = 'code';
+            if (char === "'") {
+                // Count consecutive backslashes before the quote
+                let backslashCount = 0;
+                let j = i - 1;
+                while (j >= 0 && content[j] === '\\') {
+                    backslashCount++;
+                    j--;
+                }
+                // Quote is escaped only if odd number of backslashes
+                if (backslashCount % 2 === 0) {
+                    mode = 'code';
+                }
             }
         } else if (mode === 'doubleQuote') {
             output += char;
-            if (char === '"' && content[i - 1] !== '\\') {
-                mode = 'code';
+            if (char === '"') {
+                let backslashCount = 0;
+                let j = i - 1;
+                while (j >= 0 && content[j] === '\\') {
+                    backslashCount++;
+                    j--;
+                }
+                if (backslashCount % 2 === 0) {
+                    mode = 'code';
+                }
             }
         } else if (mode === 'template') {
             output += char;
-            if (char === '`' && content[i - 1] !== '\\') {
-                mode = 'code';
+            if (char === '`') {
+                let backslashCount = 0;
+                let j = i - 1;
+                while (j >= 0 && content[j] === '\\') {
+                    backslashCount++;
+                    j--;
+                }
+                if (backslashCount % 2 === 0) {
+                    mode = 'code';
+                }
             }
         }
         i++;

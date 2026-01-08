@@ -55,13 +55,6 @@ import argparse
 import json
 import os
 import sys
-from collections import namedtuple
-
-# Named tuple for file and missing
-#   translations combination
-FileTranslation = namedtuple(
-    "FileTranslation", ["file", "missing_translations"]
-)
 
 
 def compare_translations(
