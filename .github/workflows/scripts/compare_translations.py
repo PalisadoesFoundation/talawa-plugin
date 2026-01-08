@@ -144,7 +144,9 @@ def load_translation(filepath):
     except json.JSONDecodeError as e:
         # Return empty dict if file exists but is invalid JSON (or handle as error)
         # For robustness, we raise to let the caller handle or crash
-        raise ValueError(f"Error decoding JSON from file {filepath}: {e}") from e
+        raise ValueError(
+            f"Error decoding JSON from file {filepath}: {e}"
+        ) from e
     except FileNotFoundError:
         return {}
     else:
