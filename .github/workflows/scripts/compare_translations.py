@@ -135,19 +135,20 @@ def load_translation(filepath):
         translation: Loaded translation
     """
     try:
-        with open(filepath, "r", encoding="utf-8") as file:
+        with open(filepath, encoding="utf-8") as file:
             content = file.read()
             if not content.strip():
                 raise ValueError(f"File {filepath} is empty.")
             translation = json.loads(content)
             flattened_translation = flatten_json(translation)
-        return flattened_translation
     except json.JSONDecodeError as e:
         # Return empty dict if file exists but is invalid JSON (or handle as error)
         # For robustness, we raise to let the caller handle or crash
-        raise ValueError(f"Error decoding JSON from file {filepath}: {e}")
+        raise ValueError(f"Error decoding JSON from file {filepath}: {e}") from e
     except FileNotFoundError:
         return {}
+    else:
+        return flattened_translation
 
 
 def check_translations(directory):
@@ -162,8 +163,8 @@ def check_translations(directory):
     default_language_dir = os.path.join(directory, "en")
     
     if not os.path.exists(default_language_dir):
-         print(f"Error: Default language directory '{default_language_dir}' does not exist.")
-         sys.exit(1)
+        print(f"Error: Default language directory '{default_language_dir}' does not exist.")
+        sys.exit(1)
 
     # Dynamic file detection instead of hardcoded list
     default_files = [f for f in os.listdir(default_language_dir) if f.endswith('.json')]
@@ -187,9 +188,9 @@ def check_translations(directory):
             other_file_path = os.path.join(language_dir, file)
             
             if not os.path.exists(other_file_path):
-                 print(f"File {language}/{file} is missing.")
-                 error_found = True
-                 continue
+                print(f"File {language}/{file} is missing.")
+                error_found = True
+                continue
 
             other_translation = load_translation(other_file_path)
 

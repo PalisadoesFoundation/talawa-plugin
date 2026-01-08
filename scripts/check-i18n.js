@@ -425,7 +425,8 @@ const isInSkipContext = (line, matchIndex) => {
     }
 
     // Skip new RegExp(...) or /pattern/ regex literals
-    if (/new\s+RegExp\s*\(/.test(beforeMatch) || /\/[^\/]+\//.test(beforeMatch)) {
+    // Improved heuristic: Check for characters that typically precede a regex literal
+    if (/new\s+RegExp\s*\(/.test(beforeMatch) || /(?<=[^\w$])\/[^\/]+\//.test(beforeMatch)) {
         return true;
     }
 

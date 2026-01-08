@@ -213,7 +213,7 @@ def get_target_files(
                 found_source = True
         
         if not found_source:
-             raise FileNotFoundError("Default 'src' or 'plugins' directory not found")
+            raise FileNotFoundError("Default 'src' or 'plugins' directory not found")
 
     return [
         path
