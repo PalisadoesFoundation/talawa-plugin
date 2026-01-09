@@ -45,6 +45,25 @@ export default defineConfig({
           './__mocks__/apollo-client-proxy.ts',
         ),
       },
+      {
+        find: '~/src/graphql/builder',
+        replacement: path.resolve(__dirname, './__mocks__/builder.ts'),
+      },
+      {
+        find: '~/src/utilities/TalawaGraphQLError',
+        replacement: path.resolve(
+          __dirname,
+          './__mocks__/TalawaGraphQLError.ts',
+        ),
+      },
+      {
+        find: /^~\/(.*)$/,
+        replacement: path.resolve(__dirname, './$1'),
+      },
+      {
+        find: '~',
+        replacement: path.resolve(__dirname, './'),
+      },
     ],
   },
   test: {

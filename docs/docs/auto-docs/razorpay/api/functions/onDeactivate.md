@@ -6,7 +6,7 @@
 
 > **onDeactivate**(`context`): `Promise`\<`void`\>
 
-Defined in: [plugins/razorpay/api/index.ts:235](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/razorpay/api/index.ts#L235)
+Defined in: [plugins/razorpay/api/index.ts:234](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/razorpay/api/index.ts#L234)
 
 ## Parameters
 

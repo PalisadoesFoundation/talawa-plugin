@@ -139,7 +139,9 @@ describe('ExtensionPointsGlobal', () => {
     };
 
     renderWithProviders(<ExtensionPointsGlobal />, {
-      mocks: [...standardMocks, logMock],
+      // standardMocks duplicated to trigger refetch-after-mutation (mirrors ExtensionPointsDashboard)
+      // logMock intentionally inserted between duplicates
+      mocks: [...standardMocks, logMock, ...standardMocks],
     });
 
     await screen.findAllByText('1');
@@ -245,7 +247,8 @@ describe('ExtensionPointsGlobal', () => {
     ];
 
     renderWithProviders(<ExtensionPointsGlobal />, {
-      mocks: unknownUserMocks,
+      // unknownUserMocks[0] duplicated for refetch after mutation
+      mocks: [...unknownUserMocks, unknownUserMocks[0]],
     });
 
     await waitFor(() => {

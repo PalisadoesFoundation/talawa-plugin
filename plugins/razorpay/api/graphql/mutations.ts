@@ -615,9 +615,8 @@ export async function testRazorpaySetupResolver(
     }
 
     // Import Razorpay service to test setup
-    const { createRazorpayService } = await import(
-      '../services/razorpayService'
-    );
+    const { createRazorpayService } =
+      await import('../services/razorpayService');
     const razorpayService = createRazorpayService(ctx);
 
     ctx.log?.info(
