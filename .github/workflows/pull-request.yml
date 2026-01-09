@@ -87,11 +87,12 @@ jobs:
           echo "only_changed=false" >> $GITHUB_OUTPUT
 
       - name: Check formatting
+        id: check-format
         if: steps.changed-files.outputs.only_changed != 'true'
         run: pnpm run format:check
 
       - name: Suggest running format:fix
-        if: failure()
+        if: steps.check-format.outcome == 'failure'
         run: |
           echo "::error::Formatting check failed. Please run 'pnpm run format:fix' locally and commit the changes."
           exit 1

@@ -220,16 +220,7 @@ export const createMockDatabaseClient = () => {
     transaction: Mock<
       (callback: (tx: unknown) => Promise<unknown>) => Promise<unknown>
     >;
-    [key: string]:
-      | Mock<(...args: unknown[]) => unknown>
-      | Mock<(callback: (tx: unknown) => Promise<unknown>) => Promise<unknown>>
-      | ((...args: unknown[]) => unknown)
-      | ((
-          resolve: (value: unknown) => void,
-          reject: (reason?: unknown) => void,
-        ) => Promise<unknown>)
-      | ((callback: (tx: unknown) => unknown) => unknown);
-  };
+  } & Partial<Record<string, Mock<(...args: unknown[]) => unknown>>>;
 
   // biome-ignore lint/suspicious/noThenProperty: Intentional thenable for database mock
   const mockDb: MockDb = {
