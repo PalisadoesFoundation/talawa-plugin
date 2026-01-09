@@ -96,11 +96,11 @@ i18nForTests.use(initReactI18next).init({
           error: 'Failed to log request. Please try again.',
         },
         injector: {
-          paymentTitle: 'Plugin Map G1 Extension Point',
-          paymentDescription:
+          title: 'Plugin Map G1 Extension Point',
+          description:
             'This is a demonstration of the G1 (Global Widget) extension point',
           extensionPoint: 'Extension Point: {{id}}',
-          supportText: 'Plugin supports this extension point {{id}}',
+          supportText: "Plugin supports the '{{id}}' extension point",
           badge: 'Plugin Map Extension Point Indicator',
         },
       },

@@ -54,14 +54,14 @@ const MapIconInjector: React.FC<MapIconInjectorProps> = ({
                 fontSize: '32px',
                 color: '#1890ff',
               }}
-              aria-label={t('injector.paymentTitle')}
+              aria-label={t('injector.title')}
               role="img"
             />
             <div>
               <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
-                {t('injector.paymentTitle')}
+                {t('injector.title')}
               </Title>
-              <Text type="secondary">{t('injector.paymentDescription')}</Text>
+              <Text type="secondary">{t('injector.description')}</Text>
             </div>
           </Space>
 
