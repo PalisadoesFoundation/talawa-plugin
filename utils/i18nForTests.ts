@@ -80,6 +80,7 @@ i18nForTests.use(initReactI18next).init({
           orgUsers: 'Organization Users',
           organization: 'Organization',
           note: 'Note:',
+          cardTitle: 'Extension Point Information',
           globalDesc:
             'This route is accessible to all authenticated users globally, regardless of organization membership.',
           dashboardDesc:

@@ -56,6 +56,7 @@
     "orgUsers": "Organization Users",
     "organization": "Organization",
     "note": "Note:",
+    "cardTitle": "Extension Point Information",
     "globalDesc": "This route is accessible to all authenticated users globally, regardless of organization membership.",
     "dashboardDesc": "This route is accessible to administrators in the global admin dashboard.",
     "orgUserDesc": "This route is organization-specific and accessible to users who are members of the organization.",

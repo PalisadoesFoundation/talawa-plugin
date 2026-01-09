@@ -196,7 +196,7 @@ const ExtensionPointsGlobal: React.FC = () => {
         </Col>
 
         <Col span={24}>
-          <Card title="Extension Point Information">
+          <Card title={t('info.cardTitle')}>
             <Row gutter={[24, 16]}>
               <Col span={6}>
                 <div
