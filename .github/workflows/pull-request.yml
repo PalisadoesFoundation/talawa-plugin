@@ -329,89 +329,35 @@ jobs:
           echo "- Source branch may be incorrect please use develop as source branch."
           exit 1
 
-  Check-ESlint-Disable:
-    name: Check for eslint-disable
+  Check-Disable-Statements:
+    name: Check for disable statements (eslint-disable, istanbul-ignore, it.skip)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
+          fetch-depth: 0
 
-      - name: Get changed files
-        id: changed-files
-        run: |
-          # Get the base branch ref
-          BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
-
-          # Get all changed files with quoting
-          ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | sed 's/^/"/; s/$/"/' | tr '\n' ' ')
-          echo "all_changed_files=${ALL_CHANGED_FILES}" >> $GITHUB_OUTPUT
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.9
-
-      - name: Run Python script
-        run: |
-          python .github/workflows/scripts/eslint_disable_check.py --files ${{ steps.changed-files.outputs.all_changed_files }}
-
-  Check-Code-Coverage-Disable:
-    name: Check for code coverage disable
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
+      - name: Checkout centralized scripts
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
+          repository: PalisadoesFoundation/.github
+          path: .github-central
+          ref: main
 
       - name: Get changed files
         id: changed-files
         run: |
-          # Get the base branch ref
-          BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
-
-          # Get all changed files with quoting
-          ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | sed 's/^/"/; s/$/"/' | tr '\n' ' ')
-          echo "all_changed_files=${ALL_CHANGED_FILES}" >> $GITHUB_OUTPUT
+          echo "all_changed_files=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: 3.11
 
-      - name: Run Python script
+      - name: Run Disable Statements Check
         run: |
-          python .github/workflows/scripts/code_coverage_disable_check.py --files ${{ steps.changed-files.outputs.all_changed_files }}
-
-  Check-ItSkip-Disable:
-    name: Check for it.skip commands
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: Get changed files
-        id: changed-files
-        run: |
-          # Get the base branch ref
-          BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
-
-          # Get all changed files with quoting
-          ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | sed 's/^/"/; s/$/"/' | tr '\n' ' ')
-          echo "all_changed_files=${ALL_CHANGED_FILES}" >> $GITHUB_OUTPUT
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.9
-
-      - name: Run Python script
-        run: |
-          python .github/workflows/scripts/itskip_disable_check.py --files ${{ steps.changed-files.outputs.all_changed_files }}
+          python .github-central/.github/workflows/scripts/disable_statements_check.py --files ${{ steps.changed-files.outputs.all_changed_files }}
 
   Check-For-Unused-Code:
     name: Check for Unused Files, Exports and Dependencies
@@ -446,10 +392,8 @@ jobs:
     needs:
       [
         Code-Quality-Checks,
-        Check-ESlint-Disable,
-        Check-Code-Coverage-Disable,
+        Check-Disable-Statements,
         Check-AutoDocs,
-        Check-ItSkip-Disable,
         Check-For-Unused-Code,
       ]
     steps:
