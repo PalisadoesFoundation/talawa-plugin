@@ -17,6 +17,7 @@
       "message": "Message (Optional)",
       "phonePlaceholder": "Enter your phone number",
       "messagePlaceholder": "Add a personal message with your donation",
+      "messageLabel": "Message",
       "submit": "Donate Now",
       "processing": "Processing...",
       "emailRequired": "Email Address *",

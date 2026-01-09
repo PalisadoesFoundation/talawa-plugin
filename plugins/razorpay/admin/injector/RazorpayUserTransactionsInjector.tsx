@@ -185,6 +185,7 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
       key: 'status',
       render: (status: string) => (
         <Tag color={getStatusColor(status)}>
+          {/* i18n-ignore-next-line */}
           {t(`transactions.status.${status}`, {
             defaultValue: status.toUpperCase(),
           })}
