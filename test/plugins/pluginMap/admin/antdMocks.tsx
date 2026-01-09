@@ -11,31 +11,61 @@ interface CommonProps extends Omit<
   title?: React.ReactNode;
 }
 
+interface ColumnType {
+  title: React.ReactNode;
+  dataIndex: string;
+  key?: React.Key;
+  render?: (value: unknown, record: Record<string, unknown>) => React.ReactNode;
+}
+
+interface PaginationType {
+  showTotal?: (total: number, range: [number, number]) => React.ReactNode;
+}
+
 interface TableProps extends CommonProps {
-  dataSource?: any[];
-  columns?: any[];
-  pagination?: any;
+  dataSource?: Record<string, unknown>[];
+  columns?: ColumnType[];
+  pagination?: PaginationType;
 }
 
 export const createAntdMocks = (viInstance: VitestUtils) => {
   const MockComponent = ({ children, title, ...props }: CommonProps) => (
-    <div {...(props as any)}>
+    <div {...(props as React.HTMLAttributes<HTMLDivElement>)}>
       {' '}
       {children} {title}{' '}
     </div>
   );
-  const MockTypography = ({ children, ...props }: CommonProps) => (
-    <div {...(props as any)}> {children} </div>
+
+  const TypographyBase = ({ children, ...props }: CommonProps) => (
+    <div {...(props as React.HTMLAttributes<HTMLDivElement>)}> {children} </div>
   );
-  (MockTypography as any).Title = ({ children, ...props }: CommonProps) => (
-    <h2 {...(props as any)}> {children} </h2>
+
+  const Title = ({ children, ...props }: CommonProps) => (
+    <h2 {...(props as React.HTMLAttributes<HTMLHeadingElement>)}>
+      {' '}
+      {children}{' '}
+    </h2>
   );
-  (MockTypography as any).Text = ({ children, ...props }: CommonProps) => (
-    <span {...(props as any)}> {children} </span>
+
+  const Text = ({ children, ...props }: CommonProps) => (
+    <span {...(props as React.HTMLAttributes<HTMLSpanElement>)}>
+      {' '}
+      {children}{' '}
+    </span>
   );
-  (MockTypography as any).Paragraph = ({ children, ...props }: CommonProps) => (
-    <p {...(props as any)}> {children} </p>
+
+  const Paragraph = ({ children, ...props }: CommonProps) => (
+    <p {...(props as React.HTMLAttributes<HTMLParagraphElement>)}>
+      {' '}
+      {children}{' '}
+    </p>
   );
+
+  const MockTypography = Object.assign(TypographyBase, {
+    Title,
+    Text,
+    Paragraph,
+  });
 
   return {
     Button: ({
@@ -45,23 +75,23 @@ export const createAntdMocks = (viInstance: VitestUtils) => {
       <button {...props}> {children} </button>
     ),
     Table: ({ dataSource, columns, pagination, ...props }: TableProps) => (
-      <div {...(props as any)}>
+      <div {...(props as React.HTMLAttributes<HTMLDivElement>)}>
         <table>
           <thead>
             <tr>
-              {columns?.map((col: any, j: number) => (
+              {columns?.map((col, j) => (
                 <th key={j}>{col.title}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {dataSource?.map((row: any, i: number) => (
+            {dataSource?.map((row, i) => (
               <tr key={i}>
-                {columns?.map((col: any, j: number) => (
+                {columns?.map((col, j) => (
                   <td key={j}>
                     {col.render
                       ? col.render(row[col.dataIndex], row)
-                      : row[col.dataIndex]}
+                      : (row[col.dataIndex] as React.ReactNode)}
                   </td>
                 ))}
               </tr>
@@ -79,10 +109,13 @@ export const createAntdMocks = (viInstance: VitestUtils) => {
       </div>
     ),
     Tag: ({ children, ...props }: CommonProps) => (
-      <span {...(props as any)}> {children} </span>
+      <span {...(props as React.HTMLAttributes<HTMLSpanElement>)}>
+        {' '}
+        {children}{' '}
+      </span>
     ),
     Card: ({ title, children, ...props }: CommonProps) => (
-      <div {...(props as any)}>
+      <div {...(props as React.HTMLAttributes<HTMLDivElement>)}>
         {title && <div className="ant-card-head-title">{title}</div>}
         {children}
       </div>
