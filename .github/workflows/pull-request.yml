@@ -348,8 +348,8 @@ jobs:
       - name: Get changed files
         id: changed-files
         run: |
-          BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
-          echo "all_changed_files=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          BASE_SHA=$(git merge-base "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")
+          echo "all_changed_files=$(git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "${{ github.event.pull_request.head.sha }}" | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -358,7 +358,7 @@ jobs:
 
       - name: Run Disable Statements Check
         run: |
-          python .github-central/.github/workflows/scripts/disable_statements_check.py --files ${{ steps.changed-files.outputs.all_changed_files }}
+          python .github-central/.github/workflows/scripts/disable_statements_check.py --files "${{ steps.changed-files.outputs.all_changed_files }}"
 
   Check-For-Unused-Code:
     name: Check for Unused Files, Exports and Dependencies

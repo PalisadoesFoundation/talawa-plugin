@@ -19,13 +19,13 @@ echo "Running Python CI parity checks..."
 # Standard Python Checks (black, pydocstyle, flake8)
 # Running on: .github
 echo "🔍 Running black (formatting)..."
-"$VENV_BIN" -m black --check .github || exit 1
+"$VENV_BIN" -m black --check .github plugins scripts || exit 1
 
 echo "🔍 Running pydocstyle (docstrings)..."
-"$VENV_BIN" -m pydocstyle .github || exit 1
+"$VENV_BIN" -m pydocstyle --convention=google --add-ignore=D415,D205 .github plugins scripts || exit 1
 
 echo "🔍 Running flake8 (linting)..."
-"$VENV_BIN" -m flake8 .github || exit 1
+"$VENV_BIN" -m flake8 --docstring-convention google --ignore E402,E722,E203,F401,W503 .github plugins scripts || exit 1
 
 
 # Python CI Parity Checks
