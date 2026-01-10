@@ -47,14 +47,12 @@ if (typeof window !== 'undefined') {
     // Translation map for English (complete set from JSON files)
     const translations: Record<string, string> = {
       // Plugin Map translations
-      'injector.paymentTitle': 'Payment Provider Transactions',
-      'injector.paymentDescription':
-        'Browse transactions made using the following payment provider',
-      'injector.extensionPoint':
-        'Extension Point: {{id}} - Transaction Display Area',
-      'injector.supportText':
-        'This location supports component injection via the Plugin Map system. Developers can inject custom components here using the {{id}} extension point.',
-      'injector.badge': 'Plugin Map Extension Point',
+      'injector.title': 'Plugin Map G1 Extension Point',
+      'injector.description':
+        'This is a demonstration of the G1 (Global Widget) extension point',
+      'injector.extensionPoint': 'Extension Point: {{id}}',
+      'injector.supportText': "Plugin supports the '{{id}}' extension point",
+      'injector.badge': 'Plugin Map Extension Point Indicator',
 
       // Razorpay - Donation
       'donation.title': 'Make a Donation',

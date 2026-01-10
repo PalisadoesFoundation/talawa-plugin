@@ -1,5 +1,6 @@
-import { vi } from 'vitest';
+import { vi, type Mock } from 'vitest';
 import type { GraphQLContext } from '~/src/graphql/context';
+import type { RazorpayWebhookData } from '~/plugins/razorpay/api/services/razorpayService';
 import crypto from 'node:crypto';
 
 /**
@@ -132,7 +133,7 @@ export const createMockRazorpayRefund = (
 /**
  * Mock database config data
  */
-export const createMockConfig = (overrides: Record<string, any> = {}) => {
+export const createMockConfig = (overrides: Record<string, unknown> = {}) => {
   return {
     id: 'config-123',
     keyId: 'rzp_test_key123',
@@ -151,7 +152,7 @@ export const createMockConfig = (overrides: Record<string, any> = {}) => {
 /**
  * Mock database order data
  */
-export const createMockOrder = (overrides: Record<string, any> = {}) => {
+export const createMockOrder = (overrides: Record<string, unknown> = {}) => {
   return {
     id: 'db-order-123',
     razorpayOrderId: 'order_test123',
@@ -174,7 +175,9 @@ export const createMockOrder = (overrides: Record<string, any> = {}) => {
 /**
  * Mock database transaction data
  */
-export const createMockTransaction = (overrides: Record<string, any> = {}) => {
+export const createMockTransaction = (
+  overrides: Record<string, unknown> = {},
+) => {
   return {
     id: 'db-transaction-123',
     paymentId: 'pay_test123',
@@ -207,12 +210,28 @@ export const createMockTransaction = (overrides: Record<string, any> = {}) => {
  * Mock database client for testing
  */
 export const createMockDatabaseClient = () => {
-  const mockDb: any = {
+  type MockDb = {
+    then: (
+      resolve: (value: unknown) => void,
+      reject: (reason?: unknown) => void,
+    ) => Promise<unknown>;
+    execute: Mock<(...args: unknown[]) => Promise<unknown>>;
+    returning: Mock<(...args: unknown[]) => Promise<unknown>>;
+    transaction: Mock<
+      (callback: (tx: unknown) => Promise<unknown>) => Promise<unknown>
+    >;
+  } & Partial<Record<string, Mock<(...args: unknown[]) => unknown>>>;
+
+  // biome-ignore lint/suspicious/noThenProperty: Intentional thenable for database mock
+  const mockDb: MockDb = {
     // The "then" method is required to make the mock object "thenable" (Promise-like),
     // allowing it to be awaited directly in the application code (e.g. await db.select()...).
     // Without this, "await" would return the object itself instead of the query result.
-    then: (resolve: any, reject: any) => mockDb.execute().then(resolve, reject),
-  };
+    then: (
+      resolve: (value: unknown) => void,
+      reject: (reason?: unknown) => void,
+    ) => mockDb.execute().then(resolve, reject),
+  } as MockDb;
 
   const methods = [
     'groupBy',
@@ -239,7 +258,9 @@ export const createMockDatabaseClient = () => {
   mockDb.returning = vi.fn().mockResolvedValue([createMockConfig()]);
 
   // Mock transaction method
-  mockDb.transaction = vi.fn((callback) => callback(mockDb));
+  mockDb.transaction = vi.fn((callback) =>
+    callback(mockDb),
+  ) as MockDb['transaction'];
 
   return mockDb;
 };
@@ -272,12 +293,12 @@ export const createMockRazorpayContext = (
     },
     isAdmin: true,
     token: 'mock-jwt-token',
-    db: mockDb as any,
+    db: mockDb,
     currentClient: {
       isAuthenticated: true,
       scopes: ['api:access'],
     },
-    drizzleClient: mockDb as any,
+    drizzleClient: mockDb,
     log: {
       info: vi.fn(),
       error: vi.fn(),
@@ -294,8 +315,8 @@ export const createMockRazorpayContext = (
  */
 export const createMockWebhookData = (
   event: string = 'payment.captured',
-  overrides: Record<string, any> = {},
-) => {
+  overrides: Record<string, unknown> = {},
+): RazorpayWebhookData => {
   return {
     entity: 'event',
     account_id: 'acc_test123',
@@ -311,15 +332,25 @@ export const createMockWebhookData = (
           status: 'captured',
           order_id: 'order_test123',
           method: 'card',
+          amount_refunded: 0,
+          refund_status: null,
           captured: true,
+          description: 'Test transaction',
+          card_id: null,
+          bank: null,
+          wallet: null,
+          vpa: null,
           email: 'test@example.com',
           contact: '+919876543210',
+          fee: 2000,
+          tax: 360,
+          error_code: null,
+          error_description: null,
           created_at: Math.floor(Date.now() / 1000),
           ...overrides,
         },
       },
     },
-    created_at: Math.floor(Date.now() / 1000),
   };
 };
 

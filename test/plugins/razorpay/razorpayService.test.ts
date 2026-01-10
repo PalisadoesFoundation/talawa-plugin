@@ -1,12 +1,21 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  type Mock,
+} from 'vitest';
 import { RazorpayService } from '../../../plugins/razorpay/api/services/razorpayService';
+import type { GraphQLContext } from '~/src/graphql/context';
 
 // Mock fetch
 global.fetch = vi.fn(() =>
   Promise.resolve({
     ok: true,
     json: () => Promise.resolve({ count: 1 }),
-  } as any),
+  } as Response),
 );
 import {
   createMockRazorpayContext,
@@ -32,8 +41,8 @@ vi.mock('node:crypto', async () => {
 
 describe('RazorpayService', () => {
   let service: RazorpayService;
-  let mockContext: any;
-  let mockRazorpayInstance: any;
+  let mockContext: GraphQLContext;
+  let mockRazorpayInstance: ReturnType<typeof createMockRazorpayInstance>;
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -473,7 +482,7 @@ describe('RazorpayService', () => {
 
       const webhookData = createMockWebhookData('payment.captured');
 
-      await service.processWebhook(webhookData as any);
+      await service.processWebhook(webhookData);
 
       expect(mockContext.drizzleClient.insert).toHaveBeenCalled();
       expect(mockContext.drizzleClient.update).toHaveBeenCalled();
@@ -493,7 +502,7 @@ describe('RazorpayService', () => {
 
       const webhookData = createMockWebhookData('payment.captured');
 
-      await service.processWebhook(webhookData as any);
+      await service.processWebhook(webhookData);
 
       expect(mockContext.drizzleClient.update).toHaveBeenCalledTimes(2); // Once for transaction, once for order
     });
@@ -504,7 +513,7 @@ describe('RazorpayService', () => {
 
       const webhookData = createMockWebhookData('payment.captured');
 
-      await expect(service.processWebhook(webhookData as any)).rejects.toThrow(
+      await expect(service.processWebhook(webhookData)).rejects.toThrow(
         'Order not found',
       );
     });
@@ -522,7 +531,7 @@ describe('RazorpayService', () => {
         error_description: 'Payment failed',
       });
 
-      await service.processWebhook(webhookData as any);
+      await service.processWebhook(webhookData);
 
       expect(mockContext.drizzleClient.insert).toHaveBeenCalled();
     });
@@ -620,7 +629,7 @@ describe('RazorpayService', () => {
       const mockConfig = createMockConfig();
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => ({ count: 0, items: [] }),
@@ -675,7 +684,7 @@ describe('RazorpayService', () => {
       const mockConfig = createMockConfig();
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: false,
         status: 401,
       });
@@ -690,7 +699,7 @@ describe('RazorpayService', () => {
       const mockConfig = createMockConfig();
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: false,
         status: 403,
       });
@@ -705,7 +714,7 @@ describe('RazorpayService', () => {
       const mockConfig = createMockConfig();
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: false,
         status: 429,
       });
@@ -720,7 +729,7 @@ describe('RazorpayService', () => {
       const mockConfig = createMockConfig();
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -735,7 +744,7 @@ describe('RazorpayService', () => {
       const mockConfig = createMockConfig();
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      (global.fetch as any).mockRejectedValue(new TypeError('fetch failed'));
+      (global.fetch as Mock).mockRejectedValue(new TypeError('fetch failed'));
 
       const result = await service.testConnection();
 
@@ -747,7 +756,7 @@ describe('RazorpayService', () => {
       const mockConfig = createMockConfig();
       mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
 
-      (global.fetch as any).mockRejectedValue(new Error('Unknown error'));
+      (global.fetch as Mock).mockRejectedValue(new Error('Unknown error'));
 
       const result = await service.testConnection();
 

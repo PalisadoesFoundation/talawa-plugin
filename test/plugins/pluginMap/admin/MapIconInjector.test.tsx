@@ -36,7 +36,7 @@ describe('MapIconInjector', () => {
   it('should render transaction block for G1 extension point', () => {
     renderWithI18n(<MapIconInjector extensionPointId="G1" />);
     expect(
-      screen.getByText(/Payment Provider Transactions/i),
+      screen.getByText(/Plugin Map G1 Extension Point/i),
     ).toBeInTheDocument();
   });
 
