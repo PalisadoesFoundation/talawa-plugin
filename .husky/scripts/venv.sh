@@ -27,6 +27,7 @@ VENV_DIR="$REPO_ROOT/venv"
 
 if [ ! -d "$VENV_DIR" ]; then
   echo "[X] Python virtual environment not found...." >&2
+  echo "Please run 'python -m venv venv' to create it." >&2
   exit 1
 fi
 

@@ -32,8 +32,11 @@ set -euo pipefail
 
 .husky/scripts/check-tools.sh
 
-STAGED_SRC_FILE=$(mktemp)
-STAGED_ALL_FILE=$(mktemp)
+mktemp_compat() {
+  mktemp 2>/dev/null || mktemp -t husky.XXXXXX
+}
+STAGED_SRC_FILE=$(mktemp_compat)
+STAGED_ALL_FILE=$(mktemp_compat)
 trap 'rm -f "$STAGED_SRC_FILE" "$STAGED_ALL_FILE"; cleanup_staged_cache 2>/dev/null || true' EXIT
 
 get_staged_files '\.(ts|tsx|js|jsx)$' > "$STAGED_SRC_FILE"

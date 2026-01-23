@@ -28,6 +28,10 @@
 set -euo pipefail
 
 . "$(git rev-parse --show-toplevel)/.husky/scripts/fetch-verified.sh"
+. "$(git rev-parse --show-toplevel)/.husky/scripts/staged-files.sh"
+
+STAGED_SRC_DIRS="$(mktemp)"
+trap 'rm -f "$STAGED_SRC_DIRS"' EXIT
 
 # =============================================================================
 # Configuration constants
@@ -58,7 +62,7 @@ fi
 
 echo "Running Python formatting and lint checks..."
 
-"$@" -m black --check --check .github plugins scripts
+"$@" -m black --check .github plugins scripts
 "$@" -m pydocstyle --convention=google --add-ignore=D415,D205 .github plugins scripts
 "$@" -m flake8 --docstring-convention google --ignore E402,E722,E203,F401,W503 .github plugins scripts
 
@@ -66,13 +70,15 @@ echo "Running Python CI parity checks..."
 
 "$@" .github/workflows/scripts/compare_translations.py --directory public/locales
 
-if [ ! -s "$STAGED_SRC_FILE" ]; then
-  echo "No staged source files detected. Skipping file-based Python checks."
-  exit 0
+if [ -s "$STAGED_SRC_FILE" ]; then
+  xargs -0 -n1 dirname < "$STAGED_SRC_FILE" \
+  | sort -u \
+  | tr '\n' '\0' \
+  > "$STAGED_SRC_DIRS"
+  echo "Running translation checks on staged files..."
+  xargs -0 "$@" .github/workflows/scripts/translation_tag_check.py --locales-dir public/locales/en --directories < "$STAGED_SRC_DIRS"
 fi
 
-echo "Running translation checks on staged files..."
-xargs -0 "$@" .github/workflows/scripts/translation_tag_check.py --locales-dir public/locales/en --directories < "$STAGED_SRC_FILE"
 
 echo "Running centralized Python policy checks..."
 
@@ -84,18 +90,20 @@ echo "Running centralized Python policy checks..."
 # Centralized scripts directory
 CENTRAL_SCRIPTS_DIR=".github-central/.github/workflows/scripts"
 
-echo "Running disable statements check..."
-DISABLE_STATEMENTS_URL="https://raw.githubusercontent.com/PalisadoesFoundation/.github/main/.github/workflows/scripts/disable_statements_check.py"
-DISABLE_STATEMENTS_PATH="$CENTRAL_SCRIPTS_DIR/disable_statements_check.py"
-DISABLE_STATEMENTS_SHA="0b4184cffc6dba3607798cd54e57e99944c36cc01775cfcad68b95b713196e08"
+if [ -s "$STAGED_SRC_FILE" ]; then
+  echo "Running disable statements check..."
+  DISABLE_STATEMENTS_URL="https://raw.githubusercontent.com/PalisadoesFoundation/.github/main/.github/workflows/scripts/disable_statements_check.py"
+  DISABLE_STATEMENTS_PATH="$CENTRAL_SCRIPTS_DIR/disable_statements_check.py"
+  DISABLE_STATEMENTS_SHA="0b4184cffc6dba3607798cd54e57e99944c36cc01775cfcad68b95b713196e08"
 
-fetch_and_verify \
-  "$DISABLE_STATEMENTS_URL" \
-  "$DISABLE_STATEMENTS_PATH" \
-  "$DISABLE_STATEMENTS_SHA" \
-  "$SCRIPT_CACHE_HOURS"
+  fetch_and_verify \
+    "$DISABLE_STATEMENTS_URL" \
+    "$DISABLE_STATEMENTS_PATH" \
+    "$DISABLE_STATEMENTS_SHA" \
+    "$SCRIPT_CACHE_HOURS"
 
-xargs -0 "$@" "$DISABLE_STATEMENTS_PATH" --files < "$STAGED_SRC_FILE"
+  xargs -0 "$@" "$DISABLE_STATEMENTS_PATH" --files < "$STAGED_SRC_FILE"
+fi
 
 echo "Running docstring compliance check..."
 CHECK_DOCSTRINGS_URL="https://raw.githubusercontent.com/PalisadoesFoundation/.github/main/.github/workflows/scripts/check_docstrings.py"
@@ -108,7 +116,7 @@ fetch_and_verify \
   "$CHECK_DOCSTRINGS_SHA" \
   "$SCRIPT_CACHE_HOURS"
 
-"$@" "$CHECK_DOCSTRINGS_PATH" --directories .github
+"$@" "$CHECK_DOCSTRINGS_PATH" --directories .github plugins scripts
 
 echo "Running line count enforcement check..."
 COUNTLINE_URL="https://raw.githubusercontent.com/PalisadoesFoundation/.github/main/.github/workflows/scripts/countline.py"

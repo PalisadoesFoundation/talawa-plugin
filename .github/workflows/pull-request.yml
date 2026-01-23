@@ -558,7 +558,7 @@ jobs:
         run: |
           source venv/bin/activate
           python .github-central/.github/workflows/scripts/check_docstrings.py \
-            --directories .github
+            --directories .github plugins scripts
 
   Translation-Compliance:
     name: Check Translation Compliance
