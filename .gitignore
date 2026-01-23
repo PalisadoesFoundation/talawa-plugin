@@ -1020,3 +1020,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Centralized remote ci scripts
+.github-central/
