@@ -245,18 +245,19 @@ jobs:
           BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
 
           # Get all changed files
-          ALL_CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} | tr '\n' ' ')
-          echo "all_changed_files=${ALL_CHANGED_FILES}" >> $GITHUB_OUTPUT
+          git diff -z --name-only --diff-filter=ACMRT $BASE_SHA ${{ github.event.pull_request.head.sha }} > changed_files.txt
 
       - name: Check sensitive files
         if: steps.check-labels.outputs.skip != 'true'
-        env:
-          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
           chmod +x .github-central/.github/workflows/scripts/sensitive_file_check.py
-          .github-central/.github/workflows/scripts/sensitive_file_check.py \
-            --files $CHANGED_FILES \
-            --config .github/workflows/config/sensitive_files.txt
+          if [ -s changed_files.txt ]; then
+            xargs -0 -a changed_files.txt .github-central/.github/workflows/scripts/sensitive_file_check.py \
+              --config .github/workflows/config/sensitive_files.txt \
+              --files
+          else
+            echo "No changed files to check."
+          fi
 
   Count-Changed-Files:
     if: ${{ github.actor != 'dependabot[bot]' }}
@@ -315,7 +316,7 @@ jobs:
         id: changed-files
         run: |
           BASE_SHA=$(git merge-base "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")
-          echo "all_changed_files=$(git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "${{ github.event.pull_request.head.sha }}" | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          git diff -z --name-only --diff-filter=ACMRT "$BASE_SHA" "${{ github.event.pull_request.head.sha }}" > changed_files.txt
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -324,7 +325,11 @@ jobs:
 
       - name: Run Disable Statements Check
         run: |
-          python .github-central/.github/workflows/scripts/disable_statements_check.py --files ${{ steps.changed-files.outputs.all_changed_files }}
+          if [ -s changed_files.txt ]; then
+            xargs -0 -a changed_files.txt python .github-central/.github/workflows/scripts/disable_statements_check.py --files
+          else
+            echo "No changed files to check."
+          fi
 
   Check-For-Unused-Code:
     name: Check for Unused Files, Exports and Dependencies
