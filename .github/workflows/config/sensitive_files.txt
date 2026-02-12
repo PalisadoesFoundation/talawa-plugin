@@ -13,9 +13,9 @@ vitest.config.ts$
 eslint.config.mjs$
 knip.json$
 knip.deps.json$
-^.gitignore$
-.prettierrc$
-.prettierignore$
+^\.gitignore$
+\.prettierrc$
+\.prettierignore$
 CODEOWNERS.txt$
 LICENSE.txt$
 \.coderabbit\.yaml$
@@ -36,5 +36,5 @@ CNAME$
 \..*\.password$
 \..*\.secret$
 \..*\.credentials$
-.nojekyll$
-.npmrc$
+\.nojekyll$
+\.npmrc$
