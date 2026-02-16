@@ -179,7 +179,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
                         {t('transactions.stats.totalAmount')}
                       </div>
                       <div>
-                        {stats.totalAmount
+                        {stats.totalAmount != null
                           ? (stats.totalAmount / 100).toFixed(2)
                           : '0.00'}{' '}
                         {stats.currency || 'INR'}
@@ -198,7 +198,11 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
                       <div className="fw-bold">
                         {t('transactions.stats.totalTransactions')}
                       </div>
-                      <div>{stats.totalTransactions || 0}</div>
+                      <div>
+                        {stats.totalTransactions != null
+                          ? stats.totalTransactions
+                          : 0}
+                      </div>
                     </div>
                   </div>
                 </Card.Body>
@@ -213,7 +217,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
                   <div style={{ color: '#3f8600' }}>
                     {stats.totalTransactions
                       ? (
-                          ((stats.successCount || 0) /
+                          ((stats.successfulTransactions || 0) /
                             stats.totalTransactions) *
                           100
                         ).toFixed(1)
@@ -230,7 +234,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
                     {t('transactions.stats.failedTransactions')}
                   </div>
                   <div style={{ color: '#cf1322' }}>
-                    {stats.failedCount || 0}
+                    {stats.failedTransactions || 0}
                   </div>
                 </Card.Body>
               </Card>
@@ -293,17 +297,23 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
                     variant="link"
                     size="sm"
                     onClick={() => handleViewDetails(tx)}
-                    title="View"
+                    aria-label={t(
+                      'transactions.userTransactions.viewDetailsAriaLabel',
+                    )}
                   >
                     <RemoveRedEye fontSize="small" />
+                    {t('transactions.viewButton')}
                   </Button>
                   <Button
                     variant="link"
                     size="sm"
                     onClick={() => handleDownloadReceipt(tx)}
-                    title="Receipt"
+                    aria-label={t(
+                      'transactions.userTransactions.downloadReceiptAriaLabel',
+                    )}
                   >
                     <Download fontSize="small" />
+                    {t('transactions.userTransactions.receiptButton')}
                   </Button>
                 </td>
               </tr>
@@ -311,7 +321,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
             {transactions.length === 0 && (
               <tr>
                 <td colSpan={8} className="text-center text-muted">
-                  {t('transactions.table.noData') || 'No transactions found.'}
+                  {t('transactions.table.noData')}
                 </td>
               </tr>
             )}

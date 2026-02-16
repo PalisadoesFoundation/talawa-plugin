@@ -107,4 +107,221 @@ describe('RazorpayOrganizationTransactionsInjector', () => {
       screen.getByText('transactions.stats.totalTransactions'),
     ).toBeInTheDocument();
   });
+
+  describe('Status Variants & Helper Coverage', () => {
+    it('should handle captured status with success badge', async () => {
+      const tx = createMockTransaction({
+        id: 'test-1',
+        paymentId: 'pay_captured_test',
+        status: 'captured',
+      });
+
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_ORG_TRANSACTIONS,
+            variables: { orgId: 'test-org-id', limit: 10 },
+          },
+          result: {
+            data: {
+              razorpay_getOrganizationTransactions: [tx],
+            },
+          },
+        },
+        {
+          request: {
+            query: GET_ORG_TRANSACTION_STATS,
+            variables: { orgId: 'test-org-id' },
+          },
+          result: {
+            data: { razorpay_getOrganizationTransactionStats: mockStats },
+          },
+        },
+      ];
+
+      renderWithProviders(<RazorpayOrganizationTransactionsInjector />, {
+        mocks,
+        initialEntries: ['/org/test-org-id'],
+        path: '/org/:orgId',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('pay_captured_test')).toBeInTheDocument();
+        const capturedBadge = screen.getByText('CAPTURED');
+        expect(capturedBadge).toHaveClass('bg-success');
+      });
+    });
+
+    it('should handle failed status with danger badge', async () => {
+      const tx = createMockTransaction({
+        id: 'test-2',
+        paymentId: 'pay_failed_test',
+        status: 'failed',
+      });
+
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_ORG_TRANSACTIONS,
+            variables: { orgId: 'test-org-id', limit: 10 },
+          },
+          result: {
+            data: {
+              razorpay_getOrganizationTransactions: [tx],
+            },
+          },
+        },
+        {
+          request: {
+            query: GET_ORG_TRANSACTION_STATS,
+            variables: { orgId: 'test-org-id' },
+          },
+          result: {
+            data: { razorpay_getOrganizationTransactionStats: mockStats },
+          },
+        },
+      ];
+
+      renderWithProviders(<RazorpayOrganizationTransactionsInjector />, {
+        mocks,
+        initialEntries: ['/org/test-org-id'],
+        path: '/org/:orgId',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('pay_failed_test')).toBeInTheDocument();
+        const failedBadge = screen.getByText('FAILED');
+        expect(failedBadge).toHaveClass('bg-danger');
+      });
+    });
+
+    it('should handle authorized status with info badge', async () => {
+      const tx = createMockTransaction({
+        id: 'test-3',
+        paymentId: 'pay_auth_test',
+        status: 'authorized',
+      });
+
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_ORG_TRANSACTIONS,
+            variables: { orgId: 'test-org-id', limit: 10 },
+          },
+          result: {
+            data: {
+              razorpay_getOrganizationTransactions: [tx],
+            },
+          },
+        },
+        {
+          request: {
+            query: GET_ORG_TRANSACTION_STATS,
+            variables: { orgId: 'test-org-id' },
+          },
+          result: {
+            data: { razorpay_getOrganizationTransactionStats: mockStats },
+          },
+        },
+      ];
+
+      renderWithProviders(<RazorpayOrganizationTransactionsInjector />, {
+        mocks,
+        initialEntries: ['/org/test-org-id'],
+        path: '/org/:orgId',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('pay_auth_test')).toBeInTheDocument();
+        const authorizedBadge = screen.getByText('AUTHORIZED');
+        expect(authorizedBadge).toHaveClass('bg-info');
+      });
+    });
+
+    it('should handle refunded status with warning badge', async () => {
+      const tx = createMockTransaction({
+        id: 'test-4',
+        paymentId: 'pay_refund_test',
+        status: 'refunded',
+      });
+
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_ORG_TRANSACTIONS,
+            variables: { orgId: 'test-org-id', limit: 10 },
+          },
+          result: {
+            data: {
+              razorpay_getOrganizationTransactions: [tx],
+            },
+          },
+        },
+        {
+          request: {
+            query: GET_ORG_TRANSACTION_STATS,
+            variables: { orgId: 'test-org-id' },
+          },
+          result: {
+            data: { razorpay_getOrganizationTransactionStats: mockStats },
+          },
+        },
+      ];
+
+      renderWithProviders(<RazorpayOrganizationTransactionsInjector />, {
+        mocks,
+        initialEntries: ['/org/test-org-id'],
+        path: '/org/:orgId',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('pay_refund_test')).toBeInTheDocument();
+        const refundedBadge = screen.getByText('REFUNDED');
+        expect(refundedBadge).toHaveClass('bg-warning');
+      });
+    });
+
+    it('should display anonymous fallback when donor name is null', async () => {
+      const tx = createMockTransaction({
+        id: 'test-anon',
+        paymentId: 'pay_anon',
+        donorName: null,
+      });
+
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_ORG_TRANSACTIONS,
+            variables: { orgId: 'test-org-id', limit: 10 },
+          },
+          result: {
+            data: {
+              razorpay_getOrganizationTransactions: [tx],
+            },
+          },
+        },
+        {
+          request: {
+            query: GET_ORG_TRANSACTION_STATS,
+            variables: { orgId: 'test-org-id' },
+          },
+          result: {
+            data: { razorpay_getOrganizationTransactionStats: mockStats },
+          },
+        },
+      ];
+
+      renderWithProviders(<RazorpayOrganizationTransactionsInjector />, {
+        mocks,
+        initialEntries: ['/org/test-org-id'],
+        path: '/org/:orgId',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('pay_anon')).toBeInTheDocument();
+        // Verify anonymous fallback text is rendered
+        expect(screen.getByText('common.anonymous')).toBeInTheDocument();
+      });
+    });
+  });
 });

@@ -248,7 +248,7 @@ const RazorpayUserTransactionsInjector: React.FC = () => {
             {transactions.length === 0 && (
               <tr>
                 <td colSpan={6} className="text-center text-muted">
-                  {t('transactions.table.noData') || 'No transactions found.'}
+                  {t('transactions.table.noData')}
                 </td>
               </tr>
             )}
