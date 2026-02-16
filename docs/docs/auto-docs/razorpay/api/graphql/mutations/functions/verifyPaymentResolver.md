@@ -6,7 +6,7 @@
 
 > **verifyPaymentResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `message`: `string`; `success`: `boolean`; `transaction`: \{ `amount`: `any`; `currency`: `any`; `paymentId`: `string`; `status`: `string`; \}; \}\>
 
-Defined in: [plugins/razorpay/api/graphql/mutations.ts:415](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/razorpay/api/graphql/mutations.ts#L415)
+Defined in: [plugins/razorpay/api/graphql/mutations.ts:456](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/razorpay/api/graphql/mutations.ts#L456)
 
 ## Parameters
 

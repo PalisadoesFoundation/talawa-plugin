@@ -18,7 +18,7 @@ vi.mock('razorpay');
 import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
 
 describe('Razorpay GraphQL Queries', () => {
-  let mockContext: any;
+  let mockContext: ReturnType<typeof createMockRazorpayContext>;
 
   beforeEach(() => {
     mockContext = createMockRazorpayContext({
@@ -51,15 +51,17 @@ describe('Razorpay GraphQL Queries', () => {
     });
 
     it('should throw error for non-super-admin', async () => {
-      mockContext.user.isSuperAdmin = false;
+      const nonAdminContext = createMockRazorpayContext({
+        userRole: 'user',
+      });
 
       await expect(
-        getRazorpayConfigResolver({}, {}, mockContext),
+        getRazorpayConfigResolver({}, {}, nonAdminContext),
       ).rejects.toThrow(TalawaGraphQLError);
     });
 
     it('should return default config when config not found', async () => {
-      mockContext.user = { isSuperAdmin: true } as any;
+      mockContext.user = { isSuperAdmin: true };
       mockContext.drizzleClient.limit.mockResolvedValue([]);
 
       const result = await getRazorpayConfigResolver({}, {}, mockContext);
@@ -87,7 +89,7 @@ describe('Razorpay GraphQL Queries', () => {
 
   describe('getOrganizationTransactionsResolver', () => {
     const args = {
-      orgId: 'org-123',
+      organizationId: 'org-123',
       limit: 10,
       offset: 0,
       status: null,
@@ -157,10 +159,12 @@ describe('Razorpay GraphQL Queries', () => {
     });
 
     it('should throw error for non-admin user', async () => {
-      mockContext.isAdmin = false;
+      const nonAdminContext = createMockRazorpayContext({
+        userRole: 'user',
+      });
 
       await expect(
-        getOrganizationTransactionsResolver({}, args, mockContext),
+        getOrganizationTransactionsResolver({}, args, nonAdminContext),
       ).rejects.toThrow(TalawaGraphQLError);
     });
 
@@ -221,13 +225,15 @@ describe('Razorpay GraphQL Queries', () => {
     });
 
     it('should throw error when non-admin tries to view other user transactions', async () => {
-      mockContext.isAdmin = false;
+      const nonAdminContext = createMockRazorpayContext({
+        userRole: 'user',
+      });
 
       await expect(
         getUserTransactionsResolver(
           {},
           { ...args, userId: 'other-user' },
-          mockContext,
+          nonAdminContext,
         ),
       ).rejects.toThrow(TalawaGraphQLError);
     });
@@ -274,7 +280,7 @@ describe('Razorpay GraphQL Queries', () => {
 
   describe('getOrganizationTransactionStatsResolver', () => {
     const args = {
-      orgId: 'org-123',
+      organizationId: 'org-123',
       dateFrom: null,
       dateTo: null,
     };
@@ -336,10 +342,12 @@ describe('Razorpay GraphQL Queries', () => {
     });
 
     it('should throw error for non-admin', async () => {
-      mockContext.isAdmin = false;
+      const nonAdminContext = createMockRazorpayContext({
+        userRole: 'user',
+      });
 
       await expect(
-        getOrganizationTransactionStatsResolver({}, args, mockContext),
+        getOrganizationTransactionStatsResolver({}, args, nonAdminContext),
       ).rejects.toThrow(TalawaGraphQLError);
     });
 
@@ -411,13 +419,15 @@ describe('Razorpay GraphQL Queries', () => {
     });
 
     it('should throw error when non-admin tries to view other user stats', async () => {
-      mockContext.isAdmin = false;
+      const nonAdminContext = createMockRazorpayContext({
+        userRole: 'user',
+      });
 
       await expect(
         getUserTransactionStatsResolver(
           {},
           { ...args, userId: 'other-user' },
-          mockContext,
+          nonAdminContext,
         ),
       ).rejects.toThrow(TalawaGraphQLError);
     });

@@ -237,8 +237,6 @@ export const GET_ORG_TRANSACTIONS = gql`
     ) {
       id
       paymentId
-      orderId
-      userId
       amount
       currency
       status

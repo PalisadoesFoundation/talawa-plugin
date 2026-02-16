@@ -6,7 +6,7 @@
 
 > **testRazorpaySetupResolver**(`_parent`, `_args`, `ctx`): `Promise`\<\{ `message`: `string`; `success`: `boolean`; \}\>
 
-Defined in: [plugins/razorpay/api/graphql/mutations.ts:563](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/razorpay/api/graphql/mutations.ts#L563)
+Defined in: [plugins/razorpay/api/graphql/mutations.ts:614](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/razorpay/api/graphql/mutations.ts#L614)
 
 ## Parameters
 

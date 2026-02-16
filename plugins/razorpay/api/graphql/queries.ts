@@ -16,13 +16,21 @@ import {
 
 /**
  * Resolver for fetching Razorpay configuration.
- * Requires authentication and superadmin privileges.
+ * Requires authentication and admin privileges.
  */
 export async function getRazorpayConfigResolver(
   _parent: unknown,
   _args: Record<string, unknown>,
   ctx: GraphQLContext,
 ) {
+  // Check authentication
+  if (!ctx.currentClient?.user?.id) {
+    throw new TalawaGraphQLError({
+      message: 'Unauthorized',
+      extensions: { code: 'unauthenticated' },
+    });
+  }
+
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
       message: 'Unauthenticated',
@@ -30,8 +38,13 @@ export async function getRazorpayConfigResolver(
     });
   }
 
-  // Check for superadmin access (strict)
-  if (!ctx.user || !ctx.user.isSuperAdmin) {
+  // Check for admin access (strict)
+  const currentUser = await ctx.drizzleClient.query.usersTable.findFirst({
+    where: (fields, operators) =>
+      operators.eq(fields.id, ctx.currentClient.user.id),
+  });
+
+  if (!currentUser || currentUser.role !== 'administrator') {
     throw new TalawaGraphQLError({
       message: 'Forbidden',
       extensions: { code: 'forbidden' },
@@ -89,7 +102,7 @@ export async function getRazorpayConfigResolver(
  * Supports pagination and filtering.
  */
 const getOrganizationTransactionsArgumentsSchema = z.object({
-  orgId: z.string(),
+  organizationId: z.string(),
   limit: z.number().nullable().optional(),
   offset: z.number().nullable().optional(),
   status: z.string().nullable().optional(),
@@ -102,6 +115,14 @@ export async function getOrganizationTransactionsResolver(
   args: z.infer<typeof getOrganizationTransactionsArgumentsSchema>,
   ctx: GraphQLContext,
 ) {
+  // Check authentication
+  if (!ctx.currentClient?.user?.id) {
+    throw new TalawaGraphQLError({
+      message: 'Unauthorized',
+      extensions: { code: 'unauthenticated' },
+    });
+  }
+
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
       message: 'Unauthenticated',
@@ -109,7 +130,12 @@ export async function getOrganizationTransactionsResolver(
     });
   }
 
-  if (!ctx.isAdmin) {
+  const currentUser = await ctx.drizzleClient.query.usersTable.findFirst({
+    where: (fields, operators) =>
+      operators.eq(fields.id, ctx.currentClient.user.id),
+  });
+
+  if (!currentUser || currentUser.role !== 'administrator') {
     throw new TalawaGraphQLError({
       message: 'Forbidden',
       extensions: { code: 'forbidden' },
@@ -123,6 +149,7 @@ export async function getOrganizationTransactionsResolver(
   } = getOrganizationTransactionsArgumentsSchema.safeParse(args);
 
   if (!success) {
+    ctx.log?.error('Validation errors:', error.errors);
     throw new TalawaGraphQLError({
       message: 'Invalid arguments',
       extensions: {
@@ -137,7 +164,7 @@ export async function getOrganizationTransactionsResolver(
 
   try {
     const {
-      orgId,
+      organizationId,
       limit = 20,
       offset = 0,
       status,
@@ -145,7 +172,9 @@ export async function getOrganizationTransactionsResolver(
       dateTo,
     } = parsedArgs;
 
-    const whereConditions = [eq(transactionsTable.organizationId, orgId)];
+    const whereConditions = [
+      eq(transactionsTable.organizationId, organizationId),
+    ];
 
     if (status) {
       whereConditions.push(eq(transactionsTable.status, status));
@@ -243,6 +272,14 @@ export async function getUserTransactionsResolver(
   args: z.infer<typeof getUserTransactionsArgumentsSchema>,
   ctx: GraphQLContext,
 ) {
+  // Check authentication
+  if (!ctx.currentClient?.user?.id) {
+    throw new TalawaGraphQLError({
+      message: 'Unauthorized',
+      extensions: { code: 'unauthenticated' },
+    });
+  }
+
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
       message: 'Unauthenticated',
@@ -280,8 +317,16 @@ export async function getUserTransactionsResolver(
       dateTo,
     } = parsedArgs;
 
+    const currentUser = await ctx.drizzleClient.query.usersTable.findFirst({
+      where: (fields, operators) =>
+        operators.eq(fields.id, ctx.currentClient.user.id),
+    });
+
     // Users can only view their own transactions unless they are admin
-    if (userId !== ctx.userId && !ctx.isAdmin) {
+    if (
+      userId !== ctx.currentClient.user.id &&
+      (!currentUser || currentUser.role !== 'administrator')
+    ) {
       throw new TalawaGraphQLError({
         message: 'Forbidden',
         extensions: { code: 'forbidden' },
@@ -377,7 +422,7 @@ export async function getUserTransactionsResolver(
  * Returns aggregation of transactions by date.
  */
 const getOrganizationTransactionStatsArgumentsSchema = z.object({
-  orgId: z.string(),
+  organizationId: z.string(),
   dateFrom: z.string().nullable().optional(),
   dateTo: z.string().nullable().optional(),
 });
@@ -387,6 +432,14 @@ export async function getOrganizationTransactionStatsResolver(
   args: z.infer<typeof getOrganizationTransactionStatsArgumentsSchema>,
   ctx: GraphQLContext,
 ) {
+  // Check authentication
+  if (!ctx.currentClient?.user?.id) {
+    throw new TalawaGraphQLError({
+      message: 'Unauthorized',
+      extensions: { code: 'unauthenticated' },
+    });
+  }
+
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
       message: 'Unauthenticated',
@@ -394,7 +447,12 @@ export async function getOrganizationTransactionStatsResolver(
     });
   }
 
-  if (!ctx.isAdmin) {
+  const currentUser = await ctx.drizzleClient.query.usersTable.findFirst({
+    where: (fields, operators) =>
+      operators.eq(fields.id, ctx.currentClient.user.id),
+  });
+
+  if (!currentUser || currentUser.role !== 'administrator') {
     throw new TalawaGraphQLError({
       message: 'Forbidden',
       extensions: { code: 'forbidden' },
@@ -421,9 +479,11 @@ export async function getOrganizationTransactionStatsResolver(
   }
 
   try {
-    const { orgId, dateFrom, dateTo } = parsedArgs;
+    const { organizationId, dateFrom, dateTo } = parsedArgs;
 
-    const whereConditions = [eq(transactionsTable.organizationId, orgId)];
+    const whereConditions = [
+      eq(transactionsTable.organizationId, organizationId),
+    ];
 
     if (dateFrom) {
       whereConditions.push(
@@ -496,8 +556,17 @@ export async function getUserTransactionStatsResolver(
   args: z.infer<typeof getUserTransactionStatsArgumentsSchema>,
   ctx: GraphQLContext,
 ) {
+  // Check authentication
+  if (!ctx.currentClient?.user?.id) {
+    throw new TalawaGraphQLError({
+      message: 'Unauthorized',
+      extensions: { code: 'unauthenticated' },
+    });
+  }
+
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
@@ -516,10 +585,19 @@ export async function getUserTransactionStatsResolver(
     });
   }
 
+  const currentUser = await ctx.drizzleClient.query.usersTable.findFirst({
+    where: (fields, operators) =>
+      operators.eq(fields.id, ctx.currentClient.user.id),
+  });
+
   // Users can only view their own stats unless they are admin
   // Check this before the try block so forbidden errors are thrown directly
-  if (parsedArgs.data.userId !== ctx.userId && !ctx.isAdmin) {
+  if (
+    parsedArgs.data.userId !== ctx.currentClient.user.id &&
+    (!currentUser || currentUser.role !== 'administrator')
+  ) {
     throw new TalawaGraphQLError({
+      message: 'Forbidden',
       extensions: { code: 'forbidden' },
     });
   }
@@ -595,7 +673,7 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
     t.field({
       type: t.listRef(RazorpayTransactionRef),
       args: {
-        orgId: t.arg.string({ required: true }),
+        organizationId: t.arg.string({ required: true }),
         limit: t.arg.int({ required: false }),
         offset: t.arg.int({ required: false }),
         status: t.arg.string({ required: false }),
@@ -630,7 +708,7 @@ export function registerRazorpayQueries(builderInstance: typeof builder): void {
     t.field({
       type: RazorpayTransactionStatsRef,
       args: {
-        orgId: t.arg.string({ required: true }),
+        organizationId: t.arg.string({ required: true }),
         dateFrom: t.arg.string({ required: false }),
         dateTo: t.arg.string({ required: false }),
       },
