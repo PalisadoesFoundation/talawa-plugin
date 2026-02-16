@@ -1,17 +1,5 @@
-/**
- * Razorpay Organization Transactions Injector (G2)
- *
- * This component is specifically designed for the G2 extension point to display
- * Razorpay payment provider transactions for organization admins in their transaction management.
- */
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-/**
- * TODO(2024-12-18): Apollo Client v4.x type definitions do not export useQuery/useMutation
- * hooks with correct generic signatures, causing TS2305 errors. This is a known issue:
- * @see https://github.com/apollographql/apollo-client/issues/11506
- */
 // @ts-expect-error - Apollo Client v4 types issue
 import { useQuery } from '@apollo/client';
 import {
@@ -21,29 +9,22 @@ import {
 import {
   Card,
   Table,
-  Tag,
+  Badge,
   Button,
-  Space,
-  Typography,
-  message,
-  Spin,
-  Statistic,
+  Spinner,
   Row,
   Col,
-} from 'antd';
+  Alert,
+} from 'react-bootstrap';
 import {
-  CreditCardOutlined,
-  EyeOutlined,
-  DownloadOutlined,
-  DollarOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import type { ColumnsType } from 'antd/es/table';
+  CreditCard,
+  RemoveRedEye,
+  Download,
+  AttachMoney,
+  Person,
+} from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
-
-const { Title, Text } = Typography;
-
-// GraphQL queries for fetching organization transactions and stats
+import { toast } from 'react-toastify';
 
 interface RazorpayOrganizationTransaction {
   id: string;
@@ -81,7 +62,7 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
   } = useQuery(GET_ORG_TRANSACTIONS, {
     variables: {
       orgId: orgId || '',
-      limit: 10, // Show recent 10 transactions in injector
+      limit: 10,
     },
     skip: !orgId,
     fetchPolicy: 'network-only',
@@ -103,18 +84,18 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
     transactionsData?.razorpay_getOrganizationTransactions || [];
   const stats = statsData?.razorpay_getOrganizationTransactionStats;
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string) => {
     switch (status) {
       case 'captured':
         return 'success';
       case 'authorized':
-        return 'processing';
+        return 'info';
       case 'failed':
-        return 'error';
+        return 'danger';
       case 'refunded':
         return 'warning';
       default:
-        return 'default';
+        return 'secondary';
     }
   };
 
@@ -133,218 +114,210 @@ const RazorpayOrganizationTransactionsInjector: React.FC = () => {
   };
 
   const handleViewDetails = (transaction: RazorpayOrganizationTransaction) => {
-    message.info(`Viewing details for transaction: ${transaction.id}`);
-    // In a real implementation, this would open a modal or navigate to details
+    toast.info(
+      t('transactions.messages.viewingDetails', { id: transaction.id }),
+    );
   };
 
   const handleDownloadReceipt = (
     transaction: RazorpayOrganizationTransaction,
   ) => {
-    message.success(`Downloading receipt for transaction: ${transaction.id}`);
-    // In a real implementation, this would download the receipt
+    toast.info(
+      t('transactions.messages.downloadingReceipt', { id: transaction.id }),
+    );
   };
-
-  const columns: ColumnsType<RazorpayOrganizationTransaction> = [
-    {
-      title: t('transactions.table.id'),
-      dataIndex: 'paymentId',
-      key: 'paymentId',
-      render: (paymentId: string) => (
-        <Text code style={{ fontSize: '12px' }}>
-          {paymentId || 'N/A'}
-        </Text>
-      ),
-    },
-    {
-      title: t('transactions.table.amount'),
-      dataIndex: 'amount',
-      key: 'amount',
-      render: (amount: number, record: RazorpayOrganizationTransaction) => (
-        <Text strong>
-          {amount ? formatAmount(amount, record.currency) : 'N/A'}
-        </Text>
-      ),
-    },
-    {
-      title: t('transactions.table.status'),
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => (
-        <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
-      ),
-    },
-    {
-      title: t('transactions.table.donor'),
-      key: 'donor',
-      render: (_, record: RazorpayOrganizationTransaction) => (
-        <div>
-          <div style={{ fontWeight: 500 }}>
-            {record.donorName || 'Anonymous'}
-          </div>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
-            {record.donorEmail || 'N/A'}
-          </Text>
-        </div>
-      ),
-    },
-    {
-      title: t('transactions.table.method'),
-      dataIndex: 'method',
-      key: 'method',
-      render: (method: string) => method || 'N/A',
-    },
-    {
-      title: t('transactions.table.fees'),
-      dataIndex: 'fee',
-      key: 'fee',
-      render: (fee: number, record: RazorpayOrganizationTransaction) => (
-        <Text type="secondary">
-          {fee ? formatAmount(fee, record.currency) : 'N/A'}
-        </Text>
-      ),
-    },
-    {
-      title: t('transactions.table.date'),
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (date: string) => formatDate(date),
-    },
-    {
-      title: t('transactions.table.actions'),
-      key: 'actions',
-      render: (_, record: RazorpayOrganizationTransaction) => (
-        <Space size="small">
-          <Button
-            type="link"
-            icon={<EyeOutlined />}
-            onClick={() => handleViewDetails(record)}
-            size="small"
-          >
-            View
-          </Button>
-          <Button
-            type="link"
-            icon={<DownloadOutlined />}
-            onClick={() => handleDownloadReceipt(record)}
-            size="small"
-          >
-            Receipt
-          </Button>
-        </Space>
-      ),
-    },
-  ];
 
   if (transactionsLoading || statsLoading) {
     return (
-      <Card>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <Spin size="large" />
-          <div style={{ marginTop: '16px' }}>
-            <Text>{t('transactions.loadingOrg')}</Text>
+      <Card className="my-4">
+        <Card.Body className="text-center py-5">
+          <Spinner animation="border" role="status" />
+          <div className="mt-3">
+            <span>{t('transactions.loadingOrg')}</span>
           </div>
-        </div>
+        </Card.Body>
       </Card>
     );
   }
 
   if (transactionsError || statsError) {
     return (
-      <Card>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <Text type="danger">
+      <Card className="my-4">
+        <Card.Body className="text-center py-5">
+          <Alert variant="danger">
             {t('transactions.error.loadOrgFailed')}:{' '}
             {transactionsError?.message || statsError?.message}
-          </Text>
-        </div>
+          </Alert>
+        </Card.Body>
       </Card>
     );
   }
 
   return (
-    <Card>
-      <div style={{ marginBottom: '16px' }}>
-        <Space align="center">
-          <CreditCardOutlined style={{ fontSize: '20px', color: '#1890ff' }} />
-          <Title level={4} style={{ margin: 0 }}>
-            {t('transactions.orgTitle')}
-          </Title>
-        </Space>
-        <Text type="secondary" style={{ display: 'block', marginTop: '4px' }}>
-          {t('transactions.orgSubtitle')}
-        </Text>
-      </div>
-
-      {/* Statistics Row */}
-      {stats && (
-        <Row gutter={16} style={{ marginBottom: '24px' }}>
-          <Col span={6}>
-            <Card size="small">
-              <Statistic
-                title={t('transactions.stats.totalAmount')}
-                value={stats.totalAmount ? stats.totalAmount / 100 : 0}
-                precision={2}
-                prefix={<DollarOutlined />}
-                suffix={stats.currency || 'INR'}
-                valueStyle={{ color: '#3f8600' }}
-              />
-            </Card>
+    <Card className="my-4">
+      <Card.Body>
+        <Row className="align-items-center mb-2">
+          <Col xs="auto">
+            <CreditCard color="primary" />
           </Col>
-          <Col span={6}>
-            <Card size="small">
-              <Statistic
-                title={t('transactions.stats.totalTransactions')}
-                value={stats.totalTransactions || 0}
-                prefix={<UserOutlined />}
-                valueStyle={{ color: '#1890ff' }}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card size="small">
-              <Statistic
-                title={t('transactions.stats.successRate')}
-                value={
-                  stats.totalTransactions
-                    ? ((stats.successCount || 0) / stats.totalTransactions) *
-                      100
-                    : 0
-                }
-                precision={1}
-                suffix="%"
-                valueStyle={{ color: '#3f8600' }}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card size="small">
-              <Statistic
-                title={t('transactions.stats.failedTransactions')}
-                value={stats.failedCount || 0}
-                valueStyle={{ color: '#cf1322' }}
-              />
-            </Card>
+          <Col>
+            <h4 className="mb-0">{t('transactions.orgTitle')}</h4>
+            <div className="text-muted">{t('transactions.orgSubtitle')}</div>
           </Col>
         </Row>
-      )}
 
-      <Table
-        columns={columns}
-        dataSource={transactions}
-        rowKey="id"
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
-          showQuickJumper: true,
-          showTotal: (total, range) =>
-            t('transactions.table.pagination', {
-              start: range[0],
-              end: range[1],
-              total,
-            }),
-        }}
-        scroll={{ x: 1000 }}
-      />
+        {/* Statistics Row */}
+        {stats && (
+          <Row className="mb-4">
+            <Col md={3} xs={6} className="mb-2">
+              <Card bg="light" className="h-100">
+                <Card.Body>
+                  <div className="d-flex align-items-center">
+                    <AttachMoney color="success" className="me-2" />
+                    <div>
+                      <div className="fw-bold">
+                        {t('transactions.stats.totalAmount')}
+                      </div>
+                      <div>
+                        {stats.totalAmount
+                          ? (stats.totalAmount / 100).toFixed(2)
+                          : '0.00'}{' '}
+                        {stats.currency || 'INR'}
+                      </div>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} xs={6} className="mb-2">
+              <Card bg="light" className="h-100">
+                <Card.Body>
+                  <div className="d-flex align-items-center">
+                    <Person color="primary" className="me-2" />
+                    <div>
+                      <div className="fw-bold">
+                        {t('transactions.stats.totalTransactions')}
+                      </div>
+                      <div>{stats.totalTransactions || 0}</div>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} xs={6} className="mb-2">
+              <Card bg="light" className="h-100">
+                <Card.Body>
+                  <div className="fw-bold">
+                    {t('transactions.stats.successRate')}
+                  </div>
+                  <div style={{ color: '#3f8600' }}>
+                    {stats.totalTransactions
+                      ? (
+                          ((stats.successCount || 0) /
+                            stats.totalTransactions) *
+                          100
+                        ).toFixed(1)
+                      : '0.0'}
+                    %
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} xs={6} className="mb-2">
+              <Card bg="light" className="h-100">
+                <Card.Body>
+                  <div className="fw-bold">
+                    {t('transactions.stats.failedTransactions')}
+                  </div>
+                  <div style={{ color: '#cf1322' }}>
+                    {stats.failedCount || 0}
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        )}
+
+        <Table responsive bordered hover>
+          <thead>
+            <tr>
+              <th>{t('transactions.table.id')}</th>
+              <th>{t('transactions.table.amount')}</th>
+              <th>{t('transactions.table.status')}</th>
+              <th>{t('transactions.table.donor')}</th>
+              <th>{t('transactions.table.method')}</th>
+              <th>{t('transactions.table.fees')}</th>
+              <th>{t('transactions.table.date')}</th>
+              <th>{t('transactions.table.actions')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {transactions.map((tx: RazorpayOrganizationTransaction) => (
+              <tr key={tx.id}>
+                <td>
+                  <code style={{ fontSize: '12px' }}>
+                    {tx.paymentId || t('common.notAvailable')}
+                  </code>
+                </td>
+                <td>
+                  <strong>
+                    {tx.amount != null
+                      ? formatAmount(tx.amount, tx.currency)
+                      : t('common.notAvailable')}
+                  </strong>
+                </td>
+                <td>
+                  <Badge bg={getStatusVariant(tx.status)}>
+                    {tx.status.toUpperCase()}
+                  </Badge>
+                </td>
+                <td>
+                  <div style={{ fontWeight: 500 }}>
+                    {tx.donorName || t('common.anonymous')}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#666' }}>
+                    {tx.donorEmail || t('common.notAvailable')}
+                  </div>
+                </td>
+                <td>{tx.method || t('common.notAvailable')}</td>
+                <td>
+                  <span className="text-secondary">
+                    {tx.fee != null
+                      ? formatAmount(tx.fee, tx.currency)
+                      : t('common.notAvailable')}
+                  </span>
+                </td>
+                <td>{formatDate(tx.createdAt)}</td>
+                <td>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    onClick={() => handleViewDetails(tx)}
+                    title="View"
+                  >
+                    <RemoveRedEye fontSize="small" />
+                  </Button>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    onClick={() => handleDownloadReceipt(tx)}
+                    title="Receipt"
+                  >
+                    <Download fontSize="small" />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+            {transactions.length === 0 && (
+              <tr>
+                <td colSpan={8} className="text-center text-muted">
+                  {t('transactions.table.noData') || 'No transactions found.'}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+      </Card.Body>
     </Card>
   );
 };
