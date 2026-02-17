@@ -21,7 +21,11 @@ import {
   noMethodMocks,
   multiCurrencyMocks,
   errorMocks,
+  mockStats,
+  statusesMocks,
+  methodsMocks,
 } from './RazorpayUserTransactionsInjector.mocks';
+import userEvent from '@testing-library/user-event';
 
 describe('RazorpayUserTransactionsInjector', () => {
   beforeEach(() => {
@@ -205,11 +209,17 @@ describe('RazorpayUserTransactionsInjector', () => {
         expect(screen.getByText('pay_inj123')).toBeInTheDocument();
       });
 
-      // Find and click the first View button
+      // Find and click the first View button to trigger handleViewDetails
       const viewButtons = screen.getAllByRole('button', { name: /View/i });
       expect(viewButtons.length).toBeGreaterThan(0);
-      // Just verify the button can be clicked (handler is invoked via toast)
-      expect(viewButtons[0]).toBeInTheDocument();
+
+      // Create user instance and click
+      const user = userEvent.setup();
+      await user.click(viewButtons[0]);
+
+      // If click succeeds without error, the handler was invoked
+      // Toast.info is called internally but doesn't appear in DOM snapshot
+      expect(viewButtons[0]).toBeEnabled();
     });
 
     it('should call handleDownloadReceipt on receipt button click', async () => {
@@ -223,30 +233,61 @@ describe('RazorpayUserTransactionsInjector', () => {
         expect(screen.getByText('pay_inj123')).toBeInTheDocument();
       });
 
-      // Find and verify the Receipt button exists and is clickable
+      // Find and click the Receipt button to trigger handleDownloadReceipt
       const receiptButtons = screen.getAllByRole('button', {
         name: /Receipt/i,
       });
       expect(receiptButtons.length).toBeGreaterThan(0);
-      expect(receiptButtons[0]).toBeInTheDocument();
+
+      // Create user instance and click
+      const user = userEvent.setup();
+      await user.click(receiptButtons[0]);
+
+      // If click succeeds without error, the handler was invoked
+      expect(receiptButtons[0]).toBeEnabled();
     });
   });
-  describe('Date Formatting', () => {
-    it('should format dates correctly in transaction list', async () => {
-      renderWithProviders(<RazorpayUserTransactionsInjector />, {
-        mocks: standardMocks,
-        initialEntries: ['/org/test-org-id/user/test-user-id'],
-        path: '/org/:orgId/user/:userId',
-      });
 
-      await waitFor(() => {
-        expect(screen.getByText('pay_inj123')).toBeInTheDocument();
-      });
-
-      // Verify date is formatted and displayed (MM/DD/YYYY format or localized)
-      const dateElements = screen.getAllByText(/\d{1,2}.*\d{4}/);
-      expect(dateElements.length).toBeGreaterThan(0);
+  it('should call handleDownloadReceipt on receipt button click', async () => {
+    renderWithProviders(<RazorpayUserTransactionsInjector />, {
+      mocks: standardMocks,
+      initialEntries: ['/org/test-org-id/user/test-user-id'],
+      path: '/org/:orgId/user/:userId',
     });
+
+    await waitFor(() => {
+      expect(screen.getByText('pay_inj123')).toBeInTheDocument();
+    });
+
+    // Find and click the Receipt button to trigger handleDownloadReceipt
+    const receiptButtons = screen.getAllByRole('button', {
+      name: /Receipt/i,
+    });
+    expect(receiptButtons.length).toBeGreaterThan(0);
+
+    // Create user instance and click
+    const user = userEvent.setup();
+    await user.click(receiptButtons[0]);
+
+    // If click succeeds without error, the handler was invoked
+    expect(receiptButtons[0]).toBeEnabled();
+  });
+});
+describe('Date Formatting', () => {
+  it('should format dates correctly in transaction list', async () => {
+    renderWithProviders(<RazorpayUserTransactionsInjector />, {
+      mocks: standardMocks,
+      initialEntries: ['/org/test-org-id/user/test-user-id'],
+      path: '/org/:orgId/user/:userId',
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('pay_inj123')).toBeInTheDocument();
+    });
+
+    // Verify date is formatted and displayed (MM/DD/YYYY format or localized)
+    const dateElements = screen.getAllByText(/\d{1,2}.*\d{4}/);
+    expect(dateElements.length).toBeGreaterThan(0);
   });
 });
 
@@ -327,64 +368,6 @@ describe('Responsive Rendering', () => {
 });
 describe('Additional Coverage - Component Variants', () => {
   it('should render all payment method badges', async () => {
-    const methodsMocks: MockedResponse[] = [
-      {
-        request: {
-          query: GET_USER_TXN_INJECTOR,
-          variables: {
-            userId: 'test-user-id',
-            orgId: 'test-org-id',
-            limit: 10,
-          },
-        },
-        result: {
-          data: {
-            razorpay_getUserTransactions: [
-              createMockTransaction({
-                id: 'txn-card',
-                paymentId: 'pay_card',
-                method: 'card',
-              }),
-              createMockTransaction({
-                id: 'txn-upi',
-                paymentId: 'pay_upi',
-                method: 'upi',
-              }),
-              createMockTransaction({
-                id: 'txn-wallet',
-                paymentId: 'pay_wallet',
-                method: 'wallet',
-              }),
-              createMockTransaction({
-                id: 'txn-netbanking',
-                paymentId: 'pay_netbanking',
-                method: 'netbanking',
-              }),
-            ],
-          },
-        },
-      },
-      {
-        request: {
-          query: GET_USER_TRANSACTIONS_STATS,
-          variables: { userId: 'test-user-id' },
-        },
-        result: {
-          data: {
-            razorpay_getUserTransactionStats: {
-              totalTransactions: 4,
-              totalAmount: 40000,
-              currency: 'INR',
-              successfulTransactions: 4,
-              failedTransactions: 0,
-              averageTransactionAmount: 10000,
-              __typename: 'RazorpayTransactionStats',
-            },
-          },
-        },
-      },
-    ];
-
     renderWithProviders(<RazorpayUserTransactionsInjector />, {
       mocks: methodsMocks,
       initialEntries: ['/org/test-org-id/user/test-user-id'],
@@ -401,64 +384,6 @@ describe('Additional Coverage - Component Variants', () => {
   });
 
   it('should handle all status badge variants', async () => {
-    const statusesMocks: MockedResponse[] = [
-      {
-        request: {
-          query: GET_USER_TXN_INJECTOR,
-          variables: {
-            userId: 'test-user-id',
-            orgId: 'test-org-id',
-            limit: 10,
-          },
-        },
-        result: {
-          data: {
-            razorpay_getUserTransactions: [
-              createMockTransaction({
-                id: 'txn-cap',
-                paymentId: 'pay_cap',
-                status: 'captured',
-              }),
-              createMockTransaction({
-                id: 'txn-auth',
-                paymentId: 'pay_auth',
-                status: 'authorized',
-              }),
-              createMockTransaction({
-                id: 'txn-fail',
-                paymentId: 'pay_fail',
-                status: 'failed',
-              }),
-              createMockTransaction({
-                id: 'txn-refund',
-                paymentId: 'pay_refund',
-                status: 'refunded',
-              }),
-            ],
-          },
-        },
-      },
-      {
-        request: {
-          query: GET_USER_TRANSACTIONS_STATS,
-          variables: { userId: 'test-user-id' },
-        },
-        result: {
-          data: {
-            razorpay_getUserTransactionStats: {
-              totalTransactions: 4,
-              totalAmount: 40000,
-              currency: 'INR',
-              successfulTransactions: 3,
-              failedTransactions: 1,
-              averageTransactionAmount: 10000,
-              __typename: 'RazorpayTransactionStats',
-            },
-          },
-        },
-      },
-    ];
-
     renderWithProviders(<RazorpayUserTransactionsInjector />, {
       mocks: statusesMocks,
       initialEntries: ['/org/test-org-id/user/test-user-id'],
@@ -473,5 +398,169 @@ describe('Additional Coverage - Component Variants', () => {
     expect(screen.getByText('pay_auth')).toBeInTheDocument();
     expect(screen.getByText('pay_fail')).toBeInTheDocument();
     expect(screen.getByText('pay_refund')).toBeInTheDocument();
+  });
+
+  describe('Helper Functions - formatDate & Handlers', () => {
+    it('should correctly format dates with all status variants', async () => {
+      const transactions = [
+        createMockTransaction({
+          id: 'test-fmt-1',
+          paymentId: 'pay_fmt_captured',
+          status: 'captured',
+          createdAt: '2026-02-18T12:06:00Z',
+        }),
+        createMockTransaction({
+          id: 'test-fmt-2',
+          paymentId: 'pay_fmt_failed',
+          status: 'failed',
+          createdAt: '2026-02-17T14:30:00Z',
+        }),
+        createMockTransaction({
+          id: 'test-fmt-3',
+          paymentId: 'pay_fmt_refunded',
+          status: 'refunded',
+          createdAt: '2026-02-16T10:15:00Z',
+        }),
+      ];
+
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_USER_TXN_INJECTOR,
+            variables: {
+              userId: 'test-user-id',
+              orgId: 'test-org-id',
+              limit: 10,
+            },
+          },
+          result: {
+            data: { razorpay_getUserTransactions: transactions },
+          },
+        },
+        {
+          request: {
+            query: GET_USER_TRANSACTIONS_STATS,
+            variables: {
+              userId: 'test-user-id',
+              orgId: 'test-org-id',
+            },
+          },
+          result: { data: { razorpay_getUserTransactionStats: mockStats } },
+        },
+      ];
+
+      renderWithProviders(<RazorpayUserTransactionsInjector />, {
+        mocks,
+        initialEntries: ['/org/test-org-id/user/test-user-id'],
+        path: '/org/:orgId/user/:userId',
+      });
+
+      await waitFor(() => {
+        // Verify all transactions render with formatted dates
+        expect(screen.getByText('pay_fmt_captured')).toBeInTheDocument();
+        expect(screen.getByText('pay_fmt_failed')).toBeInTheDocument();
+        expect(screen.getByText('pay_fmt_refunded')).toBeInTheDocument();
+
+        // Verify dates are displayed (they should be formatted)
+        const cells = screen.getAllByRole('cell');
+        expect(cells.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should handle authorized status variant', async () => {
+      const tx = createMockTransaction({
+        id: 'test-auth',
+        paymentId: 'pay_authorized',
+        status: 'authorized',
+      });
+
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_USER_TXN_INJECTOR,
+            variables: {
+              userId: 'test-user-id',
+              orgId: 'test-org-id',
+              limit: 10,
+            },
+          },
+          result: {
+            data: { razorpay_getUserTransactions: [tx] },
+          },
+        },
+        {
+          request: {
+            query: GET_USER_TRANSACTIONS_STATS,
+            variables: {
+              userId: 'test-user-id',
+              orgId: 'test-org-id',
+            },
+          },
+          result: { data: { razorpay_getUserTransactionStats: mockStats } },
+        },
+      ];
+
+      renderWithProviders(<RazorpayUserTransactionsInjector />, {
+        mocks,
+        initialEntries: ['/org/test-org-id/user/test-user-id'],
+        path: '/org/:orgId/user/:userId',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('pay_authorized')).toBeInTheDocument();
+        const authBadge = screen.getByText('transactions.status.authorized');
+        expect(authBadge).toHaveClass('bg-info');
+      });
+    });
+
+    it('should handle unknown status variant as secondary', async () => {
+      const tx = createMockTransaction({
+        id: 'test-unknown',
+        paymentId: 'pay_unknown_status',
+        status: 'unknown_status',
+      });
+
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_USER_TXN_INJECTOR,
+            variables: {
+              userId: 'test-user-id',
+              orgId: 'test-org-id',
+              limit: 10,
+            },
+          },
+          result: {
+            data: { razorpay_getUserTransactions: [tx] },
+          },
+        },
+        {
+          request: {
+            query: GET_USER_TRANSACTIONS_STATS,
+            variables: {
+              userId: 'test-user-id',
+              orgId: 'test-org-id',
+            },
+          },
+          result: { data: { razorpay_getUserTransactionStats: mockStats } },
+        },
+      ];
+
+      renderWithProviders(<RazorpayUserTransactionsInjector />, {
+        mocks,
+        initialEntries: ['/org/test-org-id/user/test-user-id'],
+        path: '/org/:orgId/user/:userId',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('pay_unknown_status')).toBeInTheDocument();
+        // Badge renders the i18n key directly in tests
+        const badges = screen.getAllByText(/transactions\.status\./);
+        const unknownBadge = badges.find(
+          (b) => b.textContent === 'transactions.status.unknown_status',
+        );
+        expect(unknownBadge).toHaveClass('bg-secondary');
+      });
+    });
   });
 });

@@ -368,3 +368,121 @@ export const errorMocks = [
     error: new Error('Failed to fetch transactions'),
   },
 ];
+
+export const statusTransactions = [
+  createMockTransaction({
+    id: 'txn-cap',
+    paymentId: 'pay_cap',
+    status: 'captured',
+  }),
+  createMockTransaction({
+    id: 'txn-auth',
+    paymentId: 'pay_auth',
+    status: 'authorized',
+  }),
+  createMockTransaction({
+    id: 'txn-fail',
+    paymentId: 'pay_fail',
+    status: 'failed',
+  }),
+  createMockTransaction({
+    id: 'txn-refund',
+    paymentId: 'pay_refund',
+    status: 'refunded',
+  }),
+];
+
+export const statusesMocks: MockedResponse[] = [
+  {
+    request: {
+      query: GET_USER_TXN_INJECTOR,
+      variables: {
+        userId: 'test-user-id',
+        orgId: 'test-org-id',
+        limit: 10,
+      },
+    },
+    result: {
+      data: {
+        razorpay_getUserTransactions: statusTransactions,
+      },
+    },
+  },
+  {
+    request: {
+      query: GET_USER_TRANSACTIONS_STATS,
+      variables: { userId: 'test-user-id' },
+    },
+    result: {
+      data: {
+        razorpay_getUserTransactionStats: {
+          totalTransactions: 4,
+          totalAmount: 40000,
+          currency: 'INR',
+          successfulTransactions: 3,
+          failedTransactions: 1,
+          averageTransactionAmount: 10000,
+          __typename: 'RazorpayTransactionStats',
+        },
+      },
+    },
+  },
+];
+
+export const methodsMocks: MockedResponse[] = [
+  {
+    request: {
+      query: GET_USER_TXN_INJECTOR,
+      variables: {
+        userId: 'test-user-id',
+        orgId: 'test-org-id',
+        limit: 10,
+      },
+    },
+    result: {
+      data: {
+        razorpay_getUserTransactions: [
+          createMockTransaction({
+            id: 'txn-card',
+            paymentId: 'pay_card',
+            method: 'card',
+          }),
+          createMockTransaction({
+            id: 'txn-upi',
+            paymentId: 'pay_upi',
+            method: 'upi',
+          }),
+          createMockTransaction({
+            id: 'txn-wallet',
+            paymentId: 'pay_wallet',
+            method: 'wallet',
+          }),
+          createMockTransaction({
+            id: 'txn-netbanking',
+            paymentId: 'pay_netbanking',
+            method: 'netbanking',
+          }),
+        ],
+      },
+    },
+  },
+  {
+    request: {
+      query: GET_USER_TRANSACTIONS_STATS,
+      variables: { userId: 'test-user-id' },
+    },
+    result: {
+      data: {
+        razorpay_getUserTransactionStats: {
+          totalTransactions: 4,
+          totalAmount: 40000,
+          currency: 'INR',
+          successfulTransactions: 4,
+          failedTransactions: 0,
+          averageTransactionAmount: 10000,
+          __typename: 'RazorpayTransactionStats',
+        },
+      },
+    },
+  },
+];

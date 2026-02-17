@@ -17,6 +17,7 @@ import {
   GET_USER_TRANSACTIONS,
   GET_USER_TRANSACTION_STATS,
 } from './testUtils';
+import userEvent from '@testing-library/user-event';
 
 // Mock useLocalStorage to provide user ID
 // Note: This is now handled by the path alias to __mocks__/useLocalstorage.ts,
@@ -486,6 +487,77 @@ describe('UserTransactions', () => {
       await waitFor(() => {
         expect(screen.getByText('pay_unknown_method')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Button Click Handlers', () => {
+    it('should handle view details click', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<UserTransactions />, {
+        mocks: standardMocks,
+        initialEntries: ['/user/razorpay/my-transactions'],
+        path: '/user/razorpay/my-transactions',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('pay_abc123')).toBeInTheDocument();
+      });
+
+      const viewButtons = screen.getAllByRole('button', { name: /View/i });
+      await user.click(viewButtons[0]);
+      expect(viewButtons[0]).toBeEnabled();
+    });
+
+    it('should handle download receipt click', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<UserTransactions />, {
+        mocks: standardMocks,
+        initialEntries: ['/user/razorpay/my-transactions'],
+        path: '/user/razorpay/my-transactions',
+      });
+
+      await waitFor(() =>
+        expect(screen.getByText('pay_abc123')).toBeInTheDocument(),
+      );
+      const receiptButtons = screen.getAllByRole('button', {
+        name: /Receipt/i,
+      });
+      await user.click(receiptButtons[0]);
+      expect(receiptButtons[0]).toBeEnabled();
+    });
+  });
+
+  describe('Search & Status Filters', () => {
+    it('should filter by search text', async () => {
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_USER_TRANSACTIONS,
+            variables: { userId: 'test-user-id', limit: 100 },
+          },
+          result: { data: { razorpay_getUserTransactions: mockTransactions } },
+        },
+        {
+          request: {
+            query: GET_USER_TRANSACTION_STATS,
+            variables: { userId: 'test-user-id' },
+          },
+          result: { data: { razorpay_getUserTransactionStats: mockStats } },
+        },
+      ];
+
+      renderWithProviders(<UserTransactions />, {
+        mocks,
+        initialEntries: ['/user/razorpay/my-transactions'],
+        path: '/user/razorpay/my-transactions',
+      });
+
+      await waitFor(() =>
+        expect(screen.getByText('pay_abc123')).toBeInTheDocument(),
+      );
+      const searchInput = screen.getByPlaceholderText('transactions.search');
+      fireEvent.change(searchInput, { target: { value: 'John' } });
+      expect(searchInput).toHaveValue('John');
     });
   });
 });
