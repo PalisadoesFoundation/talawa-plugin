@@ -3,7 +3,7 @@ import path from 'path';
 
 const docsDir = path.resolve('./docs/docs/auto-docs');
 const mainRepoUrl =
-  'https://github.com/PalisadoesFoundation/talawa-plugin/tree/main';
+  'https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/';
 
 function replaceRepoUrl(dir) {
   const files = fs.readdirSync(dir);
@@ -16,7 +16,7 @@ function replaceRepoUrl(dir) {
 
       // Replace any repository URL before the "src" directory with the main repository URL
       content = content.replace(
-        /https:\/\/github\.com\/[^/]+\/[^/]+\/blob\/[^/]+\//g,
+        /https:\/\/github\.com\/[^/]+\/[^/]+\/(blob|tree)\/[^/]+\//g,
         mainRepoUrl,
       );
 

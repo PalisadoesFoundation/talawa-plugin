@@ -4,14 +4,21 @@
     "scripts/**/*.{ts,js}",
     "docs/src/pages/**/*.{ts,tsx}",
     "docs/docusaurus.config.ts",
-    "docs/sidebars.ts"
+    "docs/sidebars.ts",
+    "plugins/**/api/index.ts",
+    "plugins/**/admin/index.tsx",
+    "plugins/types.ts",
+    "plugins/**/admin/utils/i18n.ts",
+    "plugins/**/api/database/tables.ts"
   ],
   "project": [
     "plugins/**/*.{ts,tsx}",
     "scripts/**/*.{ts,tsx}",
     "docs/**/*.{ts,tsx,md,mdx}"
   ],
-  "typescript": { "config": ["tsconfig.json"] },
+  "typescript": {
+    "config": ["tsconfig.json"]
+  },
   "ignore": [
     ".github/**",
     "node_modules/**",
@@ -22,10 +29,8 @@
     "scripts/init/initAdmin.ts",
     "scripts/init/initApi.ts",
     "scripts/init/initApp.ts",
-    "scripts/init/initDocker.ts",
-    "plugins/**"
+    "scripts/init/initDocker.ts"
   ],
-  "ignoreFiles": ["plugins/**"],
   "ignoreExportsUsedInFile": true,
   "rules": {
     "exports": "error",

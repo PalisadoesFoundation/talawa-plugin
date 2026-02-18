@@ -1,9 +1,0 @@
-[Plugin Docs](/)
-
-***
-
-# Variable: RazorpayVerificationInput
-
-> `const` **RazorpayVerificationInput**: `any`
-
-Defined in: [Razorpay/api/graphql/inputs.ts:100](https://github.com/PalisadoesFoundation/talawa-plugin/tree/mainplugins/Razorpay/api/graphql/inputs.ts#L100)

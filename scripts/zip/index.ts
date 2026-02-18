@@ -7,12 +7,13 @@ import {
   confirm,
   spinner,
 } from '@clack/prompts';
-import bold from 'chalk';
-import green from 'chalk';
-import { readdirSync, existsSync, mkdirSync } from 'node:fs';
+import chalk from 'chalk';
+
+import { readdirSync, existsSync, rmSync, cpSync } from 'node:fs';
 import { join } from 'node:path';
 import { createZip } from './createZip.js';
 import { compileForProduction } from './compileProduction.js';
+import { runValidationTests } from './validation.js';
 
 const PLUGINS_DIR = 'plugins';
 
@@ -50,8 +51,33 @@ async function getAvailablePlugins(): Promise<PluginInfo[]> {
   return plugins;
 }
 
+/**
+ * Restores plugin files from backup after production build
+ * @param pluginPath - Absolute path to the plugin directory
+ */
+function restoreBackup(pluginPath: string): void {
+  const backupPath = `${pluginPath}.backup`;
+
+  if (existsSync(backupPath)) {
+    rmSync(pluginPath, { recursive: true, force: true });
+    cpSync(backupPath, pluginPath, { recursive: true });
+    rmSync(backupPath, { recursive: true, force: true });
+  }
+}
+
 async function main() {
-  intro(`${bold('Talawa Plugin Zipper')}`);
+  intro(chalk.bold('Talawa Plugin Zipper'));
+
+  // Check for skip tests flag from CLI args or env var
+  const skipTests =
+    process.argv.includes('--skip-tests') || process.env.SKIP_TESTS === 'true';
+
+  if (skipTests) {
+    console.warn(
+      '\n[WARNING] Test validation will be skipped for plugins without tests.',
+    );
+    console.warn('This is not recommended for production use.\n');
+  }
 
   try {
     // Get available plugins
@@ -121,6 +147,9 @@ async function main() {
       skipTypeCheck = typeCheckResponse;
     }
 
+    // Run validation tests before creating zip
+    await runValidationTests(selectedPluginName as string, skipTests);
+
     // Create zip
     const zipSpinner = spinner();
     zipSpinner.start(
@@ -137,20 +166,12 @@ async function main() {
         await createZip(selectedPlugin, false);
 
         // Restore original TypeScript files
-        const { execSync } = await import('node:child_process');
-        const { existsSync, rmSync } = await import('node:fs');
-        const backupPath = `${selectedPlugin.path}.backup`;
-
-        if (existsSync(backupPath)) {
-          rmSync(selectedPlugin.path, { recursive: true, force: true });
-          execSync(`cp -r "${backupPath}" "${selectedPlugin.path}"`);
-          rmSync(backupPath, { recursive: true, force: true });
-        }
+        restoreBackup(selectedPlugin.path);
       }
 
       zipSpinner.stop(`${selectedPluginName} zipped successfully!`);
       outro(
-        green(
+        chalk.green(
           `Plugin "${selectedPluginName}" has been zipped as ${isDevelopment ? 'development' : 'production'} build.`,
         ),
       );
@@ -160,21 +181,14 @@ async function main() {
 
       // Restore original files on error for production builds
       if (!isDevelopment) {
-        const { execSync } = await import('node:child_process');
-        const { existsSync, rmSync } = await import('node:fs');
-        const backupPath = `${selectedPlugin.path}.backup`;
-
-        if (existsSync(backupPath)) {
-          rmSync(selectedPlugin.path, { recursive: true, force: true });
-          execSync(`cp -r "${backupPath}" "${selectedPlugin.path}"`);
-          rmSync(backupPath, { recursive: true, force: true });
-        }
+        restoreBackup(selectedPlugin.path);
       }
 
       outro('Failed to create plugin zip');
     }
   } catch (err: unknown) {
     console.error('Error:', err);
+    outro('Operation failed. See error above for details.');
     process.exitCode = 1;
   }
 }
