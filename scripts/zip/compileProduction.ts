@@ -1,13 +1,21 @@
-// scripts/zip/createProdZip.ts
+// scripts/zip/compileProduction.ts
 import {
   createWriteStream,
   existsSync,
   mkdirSync,
   readdirSync,
   statSync,
+  rmSync,
+  writeFileSync,
+  cpSync,
+  copyFileSync,
+  type Stats,
 } from 'node:fs';
 import { join, sep } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import archiver from 'archiver';
+import fg from 'fast-glob';
+import type { ArchiveWarning } from './types.js';
 
 interface PluginInfo {
   name: string;
@@ -113,18 +121,12 @@ export async function compileForProduction(
   plugin: PluginInfo,
   skipTypeCheck: boolean = false,
 ): Promise<void> {
-  const { execSync } = await import('node:child_process');
-  const { existsSync, rmSync, mkdirSync, readdirSync, statSync } = await import(
-    'node:fs'
-  );
-  const { join, extname, basename, dirname } = await import('node:path');
-
   // Create backup of original plugin
   const backupPath = `${plugin.path}.backup`;
   if (existsSync(backupPath)) {
     rmSync(backupPath, { recursive: true, force: true });
   }
-  execSync(`cp -r "${plugin.path}" "${backupPath}"`);
+  cpSync(plugin.path, backupPath, { recursive: true });
 
   try {
     // Compile Admin module (React/JSX)
@@ -158,7 +160,6 @@ export async function compileForProduction(
       };
 
       // Write temporary tsconfig
-      const { writeFileSync } = await import('node:fs');
       writeFileSync(
         adminTsConfig,
         JSON.stringify(adminTsConfigContent, null, 2),
@@ -166,15 +167,14 @@ export async function compileForProduction(
 
       try {
         // Compile admin TypeScript files
-        const tscCommand = 'npx tsc';
-        console.log(`Compiling admin module: ${tscCommand}`);
+        console.log('Compiling admin module: npx tsc');
 
         try {
-          execSync(tscCommand, { cwd: adminPath, stdio: 'inherit' });
+          execFileSync('npx', ['tsc'], { cwd: adminPath, stdio: 'inherit' });
         } catch (compileError) {
           if (skipTypeCheck) {
             console.warn(
-              '⚠️  TypeScript compilation failed, but continuing due to skip type check option',
+              'TypeScript compilation failed, but continuing due to skip type check option',
             );
             // Create dist directory manually if compilation failed
             const distPath = join(adminPath, 'dist');
@@ -182,10 +182,22 @@ export async function compileForProduction(
               mkdirSync(distPath, { recursive: true });
             }
             // Copy TypeScript files as JavaScript (fallback)
-            execSync(
-              `find . -name "*.ts" -o -name "*.tsx" | xargs -I {} sh -c 'cp "{}" "dist/$(echo "{}" | sed "s/\\.ts$/.js/" | sed "s/\\.tsx$/.jsx/")"'`,
-              { cwd: adminPath },
-            );
+            const tsFiles = await fg(['**/*.ts', '**/*.tsx'], {
+              cwd: adminPath,
+              ignore: ['node_modules/**', 'dist/**'],
+            });
+            for (const file of tsFiles) {
+              const srcPath = join(adminPath, file);
+              const destFile = file.replace(/\.tsx?$/, (match) =>
+                match === '.tsx' ? '.jsx' : '.js',
+              );
+              const destPath = join(distPath, destFile);
+              const destDir = join(destPath, '..');
+              if (!existsSync(destDir)) {
+                mkdirSync(destDir, { recursive: true });
+              }
+              copyFileSync(srcPath, destPath);
+            }
           } else {
             throw compileError;
           }
@@ -194,10 +206,30 @@ export async function compileForProduction(
         // Copy non-TS files to dist
         const distPath = join(adminPath, 'dist');
         if (existsSync(distPath)) {
-          execSync(
-            `find . -name "*.json" -o -name "*.css" -o -name "*.scss" -o -name "*.svg" -o -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.webp" | xargs -I {} cp --parents {} dist/`,
-            { cwd: adminPath },
+          // Copy non-TS files to dist using fast-glob
+          const assetFiles = await fg(
+            [
+              '**/*.json',
+              '**/*.css',
+              '**/*.scss',
+              '**/*.svg',
+              '**/*.png',
+              '**/*.jpg',
+              '**/*.jpeg',
+              '**/*.gif',
+              '**/*.webp',
+            ],
+            { cwd: adminPath, ignore: ['node_modules/**', 'dist/**'] },
           );
+          for (const file of assetFiles) {
+            const srcPath = join(adminPath, file);
+            const destPath = join(distPath, file);
+            const destDir = join(destPath, '..');
+            if (!existsSync(destDir)) {
+              mkdirSync(destDir, { recursive: true });
+            }
+            copyFileSync(srcPath, destPath);
+          }
 
           // Move compiled files back to original structure (no dist folder)
           const moveFiles = (srcDir: string, destDir: string) => {
@@ -212,8 +244,7 @@ export async function compileForProduction(
                 }
                 moveFiles(srcPath, destPath);
               } else {
-                // Copy file and remove original
-                execSync(`cp "${srcPath}" "${destPath}"`);
+                copyFileSync(srcPath, destPath);
               }
             }
           };
@@ -279,20 +310,18 @@ export async function compileForProduction(
       };
 
       // Write temporary tsconfig
-      const { writeFileSync } = await import('node:fs');
       writeFileSync(apiTsConfig, JSON.stringify(apiTsConfigContent, null, 2));
 
       try {
         // Compile API TypeScript files
-        const tscCommand = 'npx tsc';
-        console.log(`Compiling API module: ${tscCommand}`);
+        console.log('Compiling API module: npx tsc');
 
         try {
-          execSync(tscCommand, { cwd: apiPath, stdio: 'inherit' });
+          execFileSync('npx', ['tsc'], { cwd: apiPath, stdio: 'inherit' });
         } catch (compileError) {
           if (skipTypeCheck) {
             console.warn(
-              '⚠️  TypeScript compilation failed, but continuing due to skip type check option',
+              'TypeScript compilation failed, but continuing due to skip type check option',
             );
             // Create dist directory manually if compilation failed
             const distPath = join(apiPath, 'dist');
@@ -300,10 +329,20 @@ export async function compileForProduction(
               mkdirSync(distPath, { recursive: true });
             }
             // Copy TypeScript files as JavaScript (fallback)
-            execSync(
-              `find . -name "*.ts" | xargs -I {} sh -c 'cp "{}" "dist/$(echo "{}" | sed "s/\\.ts$/.js/")"'`,
-              { cwd: apiPath },
-            );
+            const tsFiles = await fg(['**/*.ts'], {
+              cwd: apiPath,
+              ignore: ['node_modules/**', 'dist/**'],
+            });
+            for (const file of tsFiles) {
+              const srcPath = join(apiPath, file);
+              const destFile = file.replace(/\.ts$/, '.js');
+              const destPath = join(distPath, destFile);
+              const destDir = join(destPath, '..');
+              if (!existsSync(destDir)) {
+                mkdirSync(destDir, { recursive: true });
+              }
+              copyFileSync(srcPath, destPath);
+            }
           } else {
             throw compileError;
           }
@@ -312,10 +351,20 @@ export async function compileForProduction(
         // Copy non-TS files to dist
         const distPath = join(apiPath, 'dist');
         if (existsSync(distPath)) {
-          execSync(
-            `find . -name "*.json" -o -name "*.graphql" | xargs -I {} cp --parents {} dist/`,
-            { cwd: apiPath },
-          );
+          // Copy non-TS files to dist using fast-glob
+          const assetFiles = await fg(['**/*.json', '**/*.graphql'], {
+            cwd: apiPath,
+            ignore: ['node_modules/**', 'dist/**'],
+          });
+          for (const file of assetFiles) {
+            const srcPath = join(apiPath, file);
+            const destPath = join(distPath, file);
+            const destDir = join(destPath, '..');
+            if (!existsSync(destDir)) {
+              mkdirSync(destDir, { recursive: true });
+            }
+            copyFileSync(srcPath, destPath);
+          }
 
           // Move compiled files back to original structure (no dist folder)
           const moveFiles = (srcDir: string, destDir: string) => {
@@ -330,8 +379,7 @@ export async function compileForProduction(
                 }
                 moveFiles(srcPath, destPath);
               } else {
-                // Copy file and remove original
-                execSync(`cp "${srcPath}" "${destPath}"`);
+                copyFileSync(srcPath, destPath);
               }
             }
           };
@@ -365,16 +413,17 @@ export async function compileForProduction(
     }
 
     console.log(
-      `✅ TypeScript compilation completed successfully${skipTypeCheck ? ' (type checking skipped)' : ''}`,
+      `TypeScript compilation completed successfully${skipTypeCheck ? ' (type checking skipped)' : ''}`,
     );
   } catch (error) {
     // Restore original files on error
-    console.error('❌ Compilation failed, restoring original files...');
+    console.error('Compilation failed, restoring original files...');
     rmSync(plugin.path, { recursive: true, force: true });
-    execSync(`cp -r "${backupPath}" "${plugin.path}"`);
+    cpSync(backupPath, plugin.path, { recursive: true });
     rmSync(backupPath, { recursive: true, force: true });
     throw error;
   }
+  // No need for explicit return - async function returns Promise<void> implicitly
 }
 
 export async function createProductionZip(
@@ -441,9 +490,12 @@ export async function createProductionZip(
   const done = new Promise<void>((resolve, reject) => {
     out.on('close', () => resolve());
     out.on('error', reject);
-    archive.on('warning', (err: any) => {
+    archive.on('warning', (err: ArchiveWarning) => {
       if (err?.code === 'ENOENT') {
-        console.warn('Archive warning:', err);
+        console.warn(
+          '[Archive] Skipping missing file:',
+          err.message || 'Unknown file',
+        );
       } else {
         reject(err);
       }
@@ -459,7 +511,8 @@ export async function createProductionZip(
     const mtime = new Date(Math.floor(mtimeMs / 1000) * 1000);
     archive.file(f.fsPath, {
       name: f.zipPath.replace(/\\/g, '/'),
-      stats: { ...f.stats, mtime } as any,
+      // Use Partial<Stats> to allow mtime override while satisfying archiver's type requirements
+      stats: { ...f.stats, mtime } as Partial<Stats> as Stats | undefined,
       // keep compression on to avoid "uncompressed content" issues
     });
   }
@@ -467,14 +520,12 @@ export async function createProductionZip(
   archive.finalize();
   await done;
 
-  console.log(`\n📦 Production ZIP created: ${zipFileName}`);
-  console.log(`📁 Location: ${zipPath}`);
+  console.log(`\nProduction ZIP created: ${zipFileName}`);
+  console.log(`Location: ${zipPath}`);
   console.log(
-    `📊 Approx size: ${(statSync(zipPath).size / 1024 / 1024).toFixed(2)} MB`,
+    `Approx size: ${(statSync(zipPath).size / 1024 / 1024).toFixed(2)} MB`,
   );
-  console.log(
-    '🔧 Flags: no append(), ZIP64 disabled, filtered to runtime files',
-  );
+  console.log('Flags: no append(), ZIP64 disabled, filtered to runtime files');
 
   return zipPath;
 }

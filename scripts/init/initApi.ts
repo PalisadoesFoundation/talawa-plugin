@@ -23,6 +23,16 @@ export function createAPISkeleton(
   pluginName: string,
   pluginsRoot = 'plugins',
 ): void {
+  if (!pluginName || pluginName.trim() === '') {
+    throw new Error('Plugin name cannot be empty');
+  }
+
+  if (!/^[a-zA-Z0-9-_]+$/.test(pluginName)) {
+    throw new Error(
+      'Plugin name can only contain letters, numbers, hyphens, and underscores',
+    );
+  }
+
   const s = spinner();
   s.start('Creating API skeleton…');
 

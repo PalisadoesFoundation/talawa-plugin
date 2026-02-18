@@ -23,5 +23,6 @@
   "cleanOutputDir": true,
   "skipErrorChecking": true,
   "logLevel": "Warn",
+  "gitRevision": "main",
   "hideBreadcrumbs": true
 }
