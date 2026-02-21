@@ -17,28 +17,19 @@ import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { useTranslation } from 'react-i18next';
 import {
-  Card,
-  Table,
-  Tag,
-  Button,
-  Space,
-  Typography,
-  message,
-  Spin,
-  Input,
-  Select,
-  DatePicker,
+  Container,
   Row,
   Col,
-} from 'antd';
+  Card,
+  Table,
+  Badge,
+  Button,
+  Spinner,
+  Form,
+  InputGroup,
+  Alert,
+} from 'react-bootstrap';
 import { Navigate } from 'react-router-dom';
-import {
-  CreditCardOutlined,
-  EyeOutlined,
-  DownloadOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
-import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
@@ -47,15 +38,18 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 import useLocalStorage from 'utils/useLocalstorage';
 
-const { Title, Text } = Typography;
-const { Search } = Input;
-const { RangePicker } = DatePicker;
-
 // GraphQL operations
 import {
   GET_USER_TRANSACTIONS,
   GET_USER_TRANSACTION_STATS,
 } from '../graphql/queries';
+import {
+  CreditCardOff,
+  Download,
+  Search,
+  VisibilityOutlined,
+} from '@mui/icons-material';
+import { toast } from 'react-toastify';
 
 interface RazorpayTransaction {
   id: string;
@@ -160,33 +154,33 @@ const UserTransactions: React.FC = () => {
     },
   );
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string) => {
     switch (status) {
       case 'captured':
         return 'success';
       case 'authorized':
-        return 'processing';
+        return 'info';
       case 'failed':
-        return 'error';
+        return 'danger';
       case 'refunded':
         return 'warning';
       default:
-        return 'default';
+        return 'secondary';
     }
   };
 
-  const getMethodColor = (method: string) => {
+  const getMethodVariant = (method: string) => {
     switch (method?.toLowerCase()) {
       case 'card':
-        return 'blue';
+        return 'primary';
       case 'upi':
-        return 'green';
+        return 'success';
       case 'netbanking':
-        return 'purple';
+        return 'info';
       case 'wallet':
-        return 'orange';
+        return 'warning';
       default:
-        return 'default';
+        return 'secondary';
     }
   };
 
@@ -205,216 +199,228 @@ const UserTransactions: React.FC = () => {
   };
 
   const handleViewDetails = (transaction: RazorpayTransaction) => {
-    message.info(`Viewing details for transaction: ${transaction.id}`);
+    toast.info(
+      t('transactions.messages.viewDetailsComing', {
+        id: transaction.paymentId || transaction.id,
+      }),
+    );
   };
 
   const handleDownloadReceipt = (transaction: RazorpayTransaction) => {
-    message.success(`Downloading receipt for transaction: ${transaction.id}`);
+    toast.info(
+      t('transactions.messages.downloadReceiptComing', {
+        id: transaction.paymentId || transaction.id,
+      }),
+    );
   };
-
-  const columns: ColumnsType<RazorpayTransaction> = [
-    {
-      title: 'Transaction ID',
-      dataIndex: 'paymentId',
-      key: 'paymentId',
-      render: (paymentId: string) => (
-        <Text code style={{ fontSize: '12px' }}>
-          {paymentId || 'N/A'}
-        </Text>
-      ),
-    },
-    {
-      title: 'Amount',
-      dataIndex: 'amount',
-      key: 'amount',
-      render: (amount: number, record: RazorpayTransaction) => (
-        <Text strong>
-          {amount ? formatAmount(amount, record.currency) : 'N/A'}
-        </Text>
-      ),
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => (
-        <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
-      ),
-    },
-    {
-      title: 'Donor',
-      dataIndex: 'donorName',
-      key: 'donorName',
-      render: (name: string, record: RazorpayTransaction) => (
-        <div>
-          <div style={{ fontWeight: 500 }}>{name || 'Anonymous'}</div>
-          <div style={{ fontSize: '12px', color: '#666' }}>
-            {record.donorEmail}
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Payment Method',
-      dataIndex: 'method',
-      key: 'method',
-      render: (method: string) => (
-        <Tag color={getMethodColor(method)}>{method || 'N/A'}</Tag>
-      ),
-    },
-    {
-      title: 'Date',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (date: string) => formatDate(date),
-      sorter: (a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (_, record: RazorpayTransaction) => (
-        <Space size="small">
-          <Button
-            type="link"
-            icon={<EyeOutlined />}
-            onClick={() => handleViewDetails(record)}
-            size="small"
-          >
-            View
-          </Button>
-          <Button
-            type="link"
-            icon={<DownloadOutlined />}
-            onClick={() => handleDownloadReceipt(record)}
-            size="small"
-          >
-            Receipt
-          </Button>
-        </Space>
-      ),
-    },
-  ];
 
   if (transactionsLoading || statsLoading) {
     return (
-      <Card>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <Spin size="large" />
-          <div style={{ marginTop: '16px' }}>
-            <Text>{t('common.loading')}</Text>
+      <Card className="my-4">
+        <Card.Body className="text-center py-5">
+          <Spinner animation="border" role="status" />
+          <div className="mt-3">
+            <span>{t('common.loading')}</span>
           </div>
-        </div>
+        </Card.Body>
       </Card>
     );
   }
 
   if (transactionsError || statsError) {
     return (
-      <Card>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <Text type="danger">
+      <Card className="my-4">
+        <Card.Body className="text-center py-5">
+          <Alert variant="danger">
             {t('transactions.error.loadFailed')}:{' '}
             {transactionsError?.message || statsError?.message}
-          </Text>
-        </div>
+          </Alert>
+        </Card.Body>
       </Card>
     );
   }
 
   return (
-    <div>
-      <Card style={{ marginBottom: '16px' }}>
-        <div style={{ marginBottom: '16px' }}>
-          <Space align="center">
-            <CreditCardOutlined
-              style={{ fontSize: '24px', color: '#1890ff' }}
-            />
-            <Title level={3} style={{ margin: 0 }}>
-              {t('transactions.title')}
-            </Title>
-          </Space>
-          <Text type="secondary" style={{ display: 'block', marginTop: '4px' }}>
-            {t('transactions.subtitle')}
-          </Text>
-        </div>
-
-        {/* Filters */}
-        <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} md={8} lg={8}>
-            <Search
-              placeholder={t('transactions.search')}
-              aria-label={t('transactions.search')}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              onSearch={setSearchText}
-              prefix={<SearchOutlined />}
-              allowClear
-            />
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={8}>
-            <Select
-              placeholder={t('transactions.filters.statusPlaceholder')}
-              aria-label={t('transactions.filters.statusLabel')}
-              value={statusFilter}
-              onChange={setStatusFilter}
-              style={{ width: '100%' }}
-              allowClear
-            >
-              <Select.Option value="all">
-                {t('transactions.filters.allStatuses')}
-              </Select.Option>
-              <Select.Option value="captured">
-                {t('transactions.status.captured')}
-              </Select.Option>
-              <Select.Option value="authorized">
-                {t('transactions.status.authorized')}
-              </Select.Option>
-              <Select.Option value="failed">
-                {t('transactions.status.failed')}
-              </Select.Option>
-              <Select.Option value="refunded">
-                {t('transactions.status.refunded')}
-              </Select.Option>
-            </Select>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={8}>
-            <RangePicker
-              value={dateRange}
-              onChange={(dates) =>
-                setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs] | null)
-              }
-              style={{ width: '100%' }}
-              placeholder={[
-                t('transactions.filters.startDate'),
-                t('transactions.filters.endDate'),
-              ]}
-              aria-label={t('transactions.filters.dateRangeLabel')}
-            />
-          </Col>
-        </Row>
+    <Container fluid>
+      <Card className="my-4">
+        <Card.Body>
+          <Row className="align-items-center mb-2">
+            <Col xs="auto">
+              <CreditCardOff />
+            </Col>
+            <Col>
+              <h3 className="mb-0">{t('transactions.title')}</h3>
+              <div className="text-muted">{t('transactions.subtitle')}</div>
+            </Col>
+          </Row>
+          <Row className="g-3">
+            <Col xs={12} md={4}>
+              <InputGroup>
+                <InputGroup.Text>
+                  <Search />
+                </InputGroup.Text>
+                <Form.Control
+                  placeholder={t('transactions.search')}
+                  aria-label={t('transactions.search')}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                />
+              </InputGroup>
+            </Col>
+            <Col xs={12} md={4}>
+              <Form.Select
+                aria-label={t('transactions.filters.statusLabel')}
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">
+                  {t('transactions.filters.allStatuses')}
+                </option>
+                <option value="captured">
+                  {t('transactions.status.captured')}
+                </option>
+                <option value="authorized">
+                  {t('transactions.status.authorized')}
+                </option>
+                <option value="failed">
+                  {t('transactions.status.failed')}
+                </option>
+                <option value="refunded">
+                  {t('transactions.status.refunded')}
+                </option>
+              </Form.Select>
+            </Col>
+            <Col xs={12} md={4}>
+              <Form.Control
+                type="date"
+                value={
+                  dateRange && dateRange[0]
+                    ? dateRange[0].format('YYYY-MM-DD')
+                    : ''
+                }
+                onChange={(e) =>
+                  setDateRange([
+                    e.target.value ? dayjs(e.target.value) : null,
+                    dateRange ? dateRange[1] : null,
+                  ] as [dayjs.Dayjs, dayjs.Dayjs] | null)
+                }
+                placeholder={t('transactions.filters.startDate')}
+                aria-label={t('transactions.filters.startDate')}
+                className="mb-2"
+              />
+              <Form.Control
+                type="date"
+                value={
+                  dateRange && dateRange[1]
+                    ? dateRange[1].format('YYYY-MM-DD')
+                    : ''
+                }
+                onChange={(e) =>
+                  setDateRange([
+                    dateRange ? dateRange[0] : null,
+                    e.target.value ? dayjs(e.target.value) : null,
+                  ] as [dayjs.Dayjs, dayjs.Dayjs] | null)
+                }
+                placeholder={t('transactions.filters.endDate')}
+                aria-label={t('transactions.filters.endDate')}
+              />
+            </Col>
+          </Row>
+        </Card.Body>
       </Card>
-
       <Card>
-        <Table
-          columns={columns}
-          dataSource={filteredTransactions}
-          rowKey="id"
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) =>
-              t('transactions.table.pagination', {
-                start: range[0],
-                end: range[1],
-                total,
-              }),
-          }}
-          scroll={{ x: 1000 }}
-        />
+        <Card.Body>
+          <Table responsive bordered hover>
+            <thead>
+              <tr>
+                <th>
+                  {t('transactions.table.transactionId') || 'Transaction ID'}
+                </th>
+                <th>{t('transactions.table.amount') || 'Amount'}</th>
+                <th>{t('transactions.table.status') || 'Status'}</th>
+                <th>{t('transactions.table.donor') || 'Donor'}</th>
+                <th>{t('transactions.table.method') || 'Payment Method'}</th>
+                <th>{t('transactions.table.date') || 'Date'}</th>
+                <th>{t('transactions.table.actions') || 'Actions'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTransactions.map((tx: RazorpayTransaction) => (
+                <tr key={tx.id}>
+                  <td>
+                    <code style={{ fontSize: '12px' }}>
+                      {tx.paymentId || t('common.notAvailable')}
+                    </code>
+                  </td>
+                  <td>
+                    <strong>
+                      {tx.amount
+                        ? formatAmount(tx.amount, tx.currency)
+                        : t('common.notAvailable')}
+                    </strong>
+                  </td>
+                  <td>
+                    <Badge bg={getStatusVariant(tx.status)}>
+                      {tx.status.toUpperCase()}
+                    </Badge>
+                  </td>
+                  <td>
+                    <div style={{ fontWeight: 500 }}>
+                      {tx.donorName || t('common.anonymous')}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#666' }}>
+                      {tx.donorEmail}
+                    </div>
+                  </td>
+                  <td>
+                    <Badge bg={getMethodVariant(tx.method || '')}>
+                      {tx.method || t('common.notAvailable')}
+                    </Badge>
+                  </td>
+                  <td>{formatDate(tx.createdAt)}</td>
+                  <td>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      onClick={() => handleViewDetails(tx)}
+                      title={t(
+                        'transactions.userTransactions.viewDetailsAriaLabel',
+                      )}
+                      aria-label={t(
+                        'transactions.userTransactions.viewDetailsAriaLabel',
+                      )}
+                    >
+                      <VisibilityOutlined /> {t('transactions.viewButton')}
+                    </Button>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      onClick={() => handleDownloadReceipt(tx)}
+                      title={t(
+                        'transactions.userTransactions.downloadReceiptAriaLabel',
+                      )}
+                      aria-label={t(
+                        'transactions.userTransactions.downloadReceiptAriaLabel',
+                      )}
+                    >
+                      <Download />{' '}
+                      {t('transactions.userTransactions.receiptButton')}
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+              {filteredTransactions.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="text-center text-muted">
+                    {t('transactions.table.noData') || 'No transactions found.'}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </Card.Body>
       </Card>
-    </div>
+    </Container>
   );
 };
 

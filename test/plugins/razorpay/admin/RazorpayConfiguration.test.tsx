@@ -197,4 +197,64 @@ describe('RazorpayConfiguration', () => {
       });
     });
   });
+
+  describe('Form Initialization and Loading', () => {
+    it('should show loading state while fetching config', () => {
+      renderWithProviders(<RazorpayConfiguration />, {
+        mocks: standardMocks,
+      });
+
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
+    });
+  });
+
+  describe('Field Interactions', () => {
+    it('should update key ID field', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<RazorpayConfiguration />, {
+        mocks: standardMocks,
+      });
+
+      const keyIdInput = (await screen.findByPlaceholderText(
+        'Enter Razorpay Key ID',
+      )) as HTMLInputElement;
+
+      await user.clear(keyIdInput);
+      await user.type(keyIdInput, 'new_key_id');
+
+      expect(keyIdInput).toHaveValue('new_key_id');
+    });
+
+    it('should update currency field', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<RazorpayConfiguration />, {
+        mocks: standardMocks,
+      });
+
+      const currencySelect = (await screen.findByRole('combobox', {
+        name: /Default Currency/i,
+      })) as HTMLSelectElement;
+
+      await user.selectOptions(currencySelect, 'USD');
+
+      expect(currencySelect).toHaveValue('USD');
+    });
+
+    it('should toggle enabled switch', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<RazorpayConfiguration />, {
+        mocks: standardMocks,
+      });
+
+      const enabledCheckbox = (await screen.findByRole('checkbox', {
+        name: /Enable Razorpay/i,
+      })) as HTMLInputElement | null;
+
+      if (enabledCheckbox) {
+        const initialChecked = enabledCheckbox.checked;
+        await user.click(enabledCheckbox);
+        expect(enabledCheckbox.checked).not.toBe(initialChecked);
+      }
+    });
+  });
 });

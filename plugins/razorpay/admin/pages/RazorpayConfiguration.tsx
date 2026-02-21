@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { toast } from 'react-toastify';
 import { Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
-import Loader from '../../../../components/Loader/Loader';
+import LoadingState from '../../../../shared-components/LoadingState/LoadingState';
 import {
   GET_RAZORPAY_CONFIG,
   UPDATE_RAZORPAY_CONFIG,
@@ -156,7 +156,11 @@ const RazorpayConfiguration: React.FC = () => {
   };
 
   if (loading) {
-    return <Loader />;
+    return (
+      <LoadingState variant="spinner" isLoading={true}>
+        <div />
+      </LoadingState>
+    );
   }
 
   if (error) {

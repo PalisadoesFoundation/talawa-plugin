@@ -37,15 +37,30 @@ export async function updateRazorpayConfigResolver(
   args: z.infer<typeof updateRazorpayConfigArgumentsSchema>,
   ctx: GraphQLContext,
 ) {
-  if (!ctx.currentClient.isAuthenticated) {
+  // Check authentication
+  if (!ctx.currentClient?.user?.id) {
     throw new TalawaGraphQLError({
+      message: 'Unauthorized',
       extensions: { code: 'unauthenticated' },
     });
   }
 
-  // Check for superadmin access
-  if (!ctx.user || !ctx.user.isSuperAdmin) {
+  if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
+      extensions: { code: 'unauthenticated' },
+    });
+  }
+
+  // Check for admin access
+  const currentUser = await ctx.drizzleClient.query.usersTable.findFirst({
+    where: (fields, operators) =>
+      operators.eq(fields.id, ctx.currentClient.user.id),
+  });
+
+  if (!currentUser || currentUser.role !== 'administrator') {
+    throw new TalawaGraphQLError({
+      message: 'Forbidden',
       extensions: { code: 'forbidden' },
     });
   }
@@ -94,6 +109,7 @@ export async function updateRazorpayConfigResolver(
 
       if (!newConfig) {
         throw new TalawaGraphQLError({
+          message: 'Failed to create Razorpay configuration',
           extensions: { code: 'unexpected' },
         });
       }
@@ -112,6 +128,7 @@ export async function updateRazorpayConfigResolver(
       const existingConfigItem = existingConfig[0];
       if (!existingConfigItem) {
         throw new TalawaGraphQLError({
+          message: 'Existing configuration not found',
           extensions: { code: 'unexpected' },
         });
       }
@@ -133,6 +150,7 @@ export async function updateRazorpayConfigResolver(
 
       if (!updatedConfig) {
         throw new TalawaGraphQLError({
+          message: 'Failed to update Razorpay configuration',
           extensions: { code: 'unexpected' },
         });
       }
@@ -150,6 +168,10 @@ export async function updateRazorpayConfigResolver(
   } catch (error) {
     ctx.log?.error('Error updating Razorpay config:', error);
     throw new TalawaGraphQLError({
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update Razorpay config',
       extensions: { code: 'unexpected' },
     });
   }
@@ -165,8 +187,17 @@ export async function createPaymentOrderResolver(
   args: z.infer<typeof createPaymentOrderArgumentsSchema>,
   ctx: GraphQLContext,
 ) {
+  // Check authentication
+  if (!ctx.currentClient?.user?.id) {
+    throw new TalawaGraphQLError({
+      message: 'Unauthorized',
+      extensions: { code: 'unauthenticated' },
+    });
+  }
+
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
@@ -214,6 +245,7 @@ export async function createPaymentOrderResolver(
     // Check authentication before database insert
     if (!ctx.user) {
       throw new TalawaGraphQLError({
+        message: 'Unauthorized',
         extensions: { code: 'unauthenticated' },
       });
     }
@@ -277,8 +309,17 @@ export async function initiatePaymentResolver(
   args: z.infer<typeof initiatePaymentArgumentsSchema>,
   ctx: GraphQLContext,
 ) {
+  // Check authentication
+  if (!ctx.currentClient?.user?.id) {
+    throw new TalawaGraphQLError({
+      message: 'Unauthorized',
+      extensions: { code: 'unauthenticated' },
+    });
+  }
+
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
@@ -417,8 +458,17 @@ export async function verifyPaymentResolver(
   args: z.infer<typeof verifyPaymentArgumentsSchema>,
   ctx: GraphQLContext,
 ) {
+  // Check authentication
+  if (!ctx.currentClient?.user?.id) {
+    throw new TalawaGraphQLError({
+      message: 'Unauthorized',
+      extensions: { code: 'unauthenticated' },
+    });
+  }
+
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
@@ -507,6 +557,7 @@ export async function verifyPaymentResolver(
     const orderItem = order[0];
     if (!orderItem) {
       throw new TalawaGraphQLError({
+        message: 'Associated order not found',
         extensions: { code: 'unexpected' },
       });
     }
@@ -565,15 +616,30 @@ export async function testRazorpaySetupResolver(
   _args: Record<string, unknown>,
   ctx: GraphQLContext,
 ) {
+  // Check authentication
+  if (!ctx.currentClient?.user?.id) {
+    throw new TalawaGraphQLError({
+      message: 'Unauthorized',
+      extensions: { code: 'unauthenticated' },
+    });
+  }
+
   if (!ctx.currentClient.isAuthenticated) {
     throw new TalawaGraphQLError({
+      message: 'Unauthenticated',
       extensions: { code: 'unauthenticated' },
     });
   }
 
   // Check for admin access
-  if (!ctx.isAdmin) {
+  const currentUser = await ctx.drizzleClient.query.usersTable.findFirst({
+    where: (fields, operators) =>
+      operators.eq(fields.id, ctx.currentClient.user.id),
+  });
+
+  if (!currentUser || currentUser.role !== 'administrator') {
     throw new TalawaGraphQLError({
+      message: 'Forbidden',
       extensions: { code: 'forbidden' },
     });
   }
