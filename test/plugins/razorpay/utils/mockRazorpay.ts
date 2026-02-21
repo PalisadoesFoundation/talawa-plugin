@@ -220,9 +220,22 @@ export const createMockDatabaseClient = () => {
     transaction: Mock<
       (callback: (tx: unknown) => Promise<unknown>) => Promise<unknown>
     >;
+    query?: {
+      usersTable: {
+        findFirst: Mock<(...args: unknown[]) => Promise<unknown>>;
+      };
+      configTable: {
+        findFirst: Mock<(...args: unknown[]) => Promise<unknown>>;
+      };
+      transactionsTable: {
+        findMany: Mock<(...args: unknown[]) => Promise<unknown>>;
+      };
+      ordersTable: {
+        findFirst: Mock<(...args: unknown[]) => Promise<unknown>>;
+      };
+    };
   } & Partial<Record<string, Mock<(...args: unknown[]) => unknown>>>;
 
-  // biome-ignore lint/suspicious/noThenProperty: Intentional thenable for database mock
   const mockDb: MockDb = {
     // The "then" method is required to make the mock object "thenable" (Promise-like),
     // allowing it to be awaited directly in the application code (e.g. await db.select()...).
@@ -231,6 +244,23 @@ export const createMockDatabaseClient = () => {
       resolve: (value: unknown) => void,
       reject: (reason?: unknown) => void,
     ) => mockDb.execute().then(resolve, reject),
+    query: {
+      usersTable: {
+        findFirst: vi.fn().mockResolvedValue({
+          id: 'user-123',
+          role: 'administrator',
+        }),
+      },
+      configTable: {
+        findFirst: vi.fn().mockResolvedValue(createMockConfig()),
+      },
+      transactionsTable: {
+        findMany: vi.fn().mockResolvedValue([]),
+      },
+      ordersTable: {
+        findFirst: vi.fn().mockResolvedValue(createMockOrder()),
+      },
+    },
   } as MockDb;
 
   const methods = [
@@ -269,20 +299,30 @@ export const createMockDatabaseClient = () => {
  * Mock GraphQL context with Razorpay-specific fields
  */
 export const createMockRazorpayContext = (
-  overrides: Partial<GraphQLContext> = {},
+  overrides: Partial<GraphQLContext> & {
+    userRole?: string;
+    isAuthenticated?: boolean;
+    userId?: string;
+  } = {},
 ): GraphQLContext => {
   const mockDb = createMockDatabaseClient();
+  const {
+    userRole = 'administrator',
+    isAuthenticated = true,
+    userId = 'user-123',
+    ...restOverrides
+  } = overrides;
 
   const ctx = {
-    userId: 'user-123',
+    userId,
     user: {
-      id: 'user-123',
+      id: userId,
       email: 'test@example.com',
       firstName: 'Test',
       lastName: 'User',
       roles: ['admin'],
       permissions: [],
-      isSuperAdmin: false,
+      isSuperAdmin: userRole === 'administrator',
     },
     organizationId: 'org-123',
     organization: {
@@ -291,12 +331,18 @@ export const createMockRazorpayContext = (
       slug: 'test-org',
       ownerId: 'user-123',
     },
-    isAdmin: true,
+    isAdmin: userRole === 'administrator',
     token: 'mock-jwt-token',
     db: mockDb,
     currentClient: {
-      isAuthenticated: true,
+      isAuthenticated,
       scopes: ['api:access'],
+      user: isAuthenticated
+        ? {
+            id: userId,
+            role: userRole,
+          }
+        : undefined,
     },
     drizzleClient: mockDb,
     log: {
@@ -305,8 +351,17 @@ export const createMockRazorpayContext = (
       warn: vi.fn(),
       debug: vi.fn(),
     },
-    ...overrides,
+    ...restOverrides,
   } as GraphQLContext;
+
+  // Update the mock usersTable.findFirst to return the user with the correct role
+  if (mockDb.query?.usersTable) {
+    mockDb.query.usersTable.findFirst = vi.fn().mockResolvedValue({
+      id: userId,
+      role: userRole,
+    });
+  }
+
   return ctx;
 };
 

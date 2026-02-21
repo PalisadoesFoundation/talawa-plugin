@@ -6,7 +6,7 @@
 
 > **initiatePaymentResolver**(`_parent`, `args`, `ctx`): `Promise`\<\{ `amount`: `any`; `currency`: `any`; `message`: `string`; `orderId`: `any`; `paymentId`: `string`; `success`: `boolean`; `transaction`: \{ `amount`: `any`; `currency`: `any`; `paymentId`: `string`; `status`: `string`; \}; \} \| \{ `amount?`: `undefined`; `currency?`: `undefined`; `message`: `string`; `orderId?`: `undefined`; `paymentId?`: `undefined`; `success`: `boolean`; `transaction`: `any`; \}\>
 
-Defined in: [plugins/razorpay/api/graphql/mutations.ts:275](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/razorpay/api/graphql/mutations.ts#L275)
+Defined in: [plugins/razorpay/api/graphql/mutations.ts:307](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/razorpay/api/graphql/mutations.ts#L307)
 
 ## Parameters
 

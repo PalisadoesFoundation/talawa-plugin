@@ -109,18 +109,22 @@ describe('Razorpay GraphQL Mutations', () => {
     });
 
     it('should throw error for non-super-admin', async () => {
-      mockContext.user.isSuperAdmin = false;
+      const nonAdminContext = createMockRazorpayContext({
+        userRole: 'user',
+      });
 
       await expect(
-        updateRazorpayConfigResolver({}, { input }, mockContext),
+        updateRazorpayConfigResolver({}, { input }, nonAdminContext),
       ).rejects.toThrow(TalawaGraphQLError);
     });
 
     it('should throw error for unauthenticated user', async () => {
-      mockContext.user = null;
+      const unauthenticatedContext = createMockRazorpayContext({
+        isAuthenticated: false,
+      });
 
       await expect(
-        updateRazorpayConfigResolver({}, { input }, mockContext),
+        updateRazorpayConfigResolver({}, { input }, unauthenticatedContext),
       ).rejects.toThrow(TalawaGraphQLError);
     });
 
@@ -417,11 +421,12 @@ describe('Razorpay GraphQL Mutations', () => {
     });
 
     it('should throw error for non-admin user', async () => {
-      mockContext.isAdmin = false;
-      mockContext.user.isSuperAdmin = false;
+      const nonAdminContext = createMockRazorpayContext({
+        userRole: 'user',
+      });
 
       await expect(
-        testRazorpaySetupResolver({}, {}, mockContext),
+        testRazorpaySetupResolver({}, {}, nonAdminContext),
       ).rejects.toThrow(TalawaGraphQLError);
     });
 
