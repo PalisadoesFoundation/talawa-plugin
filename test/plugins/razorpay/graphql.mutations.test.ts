@@ -1,59 +1,606 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { GraphQLContext } from '~/src/graphql/context';
-import crypto from 'node:crypto';
 import {
   updateRazorpayConfigResolver,
   createPaymentOrderResolver,
   initiatePaymentResolver,
   verifyPaymentResolver,
   testRazorpaySetupResolver,
+  registerRazorpayMutations,
 } from '../../../plugins/razorpay/api/graphql/mutations';
+import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
 import {
   createMockRazorpayContext,
   createMockTransaction,
-  createMockRazorpayPayment,
-  createMockDatabaseClient,
   createMockConfig,
   createMockOrder,
   createMockRazorpayOrder,
-} from './utils/mockRazorpay';
-import { TalawaGraphQLError } from '~/src/utilities/TalawaGraphQLError';
+  mockOrders,
+  updateConfigInput,
+  createOrderInput,
+  initiatePaymentInput,
+  createVerifyInput,
+  setupContext,
+  setupFindFirstWithCallback,
+} from './graphql.mutations.mock';
 
-// Mock values from the manual mock file if needed, but preferably use the create functions.
-// If we need the jest mocks, we can import them from the mock file directly or use vi.mocked
-import { mockOrders, mockPayments } from '../../../__mocks__/razorpay';
-
-// Mock the Razorpay module
 vi.mock('razorpay');
 
 describe('Razorpay GraphQL Mutations', () => {
-  let mockContext: GraphQLContext & {
-    request: { headers: Record<string, string> };
-  };
+  let ctx: ReturnType<typeof setupContext>;
 
   beforeEach(() => {
-    // Reset mocks and create a fresh context for each test
     vi.clearAllMocks();
-    mockContext = createMockRazorpayContext({
-      drizzleClient: createMockDatabaseClient(), // Fresh mocks for each test
-    });
-    // Ensure request object exists
-    mockContext.request = {
-      headers: {},
-    };
-    global.fetch = vi.fn(); // Mock fetch globally
-
-    // Set default mock implementations for Razorpay API calls
-    mockOrders.create.mockResolvedValue(createMockRazorpayOrder());
-    mockPayments.fetch.mockResolvedValue(createMockRazorpayPayment());
-
-    // Default config exists for most tests
-    const mockConfig = createMockConfig();
-    mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
+    ctx = setupContext();
+    global.fetch = vi.fn();
   });
 
-  it('should use mocked razorpay', async () => {
-    // Explicitly set return value for this isolation test
+  // --- updateRazorpayConfigResolver ---
+  describe('updateRazorpayConfigResolver', () => {
+    const input = updateConfigInput;
+
+    it('updates config for super admin', async () => {
+      ctx.user.isSuperAdmin = true;
+      const existing = createMockConfig();
+      ctx.drizzleClient.limit.mockResolvedValue([existing]);
+      ctx.drizzleClient.returning.mockResolvedValue([
+        { ...existing, ...input },
+      ]);
+
+      const result = await updateRazorpayConfigResolver({}, { input }, ctx);
+      expect(ctx.drizzleClient.update).toHaveBeenCalled();
+      expect(result).toMatchObject(input);
+    });
+
+    it('creates new config if none exists', async () => {
+      ctx.user.isSuperAdmin = true;
+      ctx.drizzleClient.limit.mockResolvedValue([]);
+      ctx.drizzleClient.returning.mockResolvedValue([createMockConfig(input)]);
+
+      const result = await updateRazorpayConfigResolver({}, { input }, ctx);
+      expect(ctx.drizzleClient.insert).toHaveBeenCalled();
+      expect(result).toMatchObject(input);
+    });
+
+    it('throws for non-super-admin', async () => {
+      const nonAdmin = createMockRazorpayContext({ userRole: 'user' });
+      await expect(
+        updateRazorpayConfigResolver({}, { input }, nonAdmin),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+
+    it('throws for unauthenticated user', async () => {
+      const unauth = createMockRazorpayContext({ isAuthenticated: false });
+      await expect(
+        updateRazorpayConfigResolver({}, { input }, unauth),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+
+    it('handles partial config updates', async () => {
+      ctx.user.isSuperAdmin = true;
+      const existing = createMockConfig();
+      const partial = { isEnabled: false, description: 'New description' };
+      ctx.drizzleClient.limit.mockResolvedValue([existing]);
+      ctx.drizzleClient.returning.mockResolvedValue([
+        { ...existing, ...partial },
+      ]);
+
+      const result = await updateRazorpayConfigResolver(
+        {},
+        { input: { ...existing, ...partial } },
+        ctx,
+      );
+      expect(result).toMatchObject(partial);
+    });
+  });
+
+  // --- createPaymentOrderResolver ---
+  describe('createPaymentOrderResolver', () => {
+    const input = createOrderInput;
+
+    it('creates payment order successfully', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([createMockConfig()]);
+      ctx.drizzleClient.returning.mockResolvedValue([createMockOrder()]);
+
+      const result = await createPaymentOrderResolver({}, { input }, ctx);
+      expect(result).toBeDefined();
+      expect(ctx.drizzleClient.insert).toHaveBeenCalled();
+    });
+
+    it('throws if Razorpay config not found', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([]);
+      await expect(
+        createPaymentOrderResolver({}, { input }, ctx),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+
+    it('handles anonymous donations (no userId)', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([createMockConfig()]);
+      mockOrders.create.mockResolvedValue(createMockRazorpayOrder());
+
+      await expect(
+        createPaymentOrderResolver(
+          {},
+          {
+            input: {
+              ...input,
+              userId: undefined,
+              anonymous: true,
+            } as unknown as typeof input & { anonymous: boolean },
+          },
+          ctx,
+        ),
+      ).resolves.not.toThrow();
+    });
+
+    it('throws for unauthenticated user (null user)', async () => {
+      ctx.user = null;
+      await expect(
+        createPaymentOrderResolver({}, { input }, ctx),
+      ).rejects.toThrow();
+    });
+  });
+
+  // --- initiatePaymentResolver ---
+  describe('initiatePaymentResolver', () => {
+    const input = initiatePaymentInput;
+
+    it('initiates payment successfully', async () => {
+      const order = createMockOrder();
+      const config = createMockConfig();
+      const txn = createMockTransaction();
+      ctx.drizzleClient.limit
+        .mockResolvedValueOnce([order])
+        .mockResolvedValueOnce([config]);
+      ctx.drizzleClient.returning.mockResolvedValue([txn]);
+
+      const result = await initiatePaymentResolver({}, { input }, ctx);
+      expect(result).toBeDefined();
+      expect(ctx.drizzleClient.insert).toHaveBeenCalled();
+    });
+
+    it('returns error if order not found', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([]);
+      const result = await initiatePaymentResolver({}, { input }, ctx);
+      expect(result.success).toBe(false);
+    });
+
+    it('returns error if order already paid', async () => {
+      ctx.drizzleClient.limit.mockResolvedValueOnce([
+        createMockOrder({ status: 'paid' }),
+      ]);
+      const result = await initiatePaymentResolver({}, { input }, ctx);
+      expect(result.success).toBe(false);
+    });
+
+    it('handles payment without customer details', async () => {
+      const order = createMockOrder();
+      const config = createMockConfig();
+      const txn = createMockTransaction();
+      ctx.drizzleClient.limit
+        .mockResolvedValueOnce([order])
+        .mockResolvedValueOnce([config]);
+      ctx.drizzleClient.returning.mockResolvedValue([txn]);
+
+      const result = await initiatePaymentResolver(
+        {},
+        { input: { orderId: 'order-db-123', paymentMethod: 'card' } },
+        ctx,
+      );
+      expect(result).toBeDefined();
+    });
+
+    it('throws for unauthenticated user', async () => {
+      const unauth = createMockRazorpayContext({
+        isAdmin: false,
+        user: null,
+      } as Partial<Parameters<typeof createMockRazorpayContext>[0]>);
+      unauth.currentClient.isAuthenticated = false;
+      await expect(
+        initiatePaymentResolver({}, { input }, unauth),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+
+    it('returns error when config is not enabled (line 387)', async () => {
+      const order = createMockOrder();
+      const disabledConfig = createMockConfig({ isEnabled: false });
+      ctx.drizzleClient.limit
+        .mockResolvedValueOnce([order])
+        .mockResolvedValueOnce([disabledConfig]);
+
+      const result = await initiatePaymentResolver({}, { input }, ctx);
+      expect(result.success).toBe(false);
+    });
+
+    it('returns error when config array is empty (line 387)', async () => {
+      const order = createMockOrder();
+      ctx.drizzleClient.limit
+        .mockResolvedValueOnce([order])
+        .mockResolvedValueOnce([]);
+
+      const result = await initiatePaymentResolver({}, { input }, ctx);
+      expect(result.success).toBe(false);
+    });
+  });
+
+  // --- verifyPaymentResolver ---
+  describe('verifyPaymentResolver', () => {
+    it('verifies payment successfully', async () => {
+      const input = createVerifyInput();
+      const config = createMockConfig();
+      const order = createMockOrder();
+      const txn = createMockTransaction();
+      ctx.drizzleClient.limit
+        .mockResolvedValueOnce([config])
+        .mockResolvedValueOnce([order])
+        .mockResolvedValueOnce([txn]);
+
+      const result = await verifyPaymentResolver({}, { input }, ctx);
+      expect(result).toBeDefined();
+      expect(ctx.drizzleClient.update).toHaveBeenCalled();
+    });
+
+    it('returns error with invalid signature', async () => {
+      const input = {
+        razorpayOrderId: 'order_test_123',
+        razorpayPaymentId: 'pay_test_123',
+        razorpaySignature: 'invalid',
+        paymentData: '{}',
+      };
+      const result = await verifyPaymentResolver({}, { input }, ctx);
+      expect(result.success).toBe(false);
+    });
+
+    it('returns error if config not found', async () => {
+      const input = createVerifyInput();
+      ctx.drizzleClient.limit.mockResolvedValue([]);
+      const result = await verifyPaymentResolver({}, { input }, ctx);
+      expect(result.success).toBe(false);
+    });
+
+    it('returns error if order not found', async () => {
+      const input = createVerifyInput();
+      ctx.drizzleClient.limit
+        .mockResolvedValueOnce([createMockConfig()])
+        .mockResolvedValueOnce([]);
+      const result = await verifyPaymentResolver({}, { input }, ctx);
+      expect(result.success).toBe(false);
+    });
+
+    it('creates transaction if not found during verification', async () => {
+      const input = createVerifyInput();
+      ctx.drizzleClient.limit
+        .mockResolvedValueOnce([createMockConfig()])
+        .mockResolvedValueOnce([createMockOrder()])
+        .mockResolvedValueOnce([]);
+
+      const result = await verifyPaymentResolver({}, { input }, ctx);
+      expect(result.success).toBe(true);
+      expect(ctx.drizzleClient.insert).toHaveBeenCalled();
+    });
+
+    it('throws for unauthenticated user (no user id)', async () => {
+      const input = createVerifyInput();
+      const unauth = createMockRazorpayContext({ isAuthenticated: false });
+      unauth.currentClient.user = undefined;
+      await expect(
+        verifyPaymentResolver({}, { input }, unauth),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+
+    it('throws for unauthenticated client (isAuthenticated false)', async () => {
+      const input = createVerifyInput();
+      const unauth = createMockRazorpayContext({});
+      unauth.currentClient.isAuthenticated = false;
+      await expect(
+        verifyPaymentResolver({}, { input }, unauth),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+  });
+  describe('testRazorpaySetupResolver', () => {
+    it('returns success for valid setup', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([createMockConfig()]);
+      vi.mocked(global.fetch).mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ count: 0, items: [] }),
+      } as Response);
+
+      const result = await testRazorpaySetupResolver({}, {}, ctx);
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Setup verified!');
+    });
+
+    it('returns error when config not found', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([]);
+      const result = await testRazorpaySetupResolver({}, {}, ctx);
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('No Razorpay configuration');
+    });
+
+    it('returns error for network failure', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([createMockConfig()]);
+      vi.mocked(global.fetch).mockRejectedValue(new TypeError('fetch failed'));
+      mockOrders.create.mockRejectedValueOnce(new Error('Network error'));
+
+      const result = await testRazorpaySetupResolver({}, {}, ctx);
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Network error');
+    });
+
+    it('throws for non-admin user', async () => {
+      const nonAdmin = createMockRazorpayContext({ userRole: 'user' });
+      await expect(testRazorpaySetupResolver({}, {}, nonAdmin)).rejects.toThrow(
+        TalawaGraphQLError,
+      );
+    });
+
+    it('throws for unauthenticated user', async () => {
+      const unauth = createMockRazorpayContext({
+        isAdmin: false,
+        user: null,
+      } as Partial<Parameters<typeof createMockRazorpayContext>[0]>);
+      unauth.currentClient.isAuthenticated = false;
+      await expect(testRazorpaySetupResolver({}, {}, unauth)).rejects.toThrow(
+        TalawaGraphQLError,
+      );
+    });
+
+    it('validates key format (API rejection)', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([
+        createMockConfig({ keyId: 'invalid_key' }),
+      ]);
+      mockOrders.create.mockRejectedValueOnce({
+        error: { code: 'BAD_REQUEST_ERROR', description: 'Key ID format ...' },
+      });
+
+      const result = await testRazorpaySetupResolver({}, {}, ctx);
+      expect(result.success).toBe(false);
+    });
+
+    it('returns error for missing API keys (null keyId/keySecret)', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([
+        createMockConfig({ keyId: null, keySecret: null }),
+      ]);
+      const result = await testRazorpaySetupResolver({}, {}, ctx);
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('API keys are not configured');
+    });
+
+    it('returns error for missing webhook secret (line 676)', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([
+        createMockConfig({ webhookSecret: null }),
+      ]);
+      const result = await testRazorpaySetupResolver({}, {}, ctx);
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Webhook secret is not configured');
+    });
+
+    it('returns specific error for invalid API credentials', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([createMockConfig()]);
+      mockOrders.create.mockRejectedValueOnce(
+        new Error('Invalid API credentials'),
+      );
+
+      const result = await testRazorpaySetupResolver({}, {}, ctx);
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Invalid API credentials');
+    });
+
+    it('returns specific error for webhook secret not configured error', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([createMockConfig()]);
+      mockOrders.create.mockRejectedValueOnce(
+        new Error('Webhook secret not configured'),
+      );
+
+      const result = await testRazorpaySetupResolver({}, {}, ctx);
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Webhook secret not configured');
+    });
+
+    it('handles non-Error thrown values (line 734)', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([createMockConfig()]);
+      mockOrders.create.mockRejectedValueOnce('string error');
+
+      const result = await testRazorpaySetupResolver({}, {}, ctx);
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Setup test failed');
+    });
+
+    it('throws for unauthenticated client (no user id, line 621)', async () => {
+      const unauth = createMockRazorpayContext({});
+      unauth.currentClient.user = undefined;
+      await expect(testRazorpaySetupResolver({}, {}, unauth)).rejects.toThrow(
+        TalawaGraphQLError,
+      );
+    });
+
+    it('throws for non-authenticated isAuthenticated=false (line 637)', async () => {
+      const unauth = createMockRazorpayContext({});
+      unauth.currentClient.isAuthenticated = false;
+      await expect(testRazorpaySetupResolver({}, {}, unauth)).rejects.toThrow(
+        TalawaGraphQLError,
+      );
+    });
+  });
+
+  // --- Coverage: unauthenticated (no user.id) throws ---
+  describe('unauthenticated (user undefined) coverage', () => {
+    const cases = [
+      [
+        'updateRazorpayConfig',
+        (c: typeof ctx) =>
+          updateRazorpayConfigResolver({}, { input: updateConfigInput }, c),
+      ],
+      [
+        'createPaymentOrder',
+        (c: typeof ctx) =>
+          createPaymentOrderResolver({}, { input: createOrderInput }, c),
+      ],
+      [
+        'initiatePayment',
+        (c: typeof ctx) =>
+          initiatePaymentResolver({}, { input: initiatePaymentInput }, c),
+      ],
+    ] as const;
+    it.each(cases)('%s throws when user is undefined', async (_name, fn) => {
+      ctx.currentClient.user = undefined;
+      await expect(fn(ctx)).rejects.toThrow(TalawaGraphQLError);
+    });
+  });
+
+  // --- Coverage: isAuthenticated=false throws ---
+  describe('isAuthenticated=false coverage', () => {
+    it('createPaymentOrder throws for unauthenticated', async () => {
+      ctx.currentClient.isAuthenticated = false;
+      await expect(
+        createPaymentOrderResolver({}, { input: createOrderInput }, ctx),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+    it('initiatePayment throws for unauthenticated', async () => {
+      ctx.currentClient.isAuthenticated = false;
+      await expect(
+        initiatePaymentResolver({}, { input: initiatePaymentInput }, ctx),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+  });
+
+  // --- Coverage: findFirst where-callback (operators.eq) ---
+  describe('findFirst where-callback invocation', () => {
+    it('updateRazorpayConfig invokes where callback', async () => {
+      const ops = setupFindFirstWithCallback(ctx);
+      ctx.drizzleClient.limit.mockResolvedValue([createMockConfig()]);
+      ctx.drizzleClient.returning.mockResolvedValue([createMockConfig()]);
+      await updateRazorpayConfigResolver({}, { input: updateConfigInput }, ctx);
+      expect(ops.eq).toHaveBeenCalledWith('id_field', 'user-123');
+    });
+    it('testRazorpaySetup invokes where callback', async () => {
+      const ops = setupFindFirstWithCallback(ctx);
+      ctx.drizzleClient.limit.mockResolvedValue([createMockConfig()]);
+      await testRazorpaySetupResolver({}, {}, ctx);
+      expect(ops.eq).toHaveBeenCalledWith('id_field', 'user-123');
+    });
+  });
+
+  // --- Coverage: catch blocks ---
+  describe('catch block coverage', () => {
+    it('updateRazorpayConfig catch block on DB error', async () => {
+      ctx.drizzleClient.select.mockImplementation(() => {
+        throw new Error('DB connection failed');
+      });
+      await expect(
+        updateRazorpayConfigResolver({}, { input: updateConfigInput }, ctx),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+    it('createPaymentOrder catch block on service error', async () => {
+      mockOrders.create.mockRejectedValue(new Error('Razorpay API down'));
+      await expect(
+        createPaymentOrderResolver({}, { input: createOrderInput }, ctx),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+  });
+
+  // --- Coverage: internal null checks ---
+  describe('internal null/undefined checks', () => {
+    it('updateRazorpayConfig throws when newConfig is undefined (insert)', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([]);
+      ctx.drizzleClient.returning.mockResolvedValue([undefined]);
+      await expect(
+        updateRazorpayConfigResolver({}, { input: updateConfigInput }, ctx),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+    it('updateRazorpayConfig throws when existingConfigItem is undefined', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([undefined]);
+      await expect(
+        updateRazorpayConfigResolver({}, { input: updateConfigInput }, ctx),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+    it('updateRazorpayConfig throws when updatedConfig is undefined', async () => {
+      ctx.drizzleClient.limit.mockResolvedValue([createMockConfig()]);
+      ctx.drizzleClient.returning.mockResolvedValue([undefined]);
+      await expect(
+        updateRazorpayConfigResolver({}, { input: updateConfigInput }, ctx),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+    it('initiatePayment handles orderItem undefined', async () => {
+      ctx.drizzleClient.limit.mockResolvedValueOnce([undefined]);
+      const result = await initiatePaymentResolver(
+        {},
+        { input: initiatePaymentInput },
+        ctx,
+      );
+      expect(result.success).toBe(false);
+    });
+    it('verifyPayment handles configItem undefined', async () => {
+      const input = createVerifyInput();
+      ctx.drizzleClient.limit.mockResolvedValueOnce([undefined]);
+      const result = await verifyPaymentResolver({}, { input }, ctx);
+      expect(result.success).toBe(false);
+    });
+    it('verifyPayment handles orderItem undefined', async () => {
+      const input = createVerifyInput();
+      ctx.drizzleClient.limit
+        .mockResolvedValueOnce([createMockConfig()])
+        .mockResolvedValueOnce([undefined])
+        .mockResolvedValueOnce([]);
+      const result = await verifyPaymentResolver({}, { input }, ctx);
+      expect(result.success).toBe(false);
+    });
+    it('createPaymentOrder throws when ctx.user is null', async () => {
+      mockOrders.create.mockResolvedValue(createMockRazorpayOrder());
+      ctx.user = null;
+      await expect(
+        createPaymentOrderResolver({}, { input: createOrderInput }, ctx),
+      ).rejects.toThrow(TalawaGraphQLError);
+    });
+  });
+
+  // --- registerRazorpayMutations ---
+  describe('registerRazorpayMutations', () => {
+    it('registers all mutation fields on the builder', () => {
+      const mockBuilder = { mutationField: vi.fn() };
+      registerRazorpayMutations(
+        mockBuilder as unknown as Parameters<
+          typeof registerRazorpayMutations
+        >[0],
+      );
+      expect(mockBuilder.mutationField).toHaveBeenCalledTimes(5);
+      for (const name of [
+        'updateRazorpayConfig',
+        'createPaymentOrder',
+        'initiatePayment',
+        'verifyPayment',
+        'testRazorpaySetup',
+      ]) {
+        expect(mockBuilder.mutationField).toHaveBeenCalledWith(
+          name,
+          expect.any(Function),
+        );
+      }
+    });
+    it('passes correct field config to builder callbacks', () => {
+      const fieldConfigs: Record<string, unknown> = {};
+      const mockBuilder = {
+        mutationField: vi.fn(
+          (name: string, configFn: (t: Record<string, unknown>) => unknown) => {
+            const mockT = {
+              field: vi.fn((config: unknown) => config),
+              arg: vi.fn((config: unknown) => config),
+            };
+            fieldConfigs[name] = configFn(mockT);
+          },
+        ),
+      };
+      registerRazorpayMutations(
+        mockBuilder as unknown as Parameters<
+          typeof registerRazorpayMutations
+        >[0],
+      );
+      expect(Object.keys(fieldConfigs)).toHaveLength(5);
+    });
+  });
+
+  // Smoke test for the Razorpay mock
+  it('uses mocked razorpay', async () => {
     mockOrders.create.mockResolvedValue({ id: 'order_mock_123', amount: 100 });
     const Razorpay = (await import('razorpay')).default;
     const instance = new Razorpay({ key_id: '1', key_secret: '2' });
@@ -62,414 +609,5 @@ describe('Razorpay GraphQL Mutations', () => {
       currency: 'INR',
     });
     expect(order.id).toBe('order_mock_123');
-  });
-
-  describe('updateRazorpayConfigResolver', () => {
-    const input = {
-      keyId: 'rzp_test_newkey123',
-      keySecret: 'rzp_secret_new123',
-      webhookSecret: 'webhook_secret_new',
-      isEnabled: true,
-      testMode: true,
-      currency: 'INR',
-      description: 'Test donation',
-    };
-
-    it('should update config for super admin', async () => {
-      mockContext.user.isSuperAdmin = true;
-      const existingConfig = createMockConfig();
-      mockContext.drizzleClient.limit.mockResolvedValue([existingConfig]);
-      const updatedConfig = { ...existingConfig, ...input };
-      mockContext.drizzleClient.returning.mockResolvedValue([updatedConfig]);
-
-      const result = await updateRazorpayConfigResolver(
-        {},
-        { input },
-        mockContext,
-      );
-
-      expect(mockContext.drizzleClient.update).toHaveBeenCalled();
-      expect(result).toMatchObject(input);
-    });
-
-    it('should create new config if none exists', async () => {
-      mockContext.user.isSuperAdmin = true;
-      mockContext.drizzleClient.limit.mockResolvedValue([]);
-      const newConfig = createMockConfig(input);
-      mockContext.drizzleClient.returning.mockResolvedValue([newConfig]);
-
-      const result = await updateRazorpayConfigResolver(
-        {},
-        { input },
-        mockContext,
-      );
-
-      expect(mockContext.drizzleClient.insert).toHaveBeenCalled();
-      expect(result).toMatchObject(input);
-    });
-
-    it('should throw error for non-super-admin', async () => {
-      const nonAdminContext = createMockRazorpayContext({
-        userRole: 'user',
-      });
-
-      await expect(
-        updateRazorpayConfigResolver({}, { input }, nonAdminContext),
-      ).rejects.toThrow(TalawaGraphQLError);
-    });
-
-    it('should throw error for unauthenticated user', async () => {
-      const unauthenticatedContext = createMockRazorpayContext({
-        isAuthenticated: false,
-      });
-
-      await expect(
-        updateRazorpayConfigResolver({}, { input }, unauthenticatedContext),
-      ).rejects.toThrow(TalawaGraphQLError);
-    });
-
-    it('should handle partial config updates', async () => {
-      mockContext.user.isSuperAdmin = true;
-      const existingConfig = createMockConfig();
-      const partialInput = {
-        isEnabled: false,
-        description: 'New description',
-      };
-      const updatedConfig = { ...existingConfig, ...partialInput };
-
-      mockContext.drizzleClient.limit.mockResolvedValue([existingConfig]);
-      mockContext.drizzleClient.returning.mockResolvedValue([updatedConfig]);
-
-      const result = await updateRazorpayConfigResolver(
-        {},
-        { input: updatedConfig },
-        mockContext,
-      );
-
-      expect(result).toMatchObject(partialInput);
-    });
-  });
-
-  describe('createPaymentOrderResolver', () => {
-    const input = {
-      organizationId: 'org-123',
-      userId: 'user-123',
-      amount: 100000,
-      currency: 'INR',
-      donorName: 'Test Donor',
-      donorEmail: 'donor@example.com',
-      donorPhone: '+919876543210',
-      description: 'Test donation',
-    };
-
-    it('should create payment order successfully', async () => {
-      const mockConfig = createMockConfig();
-      const mockOrder = createMockOrder();
-      // mockRzpOrder removed
-
-      mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
-      mockContext.drizzleClient.returning.mockResolvedValue([mockOrder]);
-
-      const result = await createPaymentOrderResolver(
-        {},
-        { input },
-        mockContext,
-      );
-
-      expect(result).toBeDefined();
-      expect(mockContext.drizzleClient.insert).toHaveBeenCalled();
-    });
-
-    it('should throw error if Razorpay config not found', async () => {
-      mockContext.drizzleClient.limit.mockResolvedValue([]);
-
-      await expect(
-        createPaymentOrderResolver({}, { input }, mockContext),
-      ).rejects.toThrow(TalawaGraphQLError);
-    });
-
-    it('should handle anonymous donations (no userId)', async () => {
-      const mockConfig = createMockConfig();
-      // mockOrder removed
-      const mockRazorpayOrder = createMockRazorpayOrder();
-
-      mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
-      mockOrders.create.mockResolvedValue(mockRazorpayOrder);
-
-      // Should not throw
-      await expect(
-        createPaymentOrderResolver(
-          {},
-
-          {
-            input: {
-              ...input,
-              userId: undefined,
-              anonymous: true,
-            } as typeof input & { anonymous: boolean },
-          },
-          mockContext,
-        ),
-      ).resolves.not.toThrow();
-    });
-
-    it('should throw error for unauthenticated user', async () => {
-      mockContext.user = null;
-
-      await expect(
-        createPaymentOrderResolver({}, { input }, mockContext),
-      ).rejects.toThrow();
-    });
-  });
-
-  describe('initiatePaymentResolver', () => {
-    const input = {
-      orderId: 'order-db-123',
-      paymentMethod: 'card',
-      customerDetails: {
-        name: 'Test Customer',
-        email: 'customer@example.com',
-        contact: '+919876543210',
-      },
-    };
-
-    it('should initiate payment successfully', async () => {
-      const mockOrder = createMockOrder();
-      const mockConfig = createMockConfig();
-      const mockTransaction = createMockTransaction();
-
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockOrder])
-        .mockResolvedValueOnce([mockConfig]);
-      mockContext.drizzleClient.returning.mockResolvedValue([mockTransaction]);
-
-      const result = await initiatePaymentResolver({}, { input }, mockContext);
-
-      expect(result).toBeDefined();
-      expect(mockContext.drizzleClient.insert).toHaveBeenCalled();
-    });
-
-    it('should throw error if order not found', async () => {
-      mockContext.drizzleClient.limit.mockResolvedValue([]);
-
-      const result = await initiatePaymentResolver({}, { input }, mockContext);
-      expect(result.success).toBe(false);
-      expect(result.message).toBeDefined();
-    });
-
-    it('should throw error if order already paid', async () => {
-      const mockPaidOrder = createMockOrder({ status: 'paid' });
-      mockContext.drizzleClient.limit.mockResolvedValueOnce([mockPaidOrder]); // Order found
-
-      const result = await initiatePaymentResolver({}, { input }, mockContext);
-      expect(result.success).toBe(false);
-      // Message propagation in TalawaGraphQLError varies, checking success is sufficient
-    });
-
-    it('should handle payment without customer details', async () => {
-      const mockOrder = createMockOrder();
-      const mockConfig = createMockConfig();
-      const mockTransaction = createMockTransaction();
-
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockOrder])
-        .mockResolvedValueOnce([mockConfig]);
-      mockContext.drizzleClient.returning.mockResolvedValue([mockTransaction]);
-
-      const inputWithoutCustomer = {
-        orderId: 'order-db-123',
-        paymentMethod: 'card',
-      };
-
-      const result = await initiatePaymentResolver(
-        {},
-        { input: inputWithoutCustomer },
-        mockContext,
-      );
-      expect(result).toBeDefined();
-    });
-
-    it('should throw error for unauthenticated user', async () => {
-      const unauthContext = createMockRazorpayContext({
-        isAdmin: false,
-        user: null,
-      });
-      unauthContext.currentClient.isAuthenticated = false;
-
-      await expect(
-        initiatePaymentResolver({}, { input }, unauthContext),
-      ).rejects.toThrow(TalawaGraphQLError);
-    });
-  });
-
-  describe('verifyPaymentResolver', () => {
-    const input = {
-      razorpayPaymentId: 'pay_test123',
-      razorpayOrderId: 'order_test123',
-      razorpaySignature: '',
-      paymentData: 'order_test123|pay_test123',
-    };
-
-    beforeEach(() => {
-      // Create valid signature for tests
-      const secret = 'rzp_test_secret123';
-      input.razorpaySignature = crypto
-        .createHmac('sha256', secret)
-        .update(input.paymentData)
-        .digest('hex');
-    });
-
-    it('should verify payment successfully', async () => {
-      const mockConfig = createMockConfig();
-      const mockOrder = createMockOrder();
-      const mockTransaction = createMockTransaction();
-
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockConfig])
-        .mockResolvedValueOnce([mockOrder])
-        .mockResolvedValueOnce([mockTransaction]);
-
-      // Use valid signature from beforeEach
-
-      const result = await verifyPaymentResolver({}, { input }, mockContext);
-      expect(result).toBeDefined();
-      expect(mockContext.drizzleClient.update).toHaveBeenCalled();
-    });
-
-    it('should return error with invalid signature', async () => {
-      const input = {
-        razorpayOrderId: 'order_test_123',
-        razorpayPaymentId: 'pay_test_123',
-        razorpaySignature: 'invalid_signature',
-        paymentData: '{"amount": 1000}',
-      };
-
-      const result = await verifyPaymentResolver({}, { input }, mockContext);
-      expect(result.success).toBe(false);
-    });
-
-    it('should return error if config not found', async () => {
-      mockContext.drizzleClient.limit.mockResolvedValue([]);
-
-      const result = await verifyPaymentResolver({}, { input }, mockContext);
-      expect(result.success).toBe(false);
-    });
-
-    it('should return error if order not found', async () => {
-      const mockConfig = createMockConfig();
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockConfig]) // Config found
-        .mockResolvedValueOnce([]); // Order not found
-
-      const result = await verifyPaymentResolver({}, { input }, mockContext);
-      expect(result.success).toBe(false);
-    });
-
-    it('should create transaction if not found during verification', async () => {
-      const mockConfig = createMockConfig();
-      const mockOrder = createMockOrder();
-      mockContext.drizzleClient.limit
-        .mockResolvedValueOnce([mockConfig])
-        .mockResolvedValueOnce([mockOrder])
-        .mockResolvedValueOnce([]);
-
-      const result = await verifyPaymentResolver({}, { input }, mockContext);
-      expect(result.success).toBe(true);
-      expect(mockContext.drizzleClient.insert).toHaveBeenCalled();
-    });
-  });
-
-  describe('testRazorpaySetupResolver', () => {
-    it('should return success for valid setup', async () => {
-      const mockConfig = createMockConfig();
-      mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
-
-      vi.mocked(global.fetch).mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: async () => ({ count: 0, items: [] }),
-      });
-
-      const result = await testRazorpaySetupResolver({}, {}, mockContext);
-
-      expect(result.success).toBe(true);
-      expect(result.message).toContain('Setup verified!');
-    });
-
-    it('should return error when config not found', async () => {
-      mockContext.drizzleClient.limit.mockResolvedValue([]);
-
-      const result = await testRazorpaySetupResolver({}, {}, mockContext);
-
-      expect(result.success).toBe(false);
-      expect(result.message).toContain('No Razorpay configuration');
-    });
-
-    it('should return error for network failure', async () => {
-      const mockConfig = createMockConfig();
-      mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
-
-      vi.mocked(global.fetch).mockRejectedValue(new TypeError('fetch failed'));
-
-      // Mock network failure
-      // Mock network failure
-      mockOrders.create.mockRejectedValueOnce(new Error('Network error'));
-      const result = await testRazorpaySetupResolver({}, {}, mockContext);
-
-      expect(result.success).toBe(false);
-      expect(result.message).toContain('Network error');
-    });
-
-    it('should throw error for non-admin user', async () => {
-      const nonAdminContext = createMockRazorpayContext({
-        userRole: 'user',
-      });
-
-      await expect(
-        testRazorpaySetupResolver({}, {}, nonAdminContext),
-      ).rejects.toThrow(TalawaGraphQLError);
-    });
-
-    it('should throw error for unauthenticated user', async () => {
-      const unauthContext = createMockRazorpayContext({
-        isAdmin: false,
-        user: null,
-      });
-      unauthContext.currentClient.isAuthenticated = false;
-
-      await expect(
-        testRazorpaySetupResolver({}, {}, unauthContext),
-      ).rejects.toThrow(TalawaGraphQLError);
-    });
-
-    it('should validate key format', async () => {
-      const mockConfig = createMockConfig({ keyId: 'invalid_key' });
-      mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
-
-      // Mock format validation failure via implementation if needed, or assume resolver checks format before calling API
-      // Since resolver logic checks key format before API, we don't need to mock API failure for this if logical check exists
-      // But if logic solely relies on API, we mock API error
-      // Assuming setupResolver catches API error
-      // Assuming setupResolver catches API error
-      mockOrders.create.mockRejectedValueOnce({
-        error: {
-          code: 'BAD_REQUEST_ERROR',
-          description: 'Key ID format ...',
-        },
-      });
-      const result = await testRazorpaySetupResolver({}, {}, mockContext);
-      expect(result.success).toBe(false);
-      // expect(result.message).toContain('Invalid Key ID format'); // Message check flaky
-    });
-
-    it('should handle missing API keys', async () => {
-      const mockConfig = createMockConfig({ keyId: null, keySecret: null });
-      mockContext.drizzleClient.limit.mockResolvedValue([mockConfig]);
-
-      const result = await testRazorpaySetupResolver({}, {}, mockContext);
-
-      expect(result.success).toBe(false);
-      expect(result.message).toContain('API keys are not configured');
-    });
   });
 });
