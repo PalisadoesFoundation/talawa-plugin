@@ -486,3 +486,38 @@ export const methodsMocks: MockedResponse[] = [
     },
   },
 ];
+
+export const unknownStatusMocks: MockedResponse[] = [
+  {
+    request: {
+      query: GET_USER_TXN_INJECTOR,
+      variables: {
+        userId: 'test-user-id',
+        orgId: 'test-org-id',
+        limit: 10,
+      },
+    },
+    result: {
+      data: {
+        razorpay_getUserTransactions: [
+          createMockTransaction({
+            id: 'txn-unknown-status',
+            paymentId: 'pay_unknown_status',
+            status: 'pending_settlement',
+          }),
+        ],
+      },
+    },
+  },
+  {
+    request: {
+      query: GET_USER_TRANSACTIONS_STATS,
+      variables: { userId: 'test-user-id' },
+    },
+    result: {
+      data: {
+        razorpay_getUserTransactionStats: mockStats,
+      },
+    },
+  },
+];

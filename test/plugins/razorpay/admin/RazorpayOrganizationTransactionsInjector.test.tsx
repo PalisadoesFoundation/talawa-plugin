@@ -184,6 +184,21 @@ describe('RazorpayOrganizationTransactionsInjector', () => {
       expect(screen.getByText(/80\.0/)).toBeInTheDocument();
     });
 
+    it('should calculate success rate with non-zero transactions', async () => {
+      const stats = createMockTransactionStats({
+        totalAmount: 100000,
+        totalTransactions: 10,
+        successfulTransactions: 7, // 7/10 = 70.0%
+        failedTransactions: 3,
+        currency: 'INR',
+      });
+      const mocks = createOrgMocks([], stats);
+      renderComp(mocks);
+      await waitFor(() => {
+        expect(screen.getByText(/70\.0/)).toBeInTheDocument();
+      });
+    });
+
     it('should show 0.0% success rate when totalTransactions is 0', async () => {
       const mocks = createOrgMocks(
         [createMockTransaction({ id: 'z', paymentId: 'pay_z' })],
@@ -200,6 +215,38 @@ describe('RazorpayOrganizationTransactionsInjector', () => {
       );
       expect(rateEl.length).toBeGreaterThan(0);
     });
+    it('should show formatted fee when fee is not null', async () => {
+      const tx = createMockTransaction({
+        id: 'fee-test',
+        paymentId: 'pay_fee',
+        fee: 1000,
+        currency: 'INR',
+      });
+      const mocks = createOrgMocks([tx]);
+      renderComp(mocks);
+      await waitFor(() => {
+        expect(screen.getByText('pay_fee')).toBeInTheDocument();
+      });
+      // 1000 cents = 10.00
+      // 1000 cents = 10.00
+      expect(screen.getByText('INR 10.00')).toBeInTheDocument();
+    });
+
+    it('should show notAvailable for missing donorEmail', async () => {
+      const tx = createMockTransaction({
+        id: 'txn-no-email',
+        paymentId: 'pay_no_email',
+        donorEmail: null,
+      });
+      const mocks = createOrgMocks([tx]);
+      renderComp(mocks);
+      await waitFor(() => {
+        expect(screen.getByText('pay_no_email')).toBeInTheDocument();
+      });
+      // The donor field has two divs: one for name ("common.anonymous") and one for email ("common.notAvailable")
+      // In tests, common.notAvailable resolves to "N/A"
+      expect(screen.getAllByText('N/A').length).toBeGreaterThan(0);
+    });
   });
 
   describe('Button Click Handlers', () => {
@@ -211,7 +258,9 @@ describe('RazorpayOrganizationTransactionsInjector', () => {
       });
       const viewBtn = screen.getAllByRole('button', { name: /View/i })[0];
       await user.click(viewBtn);
-      expect(toast.info).toHaveBeenCalled();
+      expect(toast.info).toHaveBeenCalledWith(
+        'Viewing details for transaction: 1',
+      );
     });
 
     it('should call toast.info on Receipt button click', async () => {
@@ -222,7 +271,9 @@ describe('RazorpayOrganizationTransactionsInjector', () => {
       });
       const receiptBtn = screen.getAllByRole('button', { name: /Receipt/i })[0];
       await user.click(receiptBtn);
-      expect(toast.info).toHaveBeenCalled();
+      expect(toast.info).toHaveBeenCalledWith(
+        'Downloading receipt for transaction: 1',
+      );
     });
   });
 

@@ -243,6 +243,7 @@ export const GET_ORG_TRANSACTIONS = gql`
       method
       email
       contact
+      fee
       createdAt
       capturedAt
     }

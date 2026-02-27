@@ -24,6 +24,7 @@ import {
   mockStats,
   statusesMocks,
   methodsMocks,
+  unknownStatusMocks,
 } from './RazorpayUserTransactionsInjector.mocks';
 import userEvent from '@testing-library/user-event';
 
@@ -513,53 +514,22 @@ describe('Additional Coverage - Component Variants', () => {
       });
     });
 
-    it('should handle unknown status variant as secondary', async () => {
-      const tx = createMockTransaction({
-        id: 'test-unknown',
-        paymentId: 'pay_unknown_status',
-        status: 'unknown_status',
-      });
-
-      const mocks: MockedResponse[] = [
-        {
-          request: {
-            query: GET_USER_TXN_INJECTOR,
-            variables: {
-              userId: 'test-user-id',
-              orgId: 'test-org-id',
-              limit: 10,
-            },
-          },
-          result: {
-            data: { razorpay_getUserTransactions: [tx] },
-          },
-        },
-        {
-          request: {
-            query: GET_USER_TRANSACTIONS_STATS,
-            variables: {
-              userId: 'test-user-id',
-              orgId: 'test-org-id',
-            },
-          },
-          result: { data: { razorpay_getUserTransactionStats: mockStats } },
-        },
-      ];
-
+    it('should use defaultValue for unknown status translation', async () => {
       renderWithProviders(<RazorpayUserTransactionsInjector />, {
-        mocks,
+        mocks: unknownStatusMocks,
         initialEntries: ['/org/test-org-id/user/test-user-id'],
         path: '/org/:orgId/user/:userId',
       });
 
       await waitFor(() => {
         expect(screen.getByText('pay_unknown_status')).toBeInTheDocument();
-        // Badge renders the i18n key directly in tests
-        const badges = screen.getAllByText(/transactions\.status\./);
-        const unknownBadge = badges.find(
-          (b) => b.textContent === 'transactions.status.unknown_status',
+        // Since i18next isn't fully active with real translations here,
+        // the mock translation function in setupTests or testUtils
+        // will return the key. The defaultValue option is ignored by the mock.
+        const translatedBadge = screen.getByText(
+          'transactions.status.pending_settlement',
         );
-        expect(unknownBadge).toHaveClass('bg-secondary');
+        expect(translatedBadge).toHaveClass('bg-secondary');
       });
     });
   });

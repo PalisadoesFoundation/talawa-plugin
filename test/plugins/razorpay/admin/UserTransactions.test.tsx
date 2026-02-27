@@ -18,6 +18,13 @@ import {
   emptyStats,
 } from './UserTransactions.mocks';
 import userEvent from '@testing-library/user-event';
+import { toast } from 'react-toastify';
+
+vi.mock('react-toastify', () => ({
+  toast: {
+    info: vi.fn(),
+  },
+}));
 
 const renderUserTransactions = (mocks = standardMocks) => {
   renderWithProviders(<UserTransactions />, {
@@ -247,7 +254,7 @@ describe('UserTransactions', () => {
   });
 
   describe('Button Actions', () => {
-    it('should have functional View and Download buttons', async () => {
+    it('should have functional View and Download buttons that trigger toasts', async () => {
       const user = userEvent.setup();
       renderUserTransactions();
 
@@ -255,22 +262,24 @@ describe('UserTransactions', () => {
         expect(screen.getByText('pay_abc123')).toBeInTheDocument();
       });
 
-      const buttons = screen.getAllByRole('button');
-      expect(buttons.length).toBeGreaterThan(0);
-
-      // Verify buttons are clickable
-      const viewButtons = screen.getAllByText(/View/i);
+      // Verify View button click triggers toast
+      const viewButtons = screen.getAllByRole('button', { name: /View/i });
       if (viewButtons.length > 0) {
         await user.click(viewButtons[0]);
-        expect(viewButtons[0]).toBeEnabled();
+        expect(toast.info).toHaveBeenCalledWith(
+          'transactions.messages.viewDetailsComing',
+        );
       }
 
+      // Verify Receipt button click triggers toast
       const receiptButtons = screen.getAllByRole('button', {
         name: /Receipt|Download/i,
       });
       if (receiptButtons.length > 0) {
         await user.click(receiptButtons[0]);
-        expect(receiptButtons[0]).toBeEnabled();
+        expect(toast.info).toHaveBeenCalledWith(
+          'transactions.messages.downloadReceiptComing',
+        );
       }
     });
   });
