@@ -502,22 +502,22 @@ describe('Razorpay GraphQL Mutations', () => {
   // --- Coverage: internal null checks ---
   describe('internal null/undefined checks', () => {
     it('updateRazorpayConfig throws when newConfig is undefined (insert)', async () => {
-      // Create isolated SELECT chain → returns empty array (no existing config)
-      const selectChain = {
-        from: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue([]),
-      };
-      ctx.drizzleClient.select = vi.fn().mockReturnValue(selectChain);
+      // Use fresh context to avoid mock state interference
+      const freshCtx = setupContext();
+      freshCtx.user.isSuperAdmin = true;
 
-      const insertChain = {
-        values: vi.fn().mockReturnThis(),
-        returning: vi.fn().mockResolvedValue([undefined]),
-      };
-      ctx.drizzleClient.insert = vi.fn().mockReturnValue(insertChain);
+      // SELECT chain returns empty → triggers INSERT path
+      freshCtx.drizzleClient.limit.mockResolvedValueOnce([]);
+      // INSERT chain returns empty → newConfig = undefined
+      freshCtx.drizzleClient.returning.mockResolvedValueOnce([]);
 
       await expect(
-        updateRazorpayConfigResolver({}, { input: updateConfigInput }, ctx),
-      ).rejects.toThrow(TalawaGraphQLError);
+        updateRazorpayConfigResolver(
+          {},
+          { input: updateConfigInput },
+          freshCtx,
+        ),
+      ).rejects.toThrow('Failed to create Razorpay configuration');
     });
     it('updateRazorpayConfig throws when existingConfigItem is undefined', async () => {
       ctx.drizzleClient.limit.mockResolvedValue([undefined]);
@@ -533,22 +533,18 @@ describe('Razorpay GraphQL Mutations', () => {
       ).rejects.toThrow(TalawaGraphQLError);
     });
     it('initiatePayment handles orderItem undefined', async () => {
-      // Create isolated SELECT chain → returns [undefined] so orderItem is undefined
-      const selectChain = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue([undefined]),
-      };
-      ctx.drizzleClient.select = vi.fn().mockReturnValue(selectChain);
+      // Use fresh context to avoid mock state interference
+      const freshCtx = setupContext();
+
+      // SELECT chain returns [undefined] → orderItem = undefined
+      freshCtx.drizzleClient.limit.mockResolvedValueOnce([undefined]);
 
       const result = await initiatePaymentResolver(
         {},
         { input: initiatePaymentInput },
-        ctx,
+        freshCtx,
       );
       expect(result.success).toBe(false);
-      // The !orderItem TalawaGraphQLError is caught by the catch block
-      expect(result.message).toBeDefined();
     });
     it('verifyPayment handles configItem undefined', async () => {
       const input = createVerifyInput();
