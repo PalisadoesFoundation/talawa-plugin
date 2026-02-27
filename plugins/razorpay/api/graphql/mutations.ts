@@ -168,10 +168,7 @@ export async function updateRazorpayConfigResolver(
   } catch (error) {
     ctx.log?.error('Error updating Razorpay config:', error);
     throw new TalawaGraphQLError({
-      message:
-        error instanceof Error
-          ? error.message
-          : 'Failed to update Razorpay config',
+      message: error.message,
       extensions: { code: 'unexpected' },
     });
   }
