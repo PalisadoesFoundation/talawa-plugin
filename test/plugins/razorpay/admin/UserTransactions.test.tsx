@@ -292,8 +292,8 @@ describe('UserTransactions', () => {
       });
       expect(screen.getByText('INR 100.00')).toBeInTheDocument();
       expect(screen.getByText('INR 50.00')).toBeInTheDocument();
-      expect(screen.getByText('CAPTURED')).toBeInTheDocument();
-      expect(screen.getByText('FAILED')).toBeInTheDocument();
+      expect(screen.getAllByText('CAPTURED').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('FAILED').length).toBeGreaterThan(0);
     });
     it('should show N/A when amount is zero or missing', async () => {
       const noAmountTxns = [

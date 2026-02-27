@@ -153,6 +153,12 @@ if (typeof window !== 'undefined') {
         'Error loading transactions:',
       'transactions.viewButton': 'View',
 
+      // Transaction statuses
+      'transactions.status.captured': 'CAPTURED',
+      'transactions.status.authorized': 'AUTHORIZED',
+      'transactions.status.failed': 'FAILED',
+      'transactions.status.refunded': 'REFUNDED',
+
       // Common
       'common.loading': 'Loading...',
       'common.error': 'An error occurred',
@@ -163,18 +169,28 @@ if (typeof window !== 'undefined') {
       ...actual,
       useTranslation: () => ({
         t: (key: string, options?: Record<string, unknown>) => {
-          let translation = translations[key] || key;
+          let translation = translations[key];
+
+          // If no translation found, use defaultValue if provided, otherwise use key
+          if (!translation) {
+            translation =
+              typeof options?.defaultValue === 'string'
+                ? options.defaultValue
+                : key;
+          }
 
           // Simple interpolation support for {{variable}} syntax
           if (typeof options === 'object' && options !== null) {
-            translation = Object.keys(options).reduce(
-              (result, optionKey) =>
-                result.replace(
-                  new RegExp(`\\{\\{${optionKey}\\}\\}`, 'g'),
-                  String(options[optionKey]),
-                ),
-              translation,
-            );
+            translation = Object.keys(options)
+              .filter((k) => k !== 'defaultValue')
+              .reduce(
+                (result, optionKey) =>
+                  result.replace(
+                    new RegExp(`\\{\\{${optionKey}\\}\\}`, 'g'),
+                    String(options[optionKey]),
+                  ),
+                translation,
+              );
           }
           return translation;
         },

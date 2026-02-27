@@ -506,7 +506,7 @@ describe('Razorpay GraphQL Mutations', () => {
       ctx.drizzleClient.returning.mockResolvedValue([undefined]);
       await expect(
         updateRazorpayConfigResolver({}, { input: updateConfigInput }, ctx),
-      ).rejects.toThrow(TalawaGraphQLError);
+      ).rejects.toThrow('Failed to create Razorpay configuration');
     });
     it('updateRazorpayConfig throws when existingConfigItem is undefined', async () => {
       ctx.drizzleClient.limit.mockResolvedValue([undefined]);
@@ -529,6 +529,8 @@ describe('Razorpay GraphQL Mutations', () => {
         ctx,
       );
       expect(result.success).toBe(false);
+      // The !orderItem TalawaGraphQLError is caught by the catch block
+      expect(result.message).toBeDefined();
     });
     it('verifyPayment handles configItem undefined', async () => {
       const input = createVerifyInput();

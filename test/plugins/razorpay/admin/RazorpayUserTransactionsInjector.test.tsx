@@ -161,6 +161,43 @@ describe('RazorpayUserTransactionsInjector', () => {
       expect(screen.getByText('N/A')).toBeInTheDocument();
     });
 
+    it('should show N/A when method is explicitly null', async () => {
+      const tx = createMockTransaction({
+        id: 'txn-null-method',
+        paymentId: 'pay_null_method',
+        method: null,
+      });
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_USER_TXN_INJECTOR,
+            variables: {
+              userId: 'test-user-id',
+              orgId: 'test-org-id',
+              limit: 10,
+            },
+          },
+          result: { data: { razorpay_getUserTransactions: [tx] } },
+        },
+        {
+          request: {
+            query: GET_USER_TRANSACTIONS_STATS,
+            variables: { userId: 'test-user-id' },
+          },
+          result: { data: { razorpay_getUserTransactionStats: mockStats } },
+        },
+      ];
+      renderWithProviders(<RazorpayUserTransactionsInjector />, {
+        mocks,
+        initialEntries: ['/org/test-org-id/user/test-user-id'],
+        path: '/org/:orgId/user/:userId',
+      });
+      await waitFor(() => {
+        expect(screen.getByText('pay_null_method')).toBeInTheDocument();
+      });
+      expect(screen.getByText('N/A')).toBeInTheDocument();
+    });
+
     it('should render table with proper structure', async () => {
       renderWithProviders(<RazorpayUserTransactionsInjector />, {
         mocks: standardMocks,
@@ -198,6 +235,53 @@ describe('RazorpayUserTransactionsInjector', () => {
       // Verify amounts are displayed
       const amounts = screen.getAllByText(/\d+\.\d+/);
       expect(amounts.length).toBeGreaterThan(0);
+    });
+
+    it('should display N/A for missing amount', async () => {
+      const tx = createMockTransaction({
+        id: 'txn-no-amount',
+        paymentId: 'pay_no_amount',
+        amount: null, // force null to test the branch
+        method: 'card', // ensure method is present so it doesn't also render N/A
+      });
+
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: GET_USER_TXN_INJECTOR,
+            variables: {
+              userId: 'test-user-id',
+              orgId: 'test-org-id',
+              limit: 10,
+            },
+          },
+          result: {
+            data: { razorpay_getUserTransactions: [tx] },
+          },
+        },
+        {
+          request: {
+            query: GET_USER_TRANSACTIONS_STATS,
+            variables: { userId: 'test-user-id' },
+          },
+          result: {
+            data: { razorpay_getUserTransactionStats: mockStats },
+          },
+        },
+      ];
+
+      renderWithProviders(<RazorpayUserTransactionsInjector />, {
+        mocks,
+        initialEntries: ['/org/test-org-id/user/test-user-id'],
+        path: '/org/:orgId/user/:userId',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('pay_no_amount')).toBeInTheDocument();
+      });
+
+      // Assert that "N/A" is rendered for the missing amount
+      expect(screen.getByText('N/A')).toBeInTheDocument();
     });
     it('should call handleViewDetails on view button click', async () => {
       renderWithProviders(<RazorpayUserTransactionsInjector />, {
@@ -509,7 +593,7 @@ describe('Additional Coverage - Component Variants', () => {
 
       await waitFor(() => {
         expect(screen.getByText('pay_authorized')).toBeInTheDocument();
-        const authBadge = screen.getByText('transactions.status.authorized');
+        const authBadge = screen.getByText('AUTHORIZED');
         expect(authBadge).toHaveClass('bg-info');
       });
     });
@@ -526,9 +610,7 @@ describe('Additional Coverage - Component Variants', () => {
         // Since i18next isn't fully active with real translations here,
         // the mock translation function in setupTests or testUtils
         // will return the key. The defaultValue option is ignored by the mock.
-        const translatedBadge = screen.getByText(
-          'transactions.status.pending_settlement',
-        );
+        const translatedBadge = screen.getByText('PENDING_SETTLEMENT');
         expect(translatedBadge).toHaveClass('bg-secondary');
       });
     });
