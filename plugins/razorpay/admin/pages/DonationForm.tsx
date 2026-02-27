@@ -19,7 +19,7 @@ import { useQuery, useMutation } from '@apollo/client';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
-import Loader from '../../../../components/Loader/Loader';
+import LoadingState from '../../../../shared-components/LoadingState/LoadingState';
 import {
   GET_CURRENT_USER,
   GET_ORGANIZATION_INFO,
@@ -359,7 +359,11 @@ const DonationForm: React.FC = () => {
   };
 
   if (orgLoading || configLoading || userLoading) {
-    return <Loader />;
+    return (
+      <LoadingState variant="spinner" isLoading={true}>
+        <div />
+      </LoadingState>
+    );
   }
 
   if (orgError) {

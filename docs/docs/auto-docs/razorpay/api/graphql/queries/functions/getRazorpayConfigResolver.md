@@ -9,7 +9,7 @@
 Defined in: [plugins/razorpay/api/graphql/queries.ts:21](https://github.com/PalisadoesFoundation/talawa-plugin/tree/main/plugins/razorpay/api/graphql/queries.ts#L21)
 
 Resolver for fetching Razorpay configuration.
-Requires authentication and superadmin privileges.
+Requires authentication and admin privileges.
 
 ## Parameters
 

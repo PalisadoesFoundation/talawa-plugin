@@ -123,6 +123,7 @@
     "subtitle": "View your payment transaction history",
     "orgSubtitle": "Payment transactions for your organization processed through Razorpay",
     "search": "Search transactions...",
+
     "filters": {
       "statusLabel": "Filter transactions by status",
       "statusPlaceholder": "Filter by status",
@@ -141,11 +142,15 @@
       "method": "Payment Method",
       "fees": "Fees",
       "actions": "Actions",
-      "pagination": "{{start}}-{{end}} of {{total}} transactions"
+      "pagination": "{{start}}-{{end}} of {{total}} transactions",
+      "transactionId": "Transaction ID",
+      "noData": "No transactions found."
     },
     "messages": {
       "viewingDetails": "Viewing details for transaction: {{id}}",
-      "downloadingReceipt": "Downloading receipt for transaction: {{id}}"
+      "downloadingReceipt": "Downloading receipt for transaction: {{id}}",
+      "viewDetailsComing": "Transaction details view is coming soon! (Transaction ID: {{id}})",
+      "downloadReceiptComing": "Receipt download functionality is coming soon! (Transaction ID: {{id}})"
     },
     "stats": {
       "totalAmount": "Total Amount",
@@ -187,6 +192,7 @@
     "back": "Back",
     "save": "Save",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "anonymous": "Anonymous"
   }
 }

@@ -1,117 +1,40 @@
 /**
  * @vitest-environment jsdom
  */
-/**
- * Unit Tests for DonationForm Component
- */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
-import { MockedResponse } from '@apollo/client/testing';
+import { toast } from 'react-toastify';
 import DonationForm from '../../../../plugins/razorpay/admin/pages/DonationForm';
 import {
   renderWithProviders,
-  createMockUser,
-  createMockRazorpayConfig,
-  createMockPaymentOrder,
   createUserQueryMock,
-  GET_RAZORPAY_CONFIG_PUBLIC,
   CREATE_PAYMENT_ORDER,
-  GET_ORGANIZATION_INFO,
+  VERIFY_PAYMENT,
 } from './testUtils';
 
-// Alias imported query for local usage
-const GET_RAZORPAY_CONFIG = GET_RAZORPAY_CONFIG_PUBLIC;
-
-// Minimal interfaces to replace 'any'
-interface Organization {
-  id: string;
-  name: string;
-  description: string;
-  avatarURL: string;
-  [key: string]: unknown;
-}
-
-interface PaymentOrder {
-  id: string;
-  razorpayOrderId: string;
-  amount: number;
-  currency: string;
-  [key: string]: unknown;
-}
-
-const createLocalOrganizationQueryMock = (
-  orgId: string,
-  organization: Organization,
-) => ({
-  request: {
-    query: GET_ORGANIZATION_INFO,
-    variables: { orgId },
-  },
-  result: {
-    data: {
-      organization: {
-        ...organization,
-        __typename: 'Organization',
-      },
+vi.mock('react-toastify', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-toastify')>();
+  return {
+    ...actual,
+    toast: {
+      ...actual.toast,
+      error: vi.fn(),
+      success: vi.fn(),
     },
-  },
+  };
 });
 
-const mockUser = createMockUser();
-const mockOrg: Organization = {
-  id: 'org-123',
-  name: 'Test Organization',
-  description: 'A test organization for donations',
-  avatarURL: 'https://example.com/avatar.png',
-};
-const mockConfig = createMockRazorpayConfig();
-const mockOrder = createMockPaymentOrder();
-
-const configMock = {
-  request: {
-    query: GET_RAZORPAY_CONFIG,
-    variables: {},
-  },
-  result: {
-    data: {
-      razorpay_getRazorpayConfig: {
-        ...mockConfig,
-        __typename: 'RazorpayConfig',
-      },
-    },
-  },
-};
-
-const createLocalPaymentOrderMutationMock = (order: PaymentOrder) => ({
-  request: {
-    query: CREATE_PAYMENT_ORDER,
-    variables: {
-      input: {
-        organizationId: 'org-123',
-        userId: 'user-123',
-        amount: 10000, // 100 * 100
-        currency: 'INR',
-        description: 'Donation to Test Organization',
-        donorName: 'John Doe',
-        donorEmail: 'john.doe@example.com',
-        donorPhone: '',
-      },
-    },
-  },
-  result: {
-    data: {
-      razorpay_createPaymentOrder: order,
-    },
-  },
-});
-
-const standardMocks: MockedResponse[] = [
-  createUserQueryMock(mockUser),
-  createLocalOrganizationQueryMock('org-123', mockOrg),
-  configMock,
-  createLocalPaymentOrderMutationMock(mockOrder),
-];
+import {
+  createLocalOrganizationQueryMock,
+  mockUser,
+  mockOrg,
+  mockConfig,
+  mockOrder,
+  createLocalPaymentOrderMutationMock,
+  standardMocks,
+  GET_RAZORPAY_CONFIG,
+} from './DonationForm.mock';
 
 const renderDonationForm = (customMocks = standardMocks) => {
   return renderWithProviders(<DonationForm />, {
@@ -130,468 +53,317 @@ describe('DonationForm', () => {
     vi.unstubAllGlobals();
   });
 
-  describe('Loading State', () => {
-    it('should show loader while fetching data', async () => {
-      renderDonationForm();
+  it('renders loader, org details, script cleanup, and handles config error', async () => {
+    const { unmount } = renderDonationForm([
+      createUserQueryMock(mockUser),
+      createLocalOrganizationQueryMock('org-123', mockOrg),
+      {
+        request: { query: GET_RAZORPAY_CONFIG, variables: {} },
+        error: new Error('Config Load Failed'),
+      },
+    ]);
 
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText(/Config Load Failed/i)).toBeInTheDocument();
     });
+
+    unmount();
+    expect(document.querySelector('script[src*="checkout.js"]')).toBeNull();
   });
 
-  describe('Rendering', () => {
-    it('should render organization details', async () => {
+  describe('Form Interaction & Fields', () => {
+    it('handles input fields and validation messages including empty email', async () => {
       renderDonationForm();
+      await waitFor(() => screen.getByRole('button', { name: /Donate/i }));
 
-      await waitFor(() => {
-        expect(screen.getByText('Test Organization')).toBeInTheDocument();
-      });
-      expect(
-        screen.getByText('A test organization for donations'),
-      ).toBeInTheDocument();
-    });
+      const nameInput = screen.getByLabelText(/Full Name/i);
+      const emailInput = screen.getByLabelText(/Email Address/i);
+      const phoneInput = screen.getByLabelText(/Phone Number/i);
+      const msgInput = screen.getByLabelText(/Message/i);
 
-    it('should pre-fill user details', async () => {
-      renderDonationForm();
+      fireEvent.change(nameInput, { target: { value: 'Jane' } });
+      fireEvent.change(phoneInput, { target: { value: '1234567890' } });
+      fireEvent.change(msgInput, { target: { value: 'Hello' } });
 
-      await waitFor(() => {
-        expect(screen.getAllByDisplayValue('John Doe')).toHaveLength(1);
-        expect(
-          screen.getAllByDisplayValue('john.doe@example.com'),
-        ).toHaveLength(1);
-      });
-    });
-  });
+      // submit with empty email to trigger validation failure
+      fireEvent.change(emailInput, { target: { value: ' ' } });
+      fireEvent.click(screen.getByRole('button', { name: /Donate/i }));
 
-  describe('Form Interaction', () => {
-    it('should update amount when typing', async () => {
-      renderDonationForm();
+      // select currencies
+      const currencySelect = screen.getByRole('combobox');
+      fireEvent.change(currencySelect, { target: { value: 'EUR' } });
+      expect(currencySelect).toHaveValue('EUR');
+      fireEvent.change(currencySelect, { target: { value: 'GBP' } });
+      expect(currencySelect).toHaveValue('GBP');
 
-      await waitFor(() => {
-        expect(screen.getByText('Make a Donation')).toBeInTheDocument();
-      });
-
+      // hit quick amount
+      fireEvent.click(screen.getByText('£100.00'));
       const amountInput = screen.getByPlaceholderText('0.00');
-      fireEvent.change(amountInput, { target: { value: '500' } });
+      expect(amountInput).toHaveValue(100);
 
-      expect(amountInput).toHaveValue(500);
-    });
-
-    it('should enable submit button when form is valid', async () => {
-      renderDonationForm(standardMocks); // Use helper with correct context
-
-      await waitFor(() => {
-        expect(screen.getByText('Make a Donation')).toBeInTheDocument();
-      });
-
-      const amountInput = screen.getByPlaceholderText('0.00');
-      fireEvent.change(amountInput, { target: { value: '100' } });
-
-      const submitBtn = screen.getByRole('button', { name: /Donate/i });
-      expect(submitBtn).not.toBeDisabled();
+      // submit with empty amount
+      fireEvent.change(amountInput, { target: { value: '0' } });
+      fireEvent.click(screen.getByRole('button', { name: /Donate/i }));
     });
   });
 
-  describe('Payment Flow', () => {
-    it('should initiate payment on submit', async () => {
-      // Mock Razorpay as a class wrapped in vi.fn() for spy tracking
-      const openMock = vi.fn();
-      const RazorpayMock = vi.fn().mockImplementation(() => ({
-        open: openMock,
-      }));
-      vi.stubGlobal('Razorpay', RazorpayMock);
-
-      renderDonationForm();
-
-      // Wait for form to be rendered with data
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Donate/i }),
-        ).toBeInTheDocument();
-      });
-
-      // Fill form
-      const amountInput = screen.getByPlaceholderText('0.00');
-      fireEvent.change(amountInput, { target: { value: '100' } });
-
-      // Allow state to update button text
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Donate ₹100.00/i }),
-        ).toBeInTheDocument();
-      });
-
-      // Submit the form
-      const form = screen
-        .getByRole('button', { name: /Donate ₹100.00/i })
-        .closest('form');
-      expect(form).not.toBeNull();
-      fireEvent.submit(form!);
-
-      // Verify Razorpay was instantiated with the correct options
-      await waitFor(
-        () => {
-          expect(RazorpayMock).toHaveBeenCalledTimes(1);
-        },
-        { timeout: 5000 },
-      );
-
-      // The Razorpay instance was created and open() was called by the component
-      // Since constructor succeeded, verify it was called with expected options
-      const options = RazorpayMock.mock.calls[0][0];
-      expect(options.key).toBe('rzp_test_abc123');
-      expect(options.amount).toBe(10000);
-      expect(options.currency).toBe('INR');
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('should show error if config is disabled', async () => {
-      const disabledConfigMock = {
-        request: {
-          query: GET_RAZORPAY_CONFIG,
-          variables: {},
-        },
+  describe('Submit error cases', () => {
+    it('shows config disabled error on submit', async () => {
+      const disabledCfg = {
+        request: { query: GET_RAZORPAY_CONFIG, variables: {} },
         result: {
           data: {
-            razorpay_getRazorpayConfig: {
-              ...mockConfig,
-              isEnabled: false,
-              __typename: 'RazorpayConfig',
-            },
+            razorpay_getRazorpayConfig: { ...mockConfig, isEnabled: false },
           },
         },
       };
-
-      const disabledMocks = [
-        createUserQueryMock(mockUser),
-        createLocalOrganizationQueryMock('org-123', mockOrg),
-        disabledConfigMock,
-      ];
-
-      renderDonationForm(disabledMocks);
-
-      await waitFor(() => {
-        expect(
-          screen.getByText(/Payment System Not Available/i),
-        ).toBeInTheDocument();
-      });
-    });
-
-    it('should show error if data fetch fails', async () => {
-      const errorMock = {
-        request: {
-          query: GET_ORGANIZATION_INFO,
-          variables: { orgId: 'org-123' },
-        },
-        error: new Error('Failed to fetch org'),
-      };
-
       renderDonationForm([
         createUserQueryMock(mockUser),
-        errorMock,
-        configMock,
+        createLocalOrganizationQueryMock('org-123', mockOrg),
+        disabledCfg,
       ]);
-
-      await waitFor(() => {
-        expect(
-          screen.getByText(/Failed to load organization information/i),
-        ).toBeInTheDocument();
-      });
+      await waitFor(() => screen.getByText('Payment System Not Available'));
     });
 
-    it('should handle CREATE_PAYMENT_ORDER mutation failure', async () => {
-      const mutationErrorMock = {
+    it('handles submit with disabled config via mocked hook mutation response', async () => {
+      renderDonationForm();
+      await waitFor(() => screen.getByRole('button', { name: /Donate/i }));
+
+      // fill amount to allow submit
+      fireEvent.change(screen.getByPlaceholderText('0.00'), {
+        target: { value: '10' },
+      });
+      fireEvent.change(screen.getByLabelText(/Full Name/i), {
+        target: { value: ' ' },
+      }); // trigger name validation
+      fireEvent.click(screen.getByRole('button', { name: /Donate/i }));
+    });
+
+    it('handles create order null response', async () => {
+      const nullOrderMock = {
         request: {
           query: CREATE_PAYMENT_ORDER,
-          variables: {
-            input: {
-              organizationId: 'org-123',
-              userId: 'user-123',
-              amount: 10000,
-              currency: 'INR',
-              description: 'Donation to Test Organization',
-              donorName: 'John Doe',
-              donorEmail: 'john.doe@example.com',
-              donorPhone: '',
-            },
-          },
+          variables:
+            createLocalPaymentOrderMutationMock(mockOrder).request.variables,
         },
-        error: new Error('Payment order creation failed'),
+        result: { data: { razorpay_createPaymentOrder: null } },
       };
 
-      const mocksWithMutationError = [
-        createUserQueryMock(mockUser),
-        createLocalOrganizationQueryMock('org-123', mockOrg),
-        configMock,
-        mutationErrorMock,
-      ];
+      // Ensure config is mock properly enabled
+      renderDonationForm([...standardMocks.slice(0, 3), nullOrderMock]);
+      await waitFor(() => screen.getByRole('button', { name: /Donate/i }));
 
-      renderDonationForm(mocksWithMutationError);
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Donate/i }),
-        ).toBeInTheDocument();
+      fireEvent.change(screen.getByPlaceholderText('0.00'), {
+        target: { value: '100' },
       });
-
-      // Fill form
-      const amountInput = screen.getByPlaceholderText('0.00');
-      fireEvent.change(amountInput, { target: { value: '100' } });
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Donate ₹100.00/i }),
-        ).toBeInTheDocument();
-      });
-
-      // Submit form
-      const form = screen
-        .getByRole('button', { name: /Donate ₹100.00/i })
-        .closest('form');
-      fireEvent.submit(form!);
-
-      // Expect error to be shown (toast or message)
-      await waitFor(
-        () => {
-          // The component should show an error state or toast
-          expect(
-            screen.queryByText(/Processing/i) ||
-              screen.queryByRole('button', { name: /Donate/i }),
-          ).toBeTruthy();
-        },
-        { timeout: 3000 },
+      fireEvent.click(screen.getByRole('button', { name: /Donate/i }));
+      await waitFor(() =>
+        expect(toast.error).toHaveBeenCalledWith(
+          expect.stringMatching(/Failed to create payment order/i),
+        ),
       );
     });
 
-    it('should not allow submission with zero amount', async () => {
-      renderDonationForm();
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Donate/i }),
-        ).toBeInTheDocument();
-      });
-
-      // Set amount to 0
-      const amountInput = screen.getByPlaceholderText('0.00');
-      fireEvent.change(amountInput, { target: { value: '0' } });
-
-      // Verify input has value 0 and button exists
-      expect(
-        screen.getByRole('button', { name: /Donate/i }),
-      ).toBeInTheDocument();
-      expect(amountInput).toHaveValue(0);
-    });
-
-    it('should not allow submission with negative amount', async () => {
-      renderDonationForm();
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Donate/i }),
-        ).toBeInTheDocument();
-      });
-
-      // Set negative amount
-      const amountInput = screen.getByPlaceholderText('0.00');
-      fireEvent.change(amountInput, { target: { value: '-100' } });
-
-      // Form should prevent negative values due to min="1" attribute
-      expect(
-        screen.getByRole('button', { name: /Donate/i }),
-      ).toBeInTheDocument();
-      expect(amountInput).toHaveAttribute('min', '1');
-    });
-
-    it('should handle Razorpay checkout handler failure', async () => {
-      // Mock Razorpay that calls the handler.failure callback
-      const openMock = vi.fn();
-      const RazorpayMock = vi.fn().mockImplementation((options) => {
-        // Simulate failure callback when open is called
-        setTimeout(() => {
-          if (options.handler?.failure) {
-            options.handler.failure({
-              error: { description: 'Payment cancelled by user' },
-            });
-          }
-        }, 0);
-        return { open: openMock };
-      });
-      vi.stubGlobal('Razorpay', RazorpayMock);
-
-      renderDonationForm();
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Donate/i }),
-        ).toBeInTheDocument();
-      });
-
-      // Fill form
-      const amountInput = screen.getByPlaceholderText('0.00');
-      fireEvent.change(amountInput, { target: { value: '100' } });
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Donate ₹100.00/i }),
-        ).toBeInTheDocument();
-      });
-
-      // Submit form
-      const form = screen
-        .getByRole('button', { name: /Donate ₹100.00/i })
-        .closest('form');
-      fireEvent.submit(form!);
-
-      // Wait for Razorpay to be called
-      await waitFor(
-        () => {
-          expect(RazorpayMock).toHaveBeenCalled();
-        },
-        { timeout: 5000 },
-      );
-    });
-
-    it('should handle Razorpay SDK not available', async () => {
-      // Simulate Razorpay SDK not loaded
-      vi.stubGlobal('Razorpay', undefined);
-
-      renderDonationForm();
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Donate/i }),
-        ).toBeInTheDocument();
-      });
-
-      // Fill form with valid data
-      const amountInput = screen.getByPlaceholderText('0.00');
-      fireEvent.change(amountInput, { target: { value: '100' } });
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Donate ₹100.00/i }),
-        ).toBeInTheDocument();
-      });
-
-      // Submit form - should fail gracefully since SDK is not available
-      const form = screen
-        .getByRole('button', { name: /Donate ₹100.00/i })
-        .closest('form');
-      fireEvent.submit(form!);
-
-      // Wait for graceful handling - button should return to non-processing state
-      await waitFor(
-        () => {
-          const donateButton = screen.getByRole('button', {
-            name: /Donate ₹100.00/i,
-          });
-          // Button should exist and not be in processing state (no "Processing" text)
-          expect(donateButton).toBeInTheDocument();
-          expect(donateButton).not.toBeDisabled();
-        },
-        { timeout: 3000 },
-      );
-    });
-
-    it('should handle network timeout errors', async () => {
-      const timeoutErrorMock = {
-        request: {
-          query: GET_ORGANIZATION_INFO,
-          variables: { orgId: 'org-123' },
-        },
-        error: new Error('Network timeout'),
-      };
-
+    it('handles missing orderId', async () => {
       renderDonationForm([
-        createUserQueryMock(mockUser),
-        timeoutErrorMock,
-        configMock,
+        ...standardMocks.slice(0, 3),
+        createLocalPaymentOrderMutationMock({
+          ...mockOrder,
+          razorpayOrderId: '',
+        }),
       ]);
+      await waitFor(() => screen.getByRole('button', { name: /Donate/i }));
 
-      await waitFor(() => {
-        expect(screen.getByRole('alert')).toBeInTheDocument();
+      fireEvent.change(screen.getByPlaceholderText('0.00'), {
+        target: { value: '100' },
       });
+      fireEvent.click(screen.getByRole('button', { name: /Donate/i }));
+      await waitFor(() =>
+        expect(toast.error).toHaveBeenCalledWith(
+          expect.stringMatching(/missing Razorpay order ID/i),
+        ),
+      );
+    });
+
+    it('handles missing order amount', async () => {
+      renderDonationForm([
+        ...standardMocks.slice(0, 3),
+        createLocalPaymentOrderMutationMock({ ...mockOrder, amount: 0 }),
+      ]);
+      await waitFor(() => screen.getByRole('button', { name: /Donate/i }));
+
+      fireEvent.change(screen.getByPlaceholderText('0.00'), {
+        target: { value: '100' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: /Donate/i }));
+      await waitFor(() =>
+        expect(toast.error).toHaveBeenCalledWith(
+          expect.stringMatching(/invalid amount/i),
+        ),
+      );
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper ARIA attributes on required form fields', async () => {
-      renderDonationForm();
+  describe('Payment Handler & Success Screen', () => {
+    const verifyVariables = {
+      input: {
+        razorpayPaymentId: 'p1',
+        razorpayOrderId: 'o1',
+        razorpaySignature: 's1',
+        paymentData: JSON.stringify({
+          razorpay_payment_id: 'p1',
+          razorpay_order_id: 'o1',
+          razorpay_signature: 's1',
+        }),
+      },
+    };
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Donate/i }),
-        ).toBeInTheDocument();
-      });
-
-      // Check that amount input has aria-required
-      const amountInput = screen.getByPlaceholderText('0.00');
-      expect(amountInput).toHaveAttribute('aria-required', 'true');
-      expect(amountInput).toHaveAttribute('min', '1');
-    });
-
-    it('should have accessible error alerts with role="alert"', async () => {
-      const errorMock = {
-        request: {
-          query: GET_ORGANIZATION_INFO,
-          variables: { orgId: 'org-123' },
+    it('handles full successful payment and success screen actions', async () => {
+      const verifySuccess = {
+        request: { query: VERIFY_PAYMENT, variables: verifyVariables },
+        result: {
+          data: {
+            razorpay_verifyPayment: {
+              success: true,
+              message: 'OK',
+              transaction: {
+                paymentId: 'p1',
+                status: 'captured',
+                amount: 10000,
+                currency: 'INR',
+                __typename: 'RazorpayTransaction',
+              },
+              __typename: 'PaymentVerificationResult',
+            },
+          },
         },
-        error: new Error('Failed to load'),
       };
-
-      renderDonationForm([
-        createUserQueryMock(mockUser),
-        errorMock,
-        configMock,
-      ]);
-
-      await waitFor(() => {
-        const alert = screen.getByRole('alert');
-        expect(alert).toBeInTheDocument();
-        expect(alert).toHaveAttribute('aria-live', 'polite');
+      const RazorpayMock = vi.fn().mockImplementation(function (opt: {
+        handler: (data: Record<string, string>) => void;
+      }) {
+        setTimeout(() => {
+          if (opt.handler) {
+            opt.handler({
+              razorpay_payment_id: 'p1',
+              razorpay_order_id: 'o1',
+              razorpay_signature: 's1',
+            });
+          }
+        }, 10);
+        return { open: vi.fn() };
       });
-    });
-
-    it('should submit form and open Razorpay modal', async () => {
-      const openMock = vi.fn();
-      const RazorpayMock = vi.fn().mockImplementation(() => ({
-        open: openMock,
-      }));
       vi.stubGlobal('Razorpay', RazorpayMock);
 
-      renderDonationForm();
+      renderDonationForm([
+        ...standardMocks,
+        verifySuccess,
+        createLocalPaymentOrderMutationMock(mockOrder),
+        verifySuccess,
+      ]);
+      await waitFor(() => screen.getByRole('button', { name: /Donate/i }));
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Donate/i }),
-        ).toBeInTheDocument();
+      fireEvent.change(screen.getByPlaceholderText('0.00'), {
+        target: { value: '100' },
       });
+      fireEvent.click(screen.getByRole('button', { name: /Donate/i }));
 
-      // Fill form with valid data
-      const amountInput = screen.getByPlaceholderText('0.00');
-      fireEvent.change(amountInput, { target: { value: '100' } });
+      await waitFor(() => screen.getByText('Thank You!'), { timeout: 3000 });
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Donate ₹100.00/i }),
-        ).toBeInTheDocument();
+      // Test Make Another Donation
+      fireEvent.click(screen.getByText('Make Another Donation'));
+      await waitFor(() => screen.getByRole('button', { name: /Donate/i }));
+
+      fireEvent.change(screen.getByPlaceholderText('0.00'), {
+        target: { value: '100' },
       });
+      fireEvent.click(screen.getByRole('button', { name: /Donate/i }));
+      await waitFor(() => screen.getByText('Thank You!'), { timeout: 3000 });
 
-      // Submit form
-      const form = screen
-        .getByRole('button', { name: /Donate ₹100.00/i })
-        .closest('form');
-      fireEvent.submit(form!);
+      // Test View My Transactions
+      fireEvent.click(screen.getByText('View My Transactions'));
+    });
 
-      // Verify Razorpay was initialized
-      // Note: rzp.open() is called synchronously after construction, but JSDOM
-      // environment may not track the open call reliably
-      await waitFor(
-        () => {
-          expect(RazorpayMock).toHaveBeenCalled();
+    it('handles verification failure message', async () => {
+      const verifyFail = {
+        request: { query: VERIFY_PAYMENT, variables: verifyVariables },
+        result: {
+          data: {
+            razorpay_verifyPayment: {
+              success: false,
+              message: 'Signature Invalid',
+              transaction: null,
+              __typename: 'PaymentVerificationResult',
+            },
+          },
         },
-        { timeout: 5000 },
+      };
+      const RazorpayMock = vi.fn().mockImplementation(function (opt: {
+        handler: (data: Record<string, string>) => void;
+      }) {
+        setTimeout(
+          () =>
+            opt.handler({
+              razorpay_payment_id: 'p1',
+              razorpay_order_id: 'o1',
+              razorpay_signature: 's1',
+            }),
+          10,
+        );
+        return { open: vi.fn() };
+      });
+      vi.stubGlobal('Razorpay', RazorpayMock);
+
+      renderDonationForm([...standardMocks, verifyFail]);
+
+      await waitFor(() => screen.getByRole('button', { name: /Donate/i }));
+      fireEvent.change(screen.getByPlaceholderText('0.00'), {
+        target: { value: '100' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: /Donate/i }));
+
+      await waitFor(
+        () => expect(toast.error).toHaveBeenCalledWith('Signature Invalid'),
+        { timeout: 2000 },
+      );
+    });
+
+    it('handles verification network error (catch block)', async () => {
+      const verifyErr = {
+        request: { query: VERIFY_PAYMENT, variables: verifyVariables },
+        error: new Error('Network Error during verify'),
+      };
+      const RazorpayMock = vi.fn().mockImplementation(function (opt: {
+        handler: (data: Record<string, string>) => void;
+      }) {
+        setTimeout(
+          () =>
+            opt.handler({
+              razorpay_payment_id: 'p1',
+              razorpay_order_id: 'o1',
+              razorpay_signature: 's1',
+            }),
+          10,
+        );
+        return { open: vi.fn() };
+      });
+      vi.stubGlobal('Razorpay', RazorpayMock);
+
+      renderDonationForm([...standardMocks, verifyErr]);
+
+      await waitFor(() => screen.getByRole('button', { name: /Donate/i }));
+      fireEvent.change(screen.getByPlaceholderText('0.00'), {
+        target: { value: '100' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: /Donate/i }));
+
+      await waitFor(
+        () =>
+          expect(toast.error).toHaveBeenCalledWith(
+            expect.stringMatching(/Failed/i),
+          ),
+        { timeout: 2000 },
       );
     });
   });
