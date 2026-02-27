@@ -502,14 +502,24 @@ describe('Razorpay GraphQL Mutations', () => {
   // --- Coverage: internal null checks ---
   describe('internal null/undefined checks', () => {
     it('updateRazorpayConfig throws when newConfig is undefined (insert)', async () => {
-      // Use fresh context to avoid mock state interference
       const freshCtx = setupContext();
       freshCtx.user.isSuperAdmin = true;
 
-      // SELECT chain returns empty → triggers INSERT path
-      freshCtx.drizzleClient.limit.mockResolvedValueOnce([]);
-      // INSERT chain returns empty → newConfig = undefined
-      freshCtx.drizzleClient.returning.mockResolvedValueOnce([]);
+      freshCtx.drizzleClient.select = vi.fn().mockImplementation(() => {
+        // SELECT chain: select().from().limit() → resolves to [] (no config)
+        return {
+          from: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([]),
+          }),
+        };
+      });
+
+      // INSERT chain: insert().values().returning() → resolves to [] (newConfig undefined)
+      freshCtx.drizzleClient.insert = vi.fn().mockReturnValue({
+        values: vi.fn().mockReturnValue({
+          returning: vi.fn().mockResolvedValue([]),
+        }),
+      });
 
       await expect(
         updateRazorpayConfigResolver(
@@ -533,11 +543,17 @@ describe('Razorpay GraphQL Mutations', () => {
       ).rejects.toThrow(TalawaGraphQLError);
     });
     it('initiatePayment handles orderItem undefined', async () => {
-      // Use fresh context to avoid mock state interference
       const freshCtx = setupContext();
 
-      // SELECT chain returns [undefined] → orderItem = undefined
-      freshCtx.drizzleClient.limit.mockResolvedValueOnce([undefined]);
+      // SELECT chain: select().from().where().limit() → resolves to [undefined]
+      // order.length === 1 (not 0), but order[0] === undefined → triggers !orderItem
+      freshCtx.drizzleClient.select = vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([undefined]),
+          }),
+        }),
+      });
 
       const result = await initiatePaymentResolver(
         {},
