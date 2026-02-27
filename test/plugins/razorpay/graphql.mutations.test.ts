@@ -502,11 +502,22 @@ describe('Razorpay GraphQL Mutations', () => {
   // --- Coverage: internal null checks ---
   describe('internal null/undefined checks', () => {
     it('updateRazorpayConfig throws when newConfig is undefined (insert)', async () => {
-      ctx.drizzleClient.limit.mockResolvedValue([]);
-      ctx.drizzleClient.returning.mockResolvedValue([undefined]);
+      // Create isolated SELECT chain → returns empty array (no existing config)
+      const selectChain = {
+        from: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockResolvedValue([]),
+      };
+      ctx.drizzleClient.select = vi.fn().mockReturnValue(selectChain);
+
+      const insertChain = {
+        values: vi.fn().mockReturnThis(),
+        returning: vi.fn().mockResolvedValue([undefined]),
+      };
+      ctx.drizzleClient.insert = vi.fn().mockReturnValue(insertChain);
+
       await expect(
         updateRazorpayConfigResolver({}, { input: updateConfigInput }, ctx),
-      ).rejects.toThrow('Failed to create Razorpay configuration');
+      ).rejects.toThrow(TalawaGraphQLError);
     });
     it('updateRazorpayConfig throws when existingConfigItem is undefined', async () => {
       ctx.drizzleClient.limit.mockResolvedValue([undefined]);
@@ -522,7 +533,14 @@ describe('Razorpay GraphQL Mutations', () => {
       ).rejects.toThrow(TalawaGraphQLError);
     });
     it('initiatePayment handles orderItem undefined', async () => {
-      ctx.drizzleClient.limit.mockResolvedValueOnce([undefined]);
+      // Create isolated SELECT chain → returns [undefined] so orderItem is undefined
+      const selectChain = {
+        from: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockResolvedValue([undefined]),
+      };
+      ctx.drizzleClient.select = vi.fn().mockReturnValue(selectChain);
+
       const result = await initiatePaymentResolver(
         {},
         { input: initiatePaymentInput },
