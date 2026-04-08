@@ -48,7 +48,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+          cache: true
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -173,7 +173,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24.x'
-          cache: 'pnpm'
+          cache: true
 
       - name: Prepare dependency store
         run: pnpm fetch
@@ -457,7 +457,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+          cache: true
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -617,7 +617,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24.x'
-          cache: 'pnpm'
+          cache: true
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
