@@ -173,7 +173,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24.x'
-          cache: true
+          cache: 'pnpm'
 
       - name: Prepare dependency store
         run: pnpm fetch
@@ -618,7 +618,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24.x'
-          cache: true
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
