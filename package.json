@@ -82,7 +82,7 @@
     "i18next-http-backend": "^3.0.2",
     "razorpay": "^2.9.6",
     "react-i18next": "^16.5.0",
-    "zod": "^4.1.13"
+    "zod": "^4.4.3"
   },
   "homepage": "https://github.com/PalisadoesFoundation/talawa-plugin#readme",
   "license": "GNU General Public License v3.0",
