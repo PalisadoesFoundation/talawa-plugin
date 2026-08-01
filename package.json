@@ -43,7 +43,7 @@
     "eslint-plugin-vitest": "^0.5.4",
     "fast-glob": "^3.3.3",
     "graphql": "^16.12.0",
-    "graphql-tag": "^2.12.6",
+    "graphql-tag": "^2.12.7",
     "husky": "^9.1.7",
     "jsdom": "^27.3.0",
     "knip": "^5.78.0",
